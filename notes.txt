@@ -1,0 +1,1950 @@
+Notes.txt
+
+Aug 3, 2017
+Starting from my own TC.ASM supplied by Lee Bradley, my plan is to clone it to my own C version that runs native on Unix, Linux, or wherever a C compiler exists. Goal is a gps version so ANYONE can use it under gps rules.
+---
+
+Goal 1 -- variables, 
+	newvar manages the var table. Called by valloc, which parses one variable behind INT or CHAR.
+var table (called varb)
+	fval,eval point to first and last of varb which itself is undeclared. ~65 has space allocs for this and other similar stuff. 
+
+NEWVAR(class,size,len,passed) <= A,B,DE,HL; ~794
+	capture args
+	canon'd name -> varb
+	class,size,len -> varb
+	fval allocated in varb, ~817
+		FVAL = next VARB address ~817
+	[strings must be class 0???   ~820]
+	~820 JZ NR2 for class 0. ~824 JNZ fall through to NR2 of 	PASSED. NR3 if PASSED.
+	class 0 (string) or not passed as fcn arg needs value space -> NR2; else NR3
+	if test ~818: class==0 || passed==0 ==>> NR2 get space
+		values go in ++PRUSED -> KF (temp)
+		fval->hl, prused->de (xchg), de->memory at fval
+		prused += obsize*len
+	alloc()...
+		bump prused. Hold as KF. move to DE. 
+		~829 get fval (temp DW ~791). loaded at ~817 with first unused byte into VARB. 5th column (value) of VAR table. PRUSED+1 is in DE ~825
+		If passed, put that into value.	~855 NR3.
+	Net effect is VARB points to first cell of allocated amount, and PRUSED is bumped to last cell of allocated. 
+	Memory overflow test ~842 PRUSED > EPR.
+	Zero the space ~850. 
+	NR3 ~855 a passed arg is just put into VARB. 
+	NR5 copy passed byte to allocated space BIT OF CLASS MYSTERY, HERE.
+TO DO: fix bug noted in canon. Add allocation logic. Maybe add parsing logic.
+
+VALLOC ~1360 VCLASS == 1 for array, else 0 ~1368. It gets loaded into A just before jmp to newvar ~1403.
+VPASSED ~1356 ;0 for global or local, two byte value if param to function (comment in the code)
+~1368   ;assume class 0 (not an array)
+~1372 manage recursion, 79 call ASGN
+~1398, V5, load registers with parms for NEWVAR. JMP call newvar. ~1407.
+
+valloc logic
+args: 
+	type 'c' or 'i' for already parsed int or char.
+	vpassed  probably not needed until we parse function calls
+uses:
+	symname: sets fname,lname
+	lit for ( and )
+	ASGN to parse the size
+	TOPTOI to get ASGN result
+	ESET to set symbol error (no sym ~)
+
+logic:
+	args, type in A, vpassed in HL (not used, passed
+		through to NEWVAR)
+	symname; err if none
+x	vclass=0 ~1367
+	if lit (
+		[is array] ~1372: push fname,lname,vclass
+		bump vclass 1377,1381
+		expression ASGN -> stack ~1379
+		pop vclass, lname, fname  ~1381
+		test ASGN error ~1386
+		lit ) ~1390
+		toptoi -> alen  ~1394
+	else [not array] ~1396, V3
+		alen = 1
+	endif
+x	V5: oject size = 1 or 2 (type == 'c' or 'i' resp)
+		-> B
+	jmp-call newvar: A=class, B=objsize, DE=len, HL=vpassed
+----
+Aug 7 (Mon)
+Started Thursday on this. Experience so far: Learning C all over. Learning to read 8080 asm code. Have to see the underlying intent, sometimes (as above valloc) taking notes.
+
+Order of approach: originally thought I would do in chunk order. All global decs first, all math functions, etc. But that makes little sense. For example, I wont need math functions, and maybe not even char functions. So I am instead doing features from bottom (e.g. newvar which serves the name table) to parser (e.g. valloc). I am close to finishing those two. Couple of features needed in each level. Not allocating var space yet in newvar. Not tested valloc except ('C',0).
+
+A brute force test engine is getting large. Probably need to split into test vs keeper code. And do a make file. Instead I have little scripts: c,t,ct,keep for compile, test, both, and move results from test to good for diff comparison. These seem reasonable make targets. 
+
+Doing it feature-wise means for each feature a small parser, plus code to carry out whatever. A piece of front end with a PIECE of back end in one file. Integrating those resulting files should prove interesting.
+
+Current major goal is DECL, test 101, only reachable via
+   		$ ./a.out 101
+These are outside the unit tests, from 1 to 
+		equ testcases 6	  <- or whatever, the last one.
+
+To finish decl...
+	alloc()
+		~819 if class is zero or if passed, alloc
+		NR2 alloc code
+		{
+			~825 fval = kf = prused+1 
+			~833 prused += obsize*len
+			~841 if( prused-epr >=0 ) {eset(tmvl);return}
+			~850 memset(kf,0,prused-kf+1)
+		}
+		NR3 is passed value code NOT DONE YET
+x	decl() which parses 'int', 'char', and clauses behind
+x	lit(), 
+x	literals used by decl: xchar, xint, comma, semi
+DONE
+------------
+NEXT GOAL: stack tools ~350
+functions:
+	int toptoi
+	poptwo DEPRECATE
+	popst ;pops the stack into A, B, C, DE. New top in HL.
+		~394 -9 is compensating for 4 INX H's.
+	pushone()  (PONE, 8080 name)
+	pushzero() (PZERO, 8080 name)
+	pushk(int) --  pushes a constant
+	pushst(lots,,,)
+		~413 increments by 5. the -9 must be a typo.
+		3 calls to pushst in factor. none elsewhere
+		dozens to pushk throught the parser. AND MC's.
+Data structure (ref: POPST comments):
+	in A,B,C,DE.
+	class, lvalue, size, stuff
+	~395: size is 5 bytes. 
+	struct stGlob {int class; char lvalue ;int size ;int stuff; };
+		and if lvalue=='L' use this way: (void*)stuff;
+		Comment online: "void* is the same as char* except conversions to and from it do not require type casts" - also cannot add/subtract them. – rsaxvc Apr 18 '15 at 22:33"
+Comments:
+	pushst, popst seem to be the basic. All others on top.
+	~407 'A' is an lvalue code for actual. 
+	~1293: CONFIRMED, Other code is probably 'L'. 
+	WHATS IN DE when you do a PUSHK or PUSHST:
+EQ (typical user)
+	toptoi (stuff to be assigned -> DE); PUSH DE
+	popst (must be an lvalue)
+	if class>0 size=2 (instead of 1??)
+	assure lvalue, else EQERR
+	xchg
+	POP DE   so ;where in HL ;stuff in DE
+	MOV m,e and conditionally m+1,d
+	push value back onto stack.   SO if lvalue=='L' stuff is either 
+		int*, char*.  If 'A' it may also be int or char.
+	*stGlob 
+Wed, Aug 9 8:30pm
+	wrote test 12. Need to put all test code at end, so it has decls from the keeper code. Need to add prints for the popped stuff, e.g. int array should have array2=stuff and print array2 content, and error code. Similar stuff for the other four pops.
+Thur, 9:00 am.
+	I want to split the file, and use make. Studying gcc options.
+	DONE: Split, makefile, all seem to work. Anomoly is tc is a linux deep-deep-command, but ./tc is tiny-c. 
+Fri, 11:30 am
+	Found and fixed nasty and stupid bug. Called pushk instead of pushst with four args. Ran and pushed 4 stuff all as int. Anyway test 12 is ok, now. Stack tools are in pretty good shape.
+	NEXT GOAL? asgn? Let's read.
+	SKIP REM CONST FACTOR do these 4 first, then crawl up to ASGN.
+	FACTOR  ~1169..1305 236 lines 8080 code
+SKIP ~519..544 skips balanced l-r delimiters, assuming first l delimiter is 		matched. B,C have l,r chars respectively. counter in DE set to 1. 
+REM ~660 in tc.asm, ~267 in tc.c. skips \n's and comments in any order.
+rem seems to work. Test 14.
+BUT test 8 results are OK for now, but will change when asgn done properly. 		THEN the two 9's will appear in the vartab dump.
+AND to make newline stuff robust:
+	1 - audit tc.asm for ALL places involved
+	2 - rewrite to skip BOTH cr and lf in either order
+CONST ;matches 3 kinds of constants, setting FNAME, LNAME as
+;  in SYMNAME. Sets A to 0 on no match, 1,2,or 3 on match. does not evaluate, just parses.
+
+
+How many places would 
+	char* find(char x) 
+
+be useful? Scan from cursor to epr for x and return pntr on success, else 0. No side effects, i.e. no change to cursor. Client has FULL control on effect. In C code so far...
+	~158 ~198 ~272 symname lit rem (so far), and const big time. 
+AND convienence form:
+	char* mustfind(char x, int error_code) 
+
+IMPROVEMENTs: 
+	- eliminate global poptop, and return ptr to nxtstk+1 which still has popped data. BUT test design WARNING: a push will kill that data. If recursion does that, new function (oldTopToGlobal) to capture. Probably not an issue in practice. 
+	- 
+
+Sunday, 8/13. I need to set aside development for awhile, and clean up the test code.
+	- get rid of pointers. Differences is ok, because they don't drift during development. printing the *ptr is ok.
+	- print enough of test goal and init conditions and expected results to understand result without leaning on the test code.
+	- Unify \n's in printf's. Do them ALL the same way. 
+	- codify best practices into comments at top. Here, too.
+Sunday night: did a survey (on paper) of where newlines are done. No conclusions yet. Most important test fix is to make pointers relative to their base, e.g. cursor-pr instead of cursor, thus making print contents stable and diffs reasonable.
+
+---
+Monday, 8/14. 
+DONE Get a good_results that is known to be good AND STABLE.
+---
+resuming test cleanup. Have done tests 1-10, and 15.
+TODO
+	- newvar allocation
+	- konst must null the trailing quote, tc.asm~609,CN3
+	- Retrofit find's where useful.
+	- poptop better way.
+	- /* valloc: might use mustfind instead of lit. Needs study. */
+	- resume FACTOR ~1167..1304
+
+gdb
+	set args 16
+	b file:lineno
+	b fcnName
+	run
+	s   into
+	n   over
+	bt  back trace (the stack)
+	p expression
+
+
+FWHERE is factor() where
+WHERE is enter() where
+
+~1237   ;class of element is one less than class of array. CAN class
+be bigger? Does tc support array of arrays??? Where does class get incremented? NOWHERE as best I can tell. It is incrmented from 0 to 1 in VCLASS ~1377, but that increment code cannot be reached without passing through ~1367 which sets VCLASS to zero. 
+---
+Wed, Aug 16, Coded symname case of void factor(). Needs addrval().
+
+ADDRVAL ~910 this is mature code that searches local,global,library segments of of the VAL table. I only need local, for now.
+
+factor() compiles. 
+
+AUDIT TO DO: push & pop stack, and newvar audit for use of union stuff.
+Can we always PUSH the right stuff, and always POP also???
+push:	 class==1 stuff.up  else size==0 stuff.uc  else stuff.ui
+pop, or addrval: examine while in array, then pop and fetch stuff.x
+	where x is the right stuff.
+
+NEXT GOAL: write test 18, factor symname cases.
+
+newval ~817, HL->fval ;address where fval will be put. 
+NR7,4 allocates and zeros. 
+NR3 passed value->stuff. 
+NR5 ;if passed & class is 0 
+	move the passed value into the allocated space.
+NR6 update function table ???
+
+---
+Aug 28, back from Star Island. Today's goals: 
+x	Reorder tc.c functions to same order as 8080 CPM listing. 
+x	Bind handwritten notes for easy quick reference. 
+x	MARK issues noted in the code.
+x	MAKE tests solid, and document how to read each test result.
+x	In test.c remove the if-elses and make ONE big switch.
+
+Aug 29, 
+	Still pointers in test results: stack entry, poptop
+		stack entry at 3: 1 41 2 (>)-1188285840
+		poptop: 1 41 2 -510876656
+		could be wierd class,size data. Use meaningful data.
+x	remove poptop and popst returns pointer into stack
+x	examine usage of nxtvar and nxtstack and decide if change needed
+x	3 uses of nxtvar. ~266, 413, 462, addrval, nxtvar, dumpVarTab. All
+x	seem natural. Initializing to zero is also natural.
+x	Ditto for nxtstack, push, pop, and dump.
+
+IS SUE test.c ~60 or so. WHY is the client bumping nxtvar??? BECAUSE newvar is given a pointer to a var. It does not manage the table. It just fills data into the given var. Is that right? or wrong? Only two clients, valloc and enter. So leave it.
+
+GOAL: Remove poptop. DONE
+
+GOAL: quote in test 16. RESOLVED. Fix is in konst(). Test is proper.
+
+Aug 30, Wednesday
+Goals:
+x	names of fcns into their chuncks. NOTE: math and other uneededs omitted.
+x	entire expressions stack, asgn to konst.
+x	st() plus support stuff (code entered, not tested yet)
+
+Aug 31, Thursday, 8:30am
+	st()  tested
+	eq()  entered and tested along with st().
+Tests can print stuff in the three data structures, var,stack,pr. So we put into pr a statement that effects var and stack, and then dump that structure. eq() would be a help, currently stubbed in a trivial way. And we cannot YET enter functions like ps. Before doing functions I want st() and eq() to be a firm foundation.
+Gotta do BOTH skipst AND eq, and eq needs the value part of newvar to be debugged. Busy day, today.
+9:30: st() compiles. Now type in skipst() and eq().
+DIFFICULTY with using casts to immitate typeless. Found this...
+	https://gist.github.com/buch415/8865157
+which is a typeless structure using memcpy to just move bytes. Its data structure is trivial, it acts like a tape store, but the technique with a bit of direct access AND frames can exactly mimic 8080 values stored in pr after the code. 
+
+Thought for eq(): suppose int x = 'c';  Then x has type 2 (int), 'c' has type 1 (char), And different sizes. Both class 0 though. eq() puts the 'c' into the value space of x. None of the attributes of x change. So 'c' is converted to type 2, sizeof(int), class 0. The attributes STAY WITH THE LVALUE. 
+Another thought: The size attribute must be sizeof(char|int|char*). Type can be derived, type=size>1?int:char. Is that a good idea? Better to make 8080 size into type EVERYWHERE and derive size from class and type. 
+
+DONE	Goal: change the size attribute to type, 1=char 2=int. And test nothing is broken. FIXED: (both) 7, dumpvartab heading.
+
+Goal: function to compute size from class,type.
+
+DONE: code before ShouldGet's in test.c
+
+More thoughts. If you can assign anything to anything we have a size issue. The most common case is int x=<some char>, which can be useful. Less common is int x=<ptr> which has a size problem on 64 bit compiler. 
+	pn(sizeof(char));pn(sizeof(int));pn(sizeof(char*));  output	148
+Assigning a char* to an int loses a bunch. But somehow gcc loses nothing. See strange...c in ~/Doc*/Mint*.
+
+Probably best is to allow it, and whatever happens happens. Keep the union thing for var and stackentry, but do memcpy's in and out of pr.
+
+At eq() entry, the space is allocated. The variable OWNS a small bit of pr beyond the program. newvar should do that allocation. So start with newvar. Then eq.
+
+Test 99, char took 2 bytes, int took 2 more.
+type now has two meanings, actual 'A', char 1, int 2. And opposite of actual is lvalue 'L'. And sometimes the variable for lvalue is lvalue, i.e. same as type.
+WHAT A MESS.
+stackentry has both type and lvalue, var has type (and is always an lvalue), so they are consistent. It must be a local use of type where it should have been lvalue.
+IS SUE valloc passed type = 'C'|'I'. THAT IS BETTER CODE than 1 or 2. enum? LATER
+test 99 good. Above issues were bad test call on valloc, changed to decl and worked fine. newvar is allocating proper space and initing it to zero's.
+Tomorrow we eq() a value into it and see by bytes change from 0's to that value. Here is the code from newvar (comments added). Note this will init a whole array of len data.
+		char* kf;
+		kf = prused+1;  				/* gotta zero starting here */
+		(*v).value.up = prused+1;  		/* save as ptr */
+		prused += obsize*len;  			/* bump prused by length in bytes */
+		if( prused-EPR >=0 ) {eset(TMVLERR);return;}
+		memset( kf, 0, prused-kf+1 );	/* zero it */
+So to access this:
+		void* where = (*v).value.up;
+		int get_int(where);
+		void put_int(where, int);
+and similar put_int() and the other types (char, int*, char*). THEN a fetchToTop to get data into the stack, all properly typed.
+But first we need to get data into pr. So far we initial to zero. We need to write the put_'s first and test them. Then eq. Then the fetch_'s. Then factor ~ 485 needs to be examined, adjusted to all the above, and tested.
+x	get/put by type.
+	eq
+	impact on factor understood
+	fixed
+	possible enums: 
+		type{ int,char,intStar,charStar }
+		lvalue{ actual, lvalue }
+		class{ ptr, datum }
+	possible typdefs: all structs, enums, unions
+char p() into decl doesn't allocate. char p(7) allocates seven bytes for the array. Then put_ptr clobbers them badly. So where to pointers go? Are they data? Can you use p=p+2 for example?
+Tiny-c Owners Manual, p. 2-14 describes pointers. So
+	char p(7) declares TWO datum. It declares p, and the array of 7 chars. JUST EXACTLY how does the 8080 code handle that? Time to study.
+	char pointer(0) declares the pointer and allocates ONE byte. In fact p. 2-2, int values(10) allocates ELEVEN ints. ALWAYS allocate one more than toptoi returns. The zero in the decl MUST be there.
+PUT Pointer not fix not tested yet, ditto get.
+
+type codes getting confusing. Stack type vs old var size which implied the type, etc. 
+On the stack 2 is int. pushk make that clear. Implication, 1 is char.
+
+I think the whole thing is keep pointers (class>0) separated from actual data (class==0). Pointers kept in the var or the stack, never in the value store (pr). Kind of learned that messing with memcpy today. Int/char to/from var assignments illegal. And char is just a low precision int, so they can go back and forth, losing precision one way. Can still do pointer arithmetic. Diff between two, and add/sub of an int. The former is stored as an int. The latter as a pointer.
+
+Lets get away from eq awhile, and try to define the type mystery.
+
+type found in both tc.h structs (var, stackentry).
+tc.c: all uses of type
+	~58 1 char 2 int; 
+	~75 if ptr set size=2 its a ptr WRONG (in eq)
+	~131 pushst copy arg type into top
+	~234 konst type: int 1, string 2, char 3, no match 0, err -1 
+	~293 obsize computed from class,type INCORRECTLY
+	~469 push details by type 1,2,3,-1 (from konst)
+	~494 copy type from looked up var (addrval)
+	~567 valloc arg
+	~586 valloc code, used to compute obsize if(type=='C')
+	~716 dumpStuff, 1 char, 2 int
+	~723 dumpVar, dump whatever is there
+	~753 dumpStack, "      "     "   "
+konst is a variation. Dominate usage is char vs int. Pointer determined by class. An enum that encapsoates both may be nice,
+with some macros to cover multiple cases. 
+
+typdef enum type {char,int,charstar,intstar} Type;
+
+Sunday, Sept 3
+Segfault, test.c ~379, popst delivers a small number used as a pointer in print statement, %s format, "hello" is data. Could be bad pointer in stuff, could be no null but that woould be stopped by null at end of pr content. So bad pointer. Stack[0] has 11, [1] has pointer to 8. All popst does is --nxtstack and return pointer to the popped entry at nxtstack. 3 calls to factor, only 2 entries in stack, 3 factor()'s
+Stack
+ stack entry at 0: 0 41 1 (i)->17<- hex: ->11<-
+ stack entry at 1: 1 41 2 (>)->8<-
+testSetup("   17  \"hello\"  \'c\'  STRING-END");
+MAYBE something wrong for type==char. It didn't get pushed. The string pointer has an 8. TRY stepping through konst() and see WHY the char case didn't get into the stack.
+FIXED, enum issue.
+
+Lots of bugs. Test 1 one good entry, 3 with chopped short name.
+FIXED bug in test setup.
+Test 23, trying to get eq to work. Never gets there. reln code is suspect, after the long if there is just } }. No explicet return. So it probably returns 0. 8080 code ~25ca if the last lit(<) fails, RZ ~2645. Is zero success? it matched the expr at 25ca. asgn~25c8 returns non-zero on success, reln 0, expr 0, term 0, factor eset's on failure, !0 without eset on success () case, jmp push|pushk on konst success, A is class there, return leaves class in A. SO FAILURE IN FACTOR IS FATAL, eset SYNTAX. term tests err after each factor call and returns 0 if set, hence a climb to the top with 0 in A. 
+OK what does our C code do?
+The if(lit)'s etc go from asgn to konst at the bottom. factor returns void, i.e. nothing but sets SYNTXERR if it fails to match. konst() returns type. term tests error and return 0 and the above stack all the way to asgn uses return 0 for no match. It mimics 8080 faithfully.
+0 for no match, eset for Syntax error detected way down. Does it ever call asgn just to see if there is a match? And none esets, but the logic goes on?
+GOTTA finish toptoi. 8080 ~352 online. 
+
+psuedo code gradually transformed into C-ish ...
+	int toptoi()   // resolve pointer and/or cast to int.
+		struct stackentry top* = &stack[--nxtstack];
+		if(lvalue == 'L') 
+			if(type==Int )value.ui  = (int)(top.value.(int*)up);
+			if(type==Char)value.ui  = (int)(top.value.(char*)up);
+		else if(lvalue == 'A')
+			if(type==Char)value.ui  = (int)(top.value.uc);
+		return top.value.ui;
+
+
+ADDED explicit returns up and down the stack. Test ran. Need to overhaul eq. An Int to Int assign: 
+
+Toptoi now works for int data. Test 11. Needs to be tested for all other cases. Coded two ways, one liner which assumes the union puts char on top of the low order byte of an int or ptr, and 4 if selected cases for commented out for now if the union assumption is wrong. Work on that later. Lets get int tc to work.
+
+Monday, Sept 4
+Git notes 
+From git config doc: https://stackoverflow.com/questions/12795790/how-to-colorize-git-status-output
+	color.status.<slot>
+	Use customized color for status colorization.
+	<slot> is one of:
+		header (the header text of the status message),
+		added or updated (files which are added but not committed),
+		changed (files which are changed but not added in the index),
+		untracked (files which are not tracked by git),
+		branch (the current branch), or
+		nobranch (the color the no branch warning is shown in, defaulting to red).
+git add <file>  --  Stages a file to be committed. NOT STICKY, i.e. 
+	subsequent edits to the file require another git add.
+git status  --  Shows files: staged modified untraced
+git commit [--dry-run]
+git reset   --  IMMEDIATELY AFTER a commit, undoes the commit
+git checkout <file>  --  get older version
+ref: https://git-scm.com/docs/git-commit
+	This ref says git commit -a will do an add to all changed files before doing the commit. IT DOESN'T!!!
+TECHNIQUE:
+	git status
+	git add <changed files not staged>
+	git commit -m "<what was accompished message>"
+	git status
+The last status should be short, just the untracked files. Committing with assurance it took as intended seems to be these four manual steps.
+
+Doing test output cleanup. Finding bugs.
+	- Test 8, two ints have (c) in var dump.
+	- Test 12, ~241, array has 11 (etc) WHAT IS the role of this??
+	They are not tiny-c string and array. USE FAKE DATA, pr+99.
+	- test 16, length of "hello" is 3
+	- 17 not sure what the (>) points to. ints in 100-150 range?
+	- 21 should show more than vartab. Doing an eq, show all state.
+	- make diff shows way to much irrelevant stuff.
+	- all need new Should get's
+test 8, more class/type mixup. dumpStuff wants an 'I' or 'C' , not the enum. But it TAKES the enum arg and if'ing on it always fails.
+Fixed one client, dumpVar.THE REAL PROBLEM is decl putting 'I' or 'C' into the valloc call. It needs to put the enum number. 
+
+FIXED 	More hex: stackentry, poptop
+
+Back to eq. Type table for assign...
+int x; x=7;     <-- i = i      (Int row, Int column)
+int x(); x=7    <-- i* = i   (IntStar row, Int column)
+int x,y; x=*y;  <-- i = *i   (Int row, IntStar column)
+int *x, *y; x=y;<-- i* = i*  (IntStar row and column)
+ditto for char
+
+		lvalue(whereToPut)	<--		datum				
+						Int			Char 		IntStar CharStar
+		Int 		*(i)w=(i)*w	 *(i)w=(c)*w	 *w=w	*w=W
+		Char 		*(c)w=(i)*w	 *(c)w=(c)*w	 *w=w	*w=W
+		IntStar 								  w=w	 w=w
+		CharStar 								  w=w	 w=w
+upper left block is class class 0 0. May permit class class 1 0.
+Working now on class class 0 1 *w=w. 
+
+w means where, address of respective side, lval left of =, val right.
+destination = datum (resolved if necessary)
+---
+Step 1, get the datum. Into proper local type
+	=w means  datum is val.stuff.up , no memcopy, already void*
+	=(c|i)*w means datum in pr, memcpy to local datum of proper type
+
+Step 2, put to destination
+	w= means  val.stuff.up is destination, already void*
+	(c|i)*w= means memcpy(w) local datum out to pr
+
+toptoi coded two ways, one liner just casts union.value.up to int and returns it. The siX-liner distinguishes by top.lvalue and RESOLVES!
+The pointer is certainly into pr. Actually both are wrong, but the one-liner serves for our simple (so far) tests. The six-liner probably should distinquish by type, not lvalue. But if its a pointer, what is the meaning of toptoi? Does it mean resolve, or return the ptr as the int result? DEFINITION IS SUE. psuedocode ~366 above suggests it is ptr to inc CAST, not resolve.
+
+TOPTOI  CALL    POPST   ;class in A, lvalue in B,
+        STA     TPCLASS ;  size in C, stuff in DE
+        MOV     A,B
+        CPI     'A'
+        JZ      TT2
+        XCHG            ;fetch data
+        MOV     E,M
+        INX     H
+        MOV     D,M
+TT2     DCR     C       ;if size 1 and class 0 return
+        RNZ             ;  lo byte, with sign propgated
+        LDA     TPCLASS ;  thru hi byte.
+        ORA     A
+        RNZ
+        MOV     A,E
+        RLC             ;propogate sign into D.
+        SBB     A
+        MOV     D,A
+        RET
+TPCLASS DB      0
+
+8080 toptoi resolves the data if lvalue (B moved to A)>0. ;fetch data is the comment meaning resolve the pointer. XCHG swaps DE(stuff) and HL(garbage, so stuff is in HL) mov,inx,mov gets 2 memory bytes into DE, the rest is not germain to the issue. DE is the returned int.
+It HAS to work that way for arrays! Close to the parser (factpr, probably) x(7) (parens, not brackets in tiny c) gets &x+14 (ints are 2 bytes) pushed onto the stack. Lvalue means pointer into pr where the real data is. And it is valid as an lvalue. 'A' means real data is right here. The CPI 'A';JZ jumps over the resolution code if it is an actual.
+
+New toptoi needs to have resolution added. Probably can still resolve the one-liner. Stackentry needs to have union stuff to support actuals.
+
+OOPS new eq thought. Confusing stackentry design from var design. Stack entry needs. Which can be JUST void*, not union stuff. Handy to have stack have RESOLVED DATA. Read the 8080 code. NOPE, union and unresolved it is, and lvalue is the distinguishing property.
+
+ALL DATA OF ALL TYPES IS ALLOCATED EXCEPT PASSED IN VALUES.
+
+scann for union stuff
+763 dumpstuff, thats all. No service code written yet.
+
+Tuesday, Sept 5
+GOAL: finish eq. Next step is x=1 case and testing it. And removal of popSecond to get the pushed atts proper. NEEDS study. DONE.
+
+Do classes 0 0 first. Study IS SUE: Why does C code examine val class, but 8080 code ignores it??? BECAUSE 8080 uses toptoi which dereferences. It delivers an 'A' even if top is an 'L'. Class is another issue. Class is needed to handle ptr vs int typing. The memcpy deal is NOT an 8080 issue.
+
+REMEMBER: class class refers to on-the-stack classes, lvalue datum. NOT var.
+(Easy reasoning mixup.)
+
+ISSUE Finish eq, expand test 23 to all cases.
+debugging test 24. decl didn't move cursor over the ) or ;
+valloc responsible for the ), decl for the ;
+status (9/5 10:30pm) segfault in put_int.
+
+Wed, Sept 6
+parsing x(1) by factor, does it push the right stuff???
+~527 what is the type? It should be the type of the array, which is the lvalue type, which is type ~510. Should be ok.
+Stack ends up empty, should be one entry, the pushed value. pushk is called. What happens? AHAH! st discards it. ALL IS KOOL.
+
+ISSUE findEOS() and several other ways: find one way to test EOS.
+
+DONE Next goal: MC(1,'x');
+TOMORROW why nothing from test 26 ??? Good night!
+
+Thur Sept 7
+BECAUSE if code not written yet DONE
+----------------
+Fri Sept 15
+Have been working on enter(). Needed three dependant functions, newfun, fundone(), and setarg(). And had to finish newvar.
+
+Been struggling long time  with the rats nest of goto's in ASM code for newvar. Finished today refactoring, and tc.c version reflects that. Compiles. Ready to test. But had a put_int problem. Redid the where arg so it can come from other than the stack, e.g. a var. That too compiles. So testing should start with low case numbers that exercise the getter/putters.
+
+Test 32 awaits use. First tests 22, 23, 24.
+
+ISSUE: Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
+The overflow test is if(++nxtWEver > eWEver){eset(TMWE);return;}
+
+22 ok, 23,24 fail to put data. 24 fails to allocate int x(3). ~359 if is wrong. We need to allocate this array. class==1 (correct). passed==0x0, pointer to stuff (correct), this is not a function call. 
+        LDA     CLASS
+        ORA     A       ;if class is 0, or not a passed
+        JZ      NR2     ;  arg, then get value space.
+        LHLD    PASSED
+        MOV     A,L
+        ORA     H
+        JNZ     NR3
+NR2     LHLD    PRUSED  ;get value space
+nr2 allocates. above is the if. class==0 jumps to nr2 and allocates. class is 1 so passed is tested. JNZ fails, it is zero. So it falls into nr2. The if test should be BOTH ==0 as it was before. FIXED.
+23 segs. parsing x=77. get_int, in eq ~113. On the stack val IS 77. lval is pr+18. Both correct. Shouldn't this be a put_int ??? . FIXED. 
+And TEST 24 is happy, too.
+make test segs. ~363, copyArgValue, test 17. newvar ~363. Dummy data was picked up as a pointer. Need to pass &union stuff... OR zeros. FIXED.
+make test happy, make diff looks ok at a glance. NOPE. Test 17 "ref to pr[x]", the x's have changed dramaticly. 10 vs 101, 62 vs 102, etc. Test 17 repeats the 4 canon tests (1..4) but using calls to newvar instead of canon. It is really testing newvar. MAYBE those offsets are garbage anyway. The 'good' values are all in the 100's. The setups are all short, in the 10's. Other newvar data is garbage, (not a type, for example.) The test proves it creates entries, the data is not the issue. OK.
+ALL diffs acceptable. make keep. Only 31 tests. 
+test 32 is cleared for action!  It segs. newvar, copyArgValue ~388. test ~730. call to newvar with 'E'. First try at storing a 'where'. 
+Both v and path == 'E' (0x45). newvar ~363. 
+newvar prototype tc.c ~352:
+	void newvar( struct var *v, 
+		int class, Type type, int len, union stuff *passed ) {
+newvar call, test.c ~730:
+	newvar( &vartab[nxtvar++], 'E', 2, 1, cursor);
+v,class ok. Not sure what len and passed are for class 'E'. Read the 8080 ASM.
+There is no place in tc.c newvar we test for class=='E' and give special treatment. We do test for 0 often. Link is our guide, here. ~1786...
+        MVI     A,'E'   ;allocate a variable with
+        MVI     B,2     ;  class E, size 2, len 1,
+        MVI     E,1     ;  passed value = cursor. (This
+        MVI     D,0     ;  is a function entry.)
+        LHLD    CURSOR
+        CALL    NEWVAR
+so 'E',2,1,cursor is OK args. Why was newarg copying a value? 
+~359 shouldn't allocate space. passed is true, so it does the value thing WRONG. Best probably is explicitly if on type 'E'. But how did 8080 avoid this mess??? ANSWER: 
+The copy would have been from passed into the var where pointer. And this has to be done. copyArg does that, ~388. 8080 code ok. What happened in our refactoring. It looks right for this case.
+At ~387 class is 2, passed is 'E', WHAT HAPPENED? Args all switched around. Call and called match properly.
+int copyArgValue(struct var *v, int class, Type type, union stuff *passed )
+copyArgValue( *v, class, type, *passed);
+
+AHAH, the call is to newvar from test.c ~730. 
+newvar( &vartab[nxtvar++], 'E', 2, 1, cursor);
+void newvar( struct var *v, 
+		int class, Type type, int len, union stuff *passed ) {
+cursor needs to be in the union. So at ~730 write...
+	union stuff cur; 
+	cur.up = cursor;
+	newvar(...., &cur);
+AND REMEMBER THAT when writing link. CHANGED. 
+SEG fault again. ~388. at 387 passed is 'E', class is 2, type is huge hex, and v itself is 'E'. HUGE ARG MIXUP. We gotta start at test.c 730 and go step by step to tc.c ~387. b test.c:730, b newvar, b copyArgValue, the run 32, then look at all args received.
+	union stuff cur; 
+	cur.up = cursor;
+	newvar( &vartab[nxtvar++], 'E', 2, 1, &cur);
+---
+	void newvar( struct var *v, 
+		int class, Type type, int len, union stuff *passed ) {
+---
+	if( passed ) {
+		copyArgValue( *v, class, type, *passed);
+	}
+---
+	int copyArgValue(struct var *v, int class, Type type, union stuff *passed )
+
+
+Sunday, 9/13
+gdb, stepping through above. At ~358 all is OK. atts ok, *passed.up is pr+6. 
+at copyArgValue...
+	copyArgValue (v=0x45, class=2, type=6322246, passed=0x45) at tc.c:387
+All screwed up. No proto in tc.h. Put one there and gcc now shows errors.
+vAlloc ~685 vclass=0; But class is 'E'. This is the arg, not the fcn decl.
+Might be ok depending on (*passed).up. NOPE. Alloc is called for argument 
+~360, did alloc then RETURNED. error is 0. 
+pr+6 is 0x607846   prused is <pr+51> == 0x607873
+allocSpace never returned 0, so caused false eset, never tested so kept running copyArgValue never called. FIXED.
+Runs to end, no seg, but MC(1,bar); prints nothing. 
+
+Monday, Sept 18
+Overcounting nargs. FIXED. But now seg'ing on test all...
+	Program received signal SIGSEGV, Segmentation fault.
+	0x00000000004016fd in copyArgValue (v=0x60a960 <vartab>, class=0, 
+	    type=Int, passed=0xb) at tc.c:393
+	warning: Source file is more recent than executable.
+	393				put_int( (*v).value.ui, (*passed).ui );
+	(gdb) bt
+	#0  0x00000000004016fd in copyArgValue (v=0x60a960 <vartab>, 
+	    class=0, type=Int, passed=0xb) at tc.c:393
+	#1  0x00000000004015bb in newvar (v=0x60a960 <vartab>, class=0, 
+	    type=Int, len=1, passed=0xb) at tc.c:363
+	#2  0x00000000004033cd in doTest (testcase=1) at test.c:89
+	#3  0x0000000000403211 in testing (argc=1, argv=0x7fffffffe0e8)
+	    at test.c:56
+	#4  0x0000000000400a47 in main (argc=1, argv=0x7fffffffe0e8)
+	    at tc.c:15
+Dummy data in early tests. FIXED
+Not seg'ing but dumping " var:  0 None 0" lines 31 times, tests 17 up. Its dumpVar, unused line. Left it. Test 32 now in test all.
+
+Link next, but a few more MC's would be nice.
+-------------------
+
+/*	get a char from keyboard
+ */
+	case 2:
+		break;
+
+/*	file open (r/w, name, fsize, unit)
+ */
+	case 3:
+		break;
+
+/*	 read block( where, unit)
+ */
+	case 4:
+		break;
+
+/*	write block ( first byte, last byte, unit). Block may
+ *	be any size from 1 to 256.
+ */
+	case 5:
+		break;
+
+/*	close file ( unit )
+ */
+	case 6:
+		break;
+
+/*	move a block up or down. Args are first,last,K. If K
+ *	negative, block is moved down |k| bytes, if positive
+ *	then up K bytes.
+ */
+	case 7:
+		break;
+
+/*	count # instances of character CH in a block. Args are
+ *	first,last,CH.
+ */
+	case 8:
+		break;
+
+/*	scan for nth occurance of CH in a block. Args are
+ *	first,last,CH,cnt address. Return pointer to nth
+ *	occurance,if it exists, otherwise to last. Also
+ *	cnt is reduced by one for every CH found.
+ */
+	case 9:
+		break;
+
+/*	trap to moniter 4.0 for debugging.
+ */
+	case 10:
+    	break;
+
+/*	enters an application program, setting up a new
+ *	globals variable level, redefining progend, links
+ *	the program, executes if no error occured, upon
+ *	completion captures a few facts (error, and either
+ *	cursor or errat) and restores old globals level,
+ *	progend, zeros err, pushes a zero as the value of
+ *	this function, and resumes the calling program.
+ */
+	case 11:
+		break;
+
+/*	test if keyboard char ready, return copy if so,else 0.
+ */
+	case 12:
+		break;
+
+------KEEP ABOVE AWHILE-----------
+
+Test 33 vs Test 8 should get same result. Somewhere 33 has extra nxtvar bump.
+8 has 2 decl calls, 33 has one st() call to compound. Been getting these mystery "var:  0 None 0" lines in our test results. alternates between ~'s 689,366. 689 vAlloc as it calls newvar. 366 as it leaves newvar. Why does decl not do both??? It does. Difference is in dumps. 33 dumps 6 entries, 8 dumps 12.
+How does 33 dump see ONLY 6 after installing 12? Because it stops after doing the int, it never does the char. 
+Single stepping from end of decl-ent (~710) to see does it come back to decl.
+Picked up error 9, SYNXERR, somewhere. Didn't eat the ) of b(). eset at factor ~620, looking at ). So who found the ( and skipped the )? vAlloc ~675, eat ) at 
+683, but asgn's factor sets the error at 620. Factor should not error looking at ). vAlloc and factor faithfully mimic ASM on this issue. tiny-c evidently required a number within the parens. With that fix 33 now shows all 6 decls.
+OK, now the mystery "var:  0 None 0" lines. Eliminate one of the two, 689, 366, ++nxtvar's. Which is logical. And which is ASM faithful. I think newvar (366) should take care of this, it is managing the table. 689 losses. FIXED.
+BUT why does newvar have that arg at all; both vartab and nxtvar are global, and no other arg ever put there. Its a one liner in nxtvar. DONE. Bunch of code is cleaner. Tests print cleaner, too. KEEP.
+Test 12 may have problems. Look it over tomorrow.  --  Good Night!
+
+Sept 19 AM, FIXED.
+ISSUE better names for globals.
+git checkin DONE
+Link is next. Written, test 34, too. Compiles. Tests GOOD.
+git checkin DONE
+Loader next 
+
+Sept 20
+AM: Decided to use out of the factory getchar() as sole keyboard reader, and do my own getLine(). Getchar does its own echo. Coded loader & its support brethren, including getLine. 
+PM: Compiles. To test it must run standalone without test.c. Need alternative main(). Need cold start. 
+Evening: Cold,warm,hot done. New main done, and old commented out.
+IS SUE: where is link called? Should be just before st() ~872. FIXED
+ISSUE: brake is a local in st but a global in ASM. Is local ok?
+	NO. at ~762 brake=1;return and the parent recurse sees the old brake. It won't know to break out of the compound. Fix needed at ~708 and maybe 721. Subordinate ISSUE is be sure it and leave are zeroed back appropriatly.
+Compiles (8:53pm) but doesn't link. NEED logo, prbegin, prdone.
+
+Thur, Sept 21
+Goal, finish above. DONE.
+Then move both mains into their own file and fix make to build two executables, 	tc, and test, each linked with their respective main. 
+FORGOT TO GIT cold,etc. So I did it, but my main() refactoring went in, too. So that particular git commit is not buildable. Best to move forward and get the main refactoring and two executables working, THEN COMMIT THAT.
+Makefile modified to produce two executables. Main refactoring compiles. Quick test of ./tc is OK. Goes into loader. Dot-x exits. More testing coming up, but first another commit so the most recent compiles and works even just a little bit. 
+make dotest is the new make command to do ALL tests. OR ./test [test numbers]. Both work. 
+TODO: 
+	- MC's
+	- pps
+Most of the MC's not done (about10) are needed for pps, so they are 'a's in the ASM audit. Done are 1,13,14. Key ready on linux is messy, but I think catching a signal is pretty straightforward. I plan to catch ^C to stop a looping app and exit the app. The do forever loop in main loops back to warm which can load another app.
+A faithful line oriented pps is the real goal. I wonder what a minimal character oriented one would look like?
+ALSO its time to look into git-hub.
+PPS: I'm up to line 8 of pps, and it is clear we need to redefine a bunch of MC's to support this. Enough MC anomolies observed I doubt I can be faithful to the numbers at that level. But I need to be faithful at pps library level. A good idea is to make the library its own file so others can import it. 
+So that implies jointly doing the lib and the MC's. 25 fcn's in lib.
+8 pm: read section 2.10 of owners manual, private MC's. Interesting. ISSUE: it describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
+
+Trouble getting traction on standard library. New thought is to let the std library dictate MC's. METHOD: From std lib doc (OM p. 2-21, sec. 2.9) write commented prototypes. Design MC's. Use existing def'n where possible, and 500's up for new. Code and test incrementally using test.c.
+---
+Friday, Sept 22
+Two ideas: first make the 0 in a pointer declaration optional. Second implement printf. Even the variable data args is possible because a full MC implementation supports that.
+Another: do a whole new lib that implements popular std C stuff. e.g. printf, but other stuff too. Call it newlib, or lib17, vs classical lib using ncurses???
+
+Current approach to MC's doesn't scale well. Better might be each case calls an MCx(std args), and each MCx has its own locals to deal with the args.
+Does C have a way to call a fcn whose name is a string??? NO. But a scalable way is working. No giant switch. Each MC is now written as a simple C function, any name, follow a protocol, and the model is in machineCall.c which is now separated from the tc.c file. Worthy check-in. Maybe more.
+LOTS of MC calls in test and in testFiles are reversed args. FIXED, but test 33 broken. FIXED. Test 34, link, function items have HUGE pr offset, 1,627,904,576, for example. 35 looks good. make keep even with 34 bug. dumpVartab is good. ~376 does the deed. In link cursor needs to be put into stuff, because newvar expects a stuff, not a cursor. FIXED.
+Other fun dump stuff: fvar seems nice, but lvar is Krazy.
+Now print error at end of each test. Errors in tests 12,13. Others ok. Test 33,34 dump krazy var and fun table. Fun has 2 entries, 0 and 4. Var 'E' entries have crazy ref. I put the cursor into stuff and passed &stuff. Seems FIXED. But fun table is empty. error=3,2 tests 12,13 are intended. 
+
+Saturday, Sept 23
+BUG in test 34: fun table not dumping. FIXED
+35 why the 'e' ??? OF COURSE, it was produced by MC(101,1). 101 aka 0x65 is 'e'. Redone a bit to be less confusing.
+NEXT GOAL: all tc's prints. whole file read/write (new), stuff needed for an editor (scann, movebl, etc.)
+printf can be done by very simple parsing the format arg, breaking it into strings terminated by %c,d,x,i,u,s and passing that format plus one datum to one of five fixed printf's. loop on that...
+pm: 
+Working on printf for tc. Stuff done: 
+	generalized find() and mustFind().
+	int charIn()
+	firstFmt
+--------------------------
+Sunday, Sept 24
+What is stuff.up? DumpStuff suggests it is a C pointer into pr. Does it ever point anywhere else? If not it could be an int index. Instead of pr+x, just x.
+Need an audit of ALL uses. 
+
+git diff to see where I am.  
+Colors: 
+	green seems to be new
+	white both have (just a bit surrounding the green)
+	red deleted
+GOAL: Clean up the union stuff thing, probably just int stuff. Easy audit. I just did git commit. So erase the union from tc.h and make and see what happens.
+Made fixes, not so bad. make dotest, make diff, not too bad. Stack entry prints are ONLY changes. And only prob is pr pointers which are now ints, 6326607 for example. Used to be (>)111, the pr offset. class 1's. dumpstackentry.
+STUFF IS GONE! Long live the int! But not done. Those pointers should be indexes into pr. Both there and in var's. dumpStackEntry now nice.
+
+Back to printf as tc lib function. Have working pFmt. Its sole arg now is the format string. MachineCall will have UNstacked the args, and called whatever(nargs, args); Need to write whatever() to call pFmt. Name? MpFmt? Why not.
+Need thorough test of pFmt. 
+6pm status: machine calls divided into three types, orig(0-99), new(100-199), user(200-up). Gonna make printf be #101. 
+	int MprF(int nargs, int *args)   arg[0] is the format. 
+	void pFmt(char *fmt) does its own toptoi. 
+	testSetup("[ MC("hello printf MC",101) ]  ");st();
+Should go to machinecall, newMC, Mprf which currently prints the format arg.
+Args mixup is the issue. new test setup to be easier to follow args.
+ISSUE: index base shift, BADDD!, machine call ~110. fix later.
+Followed args carefully all way thru & into MpFmt, they travel properly.
+Tommorow: change the 1st arg to a string, and debug why it segs.
+
+Monday, Sept 25
+Goin' after the seg. Caused by string as first arg after the format. This time didn't seg. machinecall stack dump looks good. toptoi bug fixed. Now args to MprF look good. REMEMBER pFmt needs to work from vector, not toptoi. WORKS!
+Committed. 
+I just implemented vPrintf. Ref:https://linux.die.net/man/3/printf
+ISSUE: konst maps trailing quote to null for strings. Does konst look for both " or null for lvar?
+
+NEXT GOAL: BACK to MC's. Back to library. All the g's and p's. As many orig functions as possible. ISSUE: rename the lib file library.tc. 
+
+Tuesday, Sept 26
+Library typed in except file i/o bodies. Need MC's 1,2,7,8,9,13,14,101 Propose to deprecate 3,4,5,6 and replace with 102,103. readFile,writeFile. Am I gonna do vscanf ???
+PM: 
+ISSUE MC7, movebl will PRINT its args to memmove (dest,src,n) but not do it quite yet.
+
+Wednesday, Sept 27
+Strategy: new test setup: testFile() optionally loads the library. 
+Test 30 (MC1) fails. Ditto 31. 29, 26, 25. ALL MC1's. FIXED yesterday's half done fix and test. Back to the main track.
+All lib fcns written except the file stuff. Test each. Write MC's as needed.
+ISSUE endlibrary line at end is commented out.
+
+putchar err's out in test 40. Cursor at space between char c, the arg decl. 
+To follow I need to outline WHAT SHOULD HAPPEN then gdb find out what wrong.
+	- cursor->putchar('h');   40 ~3, 
+	- factor sees type 'E' ~585, calls enter
+	- cursor->('h'), enter ~931 tosses the (,  ~939 parses the arg,
+			~946 tosses ). 'h' on stack.
+	- ~953 cursor=where, 965 parses char c, setarg(Char,<stackEntry>)
+	- ~1016 valloc's char c with passed value.
+	- ~983 st() does the body
+Error 3 happens in asgn, ~939. Where is the cursor before this call? -->char c
+It should be -->'h'
+where==cursor on entering enter, cursor SHOULD be still on the call -->'h'
+file loader was wrong, FIXED, but still fails. Freezes. 
+   b link. Look at what is loaded...GOOD. loop is in link. Cursor at 190.
+Loader left a null at pr+190. library follows. DID THIS cause link to FREEZE? yes, FIXED. Got into st(). Error 22, LBRCERR  -->), w(0), ...
+	writefile ***cursor--> char n(0), b(0), e(
+epr too small == 3236, cursor == 3244. FIXED. Now it freezes again, probably nulls at the end. epr too big by 2.
+It would really help to have processErr() print out the line number, the line, and a carot under the cursor position. 
+Anyway, seg in pFmt. fmt=0x1. cursor at ] at end of fcn putchar, ~7. And can we get a bt from a C library?
+	https://www.gnu.org/software/libc/manual/html_node/Backtraces.html
+
+Thur, Sept 28
+The above fix (~811) was to subtract 3 instead of 1 from the epr calculation at test.c ~24. No rational, just change the number based on evidence. Better is to understand why -1 doesn't work, and -3 does. That leads to another thought. Loading the test statement first, followed by the library is backwards, but it too fixed a bug. But then the endlibrary statement at the very end of the load caused a problem. If it was at the top, then link would put the library vars in the first frame, and the best statement vars subsequent, as designed. So we have quite a cobbled framework, with cobbled fixes. BETTER is to load lib first, test statement second, then after linking set the cursor to the test statement. cursor=pr at test.c ~23 is the true problem. Do it more intelligently.
+But is now a good time? Middle of a problem? Probably not. Get what we have stabilized. OK, so where are we? In pFmt with fmt=0x1, *fmt segs. More arg mixup. I wonder if our ptr-to-fcn thingy is making life too hard. Maybe switch is better, especially 3 switches for the three MC groups.
+
+cursor-->] end of getchar, just after MC 1,c. OPPS. FIXED. MC c,1. Now getting "hello tc" then segs on mc 101. 
+pFmt %s format bad datum. Its an 'h', not ptr to "hello ps"
+At machineCall~187, mcno 101, nargs 2, *args->pr+760->"%s", *(args+1)==104=='h'
+Should be & of where the h came from, -->"hello ps". Where was that dereferenced into 'h'? konst? Factor pushes fname onto stack, class 1, CharStar, 'A'. 
+	enter ~942 calls asgn, should have on stack -->"hello ps"
+	setarg "pts not impl yet", calls vAlloc
+	vAlloc put name=b as class 1, type Char, len 1. len should be 8? type CharStar? b's value is 63...99. b value -> "hello ps". b is arg to MC, so setarg is probably the issue. at tc.c:967, just OUT of setarg. And it did the right thing, b with proper atts. But the pointer is a C ptr, not a tc one.
+	b tc.c:940 (setarg loop). 
+		first: cursor(pr+146)->"hello ps"
+			where(pr+146)->" char b(0)[..MC..101", parsing ps call
+		second: (after gdb continue): cursor(pr+771)->"%s", parsing MC call.
+			stack is empty. Data from ps call in vartab, b, value is C ptr to "hello ps", (established an hour ago).
+			where is 0, so machinecall coming up, ~949
+	by now stack is popped, b is in vartab[24]. And in pFmt("%s",0), the ZERO is the problem. 
+TRACE THE ABOVE AGAIN. 
+	b tc.c:949 about to machine call. nargs(3) on stack: 101(top), b, fmt
+	first: 	p stack[0].value-(int)pr == 772 -> "%s"
+			p stack[1].value-(int)pr == 147 -> "hello ps"
+			p stack[3].value == 101
+	s -> ~177, nn..n past x=toptoi, p x == 104, 'h'. TOPTOI IS THE CULPRIT.
+toptoi uses lval to decide to deref. Pointers are reduced to non-pointer single datum, an Int or Char. No CharStar. DESIGN TIME! And setArg has a comment ptr's not supported yet. 
+
+Thoughts:
+An lvalue can be assigned to. A pointer is an address. Lvalue is type 'L', pointer is class 1. 
+
+		struct stackentry { 
+			int class; int lvalue; Type type; 
+			int value; 
+		struct var { 
+			char name[VLEN+1]; int class; Type type; int len; 
+			int value;
+So stack can have a CharStar,etc, 'L' or 'A'. Who decides these two atts? 
+
+==>> GO LOOK AT EACH FCN AND LEARN REAL USE. And check pushk usage. And Type usage.
+
+(Stack entry loses the name and the len.)
+(Type has too many entries. Lose the None, its an error. )
+-------------------------------------- code
+factor
+	SET: pushes constant onto stack(see konst), Int,Char,
+			CharStar NO CASE FOR IntStar
+		fcn call: USES atts of fcn name
+		subscriped var: computes offset to element, 
+						SET: pushes 'L' element to stack
+		simple var: 	SET: pushes 'L' element to stack
+eq() 
+	USES: atts of val and lval from top 2 on stack
+	SETS: lval value (because pointer), and pushes as 'A'
+		pl("eq class class 1 0 not done yet");
+		pl("eq class class 0 1 not done yet");
+		pushK simple int/char value
+setarg
+	USES: stack atts, "CharStar & IntStar not implemented yet"
+	PASSES: type to vAlloc
+toptoi
+	USES: stack popped atts, 
+	note: resolves 'L' to 'A' for arithmetic. L needed for eq.
+
+push's 
+	USES: 	pushst: whatever's passed to it
+			pushk: 0,'A', Int, datum passed to it
+konst (computes atts, passes up to factor for actual setting)
+	SETS:
+		case Int: 		pushk( ATOI() );
+		case CharStar:	pushst( 1, 'A', type, fname );
+		case Char: 		pushst( 0, 'A', type, *fname );
+		(no IntStar case)
+--------
+Now why? Both SETS and USES
+	pointers: var has tc pointers (index into pr) to values EXCEPT 
+toptoi would be ok for tc pointers. They are really pr subscripts. But type
+	needs to be maintained, e.g. IntStar,CharStar. And C pointers should never get into var or stack.
+C pointers should never get into any data structure. Only cursor, and derivatives of cursor used ONLY in C such as fname,lname. And array pointers if we go that way. Need to decide: all C pointers, or all int subscripts. Even epr, prused, etc.
+
+Survey tc.h for style on structure arrays, nxt vs cur, limits, etc. Clarity is the object, not speed.
+stack: 	int nxtstack STACKLEN
+fun:	int *current *efun FUNLEN
+var:	int nxtvar VTABLEN
+pr:		*cursor, 
+----
+struct stackentry stack[STACKLEN];
+int nxtstack;
+
+struct funentry fun[FUNLEN];
+struct funentry *curfun, *efun;
+
+struct var vartab[VTABLEN];
+int nxtvar;
+----
+CHANGES:
+	- change efun to FUNLEN everywhere, or learn why not.
+	- Keep *current because it will be used frequently to search locals
+	- Change addrval to look up 3 frames
+	- Add xStar types to setarg, toptoi
+Design:
+	- toptoi: if 'L' but type is xStar do not resolve. Keep xStar type.
+	- setarg: keep xStar type onto stack.
+ASM uses 1,2 for data type, and it is really 1 vs 2 byte. Actual role is determined by use, not declaration.
+On the stack at machinecall
+	class 	lvalue 	type 		value on stack		in args
+0	1		65		charstar 	pr+772	%s			C ptr to %
+1	1		76		char 		pr+147	hello ps	h
+
+Two problems, 
+	C ptr to % should be tc ptr to-->%s\0
+	h should be tc ptr to-->hello ps\0
+BOTH need pr subtracted before pushing. Second should be charstar.
+BOTH pushed by factor using atts set by konst. 
+Does toptoi do the right thing for charstar? evidently yes, by %s above.
+Why did konst use charstar for one, char for the other, both being quote?
+	BECAUSE "%s" was put there by ps's call to MC. library ~35.
+	AND "hello ps" by passing b(0) from testFiles/40 ~8, call to ps,
+		THEN setarg from stack to b
+
+setarg ~1005 sees what? 'L' ??? assume so. pointers are lvalues. 
+	vpassed='h'  ~1008
+
+enter ~966: setarg(Char, &stack[arg]); <<== type BECOMES Char here!!! BUG
+Needs to look betyond the xint/xchar for (0) and do xStar types.
+setArg leans on vAlloc to do the parsing. It does lit xlpar but then ASSUMES it is an array decl. 
+
+vAlloc parsing (therefor setarg) bumps type by 2 if it sees (. That should fix tc.c ~966 bug (notes ~937 above), and h vs hello bug (notes ~925 above). DONE
+Now we need to fix ~924 above. konst? DONE
+
+b machineCall:187 just before newMC(mcno-100, etc)
+	mcno=101, pr+args[0]="%s", args[1]=101 which should be popped.
+How did second arg get screwed up??? FIXED
+
+Sat, Sept 30
+toptoi 'L' now handles all types. New issue. Now that C pointers are converted to pr indexes, the C code that uses them must convert them back by adding pr. Did this to fmt in putchar. ISSUE can this be done generically before hitting the M code? To do that stack info needed. After toptoi can we look at the just popped stack for xChar and add pr? probably.
+
+pFmt internally adding pr to convert tc ptr to C ptr needs to uncovert it on recursive call. This is getting ridiculous. Need ONE GATEWAY from tc to C and that is machinecall itself. Must look at type of datum.
+
+Gotto roll machineCall.c back. And roll forward good changes. HARD. 
+Status:
+	machineCall.c       Sept 24 version
+	machineCall.c.bak   Sept 30 version
+Diffing these gives 3.5 paages of differences, piped to less.
+So far moved better comments, plus ~38 pft uses printf instead of pc.
+Leaving pFmt at 9/24. Otherwise rolled back.
+TRY IT: test 37 good, 38,40 segs.
+DEBUGGING 38. MC101 w/ %d %s %d format. Probably the %s blows it. Some fix in .c.bak should not have been moved.
+git diff machineCall.c: 
+	pft: changed pc to printf
+	origList: changed origList call args to nargs,args [was nargs-1,args+1]
+		Changed it back. now segs on tc ptr to fmt.
+Gonna try to fix pointers in the topto-to-args loop. two CharStar's in the stack. ~183 WORDS for test 38. Back to where we were sept 24 PLUS some changes. CHECKIN.
+test 12 segs at test.c~872, in pft. Old test written with C ptrs on stack.
+	The pft is called in test.c using errat data returned by tc which looks KRAZY.
+test 16 segs. test.c~407 changed %s to %x. Runs to test 35 and seems to loop. Make test, make diff now run to test 38 with lots of broken stuff. Need total review. But no segs as of 8:39 pm.
+REVIEW:
+~1091 tc.c PrVal: if(class)printf("pr[%d] %x %x",val-(int)pr,val,pr);
+	is the new dumpStuff. Assumes C pointers on the stack. ISSUE
+TEST 8, char b(9) allocates 40 cells.
+	12, stack entry prints 2 C hex addresses??? val and pr
+	22, way more then 13 zero's same bug as test 8
+	24, x(1)=77 written to wrong int array cell, x(2).
+	34  error=2, but seems to work.
+That's all. +pr pr+ gets into stacks, vars...
+	12, that's all. All uses of +-pr are printf's based on cursor, prused, fname, errat, AND one "ref to pr[%d]"..value-pr. ALL var's, not stacks.
+Thinking: all these are C ptrs, and should be. C on the C side, tc on that side. machinecall converts. NOPE
+CONCLUSIONS: 
+	- Its class, not type. No more xChar type. Use enums for class, Datum, Ptr, Fcn. Then at each scan point or dereference point set/reset class.
+	- Get rid of the +-pr complexity. Use C pointers throughout. And put them in value space, not in var. In var they become globals. Many will be locals, and in val space they get properly collected.
+	- Make lval an enum, too, Datum, Lval.
+	- Do the enums later. 
+x		- Do the if(class) instead of if(xStar) first. 
+		- Then +-pr complexity. 
+		- Then enums. 
+		- Then lib first loaded.
+pr complexity:
+	Must allocate value space for full C pointers in vAlloc. 
+x		newvar does this. 
+x		typeToSize is ready.
+x		most +-pr are in printf's. Only one +. Gonna keep some for readablility
+x		Just a few in calcs.
+x		no more CharStar except just for konst/factor.
+		konst must return type and class ???
+x		stackentry and var both have int value, need to go back to stuff
+		toptoi ???
+TESTING:
+x	8, char(9) allocates 80 cells. int(9) also 80.
+		commented out if(class) in typeToSize ~66
+		not sure side effects.
+x	remove two hex prints in dumpStackEntry
+x	16 string can now be %s instead of the temp %x
+x	22,24 same as 8
+x	34 error 2, MAY HAVE SIDE EFFECTS
+x	38 segs
+
+3 bugs, one cosmetic, one improvement 
+x	38 segs: pFmt. 
+
+make dotest, make diff
+x	8	- ~  76 int(10) allocates 40 bytes, not 80.  GOOD
+x	13	- ~ 132 error,cursor = 2 D      OK, HARMLESS
+x	17	- ~ 172 name in pr longer by 2
+x	17	- ~ 187 Test 17 done error=8 TYPEERR  OK, poorly coded test
+
+NEED Sun evening: 
+tx	test 34, epr too small by 2. 
+x	switch order of lib/test load
+x	finish test 40
+
+Monday morning, Oct 2, 2017
+
+GIT FILES CURRENTLY BEING TRACKED:
+	git ls-tree -r master --name-only
+Ref: https://stackoverflow.com/questions/15606955/how-can-i-make-git-show-a-list-of-the-files-that-are-being-tracked
+
+DATA test 40: lib loaded second, first char at pr+202, so testFiles/40 is that long (202). Null at end of lib load is at 3439, so lib is 3237 long.
+And 40 freezes with cursor at 3438, the null. epr is 3439. 
+REVERSED the load order, lib now first. 40 still freezes. cursor at 202, null. Fixed FileRead, returned len now excludes the safety null at end.
+40 runs, multiple fixes, works fine. Up'd regression level to 40.
+
+dir Tiny-C_new housekeeping
+x	moved stuff into SupportStuff
+x	note: old stuff is REALLY old
+		COULD put .o's into object folder, .c's into source, and teach makefile to deal with it
+x	22 file not too bad.
+Agenda:
+	Resume MC & wrapper testing
+	typeless get/put for pointers. Where are they put??? 
+		Don't know, but all is working.
+	determine when to allocate space for a pointer
+		Maybe pointer in var is ok. It isn't JUST globals, because
+		var table pops, too. If value is a pointer it is an lval AND it is class=alen=1. There are no arrays of pointers.
+	Full pps
+
+Add pft to test 40
+41: alpha, num, atoi, ceqn, 
+42: move, movebl, countch, scann
+43: file i/o
+
+pps: enuf to type code, print all, and run it.
+	up, down
+	delete one line
+	numbers on all above
+
+Doing pft, MC 13, Mpft.   segs
+	4 byte allocs made for pointers, b, from, to, but no copy args happened. TIME TO LEARN about pointers.
+
+------
+Tuesday, Oct 3
+Whole day studying pointers. Started to allocate them in value space, but went back to allocating in var itself. One byte gets allocated anyway. Harmless. Back to union stuff in both stackEntrys and vars. LOTS of changes, but compiler helps.
+
+Wednesday, Oct 4
+Setarg needs pointer work. Goal is clean compile for now, and regression test, and then back to pointer work.
+pushst may have an ISSUE. ~604 passes &foo as value, foo is a local. Then ~156 puts &foo on the stack. SO it points to a transient local!!! But stackentry has its own union. Need to copy somehow.
+10 am, clean compiles. dotest segs.
+	segs in test 32, but run alone its good. Garbage from 31 causing the seg in 32. cursor wildly huge. 
+	~964 cursor=where, call to enter(char *where) from factor~589, came from addrval lookup of foo, where whould be pr+5 or 6. pr is 6330912, ox609a20. in vartab foo has up=0x7fff00609a26. LAST 4 BYTES CORRECT, but first 4 are the problem. Ptr entered vartab as an ui instead of up??? Foo is 'E', it was test ~763.
+Test all runs to end, no segs. 
+
+NEXT: review diff. Fix any problems showing up there. LOTS of diff output.
+Test 6,8,17,21,22,23,24,31,33,34(var4,7),
+6: bug in test code. 
+8: HUGE allocs for int, EVEN for char arrays. 8 bytes per.
+--------
+
+Thur morning
+typeToSize returns 8 for class 1. BUT class 1 always goes into var, not val. 
+8: So only Char/Int matters. FIXED.
+17: changed garbage types to 1's, 2's, nicer result, no more error
+21: OK, but made it nicer
+22,23,24: same as 8
+31,33: OK
+34: new vartable dump prints huge sections of code. var 1,2,3,10,11. link test. The where's do it. class 'E', aka 69. Should for that class print just the where, not *where.
+ALL LOOK GOOD, now. 
+make dotest segs. test 11, dumpStackEntry(0), 0,A,Int,7. Its on the stack as an actual, so should NOT be dereferenced by PrVal, which needs access to lval. CODE TIME. DONE
+test_results now binary. ^@ for 0 Char 1. NOW prints "NULL". make diff is happy.
+11,12,16 wild 0 A 2 pointers.
+11: pushk(7) writes JUST the int portion of the union, does not clear the ptr portion. PrVal blindly prints the garbage pointer. It should print only the int value, 7. INNOCENT except for PrVal dump. Leave it for now.
+
+COMMIT
+
+Goal: resume MC's. 
+Test 41 still segs. link, then st, dumps vartable with lib, then b 1 Char 1 pr[3414]. 
+PrVal Char 1 val==? lval==0
+Mpft dumps vartab, and printing from,to (args to pft)
+	var 24: b 1 Char 1 pr[3414]-><-
+barfs on 'from' arg...
+$15 = {name = "b\000\000\000\000\000\000\000", class = 1, type = Char, 
+  len = 1, value = {uc = 118 'v', ui = 6334326, up = 0x60a776 <pr+3414>}}
+(gdb) p vartab[25]
+$16 = {name = "from\000\000\000\000", class = 1, type = Char, len = 1, 
+  value = {uc = 120 'x', ui = 6334328, up = 0x60a7760060a778}}
+(gdb) p vartab[26]
+
+b (which is OK) up=pr+3414
+from has KRAZY pointer, garbage in high order bytes (0060a778). Lo order bytes are a copy of b's up. This is from gdb dump of vartab[26].
+Could it be my memcpy? Why so many bytes? 
+BACK UP. from=b+2, to=b+6. What is eq doing? b = "0123456789" ~5
+	(gdb) n
+~92	   (*lval).value.up = (*val).value.up;
+	(gdb) p (*val).value.up
+	$20 = (void *) 0x60a6f0 <pr+3280>   <-- val
+	(gdb) p (*lval).value.up
+	$21 = (void *) 0x60a776 <pr+3414>   <-- lval
+	(gdb) p pr+3280
+	$22 = 0x60a6f0 <pr+3280> "0123456789"   <-- val
+	(gdb) p pr+3414
+	$23 = 0x60a776 <pr+3414> ""
+Looks ok so far. lval about to be 3280. CHECK. 
+Now pushst val because we popped it twice at ~83. up 3280 on the stack. TWICE. Is that right? 
+GOING ON... Next is computing from = b+2. 
+Need to stack b, stack 2, execute toptoi twice and add and push the sum.
+tc.c:516 , p stack...
+{class = 1, lvalue = 76, type = Char, value = {uc = 118 'v', 
+      ui = 6334326, up = 0x60a776 <pr+3414>}}, 
+{class = 0, lvalue = 65, 
+    type = Int, value = {uc = 2 '\002', ui = 2, up = 0x100000002}
+top is 2. lvalue is pr+3414. class 1 Char at pr+3414. Why is lvalue 3414? 
+Points to null. b should now be 3280. b is in vartab with 3414. What happened to b="123.." ??? Which we checked above. 
+
+==>> The assignment was done within the stack. The vartab never saw it. this issue was noted before. 
+Pointer arithmetic (put & get, both) needs access to vartab[?].value. Both names of elements, and index of entry are history by then. MAJOR ISSUE. Need to either communicate this data forward (UGH!) or allocate. We've mastered allocate. Pass forward is a total nightmare.
+
+NEED: put/get pointers. These could range check, and add/sub pr so it is actually an int. But that detail is buried under the get/put, which always return C pointers. 
+
+agenda:
+	- get put ptrs SOME EXIST, NEED REVIEW
+x	- find all places that do allocs, 
+x		decl, setarg
+x	- get/puts
+x		eq, copyArgValue, setArg
+x	- what they do
+x		- decl			.parses, defers action to vAlloc
+x		- setarg		.gets actual data passed to vAlloc
+x		- eq			.data incl pntrs on stack, copys val->lval
+x		- copyArgValue	.put_'s data to where.  line ~384 obsolete
+
+Plan: 
+	- review existing get/put ptrs. ~1224
+	- visit each place above and decide what is needed there.
+REVIEW
+	get/put_ptr
+		- these currently do a blind memcpy. No conversion tc/C ptrs.
+		- not used anywhere
+		- sizeof void*
+		==>> RECODE to new spec, ~1138 above.
+	decl
+		- PARSER, uses vAlloc for action
+		==>>
+	vAlloc
+		- important parser, sets up args for newvar
+		- NEEDS detail review. Do the args to newvar suffice???
+		==>>PARSING, uses newvar for action
+	setarg
+		- sets up args for vAlloc
+		- get_int/char  <<== NO OTHER USE EXCEPT HERE
+		- similar review
+		==>> EVIDENTLY no test so far needed data from val space
+	eq
+		- parsing done, data on stack
+		- uses put_xyz to do the assign
+		==>>PARSING AND ACTION via put_
+	copyArgValue
+		- called by newvar to do the put_'s
+		- both class and !class
+		==>>ACTION
+	newvar
+		- fills out nxtvar
+		- allocates space (uses allocSpace)
+		- if passed, calls setArg
+		- bumps lvar slot in current fun
+		- bumps nxtvar
+		==>> BOOKKEEPING, calls allocSpace,setArg for action
+
+Most parsers defer to action routines newvar, setarg, copyArgValue. eq seems to be the exception. Assuming work is just at action points, only those 4 plus get/put_ptr need visiting.
+
+Work Plan
+	allocSpace
+		arg to memset, 
+		==>> CHANGE TO amount (cosmetic)
+	newvar
+		fill out nxtvar, allocSpace, 
+		==>> PROBABLY NO CHANGE
+	setarg
+		from stack top fetches stuff as local. if 'L' get_'s data changing local into 'A' (but fails to change lval). Passes local to vAlloc where it trickles down to newvar which adds copyArgValue to its other bookkeeping. Evidently lval is never examined in vAlloc or copyAV. vAlloc parses the (, so setarg doesn't know the class of the arg decl yet. Its sole role seems to be to assure the value is an 'A'. Can a ptr arg be an 'L' ??? Probably. b=b+2 is an example.
+		==>> ADD get_ptr to the L-to-A conversion.
+	copyArgValue
+		called ONLY if passed!=0, but has redundant test of that. Two cases: class, !class. 
+		==>> REMOVE redundant tests (cosmetic). 
+		CHANGE THE CLASS CASE to retrieve from var space (get_ptr).
+	eq
+		~87, whereSize never used. 
+		~92 old ptr assign. CHANGE to get_/put_
+		MOST of the action seems to be here. Most not implemented at all, yet (01, 10 class,class) Think these through. Write tc code that would put these cases on the stack. The 0 0 case looks suspect. Shouldn't the put_'s be to a where?
+		==>> MORE STUDY.
+eq cases, test 99
+[	int b(9)
+	/* b eq
+	b(3)=7;
+	/* at eq: p stack 		0 77 Int pr+151, 0 65 Int 7  CASE 0 0
+	b(1)=b(3)
+	/* at eq: p stack		0 76 Int 210	0 76 Int 218 
+	b=b+2;
+	/* at eq: p stack		1 L Int 206		0 A Int 0xBIGGIE (8 bytes) 
+				should be case 1 1, but pushk made it 1 0.
+	int a(0)
+	a=b;
+	/* at eq: p stack		this would be a 1 1
+	Do we support int x; x=b; ? OR b=7 ? The latter fails our propsed range check on put_ptr. The former doesn't but can be dangerous.
+]
+
+CLARIFY: class 1 means "the data is a pointer"
+	Lvalue 'L' means "where points to the data"
+	class 1 'L' means "where points to the data which is a pointer"
+
+ISSUE needed ; after b(3)=7 because asgn tried to do 7/*.
+
+Doing b=b+2 got error 14. toptoi LVALERR. 3rd eq ok. 4th bombs. After 3rd cursor-> MESS of comments, then: int a(0)  a=b. That means just parsed is b=b+2. Stack should have b (lvalue) b+2 (val). 
+	nxtstacck = 2
+	stack:  { 1 L Int pr+312 }  { 0 A Int 0x609b5800609b5a } should be pr+314. Only + in the program. b on tc.c:515.
+b tc.c:516 (before the addition)...
+	nxtstack=3, stack has: b: 1 L Int 312, another b: 1 L Int 312, 0 A Int 2. All is good. BUT pr+312..315 is 4 nulls FOLLOWED BY GARBAGE. 
+After addition: (pushk toptoi+toptoi) stack is 
+	nxtstack=2, same b: 1 'L' 312
+	b+2 is: 0 A Int val whose ui increased by 2, whose up low bytes increased by 2 BUT high bytes huge garbage. Pushk did its job.
+==>> pointer put_/get_'s are flawed. alloc nulls only 4 bytes.
+
+This problem will be fixed by the new simpler design. typless storage holds ONLY char, int, not void*. get/put_ptr adds, subtracts pr. BUT toptoi may be a problem. And ditto pushk. toptoStuff???, pushStuff??
+
+Saturday, Oct 7, midnight.
+Took break the last 36 hours. OK, Lots of study. Time to code.
+x	- put_/get_ptr's
+x	- adjust vAlloc to alloc only 4 bytes (int) to store class 1's
+	- state changes above, ~1160, etc.
+x		- setarg
+x		- copyArgValue
+x		- eq
+state changes TOMORROW.
+--------------------
+
+Sunday, Oct 8
+First try: eq, setarg, copyArgValue
+Doing test 99 one = at a time.
+	JUST b(3)=7;  ==>> error 9
+		vartab b 1 Int 10 pr+256
+		stack: 
+			0: 0 65 Int ui 7 up 0x7000000007
+			1: 0 65 Int ui 7 up 0x1000000007
+		pr: 0x609a20  epr 245, prused 295.
+		value: 7 in slot 262
+		b eq, stack: 
+			0: 0 76 Int pr+268
+			1: 0 65 Int 7
+				CASE: 0 L <- 0 A
+				eq did the assign
+				parse error, factor looking at ]. WHY???
+	UNCOVERED b(1)=b(3);
+ 		<pr+164>:	0x00000000	0x00609ad0	0x00000000	0x00000007
+ 								b(1)					b(3)
+		. above after assign done. 
+	b eq, stack: 
+			0: 0 76 Int pr+268
+			1: 0 65 Int 7
+-----------------------	
+Monday, Oct 9
+After the assign b(1)==609ad0==pr[176], the value pointer exactly.
+In 0 0 case, stack: (nxtstack=0 due to two pops at ~84)
+			0: 0 76 Int pr+268
+			1: 0 76 Int pr+176
+This seems so different from last nights "after assign done". The 2nd is b(3), correct. Why pr+268 ??? prused is 203. 40 bytes for int(9) GOOD. This is the 2nd =, the first b(3)=7 pushed 
+Walk thru b(3)=123  (0x7b, a bit more noticable in hex dump)
+		stack before 
+			0: 0 76 Int pr+268  <-- lvalue, WRONG offset
+			1: 0 76 Int pr+176  <-- datum, WRONG lval, wrong value
+268? b is 166. b(3) is +=12 is 178. 123 should have been parsed by konst, and put onto stack[1]. It is NOT an lvalue. 
+Cover line 8. Focus on line 5 for awhile.
+---
+line 5, nxtstack 2, var b 168, 		stack before 
+			0: 0 76 Int pr+180  <-- lvalue
+			1: 0 65 Int 123  <-- datum
+		ALL GOOD, step througn eq...
+			10 n's  -> line ~106, 0 0 
+one fix, ~109 should be up, ditto ~114. x /d pr+180  has  123 GOOD.
+Continuing now will hit our other parse bug. YUP, error 9.
+uncover ~8. apply ~109/14 fixes. make. DONE
+---
+repeat above at line 5, var b 166, lvalue at 178, otherwise SAME.
+walk thru this assign, and examine stack before leaving eq.
+	stack after pushk(iDatum)...
+			0: 0 65 Int 123 GOOD
+			1: 0 65 Int 123  <-- left over from pop
+c next eq  b(1)=b(3);   nxtstack 2, stack 
+			0: 0 76 Int 170
+			1: 0 76 Int 178
+	These should be b(1),b(3). b=166, so GOOD. pr+181 == 123 (7b) GOOD
+	Case 0 0 again, but two 'L's. nexting...
+	iDatum is pr+178. BAD. Did not deref the L, ~108. It points to 123.
+FIXED. b looks like this...
+			0x609ac6 <pr+166>:	0	123	0	123
+			0x609ad6 <pr+182>:	0	0	0	0
+			0x609ae6 <pr+198>:	0	0
+YAHOO! Now lets fix that parse flaw...
+	~725 for loop calls st() repeadedly until ] breaks out, or
+		error. st() is at ~732, last in loop.
+	One c causes error 9. never reached 732. line 8 of test 99 last reached. 6 c's at st() cursor at line 9. cursor -> ']'. asgn() should fail, but not error. Instead it uses error to decide on failure. That is too harsh. factor ~625 class eset. All the parse stack returns int succ/fail EXCEPT factor, which just sets an error. IS THAT ASM?
+FIXED, but other stuff is broken. Uncovered rem() ~726.
+TODO: 
+x	- add prints to 99, two pn's. MC101 works.
+x	- move test 99 to 41. 
+	- dotest, diff, see what else is broken.
+	- COMMIT
+got a good make diff...
+	22 has more 0's (used to be 13), now >19
+	25 has negative pr index's, MC 1
+	several have stack dumps but their prints can be found among them.
+		25, 26,29, 30, 31, 
+		32 has error 21, 
+	MOST are ok. 
+--------------
+
+Tuesday, Oct 10
+Goal: What accomplished?
+Another: clean diff, then make keep.
+
+Accomplished (when done):
+	Test 42 (not 99 anymore) nails down eq treatments 4 cases, 2 being violations. (cannot assign int to ptr or vice versa). So valid cases are  00, 11. Clarified respective role of class 1 and lvalue. ~1226 above.
+22: why >19, should be 13 0's?
+	char p(7);  need TWO valloc's p, and the array. p is an int, the array adds 8 more, 12 total to the previous 5: should be 17 0's.
+But that requires proper interpretation of var where, it points to one of the two allocs, and add/sub 4 to get the other. ptr first. array second. 
+	where points to the array. 
+	where-4 points to the ptr. 
+	where+(obsize*index) points to the array element. 
+1st & last SHOULD already work. The pointer offset (-4) is new.
+What is probably happening in valloc or newvar is char array space allocated with obsize 4, ptr obsize, (stored as int). 
+valloc:
+	f/lname defined (symname)
+	( ? then 
+		newvar(1,type,1,0);--nxtvar;    <<== add this
+		vclass 1
+		alen=subscript (or 1 if vpassed), 
+	else 
+		vclass 0
+		alen 1
+	newvar(vclass,type,alen,vpassed);   <<== existing
+The result is ONE var entry for two variables in the ( case. To get to the pointer back up by 4. AND YOU ALWAYS HAVE TO DO THAT because the value of b in var may be no longer valid! AND you gotta set the pointer to the var where value.
+WHEW! Is it worth it? What was the argument to allocate pointers in value space instead of its var???  WAY BACK. Study from ~953 above forward.
+	~983 documents the decision. Wrong reasoning about global, vars DO get popped.
+	~990 adds to argument.
+	The clincher was eq not having access to vartab. Or name. 
+		int a(),b();
+		a=b;
+		b=b+2, how did ASM handle these?
+TRYING TO DO TOO MUCH. Owners Manual, p 2-15, "a pointer expression is a pointer +/- an int." So both above assigns are ok. But b-a is not. AND EQ in ASM works strictly with the stack. That implies an lvalue can point into a var. a=b will have two such lvalues. b=b+2 will have one (b), plus an actual (b+2). CHECK THE ASM CODE for these implications.
+
+ASM, ~1219 FA7: look up symbol. addrval returns all data in registers. FA10 for symbol without (. Could be datum or pointer, class determines.
+FWHERE is in DE, pushst called ~1296. 
+		FA10    LDA     OBSIZE  ;push class, 'L', obsize,
+		        MOV     C,A     ;  stuff=where.
+where (FWHERE in the code) is taken from the var. If its class 1 it is where the data is. 
+So b=b+2, the b is on the stack twice as 1,L,type,where. 
+	Then the 2 goes on as                0,A,Int ,2
+	Its all up to eq. But eq does not know where where is stored, only its value. UNLESS addrval returns where as a pointer into var, not the value stored in the var. That would be a valid 'L'. 
+;ADDRVAL looks up a symbol pointed to by FNAME,LNAME.
+;  Returns address in HL, class in A, size in B, and
+What address??? ~944, match: 
+		        ORA     A       ;if class > 0 & class < 'E'
+		        JZ      AD9     ;  then return address of fval
+		        CPI     'E'     ;  part of VARB, which is alrdy
+		        RNZ             ;  in HL.
+		AD9     PUSH    D       ;otherwise return contents of
+		        MOV     E,M     ;  fval part of VARB.
+For class 1 it is the address into var where where is stored. 
+DONE! It is MUCH simpler than I thought. 
+
+Change plan
+x	remove get/put_ptr
+x	git diff tc.c shows typeToSize, eq changes ONLY. Review these.
+	visit each use of above (get/put) and put it back the way it was
+x		eq done. But kept the lval dereference. 
+x		typeToSize now ignores class. Does only Char, Int, else error
+x		copyArgValue
+		setarg
+All tests run, no segs. Errors, though. 
+FIXED 37 Pfmt, got 77, didn't get the string. pFmt is a C not a tc call.
+41 	b is var[24], then from, then to. 
+	b is pr[3414]. from and to are both garbage. BUT intelligent garbage.
+	b    = 0x60a776
+	from = 0x60a7760060a778
+	to   = 0x60a7760060a77c 
+	to = from+5    from=b left-shifted-4-bytes + b+2
+Dump of 'from'
+0x60f560 <vartab+800>: 0x66 0x72 0x6f 0x6d 0x00 0x00 0x00 0x00
+0x60f568 <vartab+808>: 0x00 0x00 0x00 0x00 0x01 0x00 0x00 0x00
+0x60f570 <vartab+816>: 0x01 0x00 0x00 0x00 0x01 0x00 0x00 0x00
+0x60f578 <vartab+824>: 0x78 0xa7 0x60 0x00 0x76 0xa7 0x60 0x00
+
+
+name 0x66 0x72 0x6f 0x6d 0x00 0x00 0x00 0x00 0x00 9 bytes  "from"
+ | packing 0x00 0x00 0x00 
+ | type 0x01 0x00 0x00 0x00
+ | len  0x01 0x00 0x00 0x00
+ | value  0x78 0xa7 0x60 0x00 0x76 0xa7 0x60 0x00
+Low order bytes first. from at ~1402 above completely flops the order of display for readability. 
+Now lets do it for b.
+ | value  0x76 0xa7 0x60 0x00 0x00 0x00 0x00 0x00
+How did the hi order bytes get into from ??? Hypothesis, unions right pack everything. AND pointer stored as ui becomes wild hi order. And ptr+2 somehow becomes an Int.
+
+New thought: Should var use union stuff value, or char* value? Does it ever use ui or uc? grep turns up nothing. 
+----------------
+
+Wednesday, Oct 11
+
+Goal is to fix the mangled pointer in the var table.
+-m32 needs lib fixes to work. Back to 64 bit. 
+Review of make diff: all good except 41,42.
+	Test 42 works but gives error=9
+	41 fails to parse second arg, factor looking at comma. 
+		cursor->",b+6\n]\n"
+42 doesn't have all code uncovered.
+41: 
+	Goes through enter ok parsing args, then decls. Need to check the data it is producing. Problem probably in setarg, or MC.
+	Run again with JUST mc break. Two mangled pointers on stack.
+	ui = 0x60a778, up=0x60a77660a778. ui is in the low order bits. This is the first arg, from. to is similarly mangled. 3rd is 13, the MC number. Problem is in setarg. 
+Thought: what if we change from union to struct? Better thought: brkpt setarg and look at the pointer before and after the assign. 
+AT setarg 1st hit the pointer is already mangled.
+	watch'd ptr, mangled at 
+		tc.c:159 stuffCopy, 168 pushst, 176 pushk, 523 expr.
+stuffCopy doing a memcopy of one stuff into another. PUSHK USES UI.
+~523 is pushing b+2.   pushk(toptoi()+toptoi());
+stackentry knows class. Can assure pushPtr. Examine toptoi and pushk to see if class is properly passed on. TOPTOI class 1 returns ptr cast to int. pushk makes it class 0 'A'. 
+
+Put the burden on expr to push a pointer if either side is class 1, but only for +-, not the other ops. New fcn pushPtr. NOW 41 completes with error 14, lvalerr. 
+	nxtstack = -1. 
+	cursor --> ",b+6" so it is adding b+2.
+Breakpoint 2, expr () at tc.c:534
+	pre-addition:
+	(gdb) p nxtstack   2
+	(gdb) p stack[0]   {class = 1, lvalue = 76, type = Char, 
+						value = {.., up = 0x60a776 <pr+3414>}
+	(gdb) p stack[1]	{class = 0, lvalue = 65, type = Int, 
+						value = {.., ui = 2}
+----------------
+
+Thur, Oct 12
+Do the above watching the addition, AND the eq. Put a watch on error. Lvalerr will be in eq.
+
+41:
+	pr+3280 == 0x60a6f0 -> "0123456789"
+	pft args should be 3282 == 0x60a6f2, 3286 == 0x60a6f6
+	pushPtr datum is 6334328 == 0x60a778 which points to nulls.
+	Stack has 0x60a776 + 2, vartab b is 60a776 == pr+3414. 
+		==>> b="01.."   assignment done WRONG.
+	Back up to eq. stack has 
+		(0): 1, L, Char, pr+3414
+		(1): 1, A, Char, pr+3280 -> "012..."
+	After assign vartab should have pr+3280. 
+	The 3280 needs to go into var[24], which before assign HAS 3414. 
+		(gdb) p &(vartab[24].value.up) == 0x60f558 <vartab+792>
+	The lvalue ((0): above) should be 0x60f558 <vartab+792>
+	Back up more, to parsing the b. That is in factor after symname.
+	b ~604, 1st hit is b="012..", cursor->leading quote. 
+WHAT SHOULD HAPPEN: b gets the value pr+3276->"012..", BUT ~631 pushes the value vartab+792 because b is class 1. But that push doesn't happen AT ALL because no lit(xlpar). And if it did, its pushing 'L' &foo for all classes, not just class 1. PROBABLY WRONG, but ok for this case, so keep chasing. 
+NOPE. WHERE does the &foo get dropped or ignored??? And foo is a local, so the pointer becomes invalid almost immediately. 8 uses of foo in factor! How long has foo been there? git diff tc.c|grep foo returns empty. So way before Oct 5.
+THESE NOTES ~1374 IS WHEN I discovered &fval is returned by addrval for class 1, instead of where, so it could be used as an Lvalue. ~952 of tc.asm.That was Oct 10, 2 days ago. So introducing foo was to solve some earlier problem. HOW TO DIFF back 2 or 5 commits ago with today, or with its next neighbor.
+												 oct 2..oct 5
+tom@East ~/UbuTom/Projects/Tiny-C_new $ git diff e8828..fae01 tc.c|grep foo
++	union stuff foo;
++			foo.uc = *fname;
++			pushst( 0, 'A', type, &foo );
++			foo.up = fname;
++			pushst( 1, 'A', Char, &foo );
++						foo.up = where;
++						pushst( class, 'L', type, &foo);
++					foo.up = where;
++			  		pushst( class, 'L', type, &foo);
+---------------
+Fri, Oct 13
+Most of the foo stuff is probably ok. Regression proves that. Only need to debug tests 41,42. And foo has nothing to do with that. Foo solved the mangled pointer problem. addr needs to return a POINTER to var's where. Does it? ~1461 above. 
+The &stuff as arg to push is ok, because it is COPIED into var. Thus its local-ness is not an issue. 
+At ~604 *v is the foundVar. In factor. ~629 is no ( case, called simple. ~630 is the magic. No address-of logic. Foo will get COPIED by pushst. For class 1 it must be 'L', &foundVar.value.up. That goes in the STACK copy. 
+&((*v).value.up), will that be what we want. It is v+offsetToValue.up.
+
+gdb at ~602. WHAT SHOULD HAPPEN: b gets the value pr+3276->"012..", BUT ~631 pushes the value vartab+792 because b is class 1. [3276 now 3280.]
+WHAT IS HAPPENING: at ~631 foo is pr+3414 taken right out of *v. Points to null. DOES NOT point to "012..". Did the assign at test 41:~6 go wrong?
+TODO: check the assign at ~6.
+DOING: chase the b+2 works ok. 
+	ALSO chase the &((*v).value.up) == vartab+792 -> <pr+3414>. 
+FIXED ALSO: ~631.
+segs in Mpft. Probably trying to deref a null. We know b has wrong where value, Should be 3280 (+/- drift). 
+	char b(0) will point to the null byte allocated. 
+	b="012.." should change that to 3280. 
+		b eq. 
+			Look at vartab[24] aka vartab+792.
+				is b 1 Char 1 pr+3414 -> NULL
+			look at stack. 
+				is 0: 1 'L' Char vartab[24]==vartab+792  <== offset? (24)
+				   1: 1 'A' Char pr+3280 -> "012.." <==GOOD
+			walk thru eq. 
+				.
+		Factor should pushst b with pointer to b's where cell. 
+		eq should change that cell to point to "012..".
+		at ~93	if( (*val).lvalue=='L' )  val is 'A', so this deref not done
+		at ~96  (*lval).value.up = pDatum;
+			This is the actual assign.
+				p (*lval).value.up   (void*)0x60f558 <vartab+792>
+				pDatum is pr+3280
+		p vartab[24]:   b 1 Char 1 pr+3414, Where did pDatum GO ???
+		Before and after assign (printf's)
+			lval's up into vartab 792, pDatum in pr 3280
+			lval's up into pr 3280, pDatum in pr 3280
+p vartab[24]
+$1 = {name = "b\000\000\000\000\000\000\000", class = 1, 
+  type = Char, len = 1, value = {uc = 118 'v', ui = 6334326, 
+    up = 0x60a776 <pr+3414>}}
+STILL 3414 in vartab.   ^------ should be 3280.
+
+
+Did the assign go into the stack, not into the var.value.up. NO IT WENT INTO THE LOCAL 	struct structentry lval.
+
+The lefthand side of the C assign (~99) is wrong.
+
+		(*lval).value.up = pDatum;  /* assumes up points into var */
+	SHOULD BE
+		void* where = (*lval).value.up;
+		*where = pDatum;
+FIXED
+NEXT: test 41 sets in machine call, the two pointers on the stack are into vartab. from and to. And the two decls from and to are in vartab[25]/[26]. pps/library.tc, ~17, pft written in tc uses MC 13 which calls pft written in C. Should be straight forward ESPECIALLY because a comment in setarg says "cant do pointers yet."
+setarg needs to do exactly what eq does for class 1. ~1034, is (*arg).value proper, i.e. ptr to pr+3280 + 2|6 for from|to. 
+OK not exactly. Setting a value into a new ptr var is not the same as making the var be an lvalue for eq. 
+setarg ~1044. 
+----------
+Sunday, Oct 15
+
+At machinecall: 
+	stack: 
+		0:	1 'L' char vartab+824   (from)
+		1:	1 'L' char vartab+856   (to)
+		2:	0 'A' int 13  (pft MC)
+	vartab
+		25: from 1 char 1 vartab+794
+		26: to   1 char 1 vartab+798  (4 bytes apart.)
+	792 is vartab.value. 
+SHOULD BE:
+	vartab
+		from 	1 char 1 pr+something (3xxx)
+		to		ditto five bytes later
+	stack
+		0:	1 'A' char pr+3282   (from)
+		1:	1 'A' char pr+3286   (to)
+stack issues: 
+		term ptr+int: 
+			ptr's 'L' value must be derefed
+			after addition pushed as 'A'
+		setarg: may be fixed by above. 
+At tc.c:534 (term infix +)
+	stack:
+		0: 1 L char vartab+792
+		1: 0 A Int 2
+	==>> Have to deref the L But NOT the class 1. L ptr is to union stuff in var[24], which ->'s to pr+3280. GOOD. toptoi DOES a deref of an L, And pushPtr preserves the class 1. Good. Is it the toptoI? Step through to the push, see what it does.
+b tc.c:534: Then in pushPtr, d.up = vartab+794, WRONG. The problem must be the use of toptoi. It coughs up a value NOT dereffed.
+----------------
+Monday, Oct 16
+
+Thought, ~191, Int? Maybe type of b??? var b, not the b of a+b. LATER
+
+AT a=toptoi, step into toptoi.
+	stack top: 1 L Char vartab+792 AHAH! class 1 skips the L deref!
+recoded:
+		if( (*top).class==1 ) {
+		if((*top).lvalue == 'L') {
+			ptr=(char*)((*top).value.up);
+			datum=*ptr;
+		}
+this is BAD CODE: At toptoi ~140, ptr=vartab+792, datum=-16. ptr is to union, not char. FIXED. Still seg's. 
+LOOKING for 0x60a6f0->"012.." to be the left term. 2 IS the right term.
+	0x60a6f0==6334192
+	the stack has 1 'L' 0x60f558 == 6354264. 
+	datum is  0x60a6f0 == 6334192   SO 'L' deref happened.  GOOD so far.
+	at ~545 before pushPtr(a+b), a=6334192==0x60a6f0, b=2  GOOD
+	after the pushPtr, nxtstack=1, stack= 1  'A'  Int  pr+3282. GOOD
+	p (char*)stack[0].value.up
+	$37 = 0x60a6f2 <pr+3282> "23456789"
+assume *(b+6) will be "6789", we have two valid args, from and to.
+At machine call both args point into vartab. 
+	824 and 856 (delta 31)  aka  0x60f578 and ditto+delta
+==>> changed somehow during pft/MC parsing. That would be setarg.
+
+b setarg   This would be from, looking for Pr+3282...
+	p *arg    (struct stackentry *):   1  A  Int  pr+3282
+	an Actual, so passed directly to vAlloc.
+vAlloc does the parsing passing vpassed to newvar.
+newvar ~374: 
+	passed is a wierd pointer, &somethng on the C stack. 
+	Data ok. 1 Char 1 &passed
+	passed is ignored until ~381, then into copyArgValue
+copyArgValue
+	ONE line of code ~406. 
+			(*v).value.up = (*passed).up;
+	after: from 1 Char 1 pr+3282
+	p *v
+		$48 = {name = "from\000\000\000\000", class = 1, type = Char,  len = 1, value = {uc = -14 '\362', ui = 6334194, up = 0x60a6f2 <pr+3282>}}
+	LOOKS GOOD. 
+Out of setarg, enter ~1010.
+	14 n's later second arg done, at ~1027, execute the body of pft. The cursor shows "[\n/tMC from,to,13\n]..." And from,to should be on the stack as pr+3282/6 respectively. Both there, good, 1 A Int, pr+3282/6.
+	==>> The Int may be an issue.
+At machinecall. The stack has vartab stuff. Damage is before machinecall
+	printf ~109: 3282 3286 relative to pr.
+GCC lib or link flaw: putchar cannot be used. changed to printf("%c",xx); in a for loop! For the record...
+		"Program received signal SIGSEGV, Segmentation fault.
+		fputc (c=50, fp=0x2) at fputc.c:37
+		37	fputc.c: No such file or directory."
+		(gdb) bt
+		#0  fputc (c=50, fp=0x2) at fputc.c:37
+My code calls putchar, putchar uses fputc.c. Code compiles, links, runs ok until putchar is called. Seg's there.
+ANYWAY    FIXED   Test 41 success.
+
+Still segs. Still gets bad from/to at MC level. 
+NEW THOUGHT. addrval looks up from whole vartab top to bottom. It hits pft from,to and uses that instead of MC from, to. SAME NAME. Change the name for a test of this thought. Then fix addrval so it searches properly locals, globals, libs.
+------------
+
+Tue, Oct 17
+Doesn't seg this morning. 41 is good. Moving to 42.
+42: best run in gdb, examining state changes (cursor, stack, vartab[0|1]) in detail.
+	error 9 set in factor ~649, cursor -> "*\tb=b+2" line 11 of test 42. Why is factor looking at *. It must have eaten the / of /* and is trying for another expr denominator. AND b=b+2 is commented out. Its the MC line.
+b ~610, at MC's enter call. n past that and find where \n is eaten, leaving factor confused.
+	lit eats \n's. I'm sure it has to. What should prevent that if factor believes it must keep going? 
+	ASM ~1640..16 tests for no args several ways using cpi, NOT advancing the cursor, leaving it at ] ; <cr> /   But if args, uses , to keep going. lits the optional )    
+	then tests for MC, calls it & returns if so.
+term ~556 eats the \n's. This watchpoint proves... term calls lit
+		Hardware watchpoint 1: cursor
+		Old value =  "\n\n/*\tb=b+2;\n\t/*** 13 ***
+		New value =  "\n/*\tb=b+2;\n\t/*** 13 ***
+		lit (s=0x4061b3 "*") at tc.c:219
+		219		while( *cursor == ' ' 
+		$120 =  "\n/*\tb=b+2;\n\t/*** 13 ***
+		(gdb) bt
+		#0  lit (s=0x4061b3 "*") at tc.c:219
+		#1  0x0000000000401fd2 in term () at tc.c:556
+
+		(gdb) c
+		Hardware watchpoint 1: cursor
+		Old value =  "\n/*\tb=b+2;\n\t/*** 13 ***
+		New value =  "/*\tb=b+2;\n\t/*** 13 ***
+		lit (s=0x4061b3 "*") at tc.c:219
+		219		while( *cursor == ' ' 
+		$121 =  "/*\tb=b+2;\n\t/*** 13 ***
+		(gdb) bt
+		#0  lit (s=0x4061b3 "*") at tc.c:219
+		#1  0x0000000000401fd2 in term () at tc.c:556
+
+I believe this is a bug in the 8080 code. OM chapter 4, sample programs never use comments alone on a line eacept after ] . I fixed 42 with a ; before the comment line. Leave it for now.
+
+41 now misbehaving. error 9. Runs properly though. Proper results. cursor at comma between args, line 6. factor 649. 
+Thought: It can be same as 42 issue. Somehow it should be OK for asgn to learn it is done, no more relns, exprs, terms, factors, JUST a character not ever in an asgn anywhere, AND that is ok. Difference between insisting vs allowing more. And don't eat the character (e.g. comma, or newline) that ends it.  The only parse change is rem() as 1st line of for(;;) for compound statement, lit(xlb), st() ~749. It's redundant. The loop calls st and st does a rem call. This is there to do a cleanup call before leaving the loop. Ditto ~752. But that, too, is redundant. Covered both. No regression difference. Looked at ASM. 8080 code has the latter (equiv to ~752) but not the former.
+------------------
+
+Wed, Oct 18
+It seems to me that rem() should eat newlines, but lit() should not. Checking ASM on this...
+	True for ASM. Incidentally lit doesn't pass over leading \t's, just blanks.
+	8080 rem:  ;skips over remarks and/or end-of-lines in any order.
+	C rem: advance of multiple newlines, then over multiple comment lines
+	8080 lit: advance over blanks, then over literal if present. Hence always stays within a line.
+	C lit: passes over all white space, including \n's.
+Fixes (C) needed for both.
+Changed the code. Tests 41,42 still error 9. And 41 does not print 23456.
+41: 
+	Factor still looking at ]. After parsing "MC c,1\n" arg decls AND the \n.
+Time to audit rem vs lit usage. Too many rem's can be the cause.
+	8080 rems:
+		term	1149
+		skipst	1312,19,35,48,81
+		st		1421,28,32,43,1508,36
+		enter	1657
+		link	1771
+	C rems:
+		skipst	674,77,84,91
+		st		739,43,802
+		enter	999
+		link	1069
+Notable is 8080 term's special code to assure the / does not belong to /*. C code doesn't have that...
+			TE3     CALL    REM     ;make sure no /*
+			        LXI     D,XSLASH        ; /
+			        CALL    LIT
+			        JZ      TE4   <<-- jump to % test
+			        CALL    FACTOR
+ISSUE Fix needed. This however is not 41's problem. It has no comments except at the very top. 41's problem is in enter, trying to parse more stuff after parsing "MC c,1" in the lib.
+			putchar char c [
+				if(c==0)c='"'
+				MC c,1
+			]
+41 is crashing on 1st statement, putchar 10. If covered 41 runs to completion doing pft perfectly (prints "23456") but error 9. Multiple problems here. What to do first???
+Proper addrval. DONE. 
+
+Tests 30,31,40,41,42 now show error 9.
+Committed. 
+-----------
+
+Oct 19
+Goal: fix all those tests.
+	ALL BUT 41 fixed. The fix is not a faithful to the 8080 fix, but instead a rem statement in st()'s compound statement for loop at ~766. The 8080 code has a later rem, but also calls rem AFTER most statements. Excused from the responsibility are leave, break, and return. Maybe I will have to revisit this quicker fix. Here are some learned lessons...
+		Does st() in general rem when done? 
+			For C "NO". 
+			For ASM sometimes, generally YES. For leave,return,break it does not but the cursor is reset anyway. For if, while it does skipst which does it for them. 
+		Does MC? 
+			For C "NO". 
+			For ASM "NO".
+		C: When enter returns the cursor is restored to just behind the ), to the semi. st called from cmpd eats the semi. Doesn't rem it. cmpd rems it,  
+		Compound is the ONLY tc multiline statement. 
+		Uncovered the first rem in cmpd (~766). If my understanding is correct that should clear at least the test 30 issue, and maybe the others.
+
+Next goal: test 41.
+	prints "23456" as designed, using lib function pft from,to. Moving the ] to the end of the line with pft b+2,b+6 solves the problem. So its really the same as the above, BUT a rem call is needed after the b+6 is parsed. So the quick fix above is a partial, not total fix.
+b fundone, enter~1050, after cursor is restored. 
+	It is restored to -> b+2,b+6 which were parsed way back at the top of enter. line 990 should be moved to after all parsing. MORE TRACING, first.
+	ASM code pushes stcurs,cursor onto 8080 stack, and restores them at the end. pushes are just before cursor=where, and call to newfun. 
+FIXED.
+
+Next goal: more library functions...
+x	putchar char c [
+x	getchar [
+x	pft char from(0),to(0)[
+	gs char buffer(0) [
+x	ps char b(0)[
+x	pl char b(0)[
+x	alpha char a [
+x	num char b(10), int v(0) [
+x	atoi char b(0), int v(0) [
+x	pn int n [
+	gn [
+	ceqn char a(0), b(0); int n
+	index char s1(0); int n1; char s2(0); int n2 [
+	move char a(0), b(0) [
+	gc [
+	movebl char a(0), b(0); int n [
+	countch char a(0), b(0), c [
+	scann char from(0), to(0), c; int n(0) [
+	readfile char n(0), w(0), l(0); int u [
+	writefile char n(0), b(0), e(0); int u [
+	fopen int m; char n(0); int s,u [
+	fread char a(0); int u [
+	fwrite char f(0), t(0); int u [
+	fclose int u [
+		/*endlibrary
+This is the TO DO list.
+------------
+
+Friday, Oct 20
+Coded test 43 which covers a lot.
+	segs: FIXED null string bug (pl""). Regression GOOD.
+	segs: num. cursor->" char b(10),int v(0))..." (num decls)
+		in enter, ~1042, seg is in addrval ~431.
+			~11 is covered, so ndigits not in vartab, addrval SEG's instead of erroring out. Uncovered 11
+		b ~1042, enter before st().
+			where->" char b(10),int v(0))..." (num decls)
+			LOOKING FOR why did it seg
+			c: in addrval~431, no parsing since above
+			OPPS: forgot to save test fix. 
+	no seg, completes...
+		num returns 0 digits, 0 value.
+		at enter ~ 1042, about to call st, cursor->"v(0) [\n...". The second arg didn't advance the cursor. enter does the parse. It did two passes. 
+		Read the Owners Manual. Function arg decls are like local decls. A single type is separable by commas behind char OR int. But if both types are used use a ; or a \n between the tyypes. E.G.
+			int num char string(0), int val(0)  IS WRONG.
+			int num char string(0); int val(0)  is good as is...
+
+			int num char string(0)
+					inv val(0)
+			
+			on two lines.
+------------
+8080 code frag, enter, arg decl parsing...
+		EN4 
+for(;;) {		    
+				CALL    REM     ;parse arg decls and pass value
+ rem()
+		        LXI     D,XINT  ;works just like DECL, except
+		        CALL    LIT     ;  uses SETARG instead of
+ if lit int
+		        JZ      EN5     ;  VALLOC.
+		EN6     LHLD    ARG
+  do {	
+		        MVI     B,'I'
+		        CALL    SETARG
+    setarg
+		        LHLD    ARG     ;bump ARG pointer to next
+		        LXI     D,5     ;  stack layer
+		        DAD     D
+		        SHLD    ARG
+    ++arg
+		        LXI     D,COMMA
+		        CALL    LIT
+		        JNZ     EN6
+  } while(lit ,) 
+		        LXI     D,SEMI
+		        CALL    LIT
+  eat lit ;
+  		        JMP     EN4
+		EN5     LXI     D,XCHAR
+  ELSE if lit char {
+		        CALL    LIT
+		        JZ      EN7
+break from en4 loop  same logic as above
+		EN8     LHLD    ARG
+  do {
+		        MVI     B,'C'
+		        CALL    SETARG
+		        LHLD    ARG
+    setarg      LXI     D,5
+		        DAD     D
+	++arg
+		        SHLD    ARG
+		        LXI     D,COMMA
+		        CALL    LIT
+		        JNZ     EN8
+  } while lit ,
+		        LXI     D,SEMI
+		        CALL    LIT
+  eat lit ;
+		        JMP     EN4
+}
+		EN7
+-------------------------
+What it should do (enter, EN4..EN7)
+for(;;) {		    
+	rem()
+	if lit int {
+		do {	
+		    setarg
+		    ++arg
+		} while(lit ,) 
+		eat lit ;
+	}
+	else if lit char {
+	break from en4 loop outer same logic as above
+		  do {
+		    setarg 
+			++arg
+		  } while lit ,
+	  	eat lit ;
+	}
+}
+What it does, ~1014..32
+		for(;;) {	  
+			rem();
+			if(lit(xint)) { 
+				do {
+					setarg(Int, &stack[arg]);
+					arg++;
+				} while(lit(xcomma));
+				lit(xsemi); /* optional */
+			} 
+			else if ( lit(xchar)) {
+				do {
+					setarg(Char, &stack[arg]);
+					arg++;
+				} while(lit(xcomma));
+				lit(xsemi); /* optional */
+			}
+			else {
+				break;		/* and the only way outa here */
+			}
+		}
+--------------------------
+Saturday, Oct 21
+
+Subtle difference. Hard to see. It's the break. E.g.  int x; char y 
+leaves the for loop with the char unparsed. 
+Runs to end. Error 6, RANGERR. 
+Len of b(10) is ???. Addressing b(1) fails. num code is faithful from pps lib. vartab has a b with len 1. frag from vartab...
+	name = "fclose\000\000", class = 69, type = Int, len = 1, 
+    value = {uc = 23 '\027', ui = 6334231, 
+      up = 0x60a717 <pr+3319>}}, {
+    name = "v\000\000\000\000\000\000\000", class = 1, type = Int, 
+    ==>> len = 1, value = {uc = 0 '\000', ui = 6334720, 
+      up = 0x60a900 <pr+3808>}}, {
+    name = "ndigits\000", class = 0, 
+    type = Int, len = 1, value = {uc = 4 '\004', ui = 6334724, 
+      up = 0x60a904 <pr+3812>}}, {
+    name = "b\000\000\000\000\000\000\000", class = 1, type = Char, 
+    ==>> len = 1, value = {uc = 11 '\v', ui = 6334475, 
+      up = 0x60a80b <pr+3563>}}, {
+    name = "v\000\000\000\000\000\000\000", class = 1, type = Int, 
+    ==>> len = 1, value = {uc = 0 '\000', ui = 6334720, 
+      up = 0x60a900 <pr+3808>}}, {
+    name = "k\000\000\000\000\000\000\000", class = 0, type = Int, 
+    len = 1, value = {uc = 13 '\r', ui = 6334733, 
+      up = 0x60a90d <pr+3821>}}, {
+lib frag...
+		num char b(10)
+		    int v(0) [
+	That violates C, passing a big thing. Have to pass b(0). BUT tc's lib (app c) has same. And it addresses b(k) for k>0. And evidently works. Somehow in ASM the pointer only gets passed. But the declared len prevails for range checks. So gotta read a bunch of code. Setarg calls valloc to do the work. Setarg loads registers used by valloc. And valloc calls newvar to do some. And newvar calls copyArgValue.
+C version...
+	setarg
+		Called when enter has JUST parsed char|int. Passed type and stack entry from 1st half of entry().
+		Gets value,size,class BUT NOT SIZE (commented out), not len (not on stack), resolves lvalue 'L' to 'A', passes all to valloc.
+	valloc
+		given type,vpassed, parses the (dimension) if present. Adds vclass, alen to the args sent to newvar.
+	newvar
+		fills in new var's vartab entry, using 4 params plus canon. allocates space and copy's arg.
+	allocSpace
+		allocates and zeros space
+	copyArgValue
+		does the get/set of JUST the value
+ASM...
+	setarg
+		loads reg's with class,lvalue,size(really type of arg), stuff (value,2 bytes), resolves lvalue to 'A', uses size to propogate sign into int, Passes all (incl type of DECL specifically) to valloc.
+		NOTHING ABOUT LEN. Len not even in available data. Valloc will uncover that.
+	valloc
+		Parses name, (size) if present, stores len in ALEN, loads reg's with type,class,ALEN,obsize,passed calls newvar.
+	newvar
+		same as C.
+It is evident the C version fails to pass ALEN to newvar and/or newvar ignores it if it gets a passed value. Probably the latter.
+--------------------
+Sunday, Oct 22
+
+Goal: fix the above, get 43 to run to completion, commit.
+Strategy is to trace enter from its middle (parsing arg decls). LOOK FOR alen being tossed aside.
+	Parsing lib: num b(10), vartab[26]: len=1 when out of setarg tc~1027. Damage is done.
+	b setarg, run 43: cursor->" b(10)"...
+		b valloc, c: vAlloc(Char, onStack)
+		stack: 1 'L' Int vartab+792 vartab[24.75]
+		vartab[25] is ndigits
+		vartab[26] is empty (nxtvar=26)
+		cursor->" b(10)"
+Found it. vAlloc vpassed ( case sets alen=1, then mustFind ), which SKIPS OVER the 10). No call to parse the 10. 
+Review of ASM for same case: 
+			if lit (
+			asgn
+			lit )
+			alen=toptoi()
+Test 43 completes, but clearly bug in lib num ~53, FIXED, if stmt missing.
+Now atoi("-77") returns 77. FIXED, ; needed in args decls
+---------------
+Wednesday, Oct 25
+Last 3 days explored github, and how to upload stuff there. Separate notes: gitNotes.txt. 
+
+
