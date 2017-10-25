@@ -1,0 +1,14 @@
+/* test 31
+[
+	int i;
+	i=3;
+	while(i)[
+		MC(i,14);i=i-1;
+	]
+	if(i)[
+		MC('T',1);MC(i,14)
+	]
+	else [
+		MC('F',1);MC(i,14)
+	]
+]

@@ -1,0 +1,10 @@
+/* test 40
+[
+	putchar('h');putchar('e')
+	putchar('l');putchar('l');
+	putchar('o');putchar(' ');putchar('t');putchar('c');
+	putchar 10
+	ps "hello ps"
+	pl "hello pl. Seventy seven --> "
+	pn 77
+]

@@ -1,0 +1,7 @@
+/* test 41
+[
+	putchar 10
+	char b(0)
+	b = "0123456789"
+	pft b+2,b+6 
+]
