@@ -1,0 +1,18 @@
+about_testing.txt
+---
+Oct 25, 2017
+
+As of this writing there are 42 unit tests organized for simple regession testing. The are numbered 1 up. Most are coded completely in the file test.c, but a few use files stored in the directory testFiles. 
+To run tests
+	./test [<testnumber> ...]
+With test numbers just those tests are run. If none are given ALL tests are run. The test results are printed to stdout. This is useful for just one or a few tests.
+A more convenient way to run all tests is...
+	make dotest
+which produces a file, test_results. Follow that with...
+	make diff
+which diffs test_results against good_results to stdout. I do not redirect that but let it print to my terminal. Then scroll up/down to find issues. Every test prints a header like...
+	TEST 40  14:12
+which includes a time stamp. So the different time stamps for good_results vs test_results diff will always cause both headers to print...
+	TEST 40  14:12
+	TEST 40  12:32
+The times themselves are irrelevant. Actual result differences ARE relevant, and this simple trick identifies which test needs attention. After doing a make diff scroll up and down and if all is cool it takes 5 seconds to determine that.

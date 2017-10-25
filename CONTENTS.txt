@@ -1,0 +1,32 @@
+CONTENTS.txt
+---
+Oct 25, 2017
+Notice: this is work in progress. I am still doing unit testing and some integration testing. But it is not a usable tiny-c yet.
+
+Original source from 1977
+	tc.asm
+Source code...
+	FileRead.c
+	tcTestMain.c
+	tc.c
+	time.c
+	tcMain.c
+	test.c
+	machineCall.c
+	tc.h
+Makefile
+	makefile
+Log of my work
+	notes.txt
+	about_testing.txt
+The latest results of a good regression
+	good_results
+Directories
+	testFiles (see about_testing.txt)
+	pps (and the library)
+This document
+	CONTENTS.txt
+GPL license
+	LICENSE
+Simple greeting from me
+	README.md
