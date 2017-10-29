@@ -1945,6 +1945,122 @@ Test 43 completes, but clearly bug in lib num ~53, FIXED, if stmt missing.
 Now atoi("-77") returns 77. FIXED, ; needed in args decls
 ---------------
 Wednesday, Oct 25
-Last 3 days explored github, and how to upload stuff there. Separate notes: gitNotes.txt. 
+Last 3 days explored github, and how to upload stuff there. Separate notes: gitNotes.txt. DONE. This project posted at...
+			github.com/tgibson37/tiny-c
 
+Next goal: more library functions. Status (x means done, n means next)...
+x	putchar char c [
+x	getchar [
+x	pft char from(0),to(0)[
+	gs char buffer(0) [
+x	ps char b(0)[
+x	pl char b(0)[
+x	alpha char a [
+x	num char b(10), int v(0) [
+x	atoi char b(0), int v(0) [
+x	pn int n [
+	gn [
+n	ceqn char a(0), b(0); int n
+n	index char s1(0); int n1; char s2(0); int n2 [
+n	move char a(0), b(0) [
+	gc [
+n	movebl char a(0), b(0); int n [
+n	countch char a(0), b(0), c [
+n	scann char from(0), to(0), c; int n(0) [
+	readfile char n(0), w(0), l(0); int u [
+	writefile char n(0), b(0), e(0); int u [
+	fopen int m; char n(0); int s,u [
+	fread char a(0); int u [
+	fwrite char f(0), t(0); int u [
+	fclose int u [
+		/*endlibrary
+-----------------------
+Thursday, Oct 26
+Fixed bug in num. 43 not good.
+Coding 44, testing move,index,ceqn. 
+	move code is faithful tc from 1977, but fails due to range testing arg char a(0) with index 1. So '77 didn't range check? 
+		        INR     B       ;obsize in B
+		V7      LDA     VCLASS  ;class in A
+		        LHLD    ALEN    ;len in DE.
+		        XCHG
+		        LHLD    VPASSED ;passed in HL
+		        JMP     NEWVAR  ;call/ret, NEWVAR allocates the
+		;                          variable
+
+
+Possible FLAW in newvar. It allocates space UNCONDITIONALLY, so passed pointer to already allocated space causes allocation. When it was just b(0) mattered little. But now with range checking fcn parm decls have >0 dimensions. C PASSES ONLY LITTLE THINGS. Decls cannot have >0. And range checking should not apply to b(k) when arg declared as b(0). I think range checking is new C feature. Probably should rip it out. OR a special exemption for arg decls with (0) ??? DID THAT.
+Tests 40..43 changed num & atoi args to b(0)'s. Tests OK.
+AND the unneeded allocation is now harmless.
+
+44: error 26, symerra, not found. vartab has [30] s4, the last decl in 44. Then [31...] n,b,k. How did a get changed to n???
+watch vartab[31].name. set to a. set to n. bt: eq~112:
+			put_int( (*lval).value.up, iDatum);
+And vartab[31] has a VALUE 'b'. 
+---
+All this may be caused by still unit testing link();st() without using cold start. MAYBE it is time to switch testing to properly loaded/inited/entered main programs through cold start.
+	./tc enters the native loader, >>> prompt, no help. Lets add help. DONE.
+looping in link ~1119,16,16 calling lit, endlibrary, /*
+
+TODO:
+	STATUS file into github with TODO section
+--------------------------
+Friday, Oct 27
+Time to add args at least into tc.c, and ultimately into tc's main().
+I need args for debugging, specifically to use the loader or not, to auto load the lib and/or tc files. Gotta get through warm into cold.
+Need to design all this. Starter man...
+	./tc			usage
+	./tc <files>	load lib as global, pps as system, and 
+					the files as app. Skip the loader. Auto go.
+
+Do away with hot/warm/cold start AND the loader. Do it all with command line. 
+		Usage: tc [file1 [file2]]
+		  no args prints this usage
+		  one arg loads the standard library, and file1 as app
+		  two args loads file1 as standard library, and file2 as app
+		The app will be started at its main() function
+		  (no arguments to this main()
+new tcMain.c is reading files. Needs: 
+	init all the globals. 
+	link
+	write _MAIN() after endlibrary statement in library.tc
+		it calls (MC 11) main() which should be in the app else error
+		The apps are now full tc programs, tests 50 and up.
+	start _MAIN: cursor=pr; st(); 
+	
+not all chunk 9 stuff moved to tcMain.c yet. 
+loader Load getLine all no longer needed.
+--------------------------
+Saturday, Oct 28
+symname: A symbol can now have one leading '_'.
+system main is now _MAIN() vs app main still main().
+STATUS 5:38pm, EDT, WE MAY BE DONE!! 
+	- tcMain.c now boots the whole thing, prints the logo, starts the system, which enters app main(). IT WORKS. We can now write whole programs as tests.
+	- Our first whole boot test is testFiles/50, and we start a new series with that number. The test prints one line.
+	- Of course we are not done, lots of testing yet to do. BUT MILESTONE ACHIEVED.
+Goal: integrate tc into test.c... 
+	- clone tcMain.c as test setup function, one arg is test file to load and run. 
+	- Advantage: tests written as whole tc programs become part of the regression testing.
+		case 50:
+			testWhole("./testFiles/50");
+			break;
+Integration works. test 40 segs, probably a test setup flaw. So now we turn it into test 51, with a main. Let it seg there.
+41,42 still seg, even with cursor=pr added to setup. 51 works when setup is done by testWhole, but it seged when using testSetupFile. So the problem is testSetupFile. Something missing. curglbl is 1, not fun+1; 
+FIXED. Now 41,42 error=26, no prints. 42 worked once, 43 never finished.
+Make them 52,53 tomorrow.
+41: looking up 'char'. enter where->" char c"
+-----------------
+Oct 29, 2017
+Goals: 
+	move 41,42 to 52,53 and see if that fixes them.
+	When fixed do regression, including the 50's.
+	When that is fine, COMMIT, and PUSH.
+		Write a STATUS document, short, one line per entry.
+Then start full system testing.
+Once solid tidy the code...
+	Use pointers for nxtvar, nxtstack, and fvar,lvar in funentry.
+STATUS: 
+	Only one series 40 test survives, 43. Others moved to series 50. All run fine.
+	Time for full regress... ALL GOOD, keep
+		Before leaving this test thingy for next goal...
+DONE			Test 35 needs keyboard input. Full regress shows NO prompt, but freezes. Confusing if not familiar. Plan to move ALL tc keyboard input tests to their OWN series, 90 or so. And never regress them, ~3 of test.c staying out of their series.
 

@@ -69,8 +69,10 @@ int nxtvar;
 /* program space */
 char pr[PRLEN];
 /* EPR is end of program SPACE. 
-	epr is end of actual program text. 
-	prused includes value space */
+ *	epr is end of actual program text. 
+ *	prused includes value space.
+ *	EPR is pointer to last byte of pr vector.
+ */
 char* epr; 
 char* prused;
 
@@ -150,3 +152,4 @@ char get_char(char *where);
 void put_ptr(char *where, void* datum);
 char* get_ptr(char *where);
 int FileRead(char*filename, char* buffer, int bufflen);
+void readTheFiles(int argc, char *argv[]);

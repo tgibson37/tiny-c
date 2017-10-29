@@ -1,4 +1,4 @@
-/******* tiny-c library functions, 2017 ********/
+/******* tiny-c library functions, 2017 
 
 /* Put a character to the terminal
 putchar char c [
@@ -50,14 +50,12 @@ alpha char a [
 /* convert a string of digits (without leading sign) to an int, returning the 
 /* result in v. Note v is a pointer to the int. The number of digits examined
 /* is returned. Either a non digit, or the 11th stops the conversion.
-num char b(10)
+num char b(0)
     int v(0) [
 	int k
 	v(0)=0
 	while(k<10)[
-		if( (b(k)<'0') + (b(k)>'9') ) return;
-pl""
-MC " k=%d b(k)=%c", k, b(k), 101
+		if( (b(k)<'0') + (b(k)>'9') ) return k;
 		v(0) = 10*v(0) + b(k)-'0'
 		k = k+1
 	]
@@ -65,7 +63,7 @@ MC " k=%d b(k)=%c", k, b(k), 101
 ]
 
 /* like num, but includes an optional leading blanks and sign
-atoi char b(12); int v(0) [
+atoi char b(0); int v(0) [
 	int k,s
 	char c
 	s=1
@@ -125,7 +123,7 @@ index char s1(0); int n1; char s2(0); int n2 [
 move char a(0), b(0) [
 	int k
 	k = -1
-	while(a(k=k+1)!-0)b(k)=a(k)
+	while(a(k=k+1)!=0)b(k)=a(k)
 	b(k)=0
 	return k
 ]
@@ -179,4 +177,12 @@ fwrite char f(0), t(0); int u [
 fclose int u [
 ]
 
-/*endlibrary
+endlibrary
+
+/* system entry */
+_MAIN [
+	pl "----tc system level, calling appl main"
+	pl""
+	main();
+	pl "----tc system level, back from main"
+]

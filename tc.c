@@ -17,13 +17,11 @@ void stbegin() {
 void debug(){}
 /*	valid exit, last chance for summary stats, whatever. 
 	prbegin/prdone called just before/after application level.
-	tcexit called to exit the interpreter.
+	tcexit called before exiting the interpreter.
  */
 void prbegin(){};
 void prdone(){};
-void tcexit(){
-	exit(0);
-}
+void tcexit(){};
 
 /* chunk 1: literals
 /************** literals **************/
@@ -244,11 +242,11 @@ int skip(char l, char r) {
 /* Parse a symbol defining fname, lname. ret: true if symbol */
 int symname() {
 	while( *cursor == ' ' ) ++cursor;
-	if( isalpha(*cursor) ) {
+	if( isalpha(*cursor) || *cursor=='_') {
 		fname = cursor;
 	}
 	else return 0;  /* not a symbol */
-	while( isalnum(*cursor) ){
+	while( isalnum(*cursor) || *cursor=='_'){
 		++cursor; 
 	}
 	lname = cursor-1;
@@ -624,7 +622,7 @@ void factor() {
 		if( symnameis("MC") ) { 
 			enter(0); return;
 		} else {
-			struct var* v = addrval();  /* looks up symbol */
+			struct var *v = addrval();  /* looks up symbol */
 			if( !v ){ eset(SYMERR); return; } /* typo, or no decl */
 		  	char* where = (*v).value.up;
 		  	int integer =  (*v).value.ui; 
@@ -645,7 +643,7 @@ void factor() {
 		        		asgn(); if( error )return;
 		        		lit(xrpar);
 			      		int subscript = toptoi();
-						if( subscript<0 || subscript>=len )eset(RANGERR); 
+						if(len-1)if( subscript<0 || subscript>=len )eset(RANGERR); 
 						where += subscript * obsize;
 						foo.up = where;
 						pushst( class, 'L', type, &foo);
@@ -860,104 +858,9 @@ int decl() {
 }
 
 /* chunk 9: cold, warm, hot, loader, logo
+ *  This chunk is replaced by command line args, see tcMain.c. 
+  *	logo() remains here, though.
  */
-/*	it all starts here!!!!!
- *	cold start erases system level tc programs, and enters
- *	  the loader. Used to load a tailered or different
- *	  system program.
- *	warm start does not erase sys level progs, but enters
- *	  the loader so more can be loaded.
- *	hot start assumes all the loading is done, and immediately
- *	  starts up the loaded sys level tc prog.
- * 	Applications are loaded and started by the system level program using
- * 	  MC's, but if they have a main() they can run at sys level.
- *	Unfortunately, there is no hot start that preserves
- *	  application programs. That would be an MC invoked by system prog.
- * 	main() walks through these three. 
- */
-
-void cold() {
-	strcpy(pr,"[main();]");
-	epr = prused = pr+9;
-	logo();
-}
-
-void warm() {
-	loader();
-}
-
-void hot() {
-	logo();
-	prused = epr;
-	cursor = pr;
-	curfun = fun-1;
-	nxtvar = vartab;
-	nxtstack = stack;
-/*	top = stack-1;*/
-	error=0;
-	errat=0;
-	leave=brake=0;
-	link();
-	newfun();
-	cursor = pr;
-	prbegin();
-	st();     /*  <<-- executes system program  */
-	prdone();
-	printf("\nDONE ");
-	if(error)printf("%d %d\n",error,errat-pr);
-	else printf("\n");
-}
-
-
-/*	interactive loader. Commands:
- *		.x 	exit the interpreter
- *		.g 	run the loaded tc program
- *		.r filename	load the tc program (one space after r)
- */	
-void loader() {
-	char buff[80];
-	for(;;){
-		printf(">>>");
-		getLine(buff);
-		if( buff[0]=='\.') {
-			switch( buff[1]) {
-			case 'r':
-				Load(buff+3);
-				break;
-			case 'g':
-				return;
-			case 'x':
-				tcexit();
-				return;
-			}
-		} else {
-			printf("???\n");
-		}
-	}
-}
-void getLine(char buff[80]) {
-	int i, c;
-	for(i=0;i<80;++i){
-		c = getchar();
-		if(c==0x0a){
-			buff[i]=0;
-			break;
-		}
-		else buff[i]=c;
-	}
-}
-
-int Load(char *filename) {
-	int size;
-	size = FileRead(filename, pr, PRLEN);
-	if(size){
-		printf("%d bytes loaded from %s\n", size, filename);
-	}
-	else {
-		printf("ZERO bytes, check filename\n");
-	}
-}
-
 void logo() {
 	printf(
 "***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***\n"
@@ -1077,6 +980,7 @@ void link() {
 	cursor=pr;
 	newfun();
 	while(cursor<epr && !error){
+		char* lastcur = cursor;
 		rem();
 		if(lit(xlb)) skip('[',']');
 		else if(decl()) ;
@@ -1090,6 +994,7 @@ void link() {
 				skip('\[','\]');
 			}
 		}
+		if(cursor==lastcur)eset(LINKERR);
 	}
 	cursor = problemCursor;
 }
@@ -1257,3 +1162,55 @@ void dumpName() {
 		memcpy( &datum, where, sizeof(datum));
 		return datum;
 	}
+
+/* reads two files using command line args for one or both.
+ */
+void readTheFiles(int argc, char *argv[]) {
+	int nread;
+	if(argc==2){
+		nread = FileRead("pps/library.tc",epr,EPR-epr);
+		if(nread == -1) {
+			printf("file read error: pps/library.tc\n");
+			exit(1);
+		}
+		else if(nread == 0) {
+			printf("no such file: argv[1]\n");
+			exit(1);
+		}
+		epr += nread;
+		nread = FileRead( argv[1],epr,EPR-epr);
+		if(nread == -1) {
+			printf("file read error: %s\n",argv[1]);
+			exit(1);
+		}
+		else if(nread == 0) {
+			printf("no such file: %s\n",argv[1]);
+			exit(1);
+		}
+		epr += nread;
+		curglbl = fun+1;
+	}
+	else if(argc==3){
+		nread = FileRead(argv[1],epr,EPR-epr);
+		if(nread == -1) {
+			printf("file read error: %s\n",argv[1]);
+			exit(1);
+		}
+		else if(nread == 0) {
+			printf("no such file: %s\n",argv[1]);
+			exit(1);
+		}
+		epr += nread;
+		nread = FileRead(argv[2],epr,EPR-epr);
+		if(nread == -1) {
+			printf("file read error: %s\n",argv[2]);
+			exit(1);
+		}
+		else if(nread == 0) {
+			printf("no such file: %s\n",argv[2]);
+			exit(1);
+		}
+		epr += nread;
+		curglbl = 1;
+	}
+}

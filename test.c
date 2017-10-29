@@ -1,10 +1,30 @@
 #include "tc.h"
 
-#define testcases 42
+#define testcases 53
 
 char timeStamp[40];
 extern struct stackentry poptop;
-/* tool used by some of the tests */
+/* setup tools used by some of the tests */
+void testWhole(char* filename){
+	char *argv[3];
+	argv[1]=filename;
+/* modified clone of tcMain.c code...
+ */
+	strcpy(pr,"[_MAIN();]");  /* required sys main */
+	epr = prused = pr+10;
+	cursor = pr;
+	curglbl = fun;
+	readTheFiles(2,argv);  /* sets epr, curglbl */
+	error=0;
+	prused = epr+10;  /* a little slack */
+	nxtvar = 0;
+	nxtstack = 0;
+	efun = fun+FUNLEN;
+	curfun = fun-1;   /* none */
+	link();
+	cursor=pr;
+	st();   /* <<<== executes statement above, line 8 */
+}
 void testSetup(char* code) {
 	strcpy( pr, code);
 	error=0;
@@ -19,11 +39,11 @@ void testSetup(char* code) {
 int testSetupFile(char* filename, int lib) {
 	int len=0;
 	cursor = pr;
-	curglbl = 0;
+	curglbl = fun;
 	if(lib) {
 		len = FileRead("pps/library.tc",pr,PRLEN);
 		cursor += len; 	/*  cursor->app */
-		curglbl = 1;
+		curglbl = fun+1;
 	}
 	len += FileRead(filename,pr+len,PRLEN-len);
 	error=0;
@@ -67,6 +87,7 @@ void testing(int argc, char *argv[]) {
 			printf("\n\nTEST %d %s", testcase, timeStamp);
 			doTest(testcase);
 		}
+		pl("");
 	}
 }
 
@@ -97,9 +118,6 @@ void doTest(int testcase) {
 	int array1[4];
 	testSetup("");
 	switch(testcase) {
-		default:
-			ps("invalid test case (1 to 5)"); pn(testcase); pl(""); exit(1);
-			break;
 		case 1: strcpy(pr,"foobaaarwxyz"); 
 			fname = &pr[0];	
 			lname = &pr[strlen(pr)-1];
@@ -474,7 +492,7 @@ void doTest(int testcase) {
 			strcpy(pr,"foo foob5678 foobaaarwxyz ");
 			fun[0].fvar = 0;
 			fun[0].lvar = 3;
-			curglbl = 0;
+			curglbl = fun;
 			curfun = fun;
 
 			pl("look up foo");
@@ -833,25 +851,8 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				 var 11: foobar 69 Int 1  ref to pr[381]
 */
 		case 35:
-			testSetup("");
-			printf("\n");
-			pushk('t');
-			pushk(1);		/* MC number */
-			machinecall(2);	/* number of args */
-			printf("<--MC 1 printed, and returns %c",toptoi());
-
-			pushk(202);
-			pushk(2);
-			printf("\n  getchar() test, enter one char<ret>");
-			machinecall(2);
-			printf(" returns %d",toptoi());
-
+			printf("empty case");
 			break;
-/* 	Should get... 
- *				t<--MC 1 printed, and returns t
- *				  getchar() test, enter one char<ret>A
- *				 returns 65
- */
 		case 36:
 			printf("\ncharIn a abc is %d",charIn('a',"abc"));
 			printf("\ncharIn b abc is %d",charIn('b',"abc"));
@@ -886,35 +887,12 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  		case 39:
  			printf("\nempty case");
  			break;
-/******** Library tests, 40 up *********/
+/******** Library tests, 40 up, 43 is the only one   *********/
 		case 40:
-			testSetupFile("./testFiles/40",1);
-			printf("\ninvoking link\n");
-			link();
-			printf("\n40 code:\n%s",cursor);
-			st();
-			break;
-/* 	Should get... 
-					hello tc
-					hello ps
-					hello pl. Seventy seven -->  77
- */
 		case 41:
-			testSetupFile("./testFiles/41",1);
-			link();
-			st();
-			break;
-/* 	Should get... 
-				23456
- */
 		case 42:
-			testSetupFile("./testFiles/42",1);
-			link();
-			st();
+			pl(" empty case");
 			break;
-/* 	Should get... 
-    			b(3) is 123, b(1) is 123 
- */
 		case 43:
 			testSetupFile("./testFiles/43",1);
 			link();
@@ -923,31 +901,82 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			break;
 /* 	Should get... 
 				Hello, test  43
-				  testing pl,ps,pn,alpha,num,atoi
-				 should be 1 1 0 2 -> 1 1 0 0
-				 k=0 b(k)=7
-				 k=1 b(k)=7
-				num 77 has  0 digits
-				  and has value 77
-				 k=0 b(k)=7
-				 k=1 b(k)=7, and (atoi call) -77 value -77
+				 testing pl,ps,pn,alpha,num,atoi
+				 should be 1 1 0 -> 1 1 0
+				num 77 has  2 digits
+				  and has value 77, and (atoi call) -77 value -77
   */
 		case 44:
-			testSetupFile("./testFiles/44",1);
-			st();
-			break;
 		case 45:
-			testSetupFile("./testFiles/45",1);
-			st();
-			break;
 		case 46:
-			testSetupFile("./testFiles/46",1);
-			st();
+		case 47:
+		case 48:
+		case 49:
+			pl(" empty case");
 			break;
+/******** Whole tc (prog with main) tests, 50 up *********/
+		case 50:
+			testWhole("./testFiles/50");
+			break;
+/* 	Should get... 
+ *			<blank line from putchar 10>
+ *			Hello, Application main
+ */
+		case 51:
+			testWhole("./testFiles/51");
+			break;
+/* 	Should get... 
+ *					hello tc
+ *					hello ps
+ *					hello pl. Seventy seven -->  77
+ */
+		case 52:
+			testWhole("./testFiles/52");
+			break;
+/* 	Should get... 
+ *			<blank line>
+ *				23456
+ */
+		case 53:
+			testWhole("./testFiles/53");
+			break;
+/* 	Should get... 
+ *			<blank line>
+ *    			b(3) is 123, b(1) is 123 
+ */
+		case 54:
+			testWhole("./testFiles/54");
+			break;
+/* 	Should get... 
+ */
+		case 55:
+			testWhole("./testFiles/55");
+			break;
+/* 	Should get... 
+ */
+/***************  keyboard input tests, run manually *********/
 		case 99:
-			testSetupFile("./testFiles/99",0);
-			printf("\n%s, \ncursor = %d",pr,cursor-pr);
-			st();
+			testSetup("");
+			printf("\n");
+			pushk('t');
+			pushk(1);		/* MC number */
+			machinecall(2);	/* number of args */
+			printf("<--MC 1 printed, and returns %c",toptoi());
+
+			pushk(202);
+			pushk(2);
+			printf("\n  getchar() test, enter one char<ret>");
+			machinecall(2);
+			printf(" returns %d",toptoi());
+
+			break;
+/* 	Should get... 
+ *				t<--MC 1 printed, and returns t
+ *				  getchar() test, enter one char<ret>A
+ *				 returns 65
+ */
+		default:
+			ps("invalid test case "); pn(testcase); pl(""); exit(1);
 			break;
 	
 

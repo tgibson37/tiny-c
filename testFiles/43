@@ -3,11 +3,11 @@
 	pl ""
 	ps "Hello, test "
 	pn(43);
-	pl "  testing pl,ps,pn,alpha,num,atoi"
-	pl " should be 1 1 0 2 ->"
+	pl " testing pl,ps,pn,alpha,num,atoi"
+	pl " should be 1 1 0 ->"
 	pn(alpha('A'))
 	pn(alpha('z'))
-	pn(pn(alpha('9')))
+	pn(alpha('9'))
 	int v(0)
 	int ndigits
 	ndigits = num "77", v 
