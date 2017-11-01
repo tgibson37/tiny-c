@@ -1,0 +1,41 @@
+/* Test 54: ceqn AND pointer passing, scann
+main [
+	char s(0), t(0)
+	int n;
+	int count(0);
+
+/* ceqn
+	ps "ceqn cat cat, then cat dog"
+	pl ""
+	n = ceqn "cat", "cat", 3
+	pn n
+	n = ceqn "cat", "dog", 3
+	pn n
+	ps " should be 1 0"
+/*	   012345678901234567890123
+	s="foo-bar-and-hello-to-you"
+	t="foo-bar-and-hello-to-me"
+	pl s
+	pl t
+	pl "ceqn 20: "
+	n = ceqn s, t, 20
+	pn n
+	ps " should be 1"
+	pl "ceqn 23: "
+	n = ceqn s, t, 23
+	pn n
+	ps " should be 0"
+/* scann
+	pl "scann h: "
+	count(0)=1;
+	n = scann s, s+23, 'h', count
+	pn n; pn count(0);
+	ps " should be 12 0"
+	pl "scann g: "
+	count(0)=3;
+	n = scann s, s+23, '-', count
+	pn n; 
+	pn count(0); 
+	ps " should be 11 0"
+	pl ""	
+]

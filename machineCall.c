@@ -10,14 +10,36 @@
 		
 		MC8 ;count # instances of character CH in a block. Args are
 		 first,last,CH.
+*/
 		
-		MC9 ;scan for nth occurance of CH in a block. Args are
+typedef int (*McList)(int,int*);
+
+/*		MC9 ;scan for nth occurance of CH in a block. Args are
 		  first,last,CH,cnt address. Return pointer to nth
 		  occurance,if it exists, otherwise to last. Also
 		  cnt is reduced by one for every CH found.
  */
+int scann( char *from, char *to, char c, int *n ) {
+	char *f = from;
+	for(;f<=to;++f) {
+		if(*f == c) {
+			--(*n);
+			if(*n<=0) break;
+		}
+	}
+	return f-from;
+}
+int Mscann(int nargs, int *args) {
+	char *from = args[0];
+	char *to   = args[1];
+	char c     = args[2];
+	int *starN = args[3];
+	int n = *starN;
+	int offset = scann(from,to,c,&n);
+	*starN = n;
+	return offset;
+}
 
-typedef int (*McList)(int,int*);
 
 /*	return true if c exists in choices, false otherwise. AND the true 
  *	value is the integer index plus one of c in choices
@@ -140,7 +162,7 @@ printf( "117: dest,src,n %d %d %d", dest,src,n );
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
-	, &bar, &MmvBl, &bar, &bar, &bar
+	, &bar, &MmvBl, &bar, &Mscann, &bar
 	, &bar, &bar, &Mpft, &Mpn, &bar
 };
 /* first in this list is MC 101 */
@@ -185,9 +207,7 @@ void userMC(int mcno, int nargs, int *args) {
 }
 
 void machinecall( int nargs ) {
-/*printf("\n183: machinecall");
-dumpStack();
-*/
+
 	int i, args[nargs-1];
 	int mcno = toptoi();
 	--nargs;
@@ -195,10 +215,6 @@ dumpStack();
 		int x=toptoi();
 		args[nargs-1-i]=x;
 	}
-/*
-printf("193: mcno %d,nargs %d, args[0..3] %x %d %x %d ",
-mcno,nargs,args[0],args[1],args[2],args[3]);
-*/
 	if(mcno<100)origMC(mcno, nargs, args);
 	else if(mcno<200)newMC(mcno-100, nargs, args);
 	else userMC(mcno-200, nargs, args);

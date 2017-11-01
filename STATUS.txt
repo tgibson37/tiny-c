@@ -1,0 +1,10 @@
+STATUS.txt (latest on top, future at bottom)
+
+Nov  1, 2017 - more Classical Library stuff (ceqn, scann)
+
+Oct 30, 2017 - The Classical branch (not uploaded yet) will be updates to the classical library. Currently master branch has  putchar, getchar, pft, gs, ps, pl, alpha, num, atoi
+
+Oct 30, 2017 - I plan to describe my develpment environment. This may help others interested in porting to different environments.
+
+Oct 28, 2017 - The master branch has a command line version of tiny-c. 
+	$ ./tc<ret>   will print Usage.

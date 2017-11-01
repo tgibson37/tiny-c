@@ -1,0 +1,3 @@
+main [
+	pl "Hello, Application main"
+]

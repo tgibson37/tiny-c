@@ -94,13 +94,15 @@ gn [
 	]
 ]
 
-/* compare two strings for equality, returning true if equal, else false. Only
-/* the first n characters are considered.
+/* compare two strings for equality, returning true if equal, else false. 
+/* Only the first n characters are considered.
 ceqn char a(0), b(0); int n
 [
 	int k
 	k = -1
-	while((k=k+1)<n) if(a(k)!=b(k)) return 0
+	while((k=k+1)<n)[
+		if(a(k)!=b(k)) return 0
+	]
 	return 1
 ]
 
@@ -150,7 +152,7 @@ countch char a(0), b(0), c [
 /* The scan stops if n(0) is decremented to 0, or when 'to' is reached 
 /* and examined. Returns the offset from 'from' to the last character examined.
 scann char from(0), to(0), c; int n(0) [
-	return MC(from, to, for, n, 9)
+	return MC(from, to, c, n, 9)
 ]
 
 /* 

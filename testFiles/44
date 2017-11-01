@@ -1,0 +1,14 @@
+/* test 44
+[
+	pl ""
+	ps "Hello, test "
+	pn(44);
+	pl " testing ceqn, index, move"
+	int nchars, n1, n2
+	char s1(19), s2(19), s3(19), s4(19)
+	nchars = move "cat in hat", s1
+	pl(s1)
+
+
+	pl ""
+]

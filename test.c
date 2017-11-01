@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 53
+#define testcases 54
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -851,7 +851,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				 var 11: foobar 69 Int 1  ref to pr[381]
 */
 		case 35:
-			printf("empty case");
+			printf("\nempty case");
 			break;
 		case 36:
 			printf("\ncharIn a abc is %d",charIn('a',"abc"));
@@ -948,6 +948,10 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/54");
 			break;
 /* 	Should get... 
+ *	 1 0
+ *	foo-bar-and-hello-to-you
+ *	foo-bar-and-hello-to-me
+ *	 1 0
  */
 		case 55:
 			testWhole("./testFiles/55");

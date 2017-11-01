@@ -651,8 +651,12 @@ void factor() {
 					}
 				} else {	
 				/* is simple. Must push as 'L', &storagePlace. */
-					if(class==1)foo.up = &((*v).value.up);
-					else foo.up = where;
+					if(class==1){
+						foo.up = &((*v).value.up);
+					}
+					else{
+						foo.up = where;
+					}
 			  		pushst( class, 'L', type, &foo);
 				}
 			}
@@ -960,11 +964,11 @@ void setarg( Type type, struct stackentry *arg ) {
 	/*int size = (*arg).size; */
 	if( lvalue=='L') {
 		where = (char*)vpassed.up;
-		if( type==Int ) vpassed.ui = get_int(where);
-		else if( type==Char) vpassed.uc = get_char(where);
-		else if( class==1 ) { 
-			(*arg).value.up = *((char*)(*arg).value.up);
+		if( class==1 ) { 
+			vpassed.up = *((char**)(*arg).value.up);
 		}
+		else if( type==Int ) vpassed.ui = get_int(where);
+		else if( type==Char) vpassed.uc = get_char(where);
 	}
 	vAlloc( type, &vpassed);
 }

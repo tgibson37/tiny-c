@@ -1949,31 +1949,6 @@ Last 3 days explored github, and how to upload stuff there. Separate notes: gitN
 			github.com/tgibson37/tiny-c
 
 Next goal: more library functions. Status (x means done, n means next)...
-x	putchar char c [
-x	getchar [
-x	pft char from(0),to(0)[
-	gs char buffer(0) [
-x	ps char b(0)[
-x	pl char b(0)[
-x	alpha char a [
-x	num char b(10), int v(0) [
-x	atoi char b(0), int v(0) [
-x	pn int n [
-	gn [
-n	ceqn char a(0), b(0); int n
-n	index char s1(0); int n1; char s2(0); int n2 [
-n	move char a(0), b(0) [
-	gc [
-n	movebl char a(0), b(0); int n [
-n	countch char a(0), b(0), c [
-n	scann char from(0), to(0), c; int n(0) [
-	readfile char n(0), w(0), l(0); int u [
-	writefile char n(0), b(0), e(0); int u [
-	fopen int m; char n(0); int s,u [
-	fread char a(0); int u [
-	fwrite char f(0), t(0); int u [
-	fclose int u [
-		/*endlibrary
 -----------------------
 Thursday, Oct 26
 Fixed bug in num. 43 not good.
@@ -2058,9 +2033,61 @@ Goals:
 Then start full system testing.
 Once solid tidy the code...
 	Use pointers for nxtvar, nxtstack, and fvar,lvar in funentry.
-STATUS: 
 	Only one series 40 test survives, 43. Others moved to series 50. All run fine.
 	Time for full regress... ALL GOOD, keep
 		Before leaving this test thingy for next goal...
 DONE			Test 35 needs keyboard input. Full regress shows NO prompt, but freezes. Confusing if not familiar. Plan to move ALL tc keyboard input tests to their OWN series, 90 or so. And never regress them, ~3 of test.c staying out of their series.
+STATUS: 
+	good_results now go through test 53, all good. 43 is only survivor in the 40's test series. Others moved to 50's series. Test 35 is now 99, the new 90's series reserved for manual interaction. Local committed.
+push from local git to github, and branching here and there: STUDYING
+	~/Projects/tiny-C_new.local has gitHubNotes.txt.
+-----------------
+Monday, Oct 30
+git push origin master  --  DONE
 
+FUTURE note: Do all new work in a local derivative of master. Keep r&l master's sync'd. DONE: do work in local branch Classical, now.
+
+Immediate goal: 
+x	Change HEAD to new 'Classical' branch, 
+	When more of lib is done commit to github AS Classical, 
+	Do whatever the push thingy is that invites people to comment.
+
+DONE (in Classical branch): STATUS.txt created, and added.
+
+Back to classical lib:
+x	putchar char c [
+x	getchar [
+x	pft char from(0),to(0)[
+	gs char buffer(0) [
+x	ps char b(0)[
+x	pl char b(0)[
+x	alpha char a [
+x	num char b(10), int v(0) [
+x	atoi char b(0), int v(0) [
+x	pn int n [
+	gn [
+x	ceqn char a(0), b(0); int n
+n	index char s1(0); int n1; char s2(0); int n2 [
+n	move char a(0), b(0) [
+	gc [
+n	movebl char a(0), b(0); int n [
+n	countch char a(0), b(0), c [
+n	scann char from(0), to(0), c; int n(0) [
+	readfile char n(0), w(0), l(0); int u [
+	writefile char n(0), b(0), e(0); int u [
+	fopen int m; char n(0); int s,u [
+	fread char a(0); int u [
+	fwrite char f(0), t(0); int u [
+	fclose int u [
+		/*endlibrary
+---------------------
+
+Tuesday, October 31, 2017
+and Wednesday, November 1
+
+Big 2 day struggle, pointer passing. FIXED. Test 54 (ceqn) showed the bug. When fixed in setarg ceqn itself worked perfectly, no bug there.
+
+Test 54... ceqn,scann  COMMITed
+
+Other goals: nice tc diag when error set, using stcurs, curs, and countch(...,'\n') to find the line. Code probably exists in pps.
+----
