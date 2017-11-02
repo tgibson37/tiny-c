@@ -2067,12 +2067,12 @@ x	atoi char b(0), int v(0) [
 x	pn int n [
 	gn [
 x	ceqn char a(0), b(0); int n
+x	scann char from(0), to(0), c; int n(0) [
 n	index char s1(0); int n1; char s2(0); int n2 [
+n	countch char a(0), b(0), c [
 n	move char a(0), b(0) [
 	gc [
 n	movebl char a(0), b(0); int n [
-n	countch char a(0), b(0), c [
-n	scann char from(0), to(0), c; int n(0) [
 	readfile char n(0), w(0), l(0); int u [
 	writefile char n(0), b(0), e(0); int u [
 	fopen int m; char n(0); int s,u [
@@ -2091,3 +2091,24 @@ Test 54... ceqn,scann  COMMITed
 
 Other goals: nice tc diag when error set, using stcurs, curs, and countch(...,'\n') to find the line. Code probably exists in pps.
 ----
+
+Thursday, Nov 2
+Commit to github...
+	[ref:https://help.github.com/articles/pushing-to-a-remote/]
+		$ git push origin Classical
+		$ git branch -a
+		* Classical
+		  master
+		  remotes/origin/Classical
+		  remotes/origin/HEAD -> origin/master
+		  remotes/origin/master
+	GOOD, now have remote Classical. I think simple 'git push' keeps BOTH branches up to date. How to check for ALL differences...
+		ref: q
+		git diff master origin/master
+	Silent result after push's. Need to change & local commit something to see if it really worked.
+Next goal: WHATHAPPENED, then MORE lib stuff: 
+
+
+And what does pull do? Combines fetch and merge.
+ref: https://help.github.com/articles/fetching-a-remote/
+	Local has "tracking branchs" which are not your working branches. It is the target of a fetch, a copy. Merge merges this into your working branches. Pull does both, it is a convenience thingy.
