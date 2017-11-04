@@ -68,15 +68,15 @@ int nxtvar;
 
 /* program space */
 char pr[PRLEN];
-/* EPR is end of program SPACE. 
- *	epr is end of actual program text. 
- *	prused includes value space.
- *	EPR is pointer to last byte of pr vector.
- */
-char* epr; 
-char* prused;
-
+char *apr, *epr, *prused;
 #define EPR (pr+PRLEN-1)
+/* EPR is end of program SPACE. 
+ *	pr+10 is start of system program.
+ *	apr is start of application program text, 
+ *	epr is end of ALL program text, 
+ *	prused includes value space.
+ *	EPR is pointer to last byte of pr array.
+ */
 
 /************ Globals **************/
 int error, leave, brake;

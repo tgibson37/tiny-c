@@ -1167,11 +1167,15 @@ void dumpName() {
 		return datum;
 	}
 
-/* reads two files using command line args for one or both.
+/*	reads two files using command line args for one or both.
+ *		./tc                      Usage
+ *		./tc [sysfile] appfile    Load and go
+ *	  Default sysfile is ./pps/library.tc
  */
 void readTheFiles(int argc, char *argv[]) {
 	int nread;
 	if(argc==2){
+		/* sys */
 		nread = FileRead("pps/library.tc",epr,EPR-epr);
 		if(nread == -1) {
 			printf("file read error: pps/library.tc\n");
@@ -1181,7 +1185,8 @@ void readTheFiles(int argc, char *argv[]) {
 			printf("no such file: argv[1]\n");
 			exit(1);
 		}
-		epr += nread;
+		apr = epr += nread;
+		/* app */
 		nread = FileRead( argv[1],epr,EPR-epr);
 		if(nread == -1) {
 			printf("file read error: %s\n",argv[1]);
@@ -1195,6 +1200,7 @@ void readTheFiles(int argc, char *argv[]) {
 		curglbl = fun+1;
 	}
 	else if(argc==3){
+		/* sys */
 		nread = FileRead(argv[1],epr,EPR-epr);
 		if(nread == -1) {
 			printf("file read error: %s\n",argv[1]);
@@ -1204,7 +1210,8 @@ void readTheFiles(int argc, char *argv[]) {
 			printf("no such file: %s\n",argv[1]);
 			exit(1);
 		}
-		epr += nread;
+		apr = epr += nread;
+		/* app */
 		nread = FileRead(argv[2],epr,EPR-epr);
 		if(nread == -1) {
 			printf("file read error: %s\n",argv[2]);
@@ -1217,4 +1224,81 @@ void readTheFiles(int argc, char *argv[]) {
 		epr += nread;
 		curglbl = 1;
 	}
+}
+
+/* returns pointer to first character of the current line
+ */
+char* fchar(){
+	char* k = errat;
+	do{
+		if(*k=='\n')break;
+	} while( --k > apr);
+	return k+1;
+}
+/* returns pointer to last character of the current line
+ */
+char* lchar(){
+	char* k = errat;
+	do{
+		if(*k=='\n')break;
+	} while( ++k < epr);
+	return k-1;
+}
+
+int countch(char *f, char *t, char c){
+	int k=1;   /* start on line 1 */
+	while( f++ <= t) if(*f==c) ++k;
+	return k;
+}
+/*	Prints end of program message, "done" if no error, else code and 
+ *	line with error and carot under.
+ */
+void whatHappened() {
+	if(error){
+		char *fc, *lc, *lcurs;
+		int blanks, lineno;
+		lineno = countch(apr,errat,'\n');
+		printf("line %d ", lineno); errToWords();
+		lcurs=cursor;
+		fc=fchar();
+		blanks=errat-fc;
+		lc=lchar();
+		fc=fc-1;
+		pft(fc,lc);
+		printf("\n");
+		while(--blanks >= 0) printf(" ");
+		printf("^");
+	}
+	else {
+		printf("\ndone\n");
+	}
+}
+
+void errToWords(){
+	char *x;
+	switch(error){
+		case 2: x="CURSERR, cursor out of range"; break;
+		case 3: x="SYMERR, decl needed"; break;
+		case 1: x="STATERR"; break;
+		case 5: x="RPARERR, ) missing"; break;
+		case 6: x="RANGERR, subscript out of range"; break;
+		case 7: x="CLASERR"; break;
+		case 8: x="TYPEERR"; break;
+		case 9: x="SYNXERR"; break;
+		case 14: x="LVALERR, not assignable"; break;
+		case 15: x="POPERR, nothing to pop"; break;
+		case 16: x="PUSHERR, overlowed stack area"; break;
+		case 17: x="TMFUERR, overflowed function table"; break;
+		case 18: x="TMVRERR, overflowed variable table"; break;
+		case 19: x="TMVLERR, overflowed available space for values"; break;
+		case 20: x="LINKERR"; break;
+		case 21: x="ARGSERR, args don't match"; break;
+		case 22: x="LBRCERR, [ required"; break;
+		case 24: x="MCERR, no such MC"; break;
+		case 26: x="SYMERRA, decl needed"; break;
+		case 27: x="EQERR, illegal assign"; break;
+		case 28: x="PTRERR"; break;
+		case 99: x="KILL, stopped by user"; break;
+	}
+	printf("%s ",x);
 }

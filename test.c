@@ -24,6 +24,7 @@ void testWhole(char* filename){
 	link();
 	cursor=pr;
 	st();   /* <<<== executes statement above, line 8 */
+	whatHappened();
 }
 void testSetup(char* code) {
 	strcpy( pr, code);

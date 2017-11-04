@@ -2106,9 +2106,23 @@ Commit to github...
 		ref: q
 		git diff master origin/master
 	Silent result after push's. Need to change & local commit something to see if it really worked.
+		edited and committed this file into Classical, then 
+			 $ git diff Classical origin/Classical
+		and got nice diff. 
 Next goal: WHATHAPPENED, then MORE lib stuff: 
+whathappened: in 8080 the pps had its own cursor for both editing and running. MC 11 pushed 4 state vars, toptoi 4 times for new appl state vars, did the appl (prbegin,st,prend), restored stuff (MCEN2 ~2432), pushzero, done.  
+The call to MC 11 is in pps, start, top of last page in OM. Upon return assures cursor in app range, computes lineno, couple of pl"", prints either "stopped" or whathappened.
+-------------
+
+Nov 3
+Doing whatHappened() ~1256. Called tcMain.c ~28.
+DONE: Translating error code into words would be nice. DONE, prints SYMERRA for example.
+Test 55 is purposely wrong, to show up error case. 3 undeclared vars, bombs on the first. And be sure to avoid leading tabs on a line to see the TRUE diag.
+countch, tc.c ~1248
+added some english words to the error code symbol ~1280... .
+-------------
+
+Nov 4
+Gonna commit and push. 
 
 
-And what does pull do? Combines fetch and merge.
-ref: https://help.github.com/articles/fetching-a-remote/
-	Local has "tracking branchs" which are not your working branches. It is the target of a fetch, a copy. Merge merges this into your working branches. Pull does both, it is a convenience thingy.

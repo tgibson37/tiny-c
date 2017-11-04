@@ -5,7 +5,7 @@
  */
 
 int main(int argc, char *argv[]) {
-	strcpy(pr,"[_MAIN();]");  /* required sys main */
+	strcpy(pr,"[_MAIN();]");  /* very first statement */
 	epr = prused = pr+10;
 	cursor = pr;
 	curglbl = fun;
@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
 	link();
 	cursor=pr;
 	st();   /* <<<== executes statement above, line 8 */
+	whatHappened();
 }
 
 void usage() {
