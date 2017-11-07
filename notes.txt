@@ -1728,34 +1728,6 @@ b fundone, enter~1050, after cursor is restored.
 	It is restored to -> b+2,b+6 which were parsed way back at the top of enter. line 990 should be moved to after all parsing. MORE TRACING, first.
 	ASM code pushes stcurs,cursor onto 8080 stack, and restores them at the end. pushes are just before cursor=where, and call to newfun. 
 FIXED.
-
-Next goal: more library functions...
-x	putchar char c [
-x	pft char from(0),to(0)[
-x	ps char b(0)[
-x	pl char b(0)[
-x	alpha char a [
-x	num char b(10), int v(0) [
-x	atoi char b(0), int v(0) [
-x	pn int n [
-x	ceqn char a(0), b(0); int n
-x	index char s1(0); int n1; char s2(0); int n2 [
-x	countch char a(0), b(0), c [
-x	scann char from(0), to(0), c; int n(0) [
-	move char a(0), b(0) [
-	movebl char a(0), b(0); int n [
-x	getchar [
-	gc [
-	gn [
-	gs char buffer(0) [
-	readfile char n(0), w(0), l(0); int u [
-	writefile char n(0), b(0), e(0); int u [
-	fopen int m; char n(0); int s,u [
-	fread char a(0); int u [
-	fwrite char f(0), t(0); int u [
-	fclose int u [
-		/*endlibrary
-This is the TO DO list.
 ------------
 
 Friday, Oct 20
@@ -2147,6 +2119,34 @@ Done so far...
 	./tc.sh <args> runs it  [local shell script in Projects/tiny-c]
 	gedit external tools has /usr/local/bin/tinyC $*, BUT...
 		$* doesn;t work. Can't pass args. 
+
+Next goal: more library functions...
+x	putchar char c [
+x	pft char from(0),to(0)[
+x	ps char b(0)[
+x	pl char b(0)[
+x	alpha char a [
+x	num char b(10), int v(0) [
+x	atoi char b(0), int v(0) [
+x	pn int n [
+x	ceqn char a(0), b(0); int n
+x	index char s1(0); int n1; char s2(0); int n2 [
+x	countch char a(0), b(0), c [
+x	scann char from(0), to(0), c; int n(0) [
+	move char a(0), b(0) [
+	movebl char a(0), b(0); int n [
+x	getchar [
+	gc [
+	gn [
+	gs char buffer(0) [
+	readfile char n(0), w(0), l(0); int u [
+	writefile char n(0), b(0), e(0); int u [
+	fopen int m; char n(0); int s,u [
+	fread char a(0); int u [
+	fwrite char f(0), t(0); int u [
+	fclose int u [
+		/*endlibrary
+This is the TO DO list.
 -------------
 
 Tue, Nov 7
