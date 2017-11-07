@@ -38,4 +38,5 @@ main [
 	pn count(0); 
 	ps " should be 11 0"
 	pl ""	
-]
+]no such file: argv[1]
+

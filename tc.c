@@ -1176,24 +1176,24 @@ void readTheFiles(int argc, char *argv[]) {
 	int nread;
 	if(argc==2){
 		/* sys */
-		nread = FileRead("pps/library.tc",epr,EPR-epr);
+		nread = FileRead("/usr/local/share/tinyC/library.tc",epr,EPR-epr);
 		if(nread == -1) {
-			printf("file read error: pps/library.tc\n");
+			printf("tc: file read error: pps/library.tc\n");
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such file: argv[1]\n");
+			printf("tc-lib: no such file: $s\n",argv[1]);
 			exit(1);
 		}
 		apr = epr += nread;
 		/* app */
 		nread = FileRead( argv[1],epr,EPR-epr);
 		if(nread == -1) {
-			printf("file read error: %s\n",argv[1]);
+			printf("tc: file read error: %s\n",argv[1]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such file: %s\n",argv[1]);
+			printf("tc-app: no such file: %s\n",argv[1]);
 			exit(1);
 		}
 		epr += nread;
@@ -1267,7 +1267,7 @@ void whatHappened() {
 		pft(fc,lc);
 		printf("\n");
 		while(--blanks >= 0) printf(" ");
-		printf("^");
+		printf("^\n");
 	}
 	else {
 		printf("\ndone\n");

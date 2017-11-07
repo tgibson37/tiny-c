@@ -1731,23 +1731,23 @@ FIXED.
 
 Next goal: more library functions...
 x	putchar char c [
-x	getchar [
 x	pft char from(0),to(0)[
-	gs char buffer(0) [
 x	ps char b(0)[
 x	pl char b(0)[
 x	alpha char a [
 x	num char b(10), int v(0) [
 x	atoi char b(0), int v(0) [
 x	pn int n [
-	gn [
-	ceqn char a(0), b(0); int n
-	index char s1(0); int n1; char s2(0); int n2 [
+x	ceqn char a(0), b(0); int n
+x	index char s1(0); int n1; char s2(0); int n2 [
+x	countch char a(0), b(0), c [
+x	scann char from(0), to(0), c; int n(0) [
 	move char a(0), b(0) [
-	gc [
 	movebl char a(0), b(0); int n [
-	countch char a(0), b(0), c [
-	scann char from(0), to(0), c; int n(0) [
+x	getchar [
+	gc [
+	gn [
+	gs char buffer(0) [
 	readfile char n(0), w(0), l(0); int u [
 	writefile char n(0), b(0), e(0); int u [
 	fopen int m; char n(0); int s,u [
@@ -2056,23 +2056,23 @@ DONE (in Classical branch): STATUS.txt created, and added.
 
 Back to classical lib:
 x	putchar char c [
-x	getchar [
 x	pft char from(0),to(0)[
-	gs char buffer(0) [
 x	ps char b(0)[
 x	pl char b(0)[
 x	alpha char a [
 x	num char b(10), int v(0) [
 x	atoi char b(0), int v(0) [
 x	pn int n [
-	gn [
 x	ceqn char a(0), b(0); int n
 x	scann char from(0), to(0), c; int n(0) [
-n	index char s1(0); int n1; char s2(0); int n2 [
-n	countch char a(0), b(0), c [
-n	move char a(0), b(0) [
+x	index char s1(0); int n1; char s2(0); int n2 [
+x	countch char a(0), b(0), c [
+x	getchar [
+	gs char buffer(0) [
 	gc [
+	gn [
 n	movebl char a(0), b(0); int n [
+n	move char a(0), b(0) [
 	readfile char n(0), w(0), l(0); int u [
 	writefile char n(0), b(0), e(0); int u [
 	fopen int m; char n(0); int s,u [
@@ -2123,6 +2123,36 @@ added some english words to the error code symbol ~1280... .
 -------------
 
 Nov 4
-Gonna commit and push. 
+Gonna commit and push. DONE
+-------------
 
+Nov 6
+Back to classical lib. Some thoughts first. Doing the classical stuff is fruitful MAINLY for debugging, and getting used to command line instead of the 8080 loader code. So we do this. Maybe pps. 
+But my REAL thought is to make this useful I should do a MODERN version: proper C syntax, and some kind of wysiwyg editor. Easiest way to that route is find a GPS editor and just add a "run this" macro to it.
+Playing with gedit's "external tools". 
+	open terminal here works...
+		~/tryIt  dir, saved a file there so it was "current directory"
+		set ^t as shortcut
+		^t  :  term comes up with '~/tryIt $' prompt.
+	run command: works but sends outputs into current document
+	scripting: #!/bin/sh at start of the 4 supplied
+	edit options include what to do with output, fast key, more
+	zenity is used to implement 'run command'. Its a bash scriptable dialog  with lots of choices. Small dialog popup.
+	Read the code for 'build'. Does a make, but has useful $DIR feature. 
+		$dir's to the dir of the current file in gedit, makes that file, $dir's back. So you can edit in one dir but make in another.
+	I need to do a bashscript for ./tc. Its gonna be a project to make it a smooth substitute for pps. But its the most direct path to wysiwyg.
+	I think I'm happy with the interpreter. There will be a bug or 3 still to find. But LOTS of code to interpret is the best way to find them. And an nice wysiwig editor is the best way to produce lots of code. So my evening thinking today is: PRIORITY, wysiwig. Best opportunitY: go for gedit/externalTools.
+Done so far...
+	executable tinyC is in /usr/local/bin
+	./tc.sh <args> runs it  [local shell script in Projects/tiny-c]
+	gedit external tools has /usr/local/bin/tinyC $*, BUT...
+		$* doesn;t work. Can't pass args. 
+-------------
 
+Tue, Nov 7
+Defined two gedit external tools...
+	tinyC-Current: 
+		save current page, then execute it, outputs to bottom pane
+	tinyC-Append:
+		execute file[s] named in popup, outputs appended to current document
+Debugging these: copied files to /usr/local/bin/tinyC and /usr/local/share/tinyC/library.tc. NEED TO ADD install target to makefile.

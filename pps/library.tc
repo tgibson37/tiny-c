@@ -108,7 +108,7 @@ ceqn char a(0), b(0); int n
 
 /* finds the leftmost copy IN [s1..s1+n1] OF [s2..s2+n2] (memory blocks,
 /* left inclusive, right exclusive) returning false (0) if no match, else
-/* the index of the first match character. 
+/* the index of the first match character starting with 1 (one). 
 index char s1(0); int n1; char s2(0); int n2 [
 	if(n2<=0)return 1   /* null matches beginning of s1 even if s1 is empty
 	if(n1<=0)return 0   /* s1 empty

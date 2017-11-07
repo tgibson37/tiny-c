@@ -1,5 +1,7 @@
 STATUS.txt (latest on top, future at bottom)
 
+Nov 7, 2017 - More lib: scann, index, countch. Also whatHappened (user friendly diagnostic). BIG DEAL: integrated gedit using its external tools. Instead of pps we now have a nice wysiwyg editor.
+
 Nov  1, 2017 - more Classical Library stuff (ceqn, scann)
 
 Oct 30, 2017 - The Classical branch (not uploaded yet) will be updates to the classical library. Currently master branch has  putchar, getchar, pft, gs, ps, pl, alpha, num, atoi

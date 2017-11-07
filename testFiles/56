@@ -1,0 +1,18 @@
+/* test 56 */
+main [
+	ps "test 56: index"
+    int n
+    char line(0)
+    line = "the cat in the hat"
+
+    pl "in ->"; ps line; ps "<- find cat:   " 
+    n = index line, 18, "cat", 3
+    pn n
+    ps " should be 5"
+    pl "in ->"; ps line; ps "<- find dog:   " 
+    n = index line, 18, "dog", 3
+	pn n    
+    ps " should be 0"
+    pl ""
+
+]
