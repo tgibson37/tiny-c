@@ -877,8 +877,8 @@ void logo() {
 /* chunk 8: enter, setarg, link
  */
 
-/*	SITUATION: Just parsed symbol with class 'E', or special symbol MC, and
- *	the args. Their values are on the stack, arg pointing to the first 
+/*	SITUATION: Just parsed symbol with class 'E', or special symbol MC.
+ *	Parses the args putting values are on the stack, arg pointing to the first 
  *	of them.
  *	Sets the cursor to the called function's 'where'. Parses arg decl's
  *	giving them values from the stack. Executes the function body.

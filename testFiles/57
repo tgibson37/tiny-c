@@ -1,0 +1,10 @@
+/* Test 57, move, movebl
+main [
+    char a(99)
+/*        0123456789012345678
+    move "cat in the hat .......", a
+    ps a
+    movebl a, a+2, 17
+    pl a
+]
+

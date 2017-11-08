@@ -55,10 +55,6 @@ int charIn(char c, char *choices ){
 /* print a block of ram from from to to inclusive 
  */
 void pft(char *from, char *to ) {
-/*
-printf("\n36: pr,from-pr,to-pr %d %d %d\n",pr,from-pr,to-pr);
-exit(77);
-*/
 	while(from <= to) printf("%c",*(from++));
 }
 
@@ -143,20 +139,16 @@ int bar(int nargs, int *args)
     return 2;
 }
 
-/* args: a,b,dist. Block is [a..b] inclusive, distance is dist */
+/* args: a,b,dist. Block is [a..b] inclusive, distance is [+|-]dist */
 int MmvBl(int nargs, int *args) 
 {
 	char *a, *b; int dist;
-	a=args[0]; b=args[1]; dist=args[3];
+	a=args[0]; b=args[1]; dist=args[2];
+	char *src = a;
+	char *dest = a+dist;
+	int n = b-a+1;
+	memmove(dest, src, n);
 
-	char *dest = a;
-	char *src = a+dist;
-	int n = dest-src;
-/*
-printf( "117: dest,src,n %d %d %d", dest,src,n );
-*/
-/*	memmove(char *dest, char *src, int n);
-*/
 }
 
 /* first in this list is MC 1 */
@@ -207,7 +199,7 @@ void userMC(int mcno, int nargs, int *args) {
 }
 
 void machinecall( int nargs ) {
-
+/*printf("\nMC ~211, nargs %d",nargs);*/
 	int i, args[nargs-1];
 	int mcno = toptoi();
 	--nargs;

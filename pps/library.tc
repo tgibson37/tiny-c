@@ -140,6 +140,7 @@ gc [
 
 /* move [a..b] inclusive n bytes, +down (higher addresses)
 movebl char a(0), b(0); int n [
+pl("t57: 143 ");pn(n);
 	MC a,b,n,7
 ]
 

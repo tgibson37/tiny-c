@@ -2156,3 +2156,20 @@ Defined two gedit external tools...
 	tinyC-Append:
 		execute file[s] named in popup, outputs appended to current document
 Debugging these: copied files to /usr/local/bin/tinyC and /usr/local/share/tinyC/library.tc. NEED TO ADD install target to makefile.
+Append still doesn't work. But I committed, and merged back to master, and pushed.
+-------------
+
+Wed, Nov 8
+Thinking about varargs. How is this for the library...
+	printf char fmt, varags [MC 101] 
+That is the entire entry. The where points to varargs, which today points to either int, char, or [ (or the spaces before them). 
+enter() has parsed args onto the stack. When it sees 'varargs' it parses it as an int, then calls MC. Else-if lit varargs at ~931 does it. The ~936 test needs to be careful. 
+MUST the body call an MC? The requirement is the code must pop all the args passed to it and push one return value. machinecall is passed nargs. It calls toptoi that many times. C's printf uses the fmt to pop stuff. Need to emulate what machine call is doing.
+
+
+
+
+
+
+
+
