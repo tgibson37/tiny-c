@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 54
+#define testcases 57
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -23,7 +23,7 @@ void testWhole(char* filename){
 	curfun = fun-1;   /* none */
 	link();
 	cursor=pr;
-	st();   /* <<<== executes statement above, line 8 */
+	st();   /* <<<== executes statement above, line 13 */
 	whatHappened();
 }
 void testSetup(char* code) {
@@ -852,9 +852,17 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				 var 11: foobar 69 Int 1  ref to pr[381]
 */
 		case 35:
-			printf("\nempty case");
+			testSetup("");
+			printf("\n");
+			pushk('t');
+			pushk(1);		/* MC number */
+			machinecall(2);	/* number of args */
+			printf("<--MC 1 echoed, and returns %c",toptoi());
 			break;
-		case 36:
+/* 	Should get... 
+				t<--MC 1 echoed, and returns t
+ */
+ 		case 36:
 			printf("\ncharIn a abc is %d",charIn('a',"abc"));
 			printf("\ncharIn b abc is %d",charIn('b',"abc"));
 			printf("\ncharIn c abc is %d",charIn('c',"abc"));
@@ -958,28 +966,99 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/55");
 			break;
 /* 	Should get... 
+ *				line 3 SYMERRA, decl needed 
+ *					error = on + purpose
+ *					     ^
+ */
+		case 56:
+			testWhole("./testFiles/56");
+			break;
+/* 	Should get... 
+ *				test 56: index
+ *				in ->the cat in the hat<- find cat:    5 should be 5
+ *				in ->the cat in the hat<- find dog:    0 should be 0
+ */
+		case 57:
+			testWhole("./testFiles/57");
+			break;
+/* 	Should get... 
+ *				cat in the hat .......
+ *				t57: 143  17
+ *				cat in the hat ..cat..
  */
 /***************  keyboard input tests, run manually *********/
-		case 99:
-			testSetup("");
-			printf("\n");
-			pushk('t');
-			pushk(1);		/* MC number */
-			machinecall(2);	/* number of args */
-			printf("<--MC 1 printed, and returns %c",toptoi());
+/*	Test 90 MUST be run using ./test 90. It is NOT a tc program.
+ *	Tests 91 up may be run using ./test 9x, or ./tc testFiles/9x. They
+ *	are tc programs. These tests if put into the regression (with numbers in
+ *	the regression range) would not show their prompts. So they are
+ *	numbered in their own range, and run manually. Check them by examining
+ *	the "Should get..." comments.
+ */
 
-			pushk(202);
+
+		case 90:
+			testSetup("");
 			pushk(2);
-			printf("\n  getchar() test, enter one char<ret>");
-			machinecall(2);
-			printf(" returns %d",toptoi());
+			printf("\n  MC 2 test, enter one key then <ret> :");
+			machinecall(1);
+			printf(" entered hex %x",toptoi());
 
 			break;
 /* 	Should get... 
- *				t<--MC 1 printed, and returns t
- *				  getchar() test, enter one char<ret>A
- *				 returns 65
+ *				  MC 2 test, enter one key then <ret> :A
+ *				 entered hex 41
  */
+		case 91:
+			testSetup("");
+			printf("\nkbhit and getchar, ctrl-C to stop\n");
+			while(1) {
+				while(!kbhit()) {
+					sleep(1);
+					printf("Press a key... ");
+				}
+				printf("You pressed '%c'!\n", getchar());
+			}
+			break;
+/* 	Should get (typical)... 
+ *				kbhit and getchar, ctrl-C to stop
+ *				Press a key... Press a key... ^[[APress a key... You pressed ''!
+ *				You pressed '['!
+ *				You pressed 'A'!
+ *				Press a key... Press a key... pPress a key... You pressed 'p'!
+ *				Press a key... qPress a key... You pressed 'q'!
+ *				Press a key... Press a key... ^C
+ */
+		case 92:
+			testWhole("./testFiles/92");
+			break;
+/* 	Should get... 
+ *	
+ */
+		case 93:
+			testWhole("./testFiles/93");
+			break;
+/* 	Should get... 
+ *	
+ */
+		case 94:
+			testWhole("./testFiles/94");
+			break;
+/* 	Should get... 
+ *	
+ */
+		case 95:
+			testWhole("./testFiles/95");
+			break;
+/* 	Should get... 
+ *	
+ */
+		case 99:
+			testWhole("./testFiles/91");
+			break;
+/* 	Should get... 
+ *	
+ */
+
 		default:
 			ps("invalid test case "); pn(testcase); pl(""); exit(1);
 			break;

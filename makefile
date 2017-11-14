@@ -1,8 +1,9 @@
 # Compiler
 CC = /usr/bin/gcc
 
-# Name of development files
+# Name of development files/targets
 TC = tc
+LIB = ./pps/library.tc
 TEST = test
 RUN = ./tc
 DOTEST = ./test > test_results
@@ -12,13 +13,14 @@ KEEP = cp test_results good_results
 
 # Install dirs, note name change of tc executable
 INSTALLTC = /usr/local/bin/tinyC
-INSTALLLIB = /usr/local/share/library
+INSTALLLIB = /usr/local/share/tinyC/library.tc
+LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
 
 # The tc object files
-OBJTC = tc.o FileRead.o time.o machineCall.o tcMain.o
+OBJTC = tc.o FileRead.o time.o getch.o kbhit.o machineCall.o tcMain.o
 
 # The test object files
-OBJTEST = tc.o test.o FileRead.o time.o machineCall.o tcTestMain.o
+OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o machineCall.o tcTestMain.o
 
 # All the header and c files
 SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c
@@ -44,7 +46,10 @@ dotest:
 
 install:
 	cp tc $(INSTALLTC)
-	cp pps/library $(INSTALLLIB)
+	cp pps/library.tc $(INSTALLLIB)
+
+latest:
+	$(LATEST)
 
 # Build the executable files
 $(TC): $(OBJTC)

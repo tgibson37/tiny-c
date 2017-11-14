@@ -2,23 +2,23 @@
 
 /* called by st(), does nothing, used for stats, debugging, whatever. 
  */
-int traceCount=0;
-int traceMode=0;
-
 void stbegin() {
+	traceMode=0;
 	if(traceMode) {
-		printf("---- %d\n",traceCount++);
-		dumpLine();
+		if(strncmp("sleep",cursor,5)) dumpLine();
+		debug();
 	}
-	debug();
 }
+
 /* so gdb can 'b debug', and brkpt comes AFTER the dumpLine
  */
-void debug(){}
+void debug(){
+}
 /*	valid exit, last chance for summary stats, whatever. 
 	prbegin/prdone called just before/after application level.
 	tcexit called before exiting the interpreter.
  */
+
 void prbegin(){};
 void prdone(){};
 void tcexit(){};

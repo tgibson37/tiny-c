@@ -122,7 +122,9 @@ int Mpn(int nargs, int *args)
 
 int Mgch(int nargs, int *args)
 {
-    return getchar();
+	int x = getchar();
+/*printf("\nMC~126: %x",x);*/
+    return x;
 }
 
 int Mpft(int nargs, int *args) {
@@ -151,15 +153,27 @@ int MmvBl(int nargs, int *args)
 
 }
 
+/* test if keyboard char ready, return copy if so, else 0 */
+int Mchrdy() 
+{
+	return kbhit();
+}
+
+/* sleep for N seconds */
+void Msleep(int N) 
+{
+	sleep(N+1);
+}
+
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
 	, &bar, &MmvBl, &bar, &Mscann, &bar
-	, &bar, &bar, &Mpft, &Mpn, &bar
+	, &bar, &Mchrdy, &Mpft, &Mpn, &bar
 };
 /* first in this list is MC 101 */
 McList newList[] = 
-	{ &MprF, &bar, &bar, &bar, &bar
+	{ &MprF, &Msleep, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
@@ -170,8 +184,8 @@ McList userList[] =
 	, &bar, &bar, &bar, &bar, &bar
 };
 
-/*	code the MC above and register in McList array. Placement in the array determines
- *	the MC number starting with 1.
+/*	code the MC above and register in McList array. Placement in the array
+ *	determines the MC number starting with 1.
  */
 
 void origMC(int mcno, int nargs, int *args) {

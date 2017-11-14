@@ -1,11 +1,11 @@
- 10:08
+ 11:15
 DONT FORGET: test 35 requires keyboard input A<cr>
 initial state before any tests
 
 ADDRESSES (hex)
 pr:     609a20
-stack:  60e880
-vartab: 60f220
+stack:  60e8a0
+vartab: 60f240
 ----
 STATE 1
 parsing: <--end of line--
@@ -16,7 +16,7 @@ Stack (from top) class lvalue type stuff
 
 BEGIN TESTING ALL
 
-TEST 1  10:08
+TEST 1  11:15
 name in pr ->foobaaarwxyz<-
 Var Table: name class type len (type)value
  var 0: foobaaaz 0 Int 1 pr[51]->0<-
@@ -25,7 +25,7 @@ Var Table: name class type len (type)value
  var 3: foobaaaz 0 Int 1 pr[63]->0<-
 Test 1 done, error=0
 
-TEST 2  10:08
+TEST 2  11:15
 name in pr ->foob5678<-
 Var Table: name class type len (type)value
  var 0: foob5678 0 Int 1 pr[21]->0<-
@@ -34,7 +34,7 @@ Var Table: name class type len (type)value
  var 3: foob5678 0 Int 1 pr[33]->0<-
 Test 2 done, error=0
 
-TEST 3  10:08
+TEST 3  11:15
 name in pr ->foob<-
 Var Table: name class type len (type)value
  var 0: foob 0 Int 1 pr[21]->0<-
@@ -43,7 +43,7 @@ Var Table: name class type len (type)value
  var 3: foob 0 Int 1 pr[33]->0<-
 Test 3 done, error=0
 
-TEST 4  10:08
+TEST 4  11:15
 name in pr ->foo(baaarwxyz<-
 Var Table: name class type len (type)value
  var 0: foo 0 Int 1 pr[21]->0<-
@@ -52,19 +52,19 @@ Var Table: name class type len (type)value
  var 3: foo 0 Int 1 pr[33]->0<-
 Test 4 done, error=0
 
-TEST 5  10:08
+TEST 5  11:15
 symbol
 fname,lname,cursor= 5 10 11
 Test 5 done, error=0
 
-TEST 6  10:08
+TEST 6  11:15
 Var Table: name class type len (type)value
  var 0: symbol 0 Char 1 pr[21]->NULL<-
 pr ->char symbol, 34567890<-
 pr ->23456789012345<-
 Test 6 done, error=0
 
-TEST 7  10:08
+TEST 7  11:15
 cursor->char symbol, more stuff
 match,cursor= 1 4
 cursor-> symbol, more stuff
@@ -72,7 +72,7 @@ match,cursor= 0 5
 cursor->symbol, more stuff
 Test 7 done, error=0
 
-TEST 8  10:08
+TEST 8  11:15
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[101]->NULL<-
  var 1: b 1 Char 10 pr[102]-><-
@@ -82,22 +82,22 @@ Var Table: name class type len (type)value
  var 5: f 0 Int 1 pr[157]->0<-
 Test 8 done, error=0
 
-TEST 9  10:08
+TEST 9  11:15
  empty case
 Test 9 done, error=0
 
-TEST 10  10:08
+TEST 10  11:15
  empty case
 Test 10 done, error=0
 
-TEST 11  10:08
+TEST 11  11:15
 Stack (from top) class lvalue type stuff
  stack entry at 0: 0 A 2 pr[-6330905]
 
 test 11, stack, popped val is 7
 Test 11 done, error=0
 
-TEST 12  10:08
+TEST 12  11:15
 nxtstack 0
 after 4 pushes nxtstack 4
 Stack (from top) class lvalue type stuff
@@ -125,7 +125,7 @@ Stack (from top) class lvalue type stuff
 
 Test 12 done, error=15
 
-TEST 13  10:08
+TEST 13  11:15
 at start cursor,epr,error = 1 35 0
 cursor->}   {}   {{}{{}}}   {    STRING-END
 4 skips: 
@@ -135,7 +135,7 @@ error,cursor = 0    {    STRING-END
 error,cursor = 0 D
 Test 13 done, error=0
 
-TEST 14  10:08
+TEST 14  11:15
 BEFORE rem()
 cursor 0-->   
 
@@ -145,7 +145,7 @@ AFTER rem()
 cursor 36-->next-line  string-end
 Test 14 done, error=0
 
-TEST 15  10:08
+TEST 15  11:15
 1 cursor->   17  "hello"  'c'  STRING-END<-
 konst returns 2 17
 2 cursor->  "hello"  'c'  STRING-END<-
@@ -157,7 +157,7 @@ konst returns 0
 5 cursor->STRING-END<-
 Test 15 done, error=0
 
-TEST 16  10:08
+TEST 16  11:15
 pr->   17  "hello"  'c'  STRING-END
 3 factor()'s
 Stack (from top) class lvalue type stuff
@@ -171,7 +171,7 @@ Stack (from top) class lvalue type stuff
  int 17
 Test 16 done, error=0
 
-TEST 17  10:08
+TEST 17  11:15
 name in pr ->foobaaarwx<-
 name in pr ->foob5678<-
 name in pr ->foob<-
@@ -189,14 +189,14 @@ look up foobaaaz
  var 0: foobaaaz 11 Char 13 pr[10]
 Test 17 done, error=0
 
-TEST 18  10:08
+TEST 18  11:15
 asgn returned 1, 1+2 is 3
 asgn returned 1, 1+2+3 is 6
 asgn returned 1, 1*2 is 2
 asgn returned 1, (1+2)*3 is 9
 Test 18 done, error=0
 
-TEST 19  10:08
+TEST 19  11:15
 1<2 is 1 
 1>2 is 0 
 1==2 is 0 
@@ -217,7 +217,7 @@ TEST 19  10:08
 2<=1 is 0 
 Test 19 done, error=0
 
-TEST 20  10:08
+TEST 20  11:15
 7+2 is 9 
 7-2 is 5 
 7*2 is 14 
@@ -225,7 +225,7 @@ TEST 20  10:08
 7%2 is 1 
 Test 20 done, error=0
 
-TEST 21  10:08
+TEST 21  11:15
 pr: char a; a='A'; 
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->NULL<-
@@ -233,7 +233,7 @@ Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->A<-
 Test 21 done, error=0
 
-TEST 22  10:08
+TEST 22  11:15
 pr:  char a; int x; char p(7); xXXXXXXXXXXXXXXXXXXXXx
 decl char a
 prused,obsize 30 0 
@@ -247,7 +247,7 @@ prused,obsize 42 0
 prused,obsize 42 0 
 Test 22 done, error=0
 
-TEST 23  10:08
+TEST 23  11:15
 pr:  int x; x=77;  xXXXXXXXXXXXXXXXXXXXXx
 parsing int x;
 78 58 58 0 0 0 0 58 58 58 58 58 58 58 58 58 58 58 58 58 58 78 
@@ -260,7 +260,7 @@ Stack (from top) class lvalue type stuff
  x is 0
 Test 23 done, error=14
 
-TEST 24  10:08
+TEST 24  11:15
 pr:  int x(2); x(1)=77; xXX...XXXXXXXXXXXX...XXXXx
 parsing int x(3);
 78 58 58 2e 2e 2e 0 0 0 0 0 0 0 0 0 0 0 0 2e 2e 2e 58 58 58 58 78 
@@ -270,29 +270,29 @@ parsing x(1)=77;
 78 58 58 2e 2e 2e 0 0 0 0 4d 0 0 0 0 0 0 0 2e 2e 2e 58 58 58 58 78 
 Test 24 done, error=0
 
-TEST 25  10:08
+TEST 25  11:15
 ->M<- Back from MC('M',1);
 Stack (from top) class lvalue type stuff
 
 Test 25 done, error=0
 
-TEST 26  10:08
+TEST 26  11:15
 TF
 Test 26 done, error=0
 
-TEST 27  10:08
+TEST 27  11:15
  empty case
 Test 27 done, error=0
 
-TEST 28  10:08
+TEST 28  11:15
  empty case
 Test 28 done, error=0
 
-TEST 29  10:08
+TEST 29  11:15
 o
 Test 29 done, error=0
 
-TEST 30  10:08
+TEST 30  11:15
 Test 30 (97):
 /* test 30
 [
@@ -305,7 +305,7 @@ applying st()...
 hello tc
 Test 30 done, error=0
 
-TEST 31  10:08
+TEST 31  11:15
 Test 31 (125):
 /* test 31
 [
@@ -328,14 +328,14 @@ Var Table: name class type len (type)value
  var 0: i 0 Int 1 pr[136]->0<-
 Test 31 done, error=0
 
-TEST 32  10:08
+TEST 32  11:15
 Var Table: name class type len (type)value
  var 0: foo 69 Int 1 pr[6]
 parsing foo(77);
 77
 Test 32 done, error=0
 
-TEST 33  10:08
+TEST 33  11:15
 Test 33 (46):
 /* test 33
 [
@@ -354,7 +354,7 @@ Var Table: name class type len (type)value
  var 5: f 0 Char 1 pr[71]->NULL<-
 Test 33 done, error=0
 
-TEST 34  10:08
+TEST 34  11:15
 Test 34 (386):
 /* test 34, link
 
@@ -411,44 +411,44 @@ Var Table: name class type len (type)value
  var 11: foobar 69 Int 1 pr[381]
 Test 34 done, error=0
 
-TEST 35  10:08
-empty case
+TEST 35  11:15
+t<--MC 1 echoed, and returns t
 Test 35 done, error=0
 
-TEST 36  10:08
+TEST 36  11:15
 charIn a abc is 1
 charIn b abc is 2
 charIn c abc is 3
 charIn x abc is 0
 Test 36 done, error=0
 
-TEST 37  10:08
+TEST 37  11:15
 Seventy seven 77
 Test 37 done, error=0
 
-TEST 38  10:08
+TEST 38  11:15
 pr: -->[ MC("%d %s %d",11,"abc",33,101) ]  <--
  calling st();
 11 abc 33
 Test 38 done, error=0
 
-TEST 39  10:08
+TEST 39  11:15
 empty case
 Test 39 done, error=0
 
-TEST 40  10:08
+TEST 40  11:15
  empty case
 Test 40 done, error=0
 
-TEST 41  10:08
+TEST 41  11:15
  empty case
 Test 41 done, error=0
 
-TEST 42  10:08
+TEST 42  11:15
  empty case
 Test 42 done, error=0
 
-TEST 43  10:08
+TEST 43  11:15
 Hello, test  43
  testing pl,ps,pn,alpha,num,atoi
  should be 1 1 0 -> 1 1 0
@@ -457,64 +457,107 @@ num 77 has  2 digits
 
 Test 43 done, error=0
 
-TEST 44  10:08
+TEST 44  11:15
  empty case
 Test 44 done, error=0
 
-TEST 45  10:08
+TEST 45  11:15
  empty case
 Test 45 done, error=0
 
-TEST 46  10:08
+TEST 46  11:15
  empty case
 Test 46 done, error=0
 
-TEST 47  10:08
+TEST 47  11:15
  empty case
 Test 47 done, error=0
 
-TEST 48  10:08
+TEST 48  11:15
  empty case
 Test 48 done, error=0
 
-TEST 49  10:08
+TEST 49  11:15
  empty case
 Test 49 done, error=0
 
-TEST 50  10:08
+TEST 50  11:15
 ----tc system level, calling appl main
 
 Hello, Application main
 ----tc system level, back from main
+done
+
 Test 50 done, error=0
 
-TEST 51  10:08
+TEST 51  11:15
 ----tc system level, calling appl main
 hello tc
 hello ps
 hello pl. Seventy seven -->  77
 ----tc system level, back from main
+done
+
 Test 51 done, error=0
 
-TEST 52  10:08
+TEST 52  11:15
 ----tc system level, calling appl main
 
 23456
 ----tc system level, back from main
+done
+
 Test 52 done, error=0
 
-TEST 53  10:08
+TEST 53  11:15
 ----tc system level, calling appl main
 
       b(3) is 123, b(1) is 123 
 ----tc system level, back from main
+done
+
 Test 53 done, error=0
 
-TEST 54  10:08
+TEST 54  11:15
 ----tc system level, calling appl main
- 1 0
+ceqn cat cat, then cat dog
+ 1 0 should be 1 0
 foo-bar-and-hello-to-you
 foo-bar-and-hello-to-me
- 1 0
+ceqn 20:  1 should be 1
+ceqn 23:  0 should be 0
+scann h:  12 0 should be 12 0
+scann g:  11 0 should be 11 0
+
 ----tc system level, back from main
+done
+
 Test 54 done, error=0
+
+TEST 55  11:15
+----tc system level, calling appl main
+line 3 SYMERRA, decl needed 
+    error = on + purpose
+         ^
+
+Test 55 done, error=26
+
+TEST 56  11:15
+----tc system level, calling appl main
+test 56: index
+in ->the cat in the hat<- find cat:    5 should be 5
+in ->the cat in the hat<- find dog:    0 should be 0
+
+----tc system level, back from main
+done
+
+Test 56 done, error=0
+
+TEST 57  11:15
+----tc system level, calling appl main
+cat in the hat .......
+cat in the hat ..cat..
+----tc system level, back from main
+done
+
+Test 57 done, error=0

@@ -8,10 +8,19 @@ putchar char c [
 
 /* Get a character from the terminal
 getchar [
-	return MC 2
+pl "lib~11"
+	return gc
 ]
 
-/* chrdy is deprecated
+/* chrdy return true if a character has been typed, else 0 if none
+chrdy [
+    return MC 12
+]
+
+/* sleep for n seconds
+sleep int n [
+	MC 102
+]
 
 /* put a block of chars from f to l inclusive
 pft char from(0),to(0)[
@@ -19,7 +28,7 @@ pft char from(0),to(0)[
 ]
 
 /* Read a line from the terminal into buffer as a string
-gs char buffer(0) [
+gs char b(0) [
 	int x
 	while( (b(x)=MC(2))!=13 ) [
 		if(b(x)==24) [x=0; pl("")]
@@ -130,17 +139,17 @@ move char a(0), b(0) [
 	return k
 ]
 
-/* 
+/* Reads a line, returns the first character
 gc [
+pl "lib~136 "
 	char f
-	f=MC 2
-	while(MC(2)!=13)[]
+	f = MC 2
+/*	while(MC(2) != 13) []   /* purge the buffer
 	return f
 ]
 
 /* move [a..b] inclusive n bytes, +down (higher addresses)
 movebl char a(0), b(0); int n [
-pl("t57: 143 ");pn(n);
 	MC a,b,n,7
 ]
 

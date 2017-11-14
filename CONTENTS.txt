@@ -1,7 +1,7 @@
 CONTENTS.txt
 ---
-Oct 25, 2017
-Notice: this is work in progress. I am still doing unit testing and some integration testing. But it is not a usable tiny-c yet.
+Oct 25, 2017, updated: Nov 8
+Notice: this is work in progress. My testing is fairly advanced, and all my test materials and results are included. But it is ready for Beta testing by others. 
 
 Original source from 1977
 	tc.asm
@@ -23,10 +23,10 @@ The latest results of a good regression
 	good_results
 Directories
 	testFiles (see about_testing.txt)
-	pps (and the library)
-This document
-	CONTENTS.txt
-GPL license
-	LICENSE
-Simple greeting from me
-	README.md
+	pps (just the library)
+Other documentation
+	CONTENTS.txt (this document)
+    MY_ENVIRONMENT.txt (may be useful for porting)
+    STATUS (brief description, latest on top)
+	LICENSE (gpl)
+	README.md (simple greeting from me)

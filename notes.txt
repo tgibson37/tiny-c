@@ -2166,8 +2166,159 @@ That is the entire entry. The where points to varargs, which today points to eit
 enter() has parsed args onto the stack. When it sees 'varargs' it parses it as an int, then calls MC. Else-if lit varargs at ~931 does it. The ~936 test needs to be careful. 
 MUST the body call an MC? The requirement is the code must pop all the args passed to it and push one return value. machinecall is passed nargs. It calls toptoi that many times. C's printf uses the fmt to pop stuff. Need to emulate what machine call is doing.
 
+Test 57, move movebl. COMMITed. PUSHed.
 
+New goals: 
+    remove annoying prints, 
+x        MC ~'s 151 156 186.
+        system prints
+    show the logo JUST once per session. BUT what is a session? 
+x    Write a gedit_integration.txt. 
+x    Assure github README.md is helpful. 
+    Remove the Classical branches.
+-------------
 
+Thur, Nov 9
+Comments from Lee Bradley:
+    useful:
+        windows and linux releases
+        pps library
+        lazy syntax [strong like]
+        learn C by translating from tc
+    Not so useful
+        pps editor
+    Mysteries
+        makefiles
+        gedit users
+        MC 14 bug
+        doing Ed's enhancements
+        
+Future Goals: 
+    writing: steps to convert tc code into C code
+    dash options
+        -v  [verbose]
+        -d  [debug]
+            b,w,p,c,n
+     settings
+        which lib to auto-load
+        sizes of 4 major struct arrays
+     cleanup
+        Classical should have ONLY classical lib
+        pointers for nexvar, nxtstack
+        std comment *'s
+-------------
+
+Sat, Nov 11
+Goals: test getters, File i/o. That completes the classical library
+Test 90 test just MC 2, and is not a tc program with a main. It must be run using the test system, ./test.
+Test 91 IS a tc program with main, and can be run in the test system OR as a tc program. It tests getchar, gc (the classical), gn, and gs.
+    ISSUE: need whatHappened to be tab aware
+    Goal: total confustion on test 91, gs.
+K&R p160, low level io
+-------------
+
+Mon, Nov 13
+Yesterday found code for kbhit and getch on the web...
+	https://stackoverflow.com/questions/7469139/what-is-equivalent-to-getch-getche-in-linux
+	https://cboard.cprogramming.com/c-programming/63166-kbhit-linux.html
+Both compiled and worked fine using default gcc. 
+TODAY:
+	kbhit won't link using makefile even if compiled separately using default gcc.
+		It requires the default lib. makefiles -I points to lib it cannot use.
+	Can I point ALSO to the default lib...
+		ldconfig -v 2>/dev/null | grep -v ^$'\t'  LISTS the default libs
+		ldconfig -v prints out all the .so in each lib
+ref: https://homepages.inf.ed.ac.uk/imurray2/compnotes/library_linking.txt
+	AT the very end...
+	"You can see what shared libraries your program is trying to use with:
+	    ldd ./my_program"
+ $ ldd ./kbhit
+	linux-vdso.so.1 =>  (0x00007ffe4f5f5000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe74ab0c000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fe74aed5000)
+ $ ldd ./getch
+	linux-vdso.so.1 =>  (0x00007ffd12381000)
+	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fdd56a57000)
+	/lib64/ld-linux-x86-64.so.2 (0x00007fdd56e20000)
+So now we know what libs have to be included for those two. 
+SYNOPSIS
+       gcc [-c|-S|-E] [-std=standard]
+           [-g] [-pg] [-Olevel]
+           [-Wwarn...] [-Wpedantic]
+           [-Idir...] [-Ldir...]
+           [-Dmacro[=defn]...] [-Umacro]
+           [-foption...] [-mmachine-option...]
+           [-o outfile] [@file] infile...
+ISSUE: will this help us with FileRead.c, and time.c !!!
+Need to add those using -L's. 
+	-Ldir   Add directory dir to the list of directories to be searched for -l.
+	BUT what dir has libc.so.6, or linux-vdso.so.1   ??? 
+		$ ldconfig -v 2>/dev/null > junk
+		$ less junk
+		:/libc.so.6   ==>>  scroll up to see its directory...
+	libc.so.6 is in 
+		/lib/i386-linux-gnu	
+	/lib64/ld-linux-x86-64.so.2  is in  
+		/usr/local/lib  AND  /lib/x86_64-linux-gnu
+	the -vdso is not found.
+BEST BET: libc.so.6
+	$ ldd tc
+		linux-vdso.so.1 =>  (0x00007ffdfd2ac000)
+		libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4208c17000)
+		/lib64/ld-linux-x86-64.so.2 (0x00007f4208fe0000)
+WHICH is already searched. Chasing the wrong path. Why does link fail if trying to include kbhit.
+TRY JUST getch...
+	default compiled
+	added getch.o to makefile ~20
+	make  ITS HAPPY
+	added kbhit.o to makefile ~20
+	make  STILL HAPPY
+Test 91 calls them, clones the supplied kbhit.c's main(). ALL GOOD!
+MYSTERY: ~2226 above, why did it not link back then. The issues seems to have just melted away. Probably a misdiagnosed cockpit error.
+
+SIDE NOTE: Esc to kill an app will give a whatHappened. Better than ^C.
+
+Test 92 clones test 91 in tc using chrdy instead of kbhit.
+	sleep 1 is not parsing, the MC gets a 0 arg. 
+	92 frag...
+				while(chrdy()==0) [
+				  sleep(1)
+				  ps("Press a key... ");
+				]
+	lib...
+				/* sleep for n seconds
+				sleep int n [
+					MC 102
+				]
+	MC 102...
+				/* sleep for N seconds */
+				void Msleep(int N) 
+				{
+					sleep(N);
+				}
+	gdb on Msleep...
+				Breakpoint 1, Msleep (N=0) at machineCall.c:165
+				165		sleep(N);
+Variation, sleep 1 in 92:7
+I want to breakpt tc code 92:7, the sleep(1) statement. THEN b tc.c parsing that line. dumpLine() has cursor on non-blank. So match 5 chars.
+
+break doesn't work ~749(zero), 762, 799, 802, 829(set), 
+I cannot get the cursor past the if to its break statement. I need to set a tc break. A bit of code at tc.c first lines TRIES to break on the sleep fcn call. Therein lies a clue to a table of such breaks.
+-------------
+
+Tue, Nov 14
+Yesterday started coding debug.c.
+Today: not committing often enough. Last commit Nov 8 before changes to getchar, and probably others. Regression runs 57 tests with a few diffs...
+	11, 12, 16
+But these are all changes to pr[] indexes. So probably not an issue exceept as cleanup. NO KEEP yet, but commit anyway???
+git diff...
+	machineCall.c adds: Mchrdy, Msleep
+	makefile: getch.o, kbhit.o
+	library.tc: corresponding stuff 
+		GETCHAR was MC 2, now is gc  WorkInProgress
+	
+	
+	
 
 
 
