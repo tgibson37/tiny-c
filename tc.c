@@ -5,20 +5,15 @@
 void stbegin() {
 	traceMode=0;
 	if(traceMode) {
-		if(strncmp("sleep",cursor,5)) dumpLine();
-		debug();
+/*		if(strncmp("sleep",cursor,5)) dumpLine();  */
+		tcDebug();
 	}
 }
 
-/* so gdb can 'b debug', and brkpt comes AFTER the dumpLine
- */
-void debug(){
-}
-/*	valid exit, last chance for summary stats, whatever. 
+/*	BUGOUTS: Use these to gather stats, debug, whatever.
 	prbegin/prdone called just before/after application level.
 	tcexit called before exiting the interpreter.
  */
-
 void prbegin(){};
 void prdone(){};
 void tcexit(){};
@@ -746,7 +741,7 @@ int quit() { return 0; }
  */
 void st() {
 	char *whstcurs, *whcurs, *objt, *agin ;
-	int brake=0;
+	brake=0;
 
 	if(quit())return;
 	rem();
@@ -1172,53 +1167,55 @@ void dumpName() {
  *		./tc [sysfile] appfile    Load and go
  *	  Default sysfile is ./pps/library.tc
  */
-void readTheFiles(int argc, char *argv[]) {
+void readTheFiles(int argc, char *argv[], int optind) {
 	int nread;
-	if(argc==2){
+	int optcount = optind-1;
+	if(argc-optcount==2){
 		/* sys */
-		nread = FileRead("/usr/local/share/tinyC/library.tc",epr,EPR-epr);
+		char* sysfile = "/usr/local/share/tinyC/library.tc";
+		nread = FileRead(sysfile,epr,EPR-epr);
 		if(nread == -1) {
-			printf("tc: file read error: pps/library.tc\n");
+			printf("tc: file read error: %s",sysfile);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("tc-lib: no such file: $s\n",argv[1]);
+			printf("tc-lib: no such file: $s\n",sysfile);
 			exit(1);
 		}
 		apr = epr += nread;
 		/* app */
-		nread = FileRead( argv[1],epr,EPR-epr);
+		nread = FileRead( argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
-			printf("tc: file read error: %s\n",argv[1]);
+			printf("tc: file read error: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("tc-app: no such file: %s\n",argv[1]);
+			printf("tc-app: no such file: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		epr += nread;
 		curglbl = fun+1;
 	}
-	else if(argc==3){
+	else if(argc-optcount==3){
 		/* sys */
-		nread = FileRead(argv[1],epr,EPR-epr);
+		nread = FileRead(argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
-			printf("file read error: %s\n",argv[1]);
+			printf("file read error: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such file: %s\n",argv[1]);
+			printf("no such file: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		apr = epr += nread;
 		/* app */
-		nread = FileRead(argv[2],epr,EPR-epr);
+		nread = FileRead(argv[optcount+2],epr,EPR-epr);
 		if(nread == -1) {
-			printf("file read error: %s\n",argv[2]);
+			printf("file read error: %s\n",argv[optcount+2]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such file: %s\n",argv[2]);
+			printf("no such file: %s\n",argv[optcount+2]);
 			exit(1);
 		}
 		epr += nread;
@@ -1256,22 +1253,32 @@ int countch(char *f, char *t, char c){
 void whatHappened() {
 	if(error){
 		char *fc, *lc, *lcurs;
-		int blanks, lineno;
+		int firstSignif=0, blanks, lineno;
 		lineno = countch(apr,errat,'\n');
 		printf("line %d ", lineno); errToWords();
 		lcurs=cursor;
 		fc=fchar();
-		blanks=errat-fc;
+		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
+			 ++firstSignif;
 		lc=lchar();
 		fc=fc-1;
 		pft(fc,lc);
-		printf("\n");
+/*		printf("\n"); */
+		pft(fc,fc+firstSignif-1);   /* leading whitespace */
+		blanks=errat-fc-firstSignif-1;
 		while(--blanks >= 0) printf(" ");
 		printf("^\n");
 	}
 	else {
 		printf("\ndone\n");
 	}
+}
+
+void showLine() {
+		char *fc, *lc;
+		fc=fchar();
+		lc=lchar();
+		pft(fc,lc);
 }
 
 void errToWords(){

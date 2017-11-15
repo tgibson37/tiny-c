@@ -1,5 +1,16 @@
 about_testing.txt
 ---
+Nov 15 update
+There are now regression tests 1..57, but some (13) are not used. Those simply print "empty case".
+There are others 90..93 which are not in the regression. They each require manual interaction, as they test the g's (gs, gn, etc.) And my regression technique would fail to print the prompts.
+Not all the tests use files in the testFiles directory. Series 30,40,50 and 90 are predominantly coded in files. Some of these files are full tc programs with: main[..]. But some are just compound statements:  [..].
+Not noted below is the make command 'make keep' which copies the file test_results to good_results. The latter file is the real oracle for all but the 90's series. There used to be lots of pointers in the results which cause false differences. I removed most of them, but some pr[..]'s still have differences, e.g.
+		164c164
+		<  stack entry at 2: 0 A 1 pr[99]
+		---
+		>  stack entry at 2: 0 A 1 pr[67]
+In test.c there are expected result comments labeled "Should get...". The rest of the comment is a copy/paste of good results. Use these comments on the manual series 90 tests.
+------------
 Oct 25, 2017
 
 As of this writing there are 42 unit tests organized for simple regession testing. The are numbered 1 up. Most are coded completely in the file test.c, but a few use files stored in the directory testFiles. 
@@ -11,8 +22,9 @@ A more convenient way to run all tests is...
 which produces a file, test_results. Follow that with...
 	make diff
 which diffs test_results against good_results to stdout. I do not redirect that but let it print to my terminal. Then scroll up/down to find issues. Every test prints a header like...
-	TEST 40  14:12
+		TEST 16  09:11
 which includes a time stamp. So the different time stamps for good_results vs test_results diff will always cause both headers to print...
-	TEST 40  14:12
-	TEST 40  12:32
+		< TEST 16  09:11
+		---
+		> TEST 16  11:15
 The times themselves are irrelevant. Actual result differences ARE relevant, and this simple trick identifies which test needs attention. After doing a make diff scroll up and down and if all is cool it takes 5 seconds to determine that.

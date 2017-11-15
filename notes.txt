@@ -2316,9 +2316,51 @@ git diff...
 	makefile: getch.o, kbhit.o
 	library.tc: corresponding stuff 
 		GETCHAR was MC 2, now is gc  WorkInProgress
-	
-	
-	
+	tc.c, bugout changes (stbegin, etc)
+	test.c, 
+		test 35 partial restored, 
+		56,57,90's new
+I think a local commit will be ok. It compiles and runs.
+DONE
+---
+Back to debug.c
+GOALs: set a breakpoint and stop in hit. THEN continue and next.
+Coded: 
+	whatHappened: leading tabs ok
+	args: using optargs in tc.c, hand coded in test.c, modified readTheFiles
+	debug.c infrastructure, no action yet
+Arg changes work for ./tc testFiles/56 (arb picked whole prog)
+whatHappened changes DONT work. FIXED.
+Tests 44 new (whatHappened) works
+test 93 still broken
+Both getchar and gc use MC 2, which blocks UNTIL <enter>. Then they each return one char, INCLUDING the newline at the end. One of these should use getche. 
+Mgch MC 2 calls C's getchar. This is what we are trying to replace. This and chrdy which is MC 12.
+But test 92 uses chrdy and getchar and getchar there seems to flush the buffer.
+CONFUSION: I DONT KNOW WHAT MY TESTS ARE DOING...
+	44 ceqn, index, move						???
+	45 whatHappened test of leading tabs		good
+	91 is a unit test of kbhit/getchar			problem
+	92 clone of 91 using lib's chrday/getchar	interesting
+make dotest; make diff...
+	11, 12, 16 pr indx diffs
+	44, whole new test, 
+		old was ceqn,index,move; 
+		new is empty case
+		???
+	45 changed, old empty, new whatHappened
+	55 must be whatHappened. carrot moved by ONE place
+	57 LAST
+So what happened to ceqn, etc ???
+------------
+
+Wed, nov 15
+	44 tests just move
+	54 grep ceqn 9 hits. Runs. ceqn,scann
+Missing or wrong "should get"
+	44 45 
+
+
+
 
 
 

@@ -1,0 +1,20 @@
+My environment
+---
+I built this version of tinyC on mint linux using these tools:
+    - gnu's c compiler, gcc
+    - gnu's make system, makefile
+The makefile has all the technical specs. For example this line...
+    CFLAGS = -w -g -ansi -I /usr/lib/syslinux/com32/include/
+defines all the dash flags used on each compile/link.
+
+One anomoly. Two files would not compile with those flags, don't know why...
+    - time.c
+    - FileRead.c
+But they compiled fine with NO flags except -c, just pure 'gcc -c time.c', for example. And the link phase found their objects just fine.
+
+I am not familiar with either windows, or apples OSx. I assume they have build facilities not too far removed from my supplied make. So if you are porting my work to another environment you may have a bit of work to port the makefile, especially the compile flags.
+
+GOOD LUCK!
+Tom Gibson
+Nov 8, 2017
+

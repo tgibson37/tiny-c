@@ -5,12 +5,15 @@
  *	without the component tests. Normal use is tc.c.
  */
 
+extern int optind;
 int main(int argc, char *argv[])
 {
 	traceMode=0;
+	optind=1;
 	if( argc>1 && !strcmp(argv[1],"-t")) {
 		traceMode=1;
 		printf("trace mode on");
+		++optind;
 		testing(--argc, argv+1);
 	} else {
 		testing(argc,argv);

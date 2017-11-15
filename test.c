@@ -14,7 +14,7 @@ void testWhole(char* filename){
 	epr = prused = pr+10;
 	cursor = pr;
 	curglbl = fun;
-	readTheFiles(2,argv);  /* sets epr, curglbl */
+	readTheFiles(2,argv,1);  /* sets epr, curglbl */
 	error=0;
 	prused = epr+10;  /* a little slack */
 	nxtvar = 0;
@@ -914,9 +914,23 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				 should be 1 1 0 -> 1 1 0
 				num 77 has  2 digits
 				  and has value 77, and (atoi call) -77 value -77
-  */
+ */
 		case 44:
+			testWhole("./testFiles/44");
+			break;
+/* 	Should get... 
+				 testing ceqn, index, move
+				cat in hat
+ */
 		case 45:
+			testWhole("./testFiles/45");
+			break;
+/* 	Should get...
+ 
+				whatHappened, INTENTIONAL ERROR...
+				line 6 SYMERRA, decl needed 
+						  Kcount = 30;   /* <<== tab-tab-space-space K...
+ */
 		case 46:
 		case 47:
 		case 48:
@@ -935,16 +949,16 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/51");
 			break;
 /* 	Should get... 
- *					hello tc
- *					hello ps
- *					hello pl. Seventy seven -->  77
+ *			hello tc
+ *			hello ps
+ *			hello pl. Seventy seven -->  77
  */
 		case 52:
 			testWhole("./testFiles/52");
 			break;
 /* 	Should get... 
  *			<blank line>
- *				23456
+ *			23456
  */
 		case 53:
 			testWhole("./testFiles/53");
@@ -957,10 +971,14 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/54");
 			break;
 /* 	Should get... 
- *	 1 0
- *	foo-bar-and-hello-to-you
- *	foo-bar-and-hello-to-me
- *	 1 0
+			ceqn cat cat, then cat dog
+			 1 0 should be 1 0
+			foo-bar-and-hello-to-you
+			foo-bar-and-hello-to-me
+			ceqn 20:  1 should be 1
+			ceqn 23:  0 should be 0
+			scann h:  12 0 should be 12 0
+			scann g:  11 0 should be 11 0
  */
 		case 55:
 			testWhole("./testFiles/55");
@@ -1031,8 +1049,19 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 		case 92:
 			testWhole("./testFiles/92");
 			break;
-/* 	Should get... 
- *	
+/* 	Clone of 91 using lib functions. Should get (typical)... 
+ *				Press a key... 
+ *				Press a key... ^A
+ *				Press a key... You pressed 
+ *				Press a key... 
+ *				Press a key... ^[[A
+ *				Press a key... You pressed You pressed [You pressed A
+ *				Press a key... 
+ *				Press a key... p
+ *				Press a key... You pressed p
+ *				Press a key... 
+ *				Press a key... q
+ *				Press a key... You pressed q^C
  */
 		case 93:
 			testWhole("./testFiles/93");

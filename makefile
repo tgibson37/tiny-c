@@ -17,13 +17,13 @@ INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
 
 # The tc object files
-OBJTC = tc.o FileRead.o time.o getch.o kbhit.o machineCall.o tcMain.o
+OBJTC = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o
 
 # The test object files
-OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o machineCall.o tcTestMain.o
+OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcTestMain.o
 
 # All the header and c files
-SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c
+SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c debug.c
 HDRS = tc.h
 
 # Add -I to the dir the include files are in

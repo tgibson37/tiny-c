@@ -1,0 +1,17 @@
+/* Test 92, chrdy, getchar
+
+main [
+  pl("kbhit and getchar, ctrl-C to stop"); pl""
+  int count
+	  Kcount = 30;
+  while(count>0) [
+    while(chrdy()==0 ) [
+      sleep(1)
+      pl("Press a key... ");
+      count = count-1
+      if( count<0 ) return
+    ]
+    ps("You pressed "); putchar(getchar());
+  ]
+]
+

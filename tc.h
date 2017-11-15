@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
 
 #define VLEN 8
 #define VTABLEN 200
@@ -32,6 +33,7 @@
 #define KILL         99
 
 /* globals */
+int debug, verbose;
 
 /*	All tc data are ints or chars. Pointers are an int index into pr. 
  *	stuff is the typless holder of any value.
@@ -89,6 +91,8 @@ int obsize, vclass, alen;
 int traceMode;
 
 void stbegin();
+void tcDebug();
+struct var* hit();
 int typeToSize( int class, Type type );
 int eq();
 int topdiff();
@@ -152,4 +156,4 @@ char get_char(char *where);
 void put_ptr(char *where, void* datum);
 char* get_ptr(char *where);
 int FileRead(char*filename, char* buffer, int bufflen);
-void readTheFiles(int argc, char *argv[]);
+void readTheFiles(int argc, char *argv[], int optind);

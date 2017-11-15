@@ -1,0 +1,8 @@
+/* Test 44, whatHappened with leading tabs
+
+main [
+  pl("whatHappened, INTENTIONAL ERROR..."); pl""
+  int count
+	  Kcount = 30;   /* <<== tab-tab-space-space K...
+]
+

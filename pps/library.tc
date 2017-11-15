@@ -8,7 +8,6 @@ putchar char c [
 
 /* Get a character from the terminal
 getchar [
-pl "lib~11"
 	return gc
 ]
 
@@ -141,10 +140,8 @@ move char a(0), b(0) [
 
 /* Reads a line, returns the first character
 gc [
-pl "lib~136 "
 	char f
 	f = MC 2
-/*	while(MC(2) != 13) []   /* purge the buffer
 	return f
 ]
 

@@ -1,0 +1,24 @@
+/* Test 93, getchar, gc, gn, gs
+
+main [
+	char buf[80]
+	char x
+	int n
+
+	pl "getchar test; enter one character, then <enter> :"
+	x = getchar
+    ps("getchar: ");putchar x
+
+	pl "gc test; enter one character, then <enter> :"
+	x = gc
+	pl("gc: ");putchar x
+	
+	pl "gs test; enter a string, then <enter> :"
+	buf = gs
+    ps("gs: ");ps x
+
+	pl "gn test; enter a number, then <enter> :"
+	x = gn
+	ps("gn: ");pn x
+]
+
