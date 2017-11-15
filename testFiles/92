@@ -1,9 +1,9 @@
 /* Test 92, chrdy, getchar
 
 main [
-  pl("kbhit and getchar, ctrl-C to stop"); pl""
+  pl("chrdy and getchar, ctrl-C to stop"); pl""
   int count
-	  Kcount = 30;
+	  count = 30;
   while(count>0) [
     while(chrdy()==0 ) [
       sleep(1)

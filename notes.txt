@@ -2356,8 +2356,54 @@ So what happened to ceqn, etc ???
 Wed, nov 15
 	44 tests just move
 	54 grep ceqn 9 hits. Runs. ceqn,scann
-Missing or wrong "should get"
-	44 45 
+Missing "should get"
+	44 45 FIXED
+COMMIT locally, including lots of txt files.
+ 
+93 error 21, ARGSERR, args don't match.
+	Also getchar and gc 
+		both block AND 
+		both read the newline AND 
+		neither flush the input buffer but read whatever is left over
+		both use MC2, which is implemented with C's getchar
+	BUT test 92 loops printing "Press a key... "
+			kbhit and getchar, ctrl-C to stop
+			Press a key... 
+			Press a key... z
+			Press a key... You pressed z
+			Press a key... 
+			Press a key... x    <<== echo???
+			Press a key... You pressed x
+			Press a key... 
+			Press a key... ^[[A
+			Press a key... You pressed You pressed [You pressed A
+			Press a key... 
+			Press a key...  <<== <enter>
+
+			Press a key... You pressed 
+
+			Press a key... 
+			Press a key... ^C
+	redundant "Press a key... " removed.
+	It does not wait for enter
+	kbhit code does 
+		getchar, 
+		tests for EOF -> return 0
+			else ungetc char and return char
+		So tc's getchar gets the pushed back char.
+		kbhit works because its getchar ALWAYS returns something
+			EOF or buffered char. 
+			It modifies stdin's attrs to non-canon no-echo.
+		Ref: https://en.wikibooks.org/wiki/Serial_Programming/termios
+			Canon/non-canon defined near the end.
+Why 92 works...
+	The ungetc ASSURES the test 92's getchar succeeds.
+	It is pushed back into a buffer with no \n.
+	And kbhit's getchar was echo free. 
+		What produced the echo's above???
+		We can live with the echo.
+93 ARGSERR several bugs---FIXED
+COMMIT local
 
 
 

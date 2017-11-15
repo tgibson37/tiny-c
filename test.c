@@ -1066,8 +1066,14 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 		case 93:
 			testWhole("./testFiles/93");
 			break;
-/* 	Should get... 
- *	
+/* 	Should get (typical)... 
+				getchar test; enter one character, then <enter> :abcdef
+				getchar: a
+				gc test; enter one character, then <enter> :
+				gc: b
+				gs test; enter a string, then <enter> :-->cdef<--
+				gn test; enter a number, then <enter> :77
+				gn:  77
  */
 		case 94:
 			testWhole("./testFiles/94");
