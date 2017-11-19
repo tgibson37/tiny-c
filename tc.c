@@ -1,22 +1,14 @@
 #include "tc.h"
 
-/* called by st(), does nothing, used for stats, debugging, whatever. 
- */
-void stbegin() {
-	traceMode=0;
-	if(traceMode) {
-/*		if(strncmp("sleep",cursor,5)) dumpLine();  */
-		tcDebug();
-	}
-}
-
 /*	BUGOUTS: Use these to gather stats, debug, whatever.
 	prbegin/prdone called just before/after application level.
 	tcexit called before exiting the interpreter.
- */
+	NOTE: moved to debug.c
 void prbegin(){};
 void prdone(){};
 void tcexit(){};
+void stbegin() {};
+ */
 
 /* chunk 1: literals
 /************** literals **************/
@@ -411,34 +403,30 @@ int copyArgValue(struct var *v, int class, Type type, union stuff *passed ) {
 	}
 }
 
-/* 	looks up a symbol pointed to by fname,lname.
- *	This version looks from 0 to nxtvar-1.
- *	ISSUE	Ultimate version looks through 3 regions, locals,globals,library.
+/* 	looks up a symbol at one level
+ */
+struct var* _addrval(char *sym, struct funentry *level) {
+	int first = (*level).fvar;
+	int last  = (*level).lvar;
+	int pvar;
+	for(pvar=first; pvar<=last; ++pvar) {
+		if( !strcmp(vartab[pvar].name, sym) ) return &vartab[pvar];
+	}
+	return 0;
+}
+
+/* 	looks up a symbol pointed to by fname,lname: 
+ *	locals, globals, library levels in that order. First hit wins.
  */
 struct var* addrval() {
 	struct funentry *sfun = curfun;
-	struct var temp;
-	canon( &temp );  /* temp.name is string version of fname..lname */
-	int area;
-	for(area=0; area<3; ++area){
-		int first = (*sfun).fvar;
-		int last  = (*sfun).lvar;
-		int pvar;
-		for(pvar=first; pvar<=last; ++pvar) {
-			if( !strcmp(vartab[pvar].name, temp.name) ) return &vartab[pvar];
-		}
-		switch(area){
-		case 0:
-			sfun = curglbl;		/* locals done, switch to globals */
-			break;
-		case 1:
-			sfun = fun;			/* globals done, switch to library */
-			break;
-		case 2:
-			eset(SYMERRA);
-			return 0;   		/* not found */
-		}
-	}
+	struct var sym;
+	canon( &sym );  /* sym.name is string version of fname..lname */
+	struct var *v;
+	v = _addrval( sym.name, curfun ); if(v)return v;
+	v = _addrval( sym.name, curglbl ); if(v)return v;
+	v = _addrval( sym.name, fun ); if(v)return v;
+	return 0;	
 }
 
 /* 	fname..lname is full name. Puts canonicalized name into v. If short
@@ -618,7 +606,7 @@ void factor() {
 			enter(0); return;
 		} else {
 			struct var *v = addrval();  /* looks up symbol */
-			if( !v ){ eset(SYMERR); return; } /* typo, or no decl */
+			if( !v ){ eset(SYMERR); return; } /* no decl */
 		  	char* where = (*v).value.up;
 		  	int integer =  (*v).value.ui; 
 		  	int character = (*v).value.uc;

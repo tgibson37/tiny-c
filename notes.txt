@@ -2405,6 +2405,146 @@ x	gs char buffer(0) [
 	fclose int u [
 		/*endlibrary
 No x is the TO DO list.
+---
+Thoughts on getchar/gc
+	One of these two should offer non-blocking no-echo. 
+	The code in kbhit shows how to do that. 
+	Clone that code.
+	Which? 
+		I think in OM getchar gets the nod. gc should use existing MC 2. 
+			OM ~2-22 
+			gc: reads a line. 
+			getchar: returns even control char's. No explicit mention it
+				is non-blocking. But it definitly was.
+	Right now getchar calls gc, gc calls MC 2. 
+		New MC needed, MC 103. 
+	ISSUE: getchar should NOT echo. 
+		Is 'ECHO' a proper flag name??? It's not suppressing the echo.
+			ECHO is the flag name. 
+			Bit or (|) is proper. 
+			tcsetattr defininely sets the new state, as ICANON is unset.
+------------
+
+Fri, Nov 17
+Thoughts on debug
+	b <sym>: 
+		Look up sym in globals
+		check it is class E
+		add ptr to its var into brktab
+		new bugout call: void entering(where) from enter
+				called only when [apr<where<epr]
+			entering where matches where to each brktab entry
+				no hit -> continue
+				else void hit(var)
+					hit does debug command loop: 
+						n -> nxt statement
+						c -> continue
+						p <sym> -> look up and print value of sym
+---
+Working on debug. 
+
+refactored addrval, nicer code, usable part _addrval searches one level.
+changes in tests 45 tab tolerance intentional, 55 
+	(old err SYMERRA 26, new err SYMERR 3) Both are decl needed.
+	SYMERRA only shows in test.c comments, and tc.c errToWords.
+	tc.asm has it in addrval for failed lookup. 
+		Had it in C version. Evidently returned zero.
+		Lost it in this refactor. Still returns zero.
+		test.c always tests and prints "addrval returns 0"
+		tc.c only one call, it tests, 
+			it eset(SYMERR) which DOES NOT override previous setting.
+	SYMERRA is dead. Leave the code as is.
+	tc.asm use of SYMERR: factor tested for 0 where which should never happen.
+	C code makes no such test.
+b will be on globals only.
+	on 'E' its like gdb b
+	on class 0,1 its a watch
+fgets fails on stdin, "iofgets.c: No such file or directory." 
+	Try gnu extension...
+	Function: ssize_t getline (char **lineptr, size_t *n, stdin)
+That fails, too.
+------------
+
+Sat, Nov 18
+Working on debug.
+Still cannot read a line, fgets internal issue.
+	sudo apt-get install libc6-dev
+	and maybe build-essentials
+various help sites say this fixes various lib issues.
+
+$ gcc --version
+gcc (Ubuntu 4.8.4-2ubuntu1~14.04.3) 4.8.4
+
+$ cat /etc/linuxmint/info
+RELEASE=17.3
+CODENAME=rosa
+EDITION="Cinnamon 64-bit"
+DESCRIPTION="Linux Mint 17.3 Rosa"
+DESKTOP=Gnome
+TOOLKIT=GTK
+NEW_FEATURES_URL=http://www.linuxmint.com/rel_rosa_cinnamon_whatsnew.php
+RELEASE_NOTES_URL=http://www.linuxmint.com/rel_rosa_cinnamon.php
+USER_GUIDE_URL=help:linuxmint
+GRUB_TITLE=Linux Mint 17.3 Cinnamon 64-bit
+
+$ dpkg -s libc6-dev
+Package: libc6-dev
+Status: install ok installed
+Priority: optional
+Section: libdevel
+Installed-Size: 12172
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Architecture: amd64
+Multi-Arch: same
+Source: eglibc
+Version: 2.19-0ubuntu6.13
+Provides: libc-dev
+Depends: libc6 (= 2.19-0ubuntu6.13), libc-dev-bin (= 2.19-0ubuntu6.13), linux-libc-dev
+Recommends: gcc | c-compiler
+Suggests: glibc-doc, manpages-dev
+Breaks: binutils (<< 2.20.1-1), binutils-gold (<< 2.20.1-11), cmake (<< 2.8.4+dfsg.1-5), gcc-4.4 (<< 4.4.6-4), gcc-4.5 (<< 4.5.3-2), gcc-4.6 (<< 4.6.0-12), libhwloc-dev (<< 1.2-3), libjna-java (<< 3.2.7-4), liblouis-dev (<< 2.3.0-2), liblouisxml-dev (<< 2.4.0-2), make (<< 3.81-8.1), pkg-config (<< 0.26-1)
+Conflicts: libc0.1-dev, libc0.3-dev, libc6.1-dev
+Description: Embedded GNU C Library: Development Libraries and Header Files
+ Contains the symlinks, headers, and object files needed to compile
+ and link programs which use the standard C library.
+Homepage: http://www.eglibc.org
+Original-Maintainer: GNU Libc Maintainers <debian-glibc@lists.debian.org>
+
+Joined stackoverflow. Submitted question on this diagnostic...
+-----
+"
+Using gcc on Mintbox Mint Linux, amd64. Here is a successful make which produces two executables...
+$ make
+/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/ tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o -o tc
+/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/ -c test.c
+/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/   -c -o tcTestMain.o tcTestMain.c
+/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/ tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcTestMain.o -o test
+
+It segs on a call to fgets on stdin. Here is gdb's diagnostic and the top of a backtrace...
+Program received signal SIGSEGV, Segmentation fault.
+_IO_fgets (buf=0x60ed00 <buf> "", n=80, fp=0x1) at iofgets.c:50
+50	iofgets.c: No such file or directory.
+(gdb) bt
+#0  _IO_fgets (buf=0x60ed00 <buf> "", n=80, fp=0x1) at iofgets.c:50
+
+Here are the offending line(s)...
+	#define BUF_SIZE 80
+	char buf[BUF_SIZE+1];
+	...
+		fgets(buf, BUF_SIZE, stdin);
+Separate compiling of the one file doesn't change anything, although that strategy worked for a couple of other similar cases.
+I have installed libc6-dev (which was missing from my Mint box). That fixed previous issues, but this one is a mystery.
+QUESTIONS: How does one learn what lib contains the missing piece? 
+Thank you in advance.
+"
+WITHDREW THE QUESTION...
+	Separate compile of debug without CFLAGS fixed it. 
+	Evidently ../syslinux/com32/.. has many problems with i/o related stuff:
+		FileRead.c getch.c kbhit.c debug.c(because of fgets) time.c
+	The main 5 are happy with the -I
+
+
+
 
 
 

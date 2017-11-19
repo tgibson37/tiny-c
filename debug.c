@@ -1,51 +1,83 @@
 #include "tc.h"
 
-/* tc debugger 
- */
+#define BTABSIZE 10
+#define BUF_SIZE 80
+
+void prbegin(){};
+void prdone(){};
+void tcexit(){};
+void stbegin() {
+	if(debug) {
+		tcDebug();
+	}
+}
+
+int running = 0;
 
 struct brk {
 	struct var* var;
 	int enabled;
-};
-int brktab[10];
+	int hits;
+} brktab[BTABSIZE];
 int nxtbrk = 0;
-int running = 0;
 
-char buf[80];
-int sizeof_line = 80;
+char buf[BUF_SIZE+1];
+int sizeof_line = BUF_SIZE;
 
 char *param() {
 	return buf[1]==' ' ? &buf[2] : &buf[1];
 }
 
-void tcDebug() {
-	if(running) {
-		if(hit()) {
-			showLine();
-			cmds();
-		}
+struct brk *find_b(char *sym) {
+	int i;
+	for( i=0; i<nxtbrk; ++i ) {
+		if( strcmp(sym,(*brktab[i].var).name ) ) return &brktab[i];
+	}
+	return 0;
+}
+
+int num_b(struct brk *b) {
+	return b-brktab+1;
+}
+
+void set_b(char *sym) {
+	struct brk *b = find_b(sym);
+	if(b){
+		printf("is already %d",num_b(b));
 	}
 	else {
-		cmds();
+		if(nxtbrk>=BTABSIZE) printf("too many breaks, max BTABSIZE");
+		else {
+			b = &brktab[nxtbrk++];
+			(*b).var = _addrval(sym,curglbl);
+			(*b).hits = 0;
+			(*b).enabled = 1;
+		}
 	}
 }
 
-void cmds() {
-	while(1) {
-		int cmd = do_cmd();
-		if(cmd=='X') exit(0);
-		else if(cmd=='r') return;
+void inf_b() {
+	int i;
+	for(i=0;i<nxtbrk;i++){
+		printf("\n%2d %8s  %c  %d ",i+1, (*(brktab[i]).var).name, 
+				(brktab[i]).enabled?'y':'n', (brktab[i]).hits );
 	}
 }
 
-int do_cmd() {
+int deb_cmd() {
 	printf("\n(db) ");
-	fgets(buf, sizeof(buf), stdin);
+	fgets(buf, BUF_SIZE, stdin);
 	char cmd = buf[0];
 	switch(cmd) {
 /* set breakpt */
 	case 'b':
 		printf("%s\n",param());
+		set_b(param());
+		break;
+/* set breakpt */
+	case 'i':
+		printf("%s\n",param());
+		inf_b();
 		break;
 /* run */
 	case 'r':
@@ -61,7 +93,28 @@ int do_cmd() {
 	}
 }
 
+void cmds() {
+	while(1) {
+		int cmd = deb_cmd();
+		if(cmd=='X') exit(0);
+		else if(cmd=='r') return;
+	}
+}
+
 struct var* hit() {
 	
 }
-	
+
+void tcDebug() {
+	if(running) {
+		if(hit()) {
+			showLine();
+			cmds();
+		}
+	}
+	else {
+		cmds();
+	}
+}
+
+

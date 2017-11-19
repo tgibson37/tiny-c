@@ -23,7 +23,7 @@ OBJTC = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o
 OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcTestMain.o
 
 # All the header and c files
-SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c debug.c
+SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c 
 HDRS = tc.h
 
 # Add -I to the dir the include files are in
