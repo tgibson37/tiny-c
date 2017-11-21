@@ -2558,7 +2558,25 @@ ISSUE: All use of addrval requires EITHER
 ------------
 
 Tue, Nov 21
-		
+COMMITed partial debugger.
+DONE Goal: Debugger p <sym> prints the value of a symbol
+	Tools needed: string with canon'd buf parameter
+		symname defines fname,lname. 
+			It is tidy, now, doesn't jump cursor beyond the sym.
+		canon sets canon'd name into a var. 
+			See addrval for usage.
+		fname,lname is an OK way to communicate from symname to canon
+			they are used in very tight transient ways
+			both are char*, so quite flexible
+COMMITed useful debugger.
+
+
+
+
+
+
+
+
 
 
 

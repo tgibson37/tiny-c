@@ -74,13 +74,28 @@ void inf_b() {
 	}
 }
 
-void print_b(char* sym) {
-/*	
-	if(!v) printf("no such sym\n");
+void canonThis(char* f, char* l, struct var *buf) {
+	char* tf=fname;
+	char* tl=lname;
+	fname=f; lname=l; canon(buf);
+	fname=tf;
+	lname=tl;
+}
+
+void print_b(char* param) {
+	struct var sym;
+	struct var *found;
+	canonThis( param, param+strlen(param)-1, &sym );
+	found = addrval_all(sym.name);
+	if(!found) printf("no such sym\n");
 	else{
-		
+		dumpVar(found);
+		printf("\n");
 	}
-*/
+}
+
+void next_b(){
+	
 }
 
 int deb_cmd() {
@@ -92,12 +107,10 @@ int deb_cmd() {
 	switch(cmd) {
 /* set breakpt */
 	case 'b':
-/*		printf("%s\n",param()); */
 		set_b(param());
 		break;
 /* info, list breakpts */
 	case 'i':
-/*		printf("%s\n",param());  */
 		inf_b();
 		break;
 /* run */
@@ -108,7 +121,12 @@ int deb_cmd() {
 /* print */
 	case 'p':
 		print_b(param());
-		return 'x';
+		return 'p';
+		break;
+/* next */
+	case 'n':
+		next_b();
+		return 'n';
 		break;
 /* exit */
 	case 'x':
@@ -131,7 +149,7 @@ struct var* br_hit(struct var *v) {
 	int lineno;
 	if(cursor>apr){
 		lineno = countch(apr,cursor,'\n');
-		printf("break at line %d\n",lineno);
+		printf("\nbreak at line %d: %s\n",lineno,(*v).name);
 		showLine(cursor);
 		printf("\n");
 		cmds();

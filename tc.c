@@ -421,18 +421,24 @@ struct var* _addrval(char *sym, struct funentry *level) {
 	return 0;
 }
 
+/* 	looks up a symbol at three levels
+ */
+struct var* addrval_all(char *sym) {
+	struct var *v;
+	v = _addrval( sym, curfun );
+	if(!v) v = _addrval( sym, curglbl );
+	if(!v) v = _addrval( sym, fun ); 
+	if(v)return v;
+	return 0;	
+}
+
 /* 	looks up a symbol pointed to by fname,lname: 
  *	locals, globals, library levels in that order. First hit wins.
  */
 struct var* addrval() {
 	struct var sym;
-	canon( &sym );  /* sym.name is string version of fname..lname */
-	struct var *v;
-	v = _addrval( sym.name, curfun );
-	if(!v) v = _addrval( sym.name, curglbl );
-	if(!v) v = _addrval( sym.name, fun ); 
-	if(v)return v;
-	return 0;	
+	canon( &sym );
+	return addrval_all(sym.name);
 }
 
 /* 	fname..lname is full name. Puts canonicalized name into v. If short
