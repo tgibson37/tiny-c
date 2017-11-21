@@ -61,7 +61,7 @@ struct funentry fun[FUNLEN];
 struct funentry *curglbl, *curfun, *efun;
 
 struct var { 
-	char name[VLEN+1]; int class; Type type; int len; 
+	char name[VLEN+1]; int class; Type type; int len; int brkpt;
 	union stuff value; 
 };
 /* variable table */
@@ -121,6 +121,7 @@ int allocSpace(struct var *v, int amount);
 int copyArgValue(struct var *v, 
 		int class, Type type, union stuff *passed );
 struct var* addrval();
+struct var* _addrval();
 void canon(struct var *v);
 int asgn();
 int reln();

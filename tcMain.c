@@ -31,7 +31,9 @@ int main(int argc, char *argv[]) {
 	logo();
 	link();
 	cursor=pr;
+	prbegin();
 	st();   /* <<<== executes statement above, line 8 */
+	prdone();
 	whatHappened();
 }
 

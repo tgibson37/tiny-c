@@ -3,14 +3,14 @@
 #define BTABSIZE 10
 #define BUF_SIZE 80
 
-void prbegin(){};
-void prdone(){};
-void tcexit(){};
-void stbegin() {
+void prbegin(){
 	if(debug) {
-		tcDebug();
+		cmds();
 	}
 }
+void prdone(){}
+void tcexit(){}
+void stbegin() {}
 
 int running = 0;
 
@@ -41,6 +41,7 @@ int num_b(struct brk *b) {
 }
 
 void set_b(char *sym) {
+	struct var *v;
 	struct brk *b = find_b(sym);
 	if(b){
 		printf("is already %d",num_b(b));
@@ -48,35 +49,55 @@ void set_b(char *sym) {
 	else {
 		if(nxtbrk>=BTABSIZE) printf("too many breaks, max BTABSIZE");
 		else {
+			v = _addrval(sym,curfun);
+			if(!v)v = _addrval(sym,curglbl);
+			if(!v)v = _addrval(sym,fun);
+			if(!v){
+				printf("%s ? no such symbol\n",sym);
+				return;
+			}
 			b = &brktab[nxtbrk++];
-			(*b).var = _addrval(sym,curglbl);
+			(*b).var = v;
 			(*b).hits = 0;
 			(*b).enabled = 1;
+			(*v).brkpt = 1;
 		}
 	}
 }
 
 void inf_b() {
 	int i;
+	printf("num sym enabled hits\n");
 	for(i=0;i<nxtbrk;i++){
-		printf("\n%2d %8s  %c  %d ",i+1, (*(brktab[i]).var).name, 
+		printf("%2d %8s  %c  %d \n",i+1, (*(brktab[i]).var).name, 
 				(brktab[i]).enabled?'y':'n', (brktab[i]).hits );
 	}
 }
 
+void print_b(char* sym) {
+/*	
+	if(!v) printf("no such sym\n");
+	else{
+		
+	}
+*/
+}
+
 int deb_cmd() {
-	printf("\n(db) ");
+	printf("(db) ");
 	fgets(buf, BUF_SIZE, stdin);
+		int clen = ((int)strlen(buf))-1;
+		buf[clen]=0;
 	char cmd = buf[0];
 	switch(cmd) {
 /* set breakpt */
 	case 'b':
-		printf("%s\n",param());
+/*		printf("%s\n",param()); */
 		set_b(param());
 		break;
-/* set breakpt */
+/* info, list breakpts */
 	case 'i':
-		printf("%s\n",param());
+/*		printf("%s\n",param());  */
 		inf_b();
 		break;
 /* run */
@@ -84,9 +105,14 @@ int deb_cmd() {
 		running = 1;
 		return 'r';
 		break;
+/* print */
+	case 'p':
+		print_b(param());
+		return 'x';
+		break;
 /* exit */
-	case 'X':
-		return 'X';
+	case 'x':
+		return 'x';
 		break;
 	default:
 		printf("???\n");
@@ -96,23 +122,18 @@ int deb_cmd() {
 void cmds() {
 	while(1) {
 		int cmd = deb_cmd();
-		if(cmd=='X') exit(0);
+		if(cmd=='x') exit(0);
 		else if(cmd=='r') return;
 	}
 }
 
-struct var* hit() {
-	
-}
-
-void tcDebug() {
-	if(running) {
-		if(hit()) {
-			showLine();
-			cmds();
-		}
-	}
-	else {
+struct var* br_hit(struct var *v) {
+	int lineno;
+	if(cursor>apr){
+		lineno = countch(apr,cursor,'\n');
+		printf("break at line %d\n",lineno);
+		showLine(cursor);
+		printf("\n");
 		cmds();
 	}
 }

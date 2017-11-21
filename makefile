@@ -68,4 +68,20 @@ tc.o: tc.c tc.h
 clean:
 	rm -fv core* $(TC) $(OBJS)
 
-# separately: gcc -c FileRead.c
+# separately: gcc -c FileRead.c,...  WITHOUT cflags
+
+debug.o: debug.c tc.h
+	$(CC) -c -w debug.c
+
+FileRead.o: FileRead.c tc.h
+	$(CC) -c -w FileRead.c
+
+getch.o: getch.c tc.h
+	$(CC) -c -w getch.c tc.h
+
+kbhit.o: kbhit.c tc.h
+	$(CC) -c -w kbhit.c tc.h
+
+time.o: time.c tc.h
+	$(CC) -c -w time.c tc.h
+

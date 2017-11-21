@@ -2440,6 +2440,7 @@ Thoughts on debug
 						n -> nxt statement
 						c -> continue
 						p <sym> -> look up and print value of sym
+	Also when fundone happens nxtfun pops and locals go out of scope. So if I ever do locals, need to pop nxtbrk until all that fcns locals gone. Probably need same arch as funtab.
 ---
 Working on debug. 
 
@@ -2470,79 +2471,94 @@ Working on debug.
 Still cannot read a line, fgets internal issue.
 	sudo apt-get install libc6-dev
 	and maybe build-essentials
-various help sites say this fixes various lib issues.
-
-$ gcc --version
-gcc (Ubuntu 4.8.4-2ubuntu1~14.04.3) 4.8.4
-
-$ cat /etc/linuxmint/info
-RELEASE=17.3
-CODENAME=rosa
-EDITION="Cinnamon 64-bit"
-DESCRIPTION="Linux Mint 17.3 Rosa"
-DESKTOP=Gnome
-TOOLKIT=GTK
-NEW_FEATURES_URL=http://www.linuxmint.com/rel_rosa_cinnamon_whatsnew.php
-RELEASE_NOTES_URL=http://www.linuxmint.com/rel_rosa_cinnamon.php
-USER_GUIDE_URL=help:linuxmint
-GRUB_TITLE=Linux Mint 17.3 Cinnamon 64-bit
-
-$ dpkg -s libc6-dev
-Package: libc6-dev
-Status: install ok installed
-Priority: optional
-Section: libdevel
-Installed-Size: 12172
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Architecture: amd64
-Multi-Arch: same
-Source: eglibc
-Version: 2.19-0ubuntu6.13
-Provides: libc-dev
-Depends: libc6 (= 2.19-0ubuntu6.13), libc-dev-bin (= 2.19-0ubuntu6.13), linux-libc-dev
-Recommends: gcc | c-compiler
-Suggests: glibc-doc, manpages-dev
-Breaks: binutils (<< 2.20.1-1), binutils-gold (<< 2.20.1-11), cmake (<< 2.8.4+dfsg.1-5), gcc-4.4 (<< 4.4.6-4), gcc-4.5 (<< 4.5.3-2), gcc-4.6 (<< 4.6.0-12), libhwloc-dev (<< 1.2-3), libjna-java (<< 3.2.7-4), liblouis-dev (<< 2.3.0-2), liblouisxml-dev (<< 2.4.0-2), make (<< 3.81-8.1), pkg-config (<< 0.26-1)
-Conflicts: libc0.1-dev, libc0.3-dev, libc6.1-dev
-Description: Embedded GNU C Library: Development Libraries and Header Files
- Contains the symlinks, headers, and object files needed to compile
- and link programs which use the standard C library.
-Homepage: http://www.eglibc.org
-Original-Maintainer: GNU Libc Maintainers <debian-glibc@lists.debian.org>
-
-Joined stackoverflow. Submitted question on this diagnostic...
------
-"
-Using gcc on Mintbox Mint Linux, amd64. Here is a successful make which produces two executables...
-$ make
-/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/ tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o -o tc
-/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/ -c test.c
-/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/   -c -o tcTestMain.o tcTestMain.c
-/usr/bin/gcc -w -g -ansi -I /usr/lib/syslinux/com32/include/ tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcTestMain.o -o test
-
-It segs on a call to fgets on stdin. Here is gdb's diagnostic and the top of a backtrace...
-Program received signal SIGSEGV, Segmentation fault.
-_IO_fgets (buf=0x60ed00 <buf> "", n=80, fp=0x1) at iofgets.c:50
-50	iofgets.c: No such file or directory.
-(gdb) bt
-#0  _IO_fgets (buf=0x60ed00 <buf> "", n=80, fp=0x1) at iofgets.c:50
-
-Here are the offending line(s)...
-	#define BUF_SIZE 80
-	char buf[BUF_SIZE+1];
-	...
-		fgets(buf, BUF_SIZE, stdin);
-Separate compiling of the one file doesn't change anything, although that strategy worked for a couple of other similar cases.
-I have installed libc6-dev (which was missing from my Mint box). That fixed previous issues, but this one is a mystery.
-QUESTIONS: How does one learn what lib contains the missing piece? 
-Thank you in advance.
-"
-WITHDREW THE QUESTION...
+		various help sites say this fixes various lib issues.
 	Separate compile of debug without CFLAGS fixed it. 
 	Evidently ../syslinux/com32/.. has many problems with i/o related stuff:
 		FileRead.c getch.c kbhit.c debug.c(because of fgets) time.c
 	The main 5 are happy with the -I
+Spent the whole day on this issue.
+------------
 
+Sun, Nov 19
+Working on debug. Status...
+	reads command lines now
+	parses them
+		b builds entry in brktab
+DONE		But need to test for valid symbol
+		i dumps bldtab in readable fashion
+DONE	FIRST mod the makefile to debug compiles without CFLAGS
+More thoughts on debug
+DONE	Add lib syms to b, but when you hit n or c screen for app code. 
+x		Idea is this: 
+x			test 56 has no globals, but lots of lib calls.
+x			so b libsym is useful, but tracing lib statements is probably not
+	OK next is run and 
+		stop on brk pt
+		display the line
+		enter commands
+	What tc code defines fname,lname? symname IT ADVANCES THE CURSOR
+yes	Does canon then put it in string form? 
+no	In any buff? Only a struct var
+		~436 void canon(struct var *v) {
+This looks handy...
+	/* return true if symname matches arg, no state change (new) */
+	int symnameis(char* name){
+		int x = strncmp(fname, name, lname-fname+1);
+		return( !x );
+	}
+symname() should not change state. fname,lname are not state. Only cursor.
+	/* Parse a symbol defining fname, lname. ret: true if symbol */
+	int symname() {
+		while( *cursor == ' ' ) ++cursor;
+		if( isalpha(*cursor) || *cursor=='_') {
+			fname = cursor;
+		}
+		else return 0;  /* not a symbol */
+		while( isalnum(*cursor) || *cursor=='_'){
+			++cursor; 
+		}
+		lname = cursor-1;
+		return 1;  /* good, fname and lname defined */
+	}
+Should I tidy symname? Return sym size instead of true/false. Advance cursor over whitespace, but not the symbol itself. Callers take responsibility for cursor. So, who calls???
+	tc	 
+		~603(factor, all syms except decl), 
+		700(valloc, parsing decl), 
+		975(link, globals)
+	test ~182(test 5 on symname itself )
+Alternative is capture/restore cursor before/after the call. UGH.
+------------
+
+Mon, Nov 20
+Tidy symname first. Regression is happy -- DONE.
+Algorithm for hit: only looks for token on line. n=index won't catch index.
+Instead of strcmp we need to 
+	scan the line. OR 
+	bugout from addrval. OR 
+	put a debug hit field in var, and when set addrval does bugout.
+		advantage: simple, can do locals, 
+Changes: 
+x	tc.h add the field
+x	addrval add the bugout call
+x	newvar zero the field
+x	set_b set the field
+x	br_hit will receive the bugout
+x	hit() goes away
+x	stbegin code moved to prbegin
+x	cursor>apr test needed where? br_hit.
+NOW BREAKING on line 9 of test 56. NEEDS...
+	Hits still 0. 
+x	No showLine.
+	Need display commands. 
+ISSUE: All use of addrval requires EITHER
+	fname,lname defined (addrval)
+	canon'd string with sym (_addrval)
+		debug takes uncanon'd string from its input buf.
+		Need general tools for syms.
+------------
+
+Tue, Nov 21
+		
 
 
 

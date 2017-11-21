@@ -180,6 +180,7 @@ void doTest(int testcase) {
 			prused = pr+100;
 			cursor = pr+5;
 			symname();
+			cursor = lname+1;
 			pl("");dumpName();
 			printf("\nfname,lname,cursor= %d %d %d",fname-pr,lname-pr,cursor-pr);
 			break;

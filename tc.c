@@ -228,16 +228,18 @@ int skip(char l, char r) {
 
 /* Parse a symbol defining fname, lname. ret: true if symbol */
 int symname() {
-	while( *cursor == ' ' ) ++cursor;
-	if( isalpha(*cursor) || *cursor=='_') {
-		fname = cursor;
+	char* temp;
+	while( *cursor == ' ' || *cursor == '\t' ) ++cursor;
+	temp=cursor;
+	if( isalpha(*temp) || *temp=='_') {
+		fname = temp;
 	}
 	else return 0;  /* not a symbol */
-	while( isalnum(*cursor) || *cursor=='_'){
-		++cursor; 
+	while( isalnum(*temp) || *temp=='_'){
+		++temp; 
 	}
-	lname = cursor-1;
-	return 1;  /* good, fname and lname defined */
+	lname = temp-1;
+	return lname-fname+1;  /* good, fname and lname defined */
 }
 
 /* some C helper functions */
@@ -360,6 +362,7 @@ void newvar( int class, Type type, int len, union stuff *passed ) {
 	(*v).class = class;
 	(*v).type = type;
 	(*v).len = len;
+	(*v).brkpt = 0;
 	int obsize = typeToSize(class,type);
 	if(allocSpace(v,len*obsize)) return;  /* true is bad, eset done */
 	if(passed) copyArgValue( v, class, type, passed);
@@ -410,7 +413,10 @@ struct var* _addrval(char *sym, struct funentry *level) {
 	int last  = (*level).lvar;
 	int pvar;
 	for(pvar=first; pvar<=last; ++pvar) {
-		if( !strcmp(vartab[pvar].name, sym) ) return &vartab[pvar];
+		if( !strcmp(vartab[pvar].name, sym) ) {
+			if( debug && (vartab[pvar]).brkpt==1 )br_hit(&vartab[pvar]);
+			return &vartab[pvar];
+		}
 	}
 	return 0;
 }
@@ -419,13 +425,13 @@ struct var* _addrval(char *sym, struct funentry *level) {
  *	locals, globals, library levels in that order. First hit wins.
  */
 struct var* addrval() {
-	struct funentry *sfun = curfun;
 	struct var sym;
 	canon( &sym );  /* sym.name is string version of fname..lname */
 	struct var *v;
-	v = _addrval( sym.name, curfun ); if(v)return v;
-	v = _addrval( sym.name, curglbl ); if(v)return v;
-	v = _addrval( sym.name, fun ); if(v)return v;
+	v = _addrval( sym.name, curfun );
+	if(!v) v = _addrval( sym.name, curglbl );
+	if(!v) v = _addrval( sym.name, fun ); 
+	if(v)return v;
 	return 0;	
 }
 
@@ -601,6 +607,7 @@ void factor() {
 		}
 	}
 	else if( symname() ) {
+		cursor = lname+1;
 		int where, len, class, obsize, stuff;
 		if( symnameis("MC") ) { 
 			enter(0); return;
@@ -701,6 +708,7 @@ void vAlloc(Type type, union stuff *vpassed) {
 		eset(SYMERR);
 		return;
 	}
+	cursor=lname+1;
 	if( lit("(") ){
 		vclass = 1;		/* array or pointer */
 		char* fn=fname; /* localize globals that asgn() may change */
@@ -974,7 +982,7 @@ void link() {
 		else if(lit(xendlib))newfun();
 		else if(symname()) {     /* fctn decl */
 			union stuff kursor;
-			kursor.up = cursor;
+			kursor.up = cursor = lname+1;
 			newvar('E',2,1,&kursor);
 			if(x=mustfind(cursor, epr, '\[',LBRCERR)) {
 				cursor=x+1;
@@ -1213,8 +1221,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 
 /* returns pointer to first character of the current line
  */
-char* fchar(){
-	char* k = errat;
+char* fchar(char* k){
 	do{
 		if(*k=='\n')break;
 	} while( --k > apr);
@@ -1222,8 +1229,7 @@ char* fchar(){
 }
 /* returns pointer to last character of the current line
  */
-char* lchar(){
-	char* k = errat;
+char* lchar(char* k){
 	do{
 		if(*k=='\n')break;
 	} while( ++k < epr);
@@ -1245,10 +1251,10 @@ void whatHappened() {
 		lineno = countch(apr,errat,'\n');
 		printf("line %d ", lineno); errToWords();
 		lcurs=cursor;
-		fc=fchar();
+		fc=fchar(errat);
 		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
 			 ++firstSignif;
-		lc=lchar();
+		lc=lchar(errat);
 		fc=fc-1;
 		pft(fc,lc);
 /*		printf("\n"); */
@@ -1262,10 +1268,10 @@ void whatHappened() {
 	}
 }
 
-void showLine() {
+void showLine(char *line) {
 		char *fc, *lc;
-		fc=fchar();
-		lc=lchar();
+		fc=fchar(line);
+		lc=lchar(line);
 		pft(fc,lc);
 }
 
