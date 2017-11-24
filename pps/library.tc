@@ -186,6 +186,16 @@ fwrite char f(0), t(0); int u [
 fclose int u [
 ]
 
+random int little,big [
+  int range
+  if(last===0)last=seed=99
+  range=big-little+1
+  last=last*seed
+  if(last<0)last=-last
+  return little + (last/8)%range
+]
+int seed,last
+
 endlibrary
 
 /* system entry */

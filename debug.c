@@ -3,16 +3,28 @@
 #define BTABSIZE 10
 #define BUF_SIZE 80
 
+int db_running = 0;
+int db_next = 0;
+int db_skiplib = 1;
+
 void prbegin(){
 	if(debug) {
-		cmds();
+		db_cmds();
 	}
 }
 void prdone(){}
 void tcexit(){}
-void stbegin() {}
-
-int running = 0;
+void stbegin() {
+	if(!debug)return;
+	if(db_skiplib && cursor<apr)return;
+	if(db_next){
+		int lineno = countch(apr,cursor,'\n');
+		char* lc = lchar(cursor);
+		printf("line %d cursor->%.10s\n", lineno,cursor);
+		--db_next;
+		db_cmds();
+	}
+}
 
 struct brk {
 	struct var* var;
@@ -94,12 +106,7 @@ void print_b(char* param) {
 	}
 }
 
-void next_b(){
-	
-}
-
-int deb_cmd() {
-	printf("(db) ");
+int db_cmd() {
 	fgets(buf, BUF_SIZE, stdin);
 		int clen = ((int)strlen(buf))-1;
 		buf[clen]=0;
@@ -115,7 +122,7 @@ int deb_cmd() {
 		break;
 /* run */
 	case 'r':
-		running = 1;
+		db_running = 1;
 		return 'r';
 		break;
 /* print */
@@ -125,23 +132,33 @@ int deb_cmd() {
 		break;
 /* next */
 	case 'n':
-		next_b();
+		db_next=1;	
 		return 'n';
+		break;
+/* next */
+	case 'c':
+		db_next=0;
+		return 'c';
 		break;
 /* exit */
 	case 'x':
 		return 'x';
 		break;
 	default:
-		printf("???\n");
+		return '?';
 	}
 }
 
-void cmds() {
+void db_cmds() {
 	while(1) {
-		int cmd = deb_cmd();
+		db_next=0;
+		printf("(tc-db) ");
+		int cmd = db_cmd();
+		if(cmd=='\n')cmd=db_cmd();
 		if(cmd=='x') exit(0);
-		else if(cmd=='r') return;
+		if(cmd=='r') return;
+		if(cmd=='c') return;
+		if(cmd=='n') return;
 	}
 }
 
@@ -152,7 +169,7 @@ struct var* br_hit(struct var *v) {
 		printf("\nbreak at line %d: %s\n",lineno,(*v).name);
 		showLine(cursor);
 		printf("\n");
-		cmds();
+		db_cmds();
 	}
 }
 

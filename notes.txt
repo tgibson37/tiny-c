@@ -2549,8 +2549,8 @@ x	cursor>apr test needed where? br_hit.
 NOW BREAKING on line 9 of test 56. NEEDS...
 	Hits still 0. 
 x	No showLine.
-	Need display commands. 
-ISSUE: All use of addrval requires EITHER
+x	Need display commands. 
+TIDIED: All use of addrval requires EITHER
 	fname,lname defined (addrval)
 	canon'd string with sym (_addrval)
 		debug takes uncanon'd string from its input buf.
@@ -2558,6 +2558,9 @@ ISSUE: All use of addrval requires EITHER
 ------------
 
 Tue, Nov 21
+Refactored addrval:
+	addrval_all searches 3 areas
+	addrval uses addrval_all, and is now 3 lines of code
 COMMITed partial debugger.
 DONE Goal: Debugger p <sym> prints the value of a symbol
 	Tools needed: string with canon'd buf parameter
@@ -2568,9 +2571,93 @@ DONE Goal: Debugger p <sym> prints the value of a symbol
 		fname,lname is an OK way to communicate from symname to canon
 			they are used in very tight transient ways
 			both are char*, so quite flexible
-COMMITed useful debugger.
+COMMITed useful debugger. GITHUB also.
+NEXT goal: time to write a document.
+------------
 
+Wed, Nov 22
+Goal for today: piranha fish
+DONE	typing
+	need seed and random in lib
+------------
 
+Thur, Nov 23
+Decided to put random into the lib. Found the code OM p.3-12 (guess a number).
+Debugging....
+			line 265 SYMERR, decl needed 
+			else if(p<5) ps "hunter"
+			   ^             	skipst ???   if ??? ~767
+	(gdb) p s
+	$12 = 0x40517b "else"
+	(gdb) p cursor
+	$13 = 0x609da2 <pr+4738> "ps\"move \"\n 
+		Cursor at SECOND ps "move  ", pf.tc ~59
+NEED s and n(DONE) commands in tcDebug.
+
+lit(xelse...   cursor-->"\n  else ..."
+	call to match made and fails. Should lit ALSO pass over newlines???
+	Or should if code ~771 call rem???  And how about skipst???
+----------
+Getting to cursor at if-else-chain of pname...
+		gdb ./tc
+		b tc.c:774      if(lit(xelse)...
+		r pf.tc
+		7		[seed request]
+		c 3
+		s		[move request]
+				[bk 1 @ 774 if(lit(xelse)), 
+				cursor pr+9638->else if(p<5) ps "hunter... GOOD
+				header printed. 
+		s		in lit, cursor -> "\n  else... 
+				lit-else gonna fail nue to \n
+Question: where in 8080 code is rem called. Where are new lines allowed???
+1	ASCRET 0DH, usage: rem~673, skipst~1338
+2	NEWLINE is ASCRET-NULL, only REM ~660 uses it
+3	XNL is same thing,      only ST-TRET ~1515 uses it
+4	rem goes over mixed ASCRET-\n-comments, then (via lit) whitespace
+5		The most powerful next-token tool
+6	skipst rem's before & after everything
+7		calls itself for [], if, while
+8	st does the same
+9		if-else part relies on skipst when done to do final rem
+
+ok now review C code, does it faithfully mimic all the above...
+1	'\n' usage: rem~322, skipst~705, (all for this bug)
+2	newline not used at all
+3	xnl usage: rem, return, enter (that's all)
+4	whitespace, newlines, comments
+6	before and after
+7		recursive
+FIXED 8	~775, NOT after if. And after while the rem is commented out.
+9		various, just before each return (now)
+------------
+
+Thur, Nov 23
+Still broke! Same symptom, else needs decl. Missing rem somewhere. 
+
+places to look
+	skipst ~1320 ~1333 relies on lit 
+	return push zero should test for comment
+8080 enter DOES not do rem where I would expect. Neither does C enter.
+	BUT arg parse calls asgn~1626 . Does that rem??? I doubt it.
+	YES, but down in term as a guard before parsing /. 
+	C's term does not. It should, for the same reason. AND incedentally that may be the rem that made 8080 work. Better fix would be in enter before switch contexts.
+WHAT SHOULD HAPPEN, starting with call to ps"cannibal"
+	ps parsed, enter()
+	arg parsed, ~900
+==>>	8080 Deep in arg (in term, specifically) is a sneakey call to rem().
+FIXED		None in C.
+---
+pf.tc now shows status. whosgoing has issues. debug does, too.
+	Debug p uses dumpstackentry, such as...
+		 var 35: ngoing 0 Char 1 pr[9965]->NULL<-
+		 var 34: move 1 Char 5 pr[9960]-><-
+	after adding player 1 into canoe. 
+Misleading. 
+	ngoing 0 means actual, char, value NULL is probably wrong.
+	move 1 means move is a class 1, not the value is 1. Its a char(4) (five items) array starting at pr[9960] and value is not shown. should be 1 0 0 0 0. 
+Now status cannot find ps, "line 61 SYMERR, decl needed"
+	and it didn't print the line, just that whathappened comment.
 
 
 

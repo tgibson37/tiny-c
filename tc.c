@@ -566,6 +566,10 @@ int term() {
 		if(!error)pushk(toptoi()*toptoi());
 	}
 	else if(lit(xslash)){
+		if(*cursor=='*') {
+			--cursor;    /* opps, its a comment */
+			return 1;
+		}
 		factor();
 		int denom = toptoi();
 		if(!error)pushk(toptoi()/denom);
@@ -694,6 +698,9 @@ void skipst() {
 	else if( lit(xif)||lit(xwhile) ) {
 		lit(xlpar);			/* optional left paren */
 		skip('(',')');
+		skipst();
+		rem();
+		if(lit(xelse))skipst();
 		rem();
 		return;
 	}
@@ -758,7 +765,7 @@ void st() {
 			rem();
 			if(leave||brake||error)return;
 			if(lit(xrb)){
-				/*rem();*/
+				rem();
 				return;
 			}
 			st();
@@ -778,6 +785,7 @@ void st() {
 					st();
 				}
 			}
+			rem();
 			return;
 		}
 	}
@@ -901,12 +909,13 @@ void enter( char* where) {
 	}
 	if(error)return;
 	lit(xrpar);   /* optional )   */
+	rem();
 	if(!where) {
 		if(nxtstack) machinecall( nargs );
 		else eset(MCERR);
 		return;
 	}
-	else {   /* ABOVE parses the call, BELOW parses the callee's arg decls */
+	else {   /* ABOVE parses the call args, BELOW parses the called's arg decls */
 		char *localstcurs=stcurs, *localcurs=cursor;
 		cursor = where;
 		newfun();  
