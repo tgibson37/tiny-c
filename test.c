@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 57
+#define testcases 58
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1005,6 +1005,14 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  *				t57: 143  17
  *				cat in the hat ..cat..
  */
+		case 58:
+			testWhole("./testFiles/58");
+			break;
+/* 	Should get... 
+ *				health(2) should be 2, is 2
+ */
+
+
 /***************  keyboard input tests, run manually *********/
 /*	Test 90 MUST be run using ./test 90. It is NOT a tc program.
  *	Tests 91 up may be run using ./test 9x, or ./tc testFiles/9x. They

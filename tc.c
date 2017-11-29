@@ -9,6 +9,9 @@ void prdone(){};
 void tcexit(){};
 void stbegin() {};
  */
+ 
+ /* debugging aid */
+ int watchme;
 
 /* chunk 1: literals
 /************** literals **************/
@@ -138,7 +141,10 @@ int toptoi() {
 		else eset(TYPEERR);
 	}
 	else { eset(LVALERR); }
-/* ISSUE what about other types for 'L' ANSWER class 1 */
+/*if(cursor>pr+5170) printf("~141 datum,class,type,lvalue %d %d %d %d\n",
+datum,(*top).class,(*top).type,(*top).lvalue);
+if(datum==257)watchme=datum;
+*/
 	return datum;
 }
 /* basic popper, entry stays accessible until popped over */
@@ -160,6 +166,7 @@ void pushst( int class, int lvalue, Type type, union stuff *value ) {
 	stack[nxtstack].type = type;
 	stuffCopy( &stack[nxtstack].value, value);
 	++nxtstack;
+if((*value).ui==257)watchme=(*value).ui;
 }
 
 /* push an int */
@@ -303,7 +310,7 @@ Type konst() {
 	} else if(lit("\'")) {
 		fname=cursor;
 		/* lname = last char, cursor = lname+2 (past the quote) */
-		if( x=mustfind(fname+1,epr,'\'',CURSERR) ) {
+		if( x=mustfind(fname+1,fname+2,'\'',CURSERR) ) {
 			lname = x-1; 
 			cursor = x+1;
 		}
@@ -593,7 +600,7 @@ void factor() {
 	char* x;
 	if(lit(xlpar)) {
 		asgn();
-		if( x=mustfind( cursor, epr, ')' , RPARERR ) ) {
+		if( x=mustfind( cursor, cursor+5, ')' , RPARERR ) ) {
 			cursor = x+1; /*after the paren */
 		}
 	} 
@@ -729,7 +736,7 @@ void vAlloc(Type type, union stuff *vpassed) {
 		if( asgn() ) alen=toptoi()+1;  /* dimension */
 		fname=fn; 		/* restore the globals */
 		lname=ln;
-		char* x = mustfind(cursor,epr,')',RPARERR);
+		char* x = mustfind(cursor,cursor+5,')',RPARERR);
 		if(x)cursor = x+1;
 	} else {
 		vclass = 0;
@@ -904,6 +911,12 @@ void enter( char* where) {
 		do {
 			if(error)return;
 			if( asgn()) ++nargs;
+/*if(cursor>pr+5170){
+struct stackentry top=stack[nxtstack-1];			
+printf("~908 top ui,class,type,lvalue %d %d %d %d \n",
+top.value.ui,top.class,top.type,top.lvalue);
+}
+*/
 			else break;  /* break on error */
 		} while( lit(xcomma) );
 	}
@@ -957,6 +970,25 @@ void enter( char* where) {
 	}
 }
 
+/* asgn() resolved to Actual if necessary. */
+int asgnToA() {
+	struct stackentry* top = &stack[nxtstack-1];
+	if(!asgn())return 0;
+	if( ((*top).lvalue)=='L' ){
+		union stuff vpassed  = (*top).value;
+		int class = (*top).class;
+		int type  = (*top).type;
+		char *where = (char*)vpassed.up;
+		if( class==1 ) { 
+			(*top).value.up = *((char**)vpassed.up);
+		}
+		else if( type==Int ) (*top).value.ui = get_int(where);
+		else if( type==Char) (*top).value.uc = get_char(where);
+		(*top).lvalue = 'A';
+	}
+	return 1;
+}
+
 /* Situation: parsing argument declarations, passed values are on the stack.
  * arg points into stack to an argument of type. 
  * Gets actual value of arg, calls valloc which parses and sets
@@ -967,7 +999,7 @@ void setarg( Type type, struct stackentry *arg ) {
 	char* where;
 	int class = (*arg).class;
 	int lvalue = (*arg).lvalue;
-	/*int size = (*arg).size; */
+/*	int size = (*arg).size; */
 	if( lvalue=='L') {
 		where = (char*)vpassed.up;
 		if( class==1 ) { 
@@ -1007,6 +1039,7 @@ void link() {
 		if(cursor==lastcur)eset(LINKERR);
 	}
 	cursor = problemCursor;
+	if(verbose)dumpVarTab();
 }
 
 /* chunk 11: MC's. 
@@ -1261,20 +1294,26 @@ int countch(char *f, char *t, char c){
  */
 void whatHappened() {
 	if(error){
-		char *fc, *lc, *lcurs;
+		char *fc, *lc;
 		int firstSignif=0, blanks, lineno;
-		lineno = countch(apr,errat,'\n');
-		printf("line %d ", lineno); errToWords();
-		lcurs=cursor;
+		if(*errat=='\n')--errat;
+		if(errat<apr){
+			lineno = countch(pr,errat,'\n');
+			printf("\nlib ");
+		}
+		else {
+			lineno = countch(apr,errat,'\n');
+			printf("\napp ");
+		}
+		printf("line %d (cursor pr[%d])", lineno,errat-pr); errToWords();
 		fc=fchar(errat);
 		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
 			 ++firstSignif;
 		lc=lchar(errat);
 		fc=fc-1;
 		pft(fc,lc);
-/*		printf("\n"); */
-		pft(fc,fc+firstSignif-1);   /* leading whitespace */
-		blanks=errat-fc-firstSignif-1;
+		pft(fc,fc+firstSignif-1);        /* leading whitespace */
+		blanks=errat-fc-firstSignif-1;   /* blanks to carot */
 		while(--blanks >= 0) printf(" ");
 		printf("^\n");
 	}

@@ -20,7 +20,7 @@ void stbegin() {
 	if(db_next){
 		int lineno = countch(apr,cursor,'\n');
 		char* lc = lchar(cursor);
-		printf("line %d cursor->%.10s\n", lineno,cursor);
+		printf("line %d cursor(pr[%d])->%.10s\n", lineno,cursor,cursor);
 		--db_next;
 		db_cmds();
 	}
@@ -106,12 +106,18 @@ void print_b(char* param) {
 	}
 }
 
+void gdb_b() {}
+
 int db_cmd() {
 	fgets(buf, BUF_SIZE, stdin);
 		int clen = ((int)strlen(buf))-1;
 		buf[clen]=0;
 	char cmd = buf[0];
 	switch(cmd) {
+/* back to gdb, set a gdb watch on gdb_b */
+	case 'g':
+		gdb_b();
+		break;
 /* set breakpt */
 	case 'b':
 		set_b(param());
@@ -166,7 +172,7 @@ struct var* br_hit(struct var *v) {
 	int lineno;
 	if(cursor>apr){
 		lineno = countch(apr,cursor,'\n');
-		printf("\nbreak at line %d: %s\n",lineno,(*v).name);
+		printf("\nbreak at line %d cursor pr[%d]: %s\n",lineno,cursor-pr,(*v).name);
 		showLine(cursor);
 		printf("\n");
 		db_cmds();

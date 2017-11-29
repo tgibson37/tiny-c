@@ -1,5 +1,5 @@
 /* pirahna fish, an original game from the 1977 Owner's Manual
-int zoo
+int foo
 
 char shore(9), health(9), canoe, move(4), ngoing, afloat
 int hfactor(6),sinkrate,paddle(9)
@@ -50,19 +50,22 @@ whosgoing[
   while(1)[
   	pl"move "
     j=getchar
+    p=j-'0'
     if(j=='.')[		/* trip command
       i=0
       while((i=i+1)<=ngoing)
         if(health(move(i))<5)return
       ps" nobody to paddle "
     ]
+    else if(j=='-')[    /*unload
+      ngoing=0;
+      ps" canoe emptied"; pl""
+    ]
     else if(j=='s')[
       status
       ps"move "
     ]
     else if((j>='1')*(j<='9'))[		/* Put player in canoe
-zoo=1
-      p=j-'0'
       dup=0
       i=0
       while((i=i+1)<=ngoing) if(p==move(i)) dup=1
@@ -70,8 +73,10 @@ zoo=1
       else if(shore(p)!=canoe) ps" on other shore "
       else if(ngoing>=4) ps" canoe full "
       else [
+foo=1
       	move(ngoing=ngoing+1)=p
       	pn(p); ps" into the boat"
+      ]
     ]
   ]
 ]
@@ -121,6 +126,13 @@ trip [
       if(random(1,4)==1)onefish
     ]
   ]
+  i=0        /* The far shore is reached
+  while((i=i+1)<=ngoing) shore(move(i))=1-shore(move(i))
+  canoe=1-canoe
+  ngoing=0   /* everybody out
+  pl"trip to "
+  if(canoe)ps"far"; else ps"near"
+  ps" shore is complete."
 ]    
 
 /* A fish jumped in the boat. This is what happens     
@@ -204,9 +216,11 @@ shoreacts [
     if(shore(p)==shore(5))[   /*Doctor with at most minor wounds can
       if(health(5)<4) [       /* attend all wounds
         if(health(5)!=2) [
-          if((health(p)==3)+(health(p)==4) [
+foo=1
+          if((health(p)==3)+(health(p)==4)) [
             health(p)=health(p)-2
-            pl""; pn p; ps" attended by doctor."
+            pn p; 
+            ps" attended by doctor."
           ]
         ]
       ]

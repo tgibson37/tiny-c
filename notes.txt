@@ -2642,10 +2642,14 @@ places to look
 	BUT arg parse calls asgn~1626 . Does that rem??? I doubt it.
 	YES, but down in term as a guard before parsing /. 
 	C's term does not. It should, for the same reason. AND incedentally that may be the rem that made 8080 work. Better fix would be in enter before switch contexts.
+------------
+
+Fri, Nov 24
 WHAT SHOULD HAPPEN, starting with call to ps"cannibal"
 	ps parsed, enter()
 	arg parsed, ~900
 ==>>	8080 Deep in arg (in term, specifically) is a sneakey call to rem().
+		It g
 FIXED		None in C.
 ---
 pf.tc now shows status. whosgoing has issues. debug does, too.
@@ -2656,15 +2660,410 @@ pf.tc now shows status. whosgoing has issues. debug does, too.
 Misleading. 
 	ngoing 0 means actual, char, value NULL is probably wrong.
 	move 1 means move is a class 1, not the value is 1. Its a char(4) (five items) array starting at pr[9960] and value is not shown. should be 1 0 0 0 0. 
-Now status cannot find ps, "line 61 SYMERR, decl needed"
-	and it didn't print the line, just that whathappened comment.
+MAJOR ISSUE: Bombs in the lib need intellegint wha-happn'd.
+MAJOR ISSUE: bombs due to forgotten ] means inclomplete link. Need to diagnose that situation and give intelligence that is helpful.
+------------
 
+Sat, Nov 25
+New bug, LVALERR.
+using tc debug UNDER gdb
+	setup...
+		plant foo=1 in tc code (decl top as global)
+		gdb ./tc
+		b gdb_b		enables transition from [tcdb] to [gdb]
+		run -d pf.tc
+		(tc-db) b foo
+	session...
+		(tc-db) r
+		do app dialog if any until foo is hit 
+			you are in tc-db...
+			n to complete foo=1 statement
+			more n's to step to tc code of interest
+		g goes back to gdb still running.
+			bkpt @ gdb_b
+			5 n's get to st() ~758 stcurs=curs
+				n or s to step through interpreter code
+				c to resume tc-db (assuming only bkpt @ gdb_b enabled)
+		x to leave tc for restart back in gdb, 
+			run -d pf.tc again
+------------
 
+Sun, Nov 26
+gdb watch cursor==(pr+8318), NO HIT, but...
+	app line 210 (cursor pr[8338])LVALERR, not assignable 
+            health(p)=health(p)-2
+EITHER the watch didn't work OR the cursor never saw the h of health
+Try 8300...
+	->"=4) [\n" 12 spaces  ...   if(health(6)<4) ["...
+       end of ~208                 begin of line 217
+shown by p cursor while linking. 
+watch cursor>apr
+	exited again, same symptoms. Somehow cursor making a WILD JUMP.
+Cannot brk just before the damage, at or shortly before 8318.
+NEW plan... run -d pf.tc, b foo, Then single step ENDLESSLY watching the cursor from time to time.
+WHAT SHOULD HAPPEN... starting at cursor line 208 first signif (h)
+	factor~637,..,647,8,9 examine where, class, type, foo
+	step into pushst
+		when done stack[0] should be the lvalue
+		put watch on its lval
+	tunnel out of expr stack
+		back to asgn
+			parse the =
+			asgn
+				parse second health(p)
+				parse the -
+				parse the 2
+				subract
+				examine the stack here
+			eq   <<== we know the stack is screwed up here
+{name = "health\000\000", class = 1, type = Char, len = 10, brkpt = 0, 
+	value = {uc = 11 '\v', ui = 6337035, up = 0x60b20b <pr+9963>}}
 
+pf.tc~64: Player 1 on keyboard (j) is really player 0 internally (p)
 
+5:41pm gdb; n'd through logic expr pf.tc~208. Stack had 0+0 (+ is OR). GOOD. 
+	looking at [ \n health(p)=health(p)-2\n...]
+The if at ~204 should fail. 
+	Cursor WAS at 8304->[ 4 n's ago.
+	n ~477 asgn if(xeq
+	n ~482 asgn return
+	n ~483 }
+	n ~596 factor, must find ) [after the (p) subscript]
+	n ~597 		cursor=x+1  [after must find]
+		x points to ), BUT its the ) in health(p)=health(p)-2.
+HOW DID it get there?
+Also we are at st() ~775, 
+FLAW IN mustFind(). Shouldnt use epr to end fatal scan. Reasonable limits.
+	Need to audit all uses. 
+------------
 
+Mon, Nov 27
+Two subtle bugs found getting pf to run...
+	- The hidden rem bug:
+		in term to parse the '/' (divide) the 8080 code called rem first to guard against seeing the / as a divide instead of the start of a real remark. That is a poor logic. Somehow it never caused a problem, though, so it did work. in the C version I missed that rem call. That caused a problem if an if-else...
+		lit(xelse...   cursor-->"\n  else ...". 
+The \n caused the lit to fail when it needed to succeed. The fix, when finally diagnosed, was a proper guard, after lit('/') explicitly test *cursor=='*' and if true decrement the cursor so it is on the /.
+	- The runaway mustFind bug:
+New code mustFind() helped in 4 places, ample worthiness. I used it to look for required closing ),],[,and prime. And in some cases (link) it had to pass over text, namely the decls of functions. So I bounded the search with epr, a param to mustFind. This violated the idea that only rem goes to a new line. But that idea was wrong in the one case, link, that needed tofind the body of the function. Unfortunately I bounded it with epr in 3 other cases. A missing ) in pf.tc caused the cursor to find one in the very next line. The cursor was now way off, and the diagnostic was LVALERR. Two days to find that cause, starting with how did the stack get so screwed up.
+	Good news: I needed to go more-or-less seamlessly between (gdb) and (tcdb) to find this issue and so the latter got the g command, and I invented the 1=1 technique.
 
+We forge ahead. STATUS pf now does shore events and requests another move. Trifling bug: status doesn't move player or canoe to far shore. Fix is likely to be code failing to change their state (shore,canoe). FIXED
 
+Getting multiple moves, caused by getchar not being getkey. Need to put into lib getkey with replies immediately after the keystroke. New name for what WAS in 8080 version getchar. And in that version gc whas the line buffered character fetch which waited for the newline before returning anything. BUT now C's lib has the behavior for getchar. To avoid confusion in 2017 BOTH gc and getchar will be line buffered, and the new getkey will be the keystroke version.
+
+Bug: move 1 prints 257 into the boat. Here is more complex sample...
+move 1
+ 257 into the boat
+move s
+near shore                      far shore
+ 1 cannibal 
+	...
+ 9 missionary 
+     canoe
+     257
+move 2
+ 514 into the boat
+move s
+near shore                      far shore
+ 1 cannibal 
+	...
+ 9 missionary 
+     canoe
+			<<== nothing
+Two mysteries. 
+1	Why the 257 & 514 instead of 1 & 2?
+2	Why not both in the canoe instead of nobody?
+#1 This is not a pf.tc bug. Another DEEP MYSTERY (ugh)
+Evidence...
+Code:
+  while(1)[
+  	pl"move "
+    j=getchar
+    p=j-'0'
+    pn p
+...
+    else if((j>='1')*(j<='9'))[		/* Put player in canoe
+...
+      if...
+      else [
+      	move(ngoing=ngoing+1)=p
+      	pn(p); ps" into the boat"
+      ]
+    ]
+  ]
+Use:
+			move 1
+			 1 257 into the boat
+			move  -38
+			move
+How did p become 257??? Time for deep debug.
+REASONING: 257=256+1, toptoi returns 0x101 instead of 0x01. Class 0 char should return 0x01. toptoi looks at class and type in two phases: 
+Seems a (char) cast is missing somewhere, but evidently not in toptoi, which looks at ALL the atts of the top to decide what to return. Class 0 char seems (by eyeball, not by actual test) to return 0x01. The cast is there, ~132 & 137. But they are complex datum calc, easy to be just a bit wrong. I need to see an actual case work thru these. So far cant find the ACTUAL case that returns 257. 
+~143, set a watch on datum==157. Can you watch a local?
+https://stackoverflow.com/questions/1354637/how-do-i-set-persistent-and-conditional-watchpoints-on-locally-scoped-variables
+A bit complicated, but...
+b toptoi
+commands
+watch datum if datum==257
+continue
+end
+ALTERNATIVE, create a global, toptoi sets the global to datum, watch the global. Use the if in the watch OR put it in the C code...
+	if(watchme==257)watchme=datum;
+	return datum;
+GOT IT! Its pn, caught in machinecall ~221, cursor at ] of pn's body.
+nargs=1, that arg is a 247. So who PUSHED 247 onto the stack.
+~169, moved watchme here (push).
+Now its in eq ~101. Just BEFORE foo=1, and before pn(p). 
+      	move(ngoing=ngoing+1)=p    <<== HERE, right on the \n.
+		foo=1
+      	pn(p); ps" into the boat"
+p turned into 257 much earlier than expected.
+enuf for tonight
+------------
+
+Tue, Nov 28
+Try stepping to ~76 and print p.
+		(tc-db) p p
+		 var 53: p 0 Char 1 pr[10412]-><-
+So p=1 when foo is hit. Now in gdb put a watch on pr[10412].
+Technique so far allows only one transition from tcdb to gdb UNLESS you plant more than one foo=1 IN ADVANCE. Awkward. 
+		(gdb) x pr+10412
+		0x60b3cc <pr+10412>:	0x00000101
+As an int it is 257, as a char cast to int it is 1. So somewhere the cast is not taking effect (or is absent!!!)
+
+AT symname() cursor->p)  [of pn(p)] single stepping in factor ~626...
+	~667, pushst( class, 'L', type, &foo);
+	                0    'L'    1   up=<pr+10412> 
+(gdb) p stack[0]
+$20 = {class = 0, lvalue = 76, type = Char, value = {uc = -52 '\314', 
+    ui = 6337484, up = 0x60b3cc <pr+10412>}}
+b toptoi, top is stack+24 (stack[1])
+	in machinecall 
+Skipped too much stuff. Enter uses stack differently, no toptoi. Just pops.
+	MC is doing pn, printing the ' ' before the num.
+			pn int n [
+				MC ' ',1
+				MC n,14
+			]
+	and n is...
+			(gdb) x /d pr+10415
+			0x60b3cf <pr+10415>:	257
+The damage is in enter. In particular in setarg. Actually enter itself, at ~937.
+	The ABOVE parses pn(p) and assures the stack has class 0,char. 
+		But its an 'L'
+	But below it and parses pn int n, AND that results in the call to setarg(Int,...) and hence get_Int to resolve the 'L'. Too late. Need to resolve this up in ABOVE. All parms must be resolved to 'A' up there.
+
+DONE  code: new function int asgnToA() for ~913. Resolves before push.
+Starting with test 43 lots of problems.
+Also pf.tc bombs in lib gc ~33.
+
+I need to role back to before this afternoons changes, and run regression and 90's to make sure only broken is in pf.tc. Last commit was 4 days ago. NOT GOOD.
+Scann diff of just tc.c for starters.
+----------
+======================
+200 lines of differences text. Indent all and mark rollback lines...
+
+	diff --git a/tc.c b/tc.c
+	index 9244386..e2be47f 100644
+	--- a/tc.c
+	+++ b/tc.c
+	@@ -9,6 +9,9 @@ void prdone(){};
+	 void tcexit(){};
+	 void stbegin() {};
+	  */
+k	+ 
+k	+ /* debugging aid */
+k	+ int watchme;
+	 
+	 /* chunk 1: literals
+	 /************** literals **************/
+	@@ -138,7 +141,10 @@ int toptoi() {
+		            else eset(TYPEERR);
+		    }
+		    else { eset(LVALERR); }
+	-/* ISSUE what about other types for 'L' ANSWER class 1 */
+k	+/*if(cursor>pr+5170) printf("~141 datum,class,type,lvalue %d %d %d %d\n",
+k	+datum,(*top).class,(*top).type,(*top).lvalue);
+k	+if(datum==257)watchme=datum;
+k	+*/
+		    return datum;
+	 }
+	 /* basic popper, entry stays accessible until popped over */
+	@@ -160,6 +166,7 @@ void pushst( int class, int lvalue, Type type, union stuff 
+		    stack[nxtstack].type = type;
+		    stuffCopy( &stack[nxtstack].value, value);
+		    ++nxtstack;
+k	+if((*value).ui==257)watchme=(*value).ui;
+	 }
+	 
+	 /* push an int */
+	@@ -303,7 +310,7 @@ Type konst() {
+		    } else if(lit("\'")) {
+		            fname=cursor;
+		            /* lname = last char, cursor = lname+2 (past the quote) */
+	-               if( x=mustfind(fname+1,epr,'\'',CURSERR) ) {
+k	+               if( x=mustfind(fname+1,fname+2,'\'',CURSERR) ) {
+		                    lname = x-1; 
+		                    cursor = x+1;
+		            }
+	@@ -593,7 +600,7 @@ void factor() {
+		    char* x;
+		    if(lit(xlpar)) {
+		            asgn();
+	-               if( x=mustfind( cursor, epr, ')' , RPARERR ) ) {
+k	+               if( x=mustfind( cursor, cursor+5, ')' , RPARERR ) ) {
+k		                    cursor = x+1; /*after the paren */
+		            }
+		    } 
+	@@ -729,7 +736,7 @@ void vAlloc(Type type, union stuff *vpassed) {
+		            if( asgn() ) alen=toptoi()+1;  /* dimension */
+		            fname=fn;               /* restore the globals */
+		            lname=ln;
+	-               char* x = mustfind(cursor,epr,')',RPARERR);
+k	+               char* x = mustfind(cursor,cursor+5,')',RPARERR);
+		            if(x)cursor = x+1;
+		    } else {
+		            vclass = 0;
+	@@ -903,7 +910,13 @@ void enter( char* where) {
+		    if ( haveArgs ) {
+		            do {
+		                    if(error)return;
+	-                       if( asgn()) ++nargs;
+Rx	+                       if( asgnToA()) ++nargs;
+k	+/*if(cursor>pr+5170){
+k	+struct stackentry top=stack[nxtstack-1];                       
+k	+printf("~908 top ui,class,type,lvalue %d %d %d %d \n",
+k	+top.value.ui,top.class,top.type,top.lvalue);
+k	+}
+k	+*/
+		                    else break;  /* break on error */
+		            } while( lit(xcomma) );
+		    }
+	@@ -957,6 +970,25 @@ void enter( char* where) {
+		    }
+	 }
+	 
+k	+/* asgn() resolved to Actual if necessary. */
+k	+int asgnToA() {
+k	+       struct stackentry* top = &stack[nxtstack-1];
+k	+       if(!asgn())return 0;
+k	+       if( ((*top).lvalue)=='L' ){
+k	+               union stuff vpassed  = (*top).value;
+k	+               int class = (*top).class;
+k	+               int type  = (*top).type;
+k	+               char *where = (char*)vpassed.up;
+k	+               if( class==1 ) { 
+k	+                       (*top).value.up = *((char**)vpassed.up);
+k	+               }
+k	+               else if( type==Int ) (*top).value.ui = get_int(where);
+k	+               else if( type==Char) (*top).value.uc = get_char(where);
+k	+               (*top).lvalue = 'A';
+k	+       }
+k	+       return 1;
+k	+}
+k	+
+	 /* Situation: parsing argument declarations, passed values are on the stack.
+	  * arg points into stack to an argument of type. 
+	  * Gets actual value of arg, calls valloc which parses and sets
+	@@ -967,7 +999,7 @@ void setarg( Type type, struct stackentry *arg ) {
+		    char* where;
+		    int class = (*arg).class;
+		    int lvalue = (*arg).lvalue;
+	-       /*int size = (*arg).size; */
+Rx	+/*     int size = (*arg).size;
+		    if( lvalue=='L') {
+		            where = (char*)vpassed.up;
+		            if( class==1 ) { 
+	@@ -976,6 +1008,7 @@ void setarg( Type type, struct stackentry *arg ) {
+		            else if( type==Int ) vpassed.ui = get_int(where);
+		            else if( type==Char) vpassed.uc = get_char(where);
+		    }
+Rx	+ */
+		    vAlloc( type, &vpassed);
+	 }
+	 
+	@@ -1007,6 +1040,7 @@ void link() {
+		            if(cursor==lastcur)eset(LINKERR);
+		    }
+		    cursor = problemCursor;
+k	+       if(verbose)dumpVarTab();
+	 }
+	 
+	 /* chunk 11: MC's. 
+	@@ -1261,20 +1295,26 @@ int countch(char *f, char *t, char c){
+	  */
+	 void whatHappened() {
+		    if(error){
+	-               char *fc, *lc, *lcurs;
+k	+               char *fc, *lc;
+		            int firstSignif=0, blanks, lineno;
+	-               lineno = countch(apr,errat,'\n');
+	-               printf("line %d ", lineno); errToWords();
+	-               lcurs=cursor;
+k	+               if(*errat=='\n')--errat;
+k	+               if(errat<apr){
+k	+                       lineno = countch(pr,errat,'\n');
+k	+                       printf("\nlib ");
+k	+               }
+k	+               else {
+k	+                       lineno = countch(apr,errat,'\n');
+k	+                       printf("\napp ");
+k	+               }
+k	+               printf("line %d (cursor pr[%d])", lineno,errat-pr); errToWords(
+		            fc=fchar(errat);
+		            while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
+		                     ++firstSignif;
+		            lc=lchar(errat);
+		            fc=fc-1;
+		            pft(fc,lc);
+	-/*             printf("\n"); */
+	-               pft(fc,fc+firstSignif-1);   /* leading whitespace */
+	-               blanks=errat-fc-firstSignif-1;
+k	+               pft(fc,fc+firstSignif-1);        /* leading whitespace */
+k	+               blanks=errat-fc-firstSignif-1;   /* blanks to carot */
+		            while(--blanks >= 0) printf(" ");
+		            printf("^\n");
+		    }
+
+	diff --git a/tc.c b/tc.c
+	index 9244386..e2be47f 100644
+	--- a/tc.c
+	+++ b/tc.c
+	@@ -9,6 +9,9 @@ void prdone(){};
+	 void tcexit(){};
+	 void stbegin() {};
+	  */
+k	+ 
+k	+ /* debugging aid */
+k	+ int watchme;
+	 
+	 /* chunk 1: literals
+	 /************** literals **************/
+	@@ -138,7 +141,10 @@ int toptoi() {
+		            else eset(TYPEERR);
+		    }
+		    else { eset(LVALERR); }
+	-/* ISSUE what about other types for 'L' ANSWER class 1 */
+k	+/*if(cursor>pr+5170) printf("~141 datum,class,type,lvalue %d %d %d %d\n",
+k	+datum,(*top).class,(*top).type,(*top).lvalue);
+k	+if(datum==257)watchme=datum;
+k	+*/
+		    return datum;
+	 }
+	 /* basic popper, entry stays accessible until popped over */
+	@@ -160,6 +166,7 @@ void pushst( int class, int lvalue, Type type, union stuff 
+		    stack[nxtstack].type = type;
+		    stuffCopy( &stack[nxtstack].value, value);
+		    ++nxtstack;
+k	+if((*value).ui==257)watchme=(*value).ui;
+	 }
+	 
+	 /* push an int */
+	@@ -303,7 +310,7 @@ Type konst() {
+		    } else if(lit("\'")) {
+		            fname=cursor;
+========================
+very little rollback
 
 
 
