@@ -3063,8 +3063,11 @@ k	+if((*value).ui==257)watchme=(*value).ui;
 		    } else if(lit("\'")) {
 		            fname=cursor;
 ========================
-very little rollback
-
+DONE   very little rollback
+pf.tc runss as before
+test 45~6 has symerr (decl needed)
+test 55 ditto
+	commit this mess!
 
 
 
