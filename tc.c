@@ -92,7 +92,7 @@ int eq() {
 		eset(EQERR);
 	}
 	else if(class==0 && (*val).class==0) {
-		if(type=Int){
+		if(type==Int){
 			if( (*val).lvalue=='L' ) 
 				iDatum = get_int((*val).value.up);
 			else 
@@ -101,7 +101,10 @@ int eq() {
 			pushk(iDatum);
 		}
 		else if(type==Char){
-			cDatum = (*val).value.uc;
+			if( (*val).lvalue=='L' ) 
+				cDatum = get_char((*val).value.up);
+			else 
+				cDatum = (*val).value.uc;
 			put_char( (*lval).value.up, cDatum );
 			pushk(cDatum);
 		}
@@ -911,12 +914,6 @@ void enter( char* where) {
 		do {
 			if(error)return;
 			if( asgn()) ++nargs;
-/*if(cursor>pr+5170){
-struct stackentry top=stack[nxtstack-1];			
-printf("~908 top ui,class,type,lvalue %d %d %d %d \n",
-top.value.ui,top.class,top.type,top.lvalue);
-}
-*/
 			else break;  /* break on error */
 		} while( lit(xcomma) );
 	}
@@ -970,25 +967,6 @@ top.value.ui,top.class,top.type,top.lvalue);
 	}
 }
 
-/* asgn() resolved to Actual if necessary. */
-int asgnToA() {
-	struct stackentry* top = &stack[nxtstack-1];
-	if(!asgn())return 0;
-	if( ((*top).lvalue)=='L' ){
-		union stuff vpassed  = (*top).value;
-		int class = (*top).class;
-		int type  = (*top).type;
-		char *where = (char*)vpassed.up;
-		if( class==1 ) { 
-			(*top).value.up = *((char**)vpassed.up);
-		}
-		else if( type==Int ) (*top).value.ui = get_int(where);
-		else if( type==Char) (*top).value.uc = get_char(where);
-		(*top).lvalue = 'A';
-	}
-	return 1;
-}
-
 /* Situation: parsing argument declarations, passed values are on the stack.
  * arg points into stack to an argument of type. 
  * Gets actual value of arg, calls valloc which parses and sets
@@ -999,14 +977,15 @@ void setarg( Type type, struct stackentry *arg ) {
 	char* where;
 	int class = (*arg).class;
 	int lvalue = (*arg).lvalue;
-/*	int size = (*arg).size; */
+	int stacktype = (*arg).type;
 	if( lvalue=='L') {
 		where = (char*)vpassed.up;
 		if( class==1 ) { 
 			vpassed.up = *((char**)(*arg).value.up);
 		}
-		else if( type==Int ) vpassed.ui = get_int(where);
-		else if( type==Char) vpassed.uc = get_char(where);
+		else if( stacktype==Int ) vpassed.ui = get_int(where);
+		else if( stacktype==Char) vpassed.ui = get_char(where);
+			/* ui to clear high order byte */
 	}
 	vAlloc( type, &vpassed);
 }

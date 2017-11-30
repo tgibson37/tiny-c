@@ -3064,10 +3064,94 @@ k	+if((*value).ui==257)watchme=(*value).ui;
 		            fname=cursor;
 ========================
 DONE   very little rollback
-pf.tc runss as before
-test 45~6 has symerr (decl needed)
-test 55 ditto
-	commit this mess!
+pf.tc runs as before
+tests 45~6 has symerr (decl needed)
+	45 is intentional error 3, SYMERR
+	46 is empty case
+test 55 ditto, intentional sym err
+DONE	commit this mess!
+---------------------
+
+Wed, Nov 29
+New thought. Leave basic enter structure, but change the type value so it comes from the stack, not the BELOW parse. Read the code... Entirely in setarg, and much simpler code than yesterdays.
+make diff is happy
+pf.tc is HAPPY!!
+
+new BUG: putting second player in canoe fails, empties the canoe. 
+		(tc-db) p ngoing
+		 var 35: ngoing 0 Char 1 pr[10289]-><-  <<== 1 already in canoe
+		(tc-db) n
+		line 77 cursor(pr[6332218])->move(ngoin
+		(tc-db) p p
+		 var 53: p 0 Char 1 pr[10412]-><-       <<== player 2
+		(tc-db) n
+		line 78 cursor(pr[6332249])->pn(p); ps"
+		(tc-db) p ngoing
+		 var 35: ngoing 0 Char 1 pr[10289]->NULL<-  <<== nobody in canoe
+		       	move(ngoing=ngoing+1)=p            <<== code that did it
+
+No bug in pf. Why did ngoing=ngoing+1 zero ngoing?
+HYPOTHESIS: Same bug in eq, putting an int where only a char should go, wiping out its neighbor, ngoing. Looking at mem layout, and ints are 4 bytes little-Endian, writing into move[2] would wipe out ngoing.
+Strategy: foo just before above line, gdb b eq, watch pr[10289] (check this) and single step through eq.
+~76. Class,type,where,wheresize all based on lval->stackentry.
+class 0 0 Char does put_char to *where, BUT then pushk(cDatum) for subsequent use from stack. This AFTER the assign is done. NEED TO WALK THRU THIS.
+---------------------
+
+Thur, Nov 30
+The eq code, eyeball lookover, seems to handle chars properly. So from yesterday...
+Strategy: 
+x	foo just before above line, 
+	gdb b eq, 
+	watch pr[10289] (check this) and NOW ITS PR[10295]
+	single step through eq.
+	@ eq, doing ++ngoing
+		p cursor
+		$5 = 0x609f4e <pr+5166> ")=p\n
+		gdb) p where
+		$6 = (void *) 0x60d9b0 <stack+16>
+		(gdb) p class
+		$7 = 0
+		(gdb) p type
+		$8 = 1
+		(gdb) p whereSize
+		$10 = 1
+		...
+		94		else if(class==0 && (*val).class==0) {
+		(gdb) n
+		95			if(type=Int){
+		(gdb) n
+		96				if( (*val).lvalue=='L' ) 
+		(gdb) n
+		99					iDatum = (*val).value.ui;
+BINGO! why is type==Int? 
+typedef enum type {Err,Char,Int,CharStar} Type;
+Int is 2. $8 type is 1. 
+	~95 missing =    TYPO FIXED
+Now assigns of chars is broken. symptom...
+		seed7
+		move 1
+		move .
+		move s
+		move 
+s prints nothing. Both j and p are undefined, ie character assign doesn't work. The code was NEVER executed before. Lvalue resolution code missing. Added that. Just a guess, for now.
+FIXED
+CAN DELETE asgnToA() code. DONE
+New bug: First try of trip with 2 on board.
+		app line 115 (cursor pr[5935])RANGERR, subscript out of range 
+			speed = speed + paddle(move(i)*hfactor(health(move(i)))
+Same with just one... This worked before. 
+	pf~115 ()'s dont match
+	FIXED, and this FIXED the RANGERR bug, too.
+Another ) typo, ~143 FIXED
+
+
+
+debug ISSUE: Need to print array elements.
+
+
+
+
+
 
 
 

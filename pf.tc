@@ -73,7 +73,6 @@ whosgoing[
       else if(shore(p)!=canoe) ps" on other shore "
       else if(ngoing>=4) ps" canoe full "
       else [
-foo=1
       	move(ngoing=ngoing+1)=p
       	pn(p); ps" into the boat"
       ]
@@ -111,7 +110,7 @@ trip [
   int speed,dist,full
   afloat=1
   while((i=i+1)<=ngoing)
-    speed = speed + paddle(move(i)*hfactor(health(move(i)))
+    speed = speed + paddle(move(i))*hfactor(health(move(i)))
   speed=speed/(4*ngoing)   /* yards per unit of time
   while((dist=dist+speed)<100)[
     full=full+sinkrate
@@ -140,7 +139,8 @@ onefish [
   char p
   pl"A piranha fish has jumped into the boat. He is swimming"
   pl"around. He is looking at the toe of the "
-  pname(p=move(random(1,ngoing))
+foo=1
+  pname(p=move(random(1,ngoing)))
   ps"."
   if(health(p)>4)pl"Oh, well. He is dead anyway....."
   else if(p>6)[
