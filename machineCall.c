@@ -122,9 +122,10 @@ int Mpn(int nargs, int *args)
 
 int Mgch(int nargs, int *args)
 {
-	int x = getchar();
-/*printf("\nMC~126: %x",x);*/
-    return x;
+	int x = getch_(ECHO);
+	if(x==0x1b)eset(KILL);
+	if(x==0x03)exit(0);
+	return x;
 }
 
 int Mpft(int nargs, int *args) {
@@ -185,7 +186,7 @@ McList userList[] =
 };
 
 /*	code the MC above and register in McList array. Placement in the array
- *	determines the MC number starting with 1.
+ *	determines the MC number starting with 1, 101, 201.
  */
 
 void origMC(int mcno, int nargs, int *args) {
@@ -203,7 +204,7 @@ void newMC(int mcno, int nargs, int *args) {
 		pushk(0); eset(MCERR);
 	}
 	else {
-	    int x = newList[mcno-1](nargs, args); /* mcno minus one, index base shift */
+	    int x = newList[mcno-1](nargs, args);
 	    pushk(x);
 	}
 }
@@ -224,5 +225,6 @@ void machinecall( int nargs ) {
 	if(mcno<100)origMC(mcno, nargs, args);
 	else if(mcno<200)newMC(mcno-100, nargs, args);
 	else userMC(mcno-200, nargs, args);
+	if(error==KILL)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }

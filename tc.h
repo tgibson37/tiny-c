@@ -3,6 +3,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#define ECHO 1
 #define VLEN 8
 #define VTABLEN 200
 #define PRLEN 20000
@@ -26,6 +27,7 @@
 #define LINKERR      20
 #define ARGSERR      21
 #define LBRCERR      22
+#define RBRCERR      23
 #define MCERR        24
 #define SYMERRA      26
 #define EQERR		 27

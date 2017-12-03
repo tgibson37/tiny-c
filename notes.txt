@@ -489,7 +489,7 @@ Do classes 0 0 first. Study IS SUE: Why does C code examine val class, but 8080 
 REMEMBER: class class refers to on-the-stack classes, lvalue datum. NOT var.
 (Easy reasoning mixup.)
 
-ISSUE Finish eq, expand test 23 to all cases.
+IS SUE Finish eq, expand test 23 to all cases.
 debugging test 24. decl didn't move cursor over the ) or ;
 valloc responsible for the ), decl for the ;
 status (9/5 10:30pm) segfault in put_int.
@@ -705,8 +705,8 @@ AM: Decided to use out of the factory getchar() as sole keyboard reader, and do 
 PM: Compiles. To test it must run standalone without test.c. Need alternative main(). Need cold start. 
 Evening: Cold,warm,hot done. New main done, and old commented out.
 IS SUE: where is link called? Should be just before st() ~872. FIXED
-ISSUE: brake is a local in st but a global in ASM. Is local ok?
-	NO. at ~762 brake=1;return and the parent recurse sees the old brake. It won't know to break out of the compound. Fix needed at ~708 and maybe 721. Subordinate ISSUE is be sure it and leave are zeroed back appropriatly.
+IS SUE: brake is a local in st but a global in ASM. Is local ok?
+	NO. at ~762 brake=1;return and the parent recurse sees the old brake. It won't know to break out of the compound. Fix needed at ~708 and maybe 721. Subordinate ISSUE is be sure brake and leave are zeroed back appropriatly.
 Compiles (8:53pm) but doesn't link. NEED logo, prbegin, prdone.
 
 Thur, Sept 21
@@ -777,20 +777,20 @@ Monday, Sept 25
 Goin' after the seg. Caused by string as first arg after the format. This time didn't seg. machinecall stack dump looks good. toptoi bug fixed. Now args to MprF look good. REMEMBER pFmt needs to work from vector, not toptoi. WORKS!
 Committed. 
 I just implemented vPrintf. Ref:https://linux.die.net/man/3/printf
-ISSUE: konst maps trailing quote to null for strings. Does konst look for both " or null for lvar?
+IS SUE: konst maps trailing quote to null for strings. Does konst look for both " or null for lvar?
 
-NEXT GOAL: BACK to MC's. Back to library. All the g's and p's. As many orig functions as possible. ISSUE: rename the lib file library.tc. 
+NEXT GOAL: BACK to MC's. Back to library. All the g's and p's. As many orig functions as possible. IS SUE: rename the lib file library.tc. 
 
 Tuesday, Sept 26
 Library typed in except file i/o bodies. Need MC's 1,2,7,8,9,13,14,101 Propose to deprecate 3,4,5,6 and replace with 102,103. readFile,writeFile. Am I gonna do vscanf ???
 PM: 
-ISSUE MC7, movebl will PRINT its args to memmove (dest,src,n) but not do it quite yet.
+IS SUE MC7, movebl will PRINT its args to memmove (dest,src,n) but not do it quite yet.
 
 Wednesday, Sept 27
 Strategy: new test setup: testFile() optionally loads the library. 
 Test 30 (MC1) fails. Ditto 31. 29, 26, 25. ALL MC1's. FIXED yesterday's half done fix and test. Back to the main track.
 All lib fcns written except the file stuff. Test each. Write MC's as needed.
-ISSUE endlibrary line at end is commented out.
+IS SUE endlibrary line at end is commented out.
 
 putchar err's out in test 40. Cursor at space between char c, the arg decl. 
 To follow I need to outline WHAT SHOULD HAPPEN then gdb find out what wrong.
@@ -946,11 +946,11 @@ b machineCall:187 just before newMC(mcno-100, etc)
 How did second arg get screwed up??? FIXED
 
 Sat, Sept 30
-toptoi 'L' now handles all types. New issue. Now that C pointers are converted to pr indexes, the C code that uses them must convert them back by adding pr. Did this to fmt in putchar. ISSUE can this be done generically before hitting the M code? To do that stack info needed. After toptoi can we look at the just popped stack for xChar and add pr? probably.
+toptoi 'L' now handles all types. New issue. Now that C pointers are converted to pr indexes, the C code that uses them must convert them back by adding pr. Did this to fmt in putchar. IS SUE can this be done generically before hitting the M code? To do that stack info needed. After toptoi can we look at the just popped stack for xChar and add pr? probably.
 
 pFmt internally adding pr to convert tc ptr to C ptr needs to uncovert it on recursive call. This is getting ridiculous. Need ONE GATEWAY from tc to C and that is machinecall itself. Must look at type of datum.
 
-Gotto roll machineCall.c back. And roll forward good changes. HARD. 
+Got to roll machineCall.c back. And roll forward good changes. HARD. 
 Status:
 	machineCall.c       Sept 24 version
 	machineCall.c.bak   Sept 30 version
@@ -969,7 +969,7 @@ test 12 segs at test.c~872, in pft. Old test written with C ptrs on stack.
 test 16 segs. test.c~407 changed %s to %x. Runs to test 35 and seems to loop. Make test, make diff now run to test 38 with lots of broken stuff. Need total review. But no segs as of 8:39 pm.
 REVIEW:
 ~1091 tc.c PrVal: if(class)printf("pr[%d] %x %x",val-(int)pr,val,pr);
-	is the new dumpStuff. Assumes C pointers on the stack. ISSUE
+	is the new dumpStuff. Assumes C pointers on the stack. IS SUE
 TEST 8, char b(9) allocates 40 cells.
 	12, stack entry prints 2 C hex addresses??? val and pr
 	22, way more then 13 zero's same bug as test 8
@@ -1065,7 +1065,7 @@ Whole day studying pointers. Started to allocate them in value space, but went b
 
 Wednesday, Oct 4
 Setarg needs pointer work. Goal is clean compile for now, and regression test, and then back to pointer work.
-pushst may have an ISSUE. ~604 passes &foo as value, foo is a local. Then ~156 puts &foo on the stack. SO it points to a transient local!!! But stackentry has its own union. Need to copy somehow.
+pushst may have an IS SUE. ~604 passes &foo as value, foo is a local. Then ~156 puts &foo on the stack. SO it points to a transient local!!! But stackentry has its own union. Need to copy somehow.
 10 am, clean compiles. dotest segs.
 	segs in test 32, but run alone its good. Garbage from 31 causing the seg in 32. cursor wildly huge. 
 	~964 cursor=where, call to enter(char *where) from factor~589, came from addrval lookup of foo, where whould be pr+5 or 6. pr is 6330912, ox609a20. in vartab foo has up=0x7fff00609a26. LAST 4 BYTES CORRECT, but first 4 are the problem. Ptr entered vartab as an ui instead of up??? Foo is 'E', it was test ~763.
@@ -1133,7 +1133,7 @@ top is 2. lvalue is pr+3414. class 1 Char at pr+3414. Why is lvalue 3414?
 Points to null. b should now be 3280. b is in vartab with 3414. What happened to b="123.." ??? Which we checked above. 
 
 ==>> The assignment was done within the stack. The vartab never saw it. this issue was noted before. 
-Pointer arithmetic (put & get, both) needs access to vartab[?].value. Both names of elements, and index of entry are history by then. MAJOR ISSUE. Need to either communicate this data forward (UGH!) or allocate. We've mastered allocate. Pass forward is a total nightmare.
+Pointer arithmetic (put & get, both) needs access to vartab[?].value. Both names of elements, and index of entry are history by then. MAJOR IS SUE. Need to either communicate this data forward (UGH!) or allocate. We've mastered allocate. Pass forward is a total nightmare.
 
 NEED: put/get pointers. These could range check, and add/sub pr so it is actually an int. But that detail is buried under the get/put, which always return C pointers. 
 
@@ -1227,7 +1227,7 @@ CLARIFY: class 1 means "the data is a pointer"
 	Lvalue 'L' means "where points to the data"
 	class 1 'L' means "where points to the data which is a pointer"
 
-ISSUE needed ; after b(3)=7 because asgn tried to do 7/*.
+IS SUE needed ; after b(3)=7 because asgn tried to do 7/*.
 
 Doing b=b+2 got error 14. toptoi LVALERR. 3rd eq ok. 4th bombs. After 3rd cursor-> MESS of comments, then: int a(0)  a=b. That means just parsed is b=b+2. Stack should have b (lvalue) b+2 (val). 
 	nxtstacck = 2
@@ -1697,7 +1697,7 @@ Notable is 8080 term's special code to assure the / does not belong to /*. C cod
 			        CALL    LIT
 			        JZ      TE4   <<-- jump to % test
 			        CALL    FACTOR
-ISSUE Fix needed. This however is not 41's problem. It has no comments except at the very top. 41's problem is in enter, trying to parse more stuff after parsing "MC c,1" in the lib.
+IS SUE Fix needed. This however is not 41's problem. It has no comments except at the very top. 41's problem is in enter, trying to parse more stuff after parsing "MC c,1" in the lib.
 			putchar char c [
 				if(c==0)c='"'
 				MC c,1
@@ -2185,7 +2185,7 @@ Sat, Nov 11
 Goals: test getters, File i/o. That completes the classical library
 Test 90 test just MC 2, and is not a tc program with a main. It must be run using the test system, ./test.
 Test 91 IS a tc program with main, and can be run in the test system OR as a tc program. It tests getchar, gc (the classical), gn, and gs.
-    ISSUE: need whatHappened to be tab aware
+    IS SUE: need whatHappened to be tab aware
     Goal: total confustion on test 91, gs.
 K&R p160, low level io
 -------------
@@ -2222,7 +2222,7 @@ SYNOPSIS
            [-Dmacro[=defn]...] [-Umacro]
            [-foption...] [-mmachine-option...]
            [-o outfile] [@file] infile...
-ISSUE: will this help us with FileRead.c, and time.c !!!
+IS SUE: will this help us with FileRead.c, and time.c !!!
 Need to add those using -L's. 
 	-Ldir   Add directory dir to the list of directories to be searched for -l.
 	BUT what dir has libc.so.6, or linux-vdso.so.1   ??? 
@@ -2418,7 +2418,7 @@ Thoughts on getchar/gc
 				is non-blocking. But it definitly was.
 	Right now getchar calls gc, gc calls MC 2. 
 		New MC needed, MC 103. 
-	ISSUE: getchar should NOT echo. 
+	IS SUE: getchar should NOT echo. 
 		Is 'ECHO' a proper flag name??? It's not suppressing the echo.
 			ECHO is the flag name. 
 			Bit or (|) is proper. 
@@ -2653,14 +2653,17 @@ WHAT SHOULD HAPPEN, starting with call to ps"cannibal"
 FIXED		None in C.
 ---
 pf.tc now shows status. whosgoing has issues. debug does, too.
-	Debug p uses dumpstackentry, such as...
+	Debug p uses dumpvarentry, such as...
 		 var 35: ngoing 0 Char 1 pr[9965]->NULL<-
 		 var 34: move 1 Char 5 pr[9960]-><-
 	after adding player 1 into canoe. 
-Misleading. 
-	ngoing 0 means actual, char, value NULL is probably wrong.
+debugs p is misleading...
+	ngoing 0 means class, then type, len, where, value.
+		Useless to a tc programmer.
+		NULL is probably wrong.
 	move 1 means move is a class 1, not the value is 1. Its a char(4) (five items) array starting at pr[9960] and value is not shown. should be 1 0 0 0 0. 
-MAJOR ISSUE: Bombs in the lib need intellegint wha-happn'd.
+MAJOR IS SUE: Bombs in the lib need intelligent wha-happn'd.
+
 MAJOR ISSUE: bombs due to forgotten ] means inclomplete link. Need to diagnose that situation and give intelligence that is helpful.
 ------------
 
@@ -2852,218 +2855,6 @@ The damage is in enter. In particular in setarg. Actually enter itself, at ~937.
 	The ABOVE parses pn(p) and assures the stack has class 0,char. 
 		But its an 'L'
 	But below it and parses pn int n, AND that results in the call to setarg(Int,...) and hence get_Int to resolve the 'L'. Too late. Need to resolve this up in ABOVE. All parms must be resolved to 'A' up there.
-
-DONE  code: new function int asgnToA() for ~913. Resolves before push.
-Starting with test 43 lots of problems.
-Also pf.tc bombs in lib gc ~33.
-
-I need to role back to before this afternoons changes, and run regression and 90's to make sure only broken is in pf.tc. Last commit was 4 days ago. NOT GOOD.
-Scann diff of just tc.c for starters.
-----------
-======================
-200 lines of differences text. Indent all and mark rollback lines...
-
-	diff --git a/tc.c b/tc.c
-	index 9244386..e2be47f 100644
-	--- a/tc.c
-	+++ b/tc.c
-	@@ -9,6 +9,9 @@ void prdone(){};
-	 void tcexit(){};
-	 void stbegin() {};
-	  */
-k	+ 
-k	+ /* debugging aid */
-k	+ int watchme;
-	 
-	 /* chunk 1: literals
-	 /************** literals **************/
-	@@ -138,7 +141,10 @@ int toptoi() {
-		            else eset(TYPEERR);
-		    }
-		    else { eset(LVALERR); }
-	-/* ISSUE what about other types for 'L' ANSWER class 1 */
-k	+/*if(cursor>pr+5170) printf("~141 datum,class,type,lvalue %d %d %d %d\n",
-k	+datum,(*top).class,(*top).type,(*top).lvalue);
-k	+if(datum==257)watchme=datum;
-k	+*/
-		    return datum;
-	 }
-	 /* basic popper, entry stays accessible until popped over */
-	@@ -160,6 +166,7 @@ void pushst( int class, int lvalue, Type type, union stuff 
-		    stack[nxtstack].type = type;
-		    stuffCopy( &stack[nxtstack].value, value);
-		    ++nxtstack;
-k	+if((*value).ui==257)watchme=(*value).ui;
-	 }
-	 
-	 /* push an int */
-	@@ -303,7 +310,7 @@ Type konst() {
-		    } else if(lit("\'")) {
-		            fname=cursor;
-		            /* lname = last char, cursor = lname+2 (past the quote) */
-	-               if( x=mustfind(fname+1,epr,'\'',CURSERR) ) {
-k	+               if( x=mustfind(fname+1,fname+2,'\'',CURSERR) ) {
-		                    lname = x-1; 
-		                    cursor = x+1;
-		            }
-	@@ -593,7 +600,7 @@ void factor() {
-		    char* x;
-		    if(lit(xlpar)) {
-		            asgn();
-	-               if( x=mustfind( cursor, epr, ')' , RPARERR ) ) {
-k	+               if( x=mustfind( cursor, cursor+5, ')' , RPARERR ) ) {
-k		                    cursor = x+1; /*after the paren */
-		            }
-		    } 
-	@@ -729,7 +736,7 @@ void vAlloc(Type type, union stuff *vpassed) {
-		            if( asgn() ) alen=toptoi()+1;  /* dimension */
-		            fname=fn;               /* restore the globals */
-		            lname=ln;
-	-               char* x = mustfind(cursor,epr,')',RPARERR);
-k	+               char* x = mustfind(cursor,cursor+5,')',RPARERR);
-		            if(x)cursor = x+1;
-		    } else {
-		            vclass = 0;
-	@@ -903,7 +910,13 @@ void enter( char* where) {
-		    if ( haveArgs ) {
-		            do {
-		                    if(error)return;
-	-                       if( asgn()) ++nargs;
-Rx	+                       if( asgnToA()) ++nargs;
-k	+/*if(cursor>pr+5170){
-k	+struct stackentry top=stack[nxtstack-1];                       
-k	+printf("~908 top ui,class,type,lvalue %d %d %d %d \n",
-k	+top.value.ui,top.class,top.type,top.lvalue);
-k	+}
-k	+*/
-		                    else break;  /* break on error */
-		            } while( lit(xcomma) );
-		    }
-	@@ -957,6 +970,25 @@ void enter( char* where) {
-		    }
-	 }
-	 
-k	+/* asgn() resolved to Actual if necessary. */
-k	+int asgnToA() {
-k	+       struct stackentry* top = &stack[nxtstack-1];
-k	+       if(!asgn())return 0;
-k	+       if( ((*top).lvalue)=='L' ){
-k	+               union stuff vpassed  = (*top).value;
-k	+               int class = (*top).class;
-k	+               int type  = (*top).type;
-k	+               char *where = (char*)vpassed.up;
-k	+               if( class==1 ) { 
-k	+                       (*top).value.up = *((char**)vpassed.up);
-k	+               }
-k	+               else if( type==Int ) (*top).value.ui = get_int(where);
-k	+               else if( type==Char) (*top).value.uc = get_char(where);
-k	+               (*top).lvalue = 'A';
-k	+       }
-k	+       return 1;
-k	+}
-k	+
-	 /* Situation: parsing argument declarations, passed values are on the stack.
-	  * arg points into stack to an argument of type. 
-	  * Gets actual value of arg, calls valloc which parses and sets
-	@@ -967,7 +999,7 @@ void setarg( Type type, struct stackentry *arg ) {
-		    char* where;
-		    int class = (*arg).class;
-		    int lvalue = (*arg).lvalue;
-	-       /*int size = (*arg).size; */
-Rx	+/*     int size = (*arg).size;
-		    if( lvalue=='L') {
-		            where = (char*)vpassed.up;
-		            if( class==1 ) { 
-	@@ -976,6 +1008,7 @@ void setarg( Type type, struct stackentry *arg ) {
-		            else if( type==Int ) vpassed.ui = get_int(where);
-		            else if( type==Char) vpassed.uc = get_char(where);
-		    }
-Rx	+ */
-		    vAlloc( type, &vpassed);
-	 }
-	 
-	@@ -1007,6 +1040,7 @@ void link() {
-		            if(cursor==lastcur)eset(LINKERR);
-		    }
-		    cursor = problemCursor;
-k	+       if(verbose)dumpVarTab();
-	 }
-	 
-	 /* chunk 11: MC's. 
-	@@ -1261,20 +1295,26 @@ int countch(char *f, char *t, char c){
-	  */
-	 void whatHappened() {
-		    if(error){
-	-               char *fc, *lc, *lcurs;
-k	+               char *fc, *lc;
-		            int firstSignif=0, blanks, lineno;
-	-               lineno = countch(apr,errat,'\n');
-	-               printf("line %d ", lineno); errToWords();
-	-               lcurs=cursor;
-k	+               if(*errat=='\n')--errat;
-k	+               if(errat<apr){
-k	+                       lineno = countch(pr,errat,'\n');
-k	+                       printf("\nlib ");
-k	+               }
-k	+               else {
-k	+                       lineno = countch(apr,errat,'\n');
-k	+                       printf("\napp ");
-k	+               }
-k	+               printf("line %d (cursor pr[%d])", lineno,errat-pr); errToWords(
-		            fc=fchar(errat);
-		            while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
-		                     ++firstSignif;
-		            lc=lchar(errat);
-		            fc=fc-1;
-		            pft(fc,lc);
-	-/*             printf("\n"); */
-	-               pft(fc,fc+firstSignif-1);   /* leading whitespace */
-	-               blanks=errat-fc-firstSignif-1;
-k	+               pft(fc,fc+firstSignif-1);        /* leading whitespace */
-k	+               blanks=errat-fc-firstSignif-1;   /* blanks to carot */
-		            while(--blanks >= 0) printf(" ");
-		            printf("^\n");
-		    }
-
-	diff --git a/tc.c b/tc.c
-	index 9244386..e2be47f 100644
-	--- a/tc.c
-	+++ b/tc.c
-	@@ -9,6 +9,9 @@ void prdone(){};
-	 void tcexit(){};
-	 void stbegin() {};
-	  */
-k	+ 
-k	+ /* debugging aid */
-k	+ int watchme;
-	 
-	 /* chunk 1: literals
-	 /************** literals **************/
-	@@ -138,7 +141,10 @@ int toptoi() {
-		            else eset(TYPEERR);
-		    }
-		    else { eset(LVALERR); }
-	-/* ISSUE what about other types for 'L' ANSWER class 1 */
-k	+/*if(cursor>pr+5170) printf("~141 datum,class,type,lvalue %d %d %d %d\n",
-k	+datum,(*top).class,(*top).type,(*top).lvalue);
-k	+if(datum==257)watchme=datum;
-k	+*/
-		    return datum;
-	 }
-	 /* basic popper, entry stays accessible until popped over */
-	@@ -160,6 +166,7 @@ void pushst( int class, int lvalue, Type type, union stuff 
-		    stack[nxtstack].type = type;
-		    stuffCopy( &stack[nxtstack].value, value);
-		    ++nxtstack;
-k	+if((*value).ui==257)watchme=(*value).ui;
-	 }
-	 
-	 /* push an int */
-	@@ -303,7 +310,7 @@ Type konst() {
-		    } else if(lit("\'")) {
-		            fname=cursor;
-========================
-DONE   very little rollback
 pf.tc runs as before
 tests 45~6 has symerr (decl needed)
 	45 is intentional error 3, SYMERR
@@ -3126,7 +2917,7 @@ x	foo just before above line,
 BINGO! why is type==Int? 
 typedef enum type {Err,Char,Int,CharStar} Type;
 Int is 2. $8 type is 1. 
-	~95 missing =    TYPO FIXED
+	~95 TYPO, missing =    FIXED
 Now assigns of chars is broken. symptom...
 		seed7
 		move 1
@@ -3143,14 +2934,76 @@ Same with just one... This worked before.
 	pf~115 ()'s dont match
 	FIXED, and this FIXED the RANGERR bug, too.
 Another ) typo, ~143 FIXED
-
-
-
+All known bugs fixed. Still looking. getchar flaw remains, but the plan is to leave it and provide an unbuffered getkey().
+COMMITTED and PUSHED
+Browsing a bit...
+	http://primepuzzle.com/tc/pf.txt (and parent folder)
+		Lots of tc progs in ../tc
+		pf.txt is a run by Lee Bradley.
+	~2193 above is my first work on kbhit, with ref's to web pages.
+3:35pm, Nov 30, 
+First full game of piranha fish using new C implementaion of tiny-c. 
+	But there is a bug: the score should be 700, not 900.
+	And a flaw, excessive move prompts, getchar returns newlines.
 debug ISSUE: Need to print array elements.
+---------------------
 
+Fri, Dec 1
+today's goal: a proper getchar. DONE, BUT...
+FIXED	it captures ^C, so how to bail?
+Passed all 90's tests involving getchar.
+Now need esc capture at beginning of each statement.
+	Design thoughts: 
+		shouldn't quit if debug is on. 
+		maybe do whathappened
+		what did ASM do?
+			Calls QUIT...
+				applvl && chrdy && ESC -> discard ESC, eset(KILL)
+---------------------
 
+Sat, Dec 2
+IS SUE:survey IS SUE's and summarize in one place.  DONE...
+-----
+THE WHOLE LIST...
+notes.txt...
+	502 findEOS() and several other ways: find one way to test EOS.
+	517 : Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
+	697 ISSUE better names for globals.
+	709 Subordinate ISSUE is be sure brake and leave are zeroed back appropriatly.
+	726 : it (77 OM) describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
+	772 : index base shift, BADDD!, machine call ~110. fix later.
+	2664 MAJOR ISSUE: bombs due to forgotten ] means incomplete link. Need to diagnose that situation and give intelligence that is helpful.
+	2944 debug ISSUE: Need to print array elements.
 
+tc.c...
+	754 quit() /* Returns true if user signals quit.
+	 *	STUBBED for now. ISSUE how to set the quit flag from keyboard.
+	 */
+-----
+PRIORITIES
+	possible bugs over function over tidy
+x		709 2664 
+	function
+		754 2944
+	tidy
+		502 517 697 726 772
 
+DONE Today's goal: Check the possible bugs.
+OK 709 brake,leave...
+	both are global, 
+	brake zeroed at st() beginning
+	leave zeroed AFTER st() call near end of enter
+FIXED 2664 checkBrackets() scans pr+1 to end up/down counting brackets
+---------------------
+
+Sun, Dec 3
+Today's goal: function items (754, 2944)
+754, quit()
+	ESC key hit esets KILL, quit tests for that and returns true/false which causes st() to tunnel to the top. 
+		Will it end up in whatHappened? YES
+		or debug? Not unless whatHappened tests for debug because quit() is called BEFORE stbegin(). 
+		whatHappened is called at end of tc's main().
+		KILL code is in machineCall, Mgch, ~126.
 
 
 

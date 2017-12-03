@@ -231,7 +231,7 @@ int skip(char l, char r) {
 		if(*cursor==r)--counter;
 		++cursor;
 	};
-	if( cursor > epr ) { eset(CURSERR); return error; }
+	if( counter ) { eset(CURSERR); return error; }
 	return 0;
 }
 
@@ -751,10 +751,12 @@ void vAlloc(Type type, union stuff *vpassed) {
 /* chunk 7: st, decl, quit
  */
 
-/* Returns true if user signals quit.
- *	STUBBED for now. ISSUE how to set the quit flag from keyboard.
+/* Returns true if user signals quit, or any other error.
  */
-int quit() { return 0; }
+int quit() { 
+	if(error)return 1;
+	return 0; 
+}
 
 /* st(): interprets a possibly compound statement
  */
@@ -990,6 +992,12 @@ void setarg( Type type, struct stackentry *arg ) {
 	vAlloc( type, &vpassed);
 }
 
+void checkBrackets() {
+	int count;
+	cursor=pr+1;
+	if(skip('[',']'))eset(RBRCERR);
+}
+
 /*
  *	scans program from cursor to progend and allocates all externals 
  * 	in next fctn layer. An "endlibrary" line causes a new fctn layer
@@ -998,6 +1006,8 @@ void setarg( Type type, struct stackentry *arg ) {
 void link() {
 	char* x;
 	char* problemCursor=cursor;
+	checkBrackets();
+	if(error)return;
 	cursor=pr;
 	newfun();
 	while(cursor<epr && !error){
@@ -1272,7 +1282,8 @@ int countch(char *f, char *t, char c){
  *	line with error and carot under.
  */
 void whatHappened() {
-	if(error){
+	if(error==KILL)errToWords();
+	else if(error){
 		char *fc, *lc;
 		int firstSignif=0, blanks, lineno;
 		if(*errat=='\n')--errat;
@@ -1289,7 +1300,8 @@ void whatHappened() {
 		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
 			 ++firstSignif;
 		lc=lchar(errat);
-		fc=fc-1;
+/*		fc=fc-1;
+*/
 		pft(fc,lc);
 		pft(fc,fc+firstSignif-1);        /* leading whitespace */
 		blanks=errat-fc-firstSignif-1;   /* blanks to carot */
@@ -1328,11 +1340,12 @@ void errToWords(){
 		case 20: x="LINKERR"; break;
 		case 21: x="ARGSERR, args don't match"; break;
 		case 22: x="LBRCERR, [ required"; break;
+		case 23: x="RBRCERR, ] required somewhere"; break;
 		case 24: x="MCERR, no such MC"; break;
 		case 26: x="SYMERRA, decl needed"; break;
 		case 27: x="EQERR, illegal assign"; break;
 		case 28: x="PTRERR"; break;
 		case 99: x="KILL, stopped by user"; break;
 	}
-	printf("%s ",x);
+	printf("%s\n",x);
 }

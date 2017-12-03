@@ -31,7 +31,7 @@ setup [
   paddle(8)=4
   paddle(9)=4
   sinkrate=25
-  ps"seed"
+  ps"seed "
   seed=last=gn
 ]
 
@@ -63,7 +63,6 @@ whosgoing[
     ]
     else if(j=='s')[
       status
-      ps"move "
     ]
     else if((j>='1')*(j<='9'))[		/* Put player in canoe
       dup=0
@@ -195,7 +194,7 @@ swim char p [
       if(health(p)==2)health(p)=4
       else if(health(p)<2)health(p)=3
     ]
-    else if(health(p))<4)health(p)=4
+    else if(health(p)<4)health(p)=4
     if(health(p)==3)ps" fortunately escapes with minor wounds"
     else ps" major wounds acquired"
   ]
