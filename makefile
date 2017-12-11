@@ -71,7 +71,7 @@ clean:
 # separately: gcc -c FileRead.c,...  WITHOUT cflags
 
 debug.o: debug.c tc.h
-	$(CC) -c -w debug.c
+	$(CC) -c -w -g debug.c
 
 FileRead.o: FileRead.c tc.h
 	$(CC) -c -w FileRead.c

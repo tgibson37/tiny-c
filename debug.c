@@ -94,6 +94,44 @@ void canonThis(char* f, char* l, struct var *buf) {
 	lname=tl;
 }
 
+void print_val(struct var *var) {
+	int class=(*var).class;
+	int type =(*var).type;
+	if(class==0) {
+		if(type==Int){
+			int iDatum = get_int((*var).value.up);
+			printf(" %d", iDatum);
+		}
+		else if(type==Char){
+			char cDatum = get_char((*var).value.up);
+			printf(" (%x)%c", cDatum,cDatum);
+		}
+	}
+	else if(class==1) {
+		if(type==Int){
+			int* where=(int*)((*var).value.up);
+			int len=(*var).len;
+			int iDatum, i;
+			for(i=0;i<len;++i){
+				iDatum = get_int(where+i);
+				printf(" %d", iDatum);
+			}
+		}
+		else if(type==Char){
+			char* where=(*var).value.up;
+			if(*where<32) {
+				int i;
+				for(i=0; i<10; ++i) printf(" 0x",*(where+i));
+			}
+			else printf(" %s", where);
+		}
+	}
+	else {
+		char* name=(*var).name;
+		printf("%s is a function\n",name);
+	}
+}
+
 void print_b(char* param) {
 	struct var sym;
 	struct var *found;
@@ -101,7 +139,8 @@ void print_b(char* param) {
 	found = addrval_all(sym.name);
 	if(!found) printf("no such sym\n");
 	else{
-		dumpVar(found);
+		printf("%s: ",param);
+		print_val(found);
 		printf("\n");
 	}
 }
@@ -114,7 +153,7 @@ int db_cmd() {
 		buf[clen]=0;
 	char cmd = buf[0];
 	switch(cmd) {
-/* back to gdb, set a gdb watch on gdb_b */
+/* back to gdb, to enable this set a gdb watch on gdb_b */
 	case 'g':
 		gdb_b();
 		break;

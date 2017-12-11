@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 	link();
 	cursor=pr;
 	prbegin();
-	st();   /* <<<== executes statement above, line 8 */
+	st();   /* <<<== executes statement above, line 19 */
 	prdone();
 	whatHappened();
 }

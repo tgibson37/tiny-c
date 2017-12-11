@@ -1282,7 +1282,7 @@ int countch(char *f, char *t, char c){
  *	line with error and carot under.
  */
 void whatHappened() {
-	if(error==KILL)errToWords();
+	if(error==KILL) errToWords();
 	else if(error){
 		char *fc, *lc;
 		int firstSignif=0, blanks, lineno;

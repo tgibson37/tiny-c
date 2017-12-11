@@ -1,7 +1,17 @@
 Notes.txt
+Notes on reading these notes.
+	I always keep a log, and I often use shorthand as a convenience. Here are some of my shorthands...
+	~number means line number in a file, usually a code file but often this file.
+	The 1977 8080 code is refered to by several names, TC.ASM, just ASM (not always upper case, 8080. 
+	I note ISSUEs that I will work later with the all-caps word.
+	When an issue is resolved, I leave it in the notes but break the word in two to avoid grep hits.
+	Often I refer to specific C fcns by name(). The parens are just a flag "this is a fcn". I rarely use the full signature (all the args). And sometimes no () flag.
+	
+==================================	
+I begin...
 
 Aug 3, 2017
-Starting from my own TC.ASM supplied by Lee Bradley, my plan is to clone it to my own C version that runs native on Unix, Linux, or wherever a C compiler exists. Goal is a gps version so ANYONE can use it under gps rules.
+Starting from my own TC.ASM supplied by Lee Bradley, my plan is to clone it to my own C version that runs native on Unix, Linux, or wherever a C compiler exists. Goal is a GPS version so ANYONE can use it under gps rules.
 ---
 
 Goal 1 -- variables, 
@@ -2999,13 +3009,32 @@ FIXED 2664 checkBrackets() scans pr+1 to end up/down counting brackets
 Sun, Dec 3
 Today's goal: function items (754, 2944)
 754, quit()
-	ESC key hit esets KILL, quit tests for that and returns true/false which causes st() to tunnel to the top. 
-		Will it end up in whatHappened? YES
-		or debug? Not unless whatHappened tests for debug because quit() is called BEFORE stbegin(). 
-		whatHappened is called at end of tc's main().
-		KILL code is in machineCall, Mgch, ~126.
+		ESC key hit esets KILL, quit tests for that and returns true/false which causes st() to tunnel to the top. 
+		Will it end up in whatHappened? YES, special treatment added.
+ISSUE	Or debug? No, but that is probably ok. debug runs UNDER st(). Once st is dead, so is debug. COULD restart by calling the apps main(). OR doing 6 lines from tcMain.c, ~'s 25,33..37
 
+2944	debug needs to print array elements
+---------------------
 
+Tue, Dec 5
+dumpVar uses PrVal which is designed for stack entries. Doesn't display enough, e.g. doesn't do get_'s. 
 
+BUG: in tc-db: b health, then b shore ==>> is already 1
+	i b ==>> just health, not shore
+---------------------
 
+Mon, Dec 11
+(One week hiatus on this)...
+Need to design a test for (tc-db)p <ptr>.
+	Current design and code: 
+		for char*:test *ptr<32 then hex else string. CODED
+		for int* always %d. NOT coded   ~141
+Test case: must run under -d (obviously) 
+	hence natively manual 
+	AND natively ./tc (not ./test).
+	Three arrays and two datum cover all types.
+	Manually p them all.
+DONE, and all 5 tests GOOD!
+
+NEXT: bug above ~3022
 
