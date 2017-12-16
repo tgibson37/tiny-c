@@ -93,18 +93,23 @@ int eq() {
 	}
 	else if(class==0 && (*val).class==0) {
 		if(type==Int){
-			if( (*val).lvalue=='L' ) 
+			if( (*val).lvalue=='L' ) {
 				iDatum = get_int((*val).value.up);
-			else 
+			}
+			else {
 				iDatum = (*val).value.ui;
+			}
+			if((*val).type==Char) iDatum = iDatum&0xff;
 			put_int( (*lval).value.up, iDatum);
 			pushk(iDatum);
 		}
 		else if(type==Char){
-			if( (*val).lvalue=='L' ) 
+			if( (*val).lvalue=='L' ) {
 				cDatum = get_char((*val).value.up);
-			else 
+			}
+			else {
 				cDatum = (*val).value.uc;
+			}
 			put_char( (*lval).value.up, cDatum );
 			pushk(cDatum);
 		}

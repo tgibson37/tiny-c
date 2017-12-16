@@ -43,7 +43,7 @@ char *param() {
 struct brk *find_b(char *sym) {
 	int i;
 	for( i=0; i<nxtbrk; ++i ) {
-		if( strcmp(sym,(*brktab[i].var).name ) ) return &brktab[i];
+		if( !strcmp(sym,(*brktab[i].var).name ) ) return &brktab[i];
 	}
 	return 0;
 }
@@ -56,7 +56,7 @@ void set_b(char *sym) {
 	struct var *v;
 	struct brk *b = find_b(sym);
 	if(b){
-		printf("is already %d",num_b(b));
+		printf("is already %d\n",num_b(b));
 	}
 	else {
 		if(nxtbrk>=BTABSIZE) printf("too many breaks, max BTABSIZE");
@@ -121,7 +121,7 @@ void print_val(struct var *var) {
 			char* where=(*var).value.up;
 			if(*where<32) {
 				int i;
-				for(i=0; i<10; ++i) printf(" 0x",*(where+i));
+				for(i=0; i<10; ++i) printf(" 0x%x",*(where+i));
 			}
 			else printf(" %s", where);
 		}

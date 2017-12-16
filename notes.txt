@@ -3013,28 +3013,47 @@ Today's goal: function items (754, 2944)
 		Will it end up in whatHappened? YES, special treatment added.
 ISSUE	Or debug? No, but that is probably ok. debug runs UNDER st(). Once st is dead, so is debug. COULD restart by calling the apps main(). OR doing 6 lines from tcMain.c, ~'s 25,33..37
 
-2944	debug needs to print array elements
+DONE 2944	debug needs to print array elements
 ---------------------
 
 Tue, Dec 5
-dumpVar uses PrVal which is designed for stack entries. Doesn't display enough, e.g. doesn't do get_'s. 
-
-BUG: in tc-db: b health, then b shore ==>> is already 1
+FIXED dumpVar uses PrVal which is designed for stack entries. Doesn't display enough for debug p, e.g. doesn't do get_'s. 
+FIXED BUG: in tc-db: b health, then b shore ==>> is already 1
 	i b ==>> just health, not shore
 ---------------------
 
 Mon, Dec 11
-(One week hiatus on this)...
-Need to design a test for (tc-db)p <ptr>.
-	Current design and code: 
-		for char*:test *ptr<32 then hex else string. CODED
-		for int* always %d. NOT coded   ~141
-Test case: must run under -d (obviously) 
-	hence natively manual 
-	AND natively ./tc (not ./test).
-	Three arrays and two datum cover all types.
-	Manually p them all.
-DONE, and all 5 tests GOOD!
+DONE	Need to design a test for (tc-db)p <ptr>.
+		Current design and code: 
+			for char*:test *ptr<32 then hex else string. CODED
+			for int* always %d. NOT coded   ~141
+DONE TEST 94	Test case: must run under -d (obviously) 
+		hence natively manual 
+		AND natively ./tc (not ./test).
+		Three arrays and two datum cover all types.
+		Manually p them all.
+	DONE, and all 5 tests are GOOD!
 
-NEXT: bug above ~3022
+---------------------
+
+Thur, Dec 14
+FIXED next: bug above ~3022
+FIXED new BUG... 	
+	p shore prints a blank line, because it is printed as an empty string instead of an array of short ints. debug.c ~122 print_val().
+n should stop printing at a newline
+FIXED Old bug...
+	Wrong score... Bad setting of h=health(p), ~267
+	pf.tc ~267 (wrapup). Data is...
+			player =  1 2 3 4 5 6 7 8 9
+			health =  0 5 2 0 0 5 0 0 0
+	How is health(p) evaluated...
+		Problem in eq() ~95..105, fix is new line ~102.
+	
+		
+	
+	
+
+
+
+
 
