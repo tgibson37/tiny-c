@@ -997,14 +997,18 @@ void setarg( Type type, struct stackentry *arg ) {
 	vAlloc( type, &vpassed);
 }
 
+/*
+ *	Checks for balanced brackets, cursor to epr inclusive. 
+ */
 void checkBrackets() {
 	int count;
-	cursor=pr+1;
+	while(*(cursor++) != '[' && cursor<=epr) ;
 	if(skip('[',']'))eset(RBRCERR);
 }
 
 /*
- *	scans program from cursor to progend and allocates all externals 
+ *	Saves and (and later restores) cursor, then
+ *	scans program from pr to progend and allocates all externals 
  * 	in next fctn layer. An "endlibrary" line causes a new fctn layer
  * 	to be opened and globals done there.
  */
@@ -1308,6 +1312,7 @@ void whatHappened() {
 /*		fc=fc-1;
 */
 		pft(fc,lc);
+		printf("\n");
 		pft(fc,fc+firstSignif-1);        /* leading whitespace */
 		blanks=errat-fc-firstSignif-1;   /* blanks to carot */
 		while(--blanks >= 0) printf(" ");

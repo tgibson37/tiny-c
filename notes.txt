@@ -3033,7 +3033,6 @@ DONE TEST 94	Test case: must run under -d (obviously)
 		Three arrays and two datum cover all types.
 		Manually p them all.
 	DONE, and all 5 tests are GOOD!
-
 ---------------------
 
 Thur, Dec 14
@@ -3041,19 +3040,41 @@ FIXED next: bug above ~3022
 FIXED new BUG... 	
 	p shore prints a blank line, because it is printed as an empty string instead of an array of short ints. debug.c ~122 print_val().
 n should stop printing at a newline
-FIXED Old bug...
+---------------------
+
+Fri, Dec 15
+FIXED Old (~2955 above) bug...
 	Wrong score... Bad setting of h=health(p), ~267
 	pf.tc ~267 (wrapup). Data is...
 			player =  1 2 3 4 5 6 7 8 9
 			health =  0 5 2 0 0 5 0 0 0
 	How is health(p) evaluated...
 		Problem in eq() ~95..105, fix is new line ~102.
-	
-		
-	
-	
+Time to write a document.
+---------------------
 
-
-
+Sat, Dec 16
+Stuff to tidy...
+	22 untracked files in dev directory not in master
+	How to list tracked files...
+		git ls-tree -r master --name-only
+		Done: > file 'tracked'
+Tests...
+	regression reviews needed: 13 34 43 45 55
+	good_results date is Nov 29
+		4 commits since then.
+		Nov 28 is df98eff5713537...
+		M == mystery
+OK	13: skip (curly braces) prints D (last char on line) But skip works fine.
+	Vaguely recall reducing the skip runaway limit by one.
+M	34: link, neither the funtab or vartab have anything. But link works fine.
+	Recall NO changes in this area. Cannot quickly see why this behavior.
+M	43: pl,ps,pn,num,atoi. Again work fine. 
+Both M's are error 2, CURSERR. 5 eset's. Both from skip[]'s,
+link calls checkbrackets which assumes a real program, not a test of a compound statement. Err 2 is set before any testing gets done. Checkbrackets was introduced to give a more informative diagnostic if a tc program had unbalanced brackets.  
+Several little fixes PLUS comment out call from link to checkbrackets. 
+New list: 13 OK, 45 OK, 55 OK, 
+KEEP, uncover checkbr.. call, New list...
+	34, 43
 
 
