@@ -1,7 +1,7 @@
 CONTENTS.txt
 ---
 Oct 25, 2017, updated: Nov 8
-Notice: this is work in progress. My testing is fairly advanced, and all my test materials and results are included. But it is ready for Beta testing by others. 
+Notice: this is work in progress. My testing is fairly advanced, and all my test materials and results are included. But it is ready for Beta testing by others. See STATUS for latest info. 
 
 Original source from 1977
 	tc.asm

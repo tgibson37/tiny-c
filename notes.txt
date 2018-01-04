@@ -2502,20 +2502,20 @@ DONE	Add lib syms to b, but when you hit n or c screen for app code.
 x		Idea is this: 
 x			test 56 has no globals, but lots of lib calls.
 x			so b libsym is useful, but tracing lib statements is probably not
-	OK next is run and 
-		stop on brk pt
-		display the line
-		enter commands
+x	OK next is run and 
+x		stop on brk pt
+x		display the line
+x		enter commands
 	What tc code defines fname,lname? symname IT ADVANCES THE CURSOR
 yes	Does canon then put it in string form? 
 no	In any buff? Only a struct var
 		~436 void canon(struct var *v) {
 This looks handy...
 	/* return true if symname matches arg, no state change (new) */
-	int symnameis(char* name){
-		int x = strncmp(fname, name, lname-fname+1);
-		return( !x );
-	}
+~262	int symnameis(char* name){
+			int x = strncmp(fname, name, lname-fname+1);
+			return( !x );
+		}
 symname() should not change state. fname,lname are not state. Only cursor.
 	/* Parse a symbol defining fname, lname. ret: true if symbol */
 	int symname() {
@@ -2651,7 +2651,7 @@ places to look
 8080 enter DOES not do rem where I would expect. Neither does C enter.
 	BUT arg parse calls asgn~1626 . Does that rem??? I doubt it.
 	YES, but down in term as a guard before parsing /. 
-	C's term does not. It should, for the same reason. AND incedentally that may be the rem that made 8080 work. Better fix would be in enter before switch contexts.
+	C's term does not. It should, for the same reason. AND incidentally that may be the rem that made 8080 work. Better fix would be in enter before switch contexts.
 ------------
 
 Fri, Nov 24
@@ -2659,7 +2659,6 @@ WHAT SHOULD HAPPEN, starting with call to ps"cannibal"
 	ps parsed, enter()
 	arg parsed, ~900
 ==>>	8080 Deep in arg (in term, specifically) is a sneakey call to rem().
-		It g
 FIXED		None in C.
 ---
 pf.tc now shows status. whosgoing has issues. debug does, too.
@@ -2762,7 +2761,7 @@ New code mustFind() helped in 4 places, ample worthiness. I used it to look for 
 
 We forge ahead. STATUS pf now does shore events and requests another move. Trifling bug: status doesn't move player or canoe to far shore. Fix is likely to be code failing to change their state (shore,canoe). FIXED
 
-Getting multiple moves, caused by getchar not being getkey. Need to put into lib getkey with replies immediately after the keystroke. New name for what WAS in 8080 version getchar. And in that version gc whas the line buffered character fetch which waited for the newline before returning anything. BUT now C's lib has the behavior for getchar. To avoid confusion in 2017 BOTH gc and getchar will be line buffered, and the new getkey will be the keystroke version.
+Getting multiple moves, caused by getchar not being getkey. Need to put into lib getkey with replies immediately after the keystroke. New name for what WAS in 8080 version getchar. And in that version gc was the line buffered character fetch which waited for the newline before returning anything. BUT now C's lib has the behavior for getchar. To avoid confusion in 2017 BOTH gc and getchar will be line buffered, and the new getkey will be the keystroke version. OR stay classic? (YES)
 
 Bug: move 1 prints 257 into the boat. Here is more complex sample...
 move 1
@@ -2875,8 +2874,9 @@ DONE	commit this mess!
 
 Wed, Nov 29
 New thought. Leave basic enter structure, but change the type value so it comes from the stack, not the BELOW parse. Read the code... Entirely in setarg, and much simpler code than yesterdays.
-make diff is happy
-pf.tc is HAPPY!!
+DONE 
+	make diff is happy
+	pf.tc is HAPPY!!
 
 new BUG: putting second player in canoe fails, empties the canoe. 
 		(tc-db) p ngoing
@@ -2979,14 +2979,14 @@ notes.txt...
 	502 findEOS() and several other ways: find one way to test EOS.
 	517 : Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
 	697 ISSUE better names for globals.
-	709 Subordinate ISSUE is be sure brake and leave are zeroed back appropriatly.
+x	709 Subordinate ISSUE is be sure brake and leave are zeroed back appropriately.
 	726 : it (77 OM) describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
 	772 : index base shift, BADDD!, machine call ~110. fix later.
-	2664 MAJOR ISSUE: bombs due to forgotten ] means incomplete link. Need to diagnose that situation and give intelligence that is helpful.
-	2944 debug ISSUE: Need to print array elements.
+x	2664 MAJOR ISSUE: bombs due to forgotten ] means incomplete link. Need to diagnose that situation and give intelligence that is helpful.
+x	2944 debug ISSUE: Need to print array elements.
 
 tc.c...
-	754 quit() /* Returns true if user signals quit.
+x	754 quit() /* Returns true if user signals quit.
 	 *	STUBBED for now. ISSUE how to set the quit flag from keyboard.
 	 */
 -----
@@ -2994,7 +2994,7 @@ PRIORITIES
 	possible bugs over function over tidy
 x		709 2664 
 	function
-		754 2944
+x		754 2944
 	tidy
 		502 517 697 726 772
 
@@ -3060,8 +3060,11 @@ Stuff to tidy...
 		git ls-tree -r master --name-only
 		Done: > file 'tracked'
 Tests...
-	regression reviews needed: 13 34 43 45 55
-	good_results date is Nov 29
+x	regression reviews needed: 13 34 43 45 55
+---------------------
+
+Sun, Dec 17
+good_results date is Nov 29
 		4 commits since then.
 		Nov 28 is df98eff5713537...
 		M == mystery
@@ -3075,6 +3078,111 @@ link calls checkbrackets which assumes a real program, not a test of a compound 
 Several little fixes PLUS comment out call from link to checkbrackets. 
 New list: 13 OK, 45 OK, 55 OK, 
 KEEP, uncover checkbr.. call, New list...
-	34, 43
+	34, 43 
+FIXED: checkBrackets fix, dotest/diff(its clean)/keep, COMMIT, PUSH
+No known problems.
+---------------------
+
+Mon, Dec 18
+	TODO (maybe?)
+	Dec 17, 2017
+	scan of last 1/3 of notes.txt, looking for ideas over the last 10 weeks.
+	Collected here those ideas still alive, plus items worth covering in a writing.
+	---
+
+1	never did file i/o in lib
+2	Classical branches still exist
+3	gedit as wysiwig cannot do dialog (^T)
+		does append work? (^R)
+4	varargs ~2146
+5	malloc's
+6	what does verbose do?
+7	better understanding of gcc's -I
+8	~2977 issues survey, the whole list
+	---
+9	WRITING
+	seed,random now in classical lib (77 was in OM example)
+	debug, incl hookup to gdb ~2681, also ~2760
+	notes style
+		~
+		debug notes usually deleted leaving symptom and FIXED note
+			BUT not always deleted
+		compile and makefile notes
+		ABOVE/BELOW refs to code in enter
+		sub-thoughts often indented
+		broken IS SUE
+	90's tests, unit vs whole code, no file vs file
+	MC story, how to add your own ~2983
+---------------------
+
+Tue, Dec 19
+Classifying yesterday's thoughts...
+	finish classical stuff
+		1 
+	documentation
+		9
+	new function
+		4 6 3 
+	tidy thiings
+		2 5 7 8
+and of course more testing. I'm in the mood for #9.
+
+Survey of writings that may help...
+	my_environment, about_testing, OM's MC ~2-29
+---------------------
+
+Wed, Dec 20
+Writing debug.txt. Here are ISSUEs uncovered by the writing...
+	debug r should offer restart
+	debug d and e
+	debug i v (variables)
+	prbegin never called, should be AFTER link, so can set brkpts
+		goaround: do one n. That lets interp run until it has to parse a statement, which is the MAIN_. By then link is done and you can enter bkpt's.
+	debug b, sym must be canonical form
+		canonical not called
+		adding long sym using long name fails. Adding using canon'd result (mentally achieved) works.
+---------------------
+
+Sat, Dec 23
+Writing document to gather misc txt's into one odt/doc
+---------------------
+
+Mon, Jan 1
+
+TODO (maybe?) collected Dec 17, 2017...
+
+	scan of last 1/3 of notes.txt, looking for ideas over the last 10 weeks.
+	Collected here those ideas still alive, plus items worth covering in a writing.
+	---
+	never did file i/o in lib
+	Classical branches still exist
+	gedit as wysiwig cannot do dialog (^T)
+		does append work? (^R)
+	varargs ~2146
+	malloc's
+	what does verbose do?
+	better understanding of gcc's -I
+	~2977 issues survey, the whole list
+	---
+	WRITING
+	seed,random now in classical lib (77 was in OM example)
+	debug, incl hookup to gdb ~2681, also ~2760
+	notes style
+		~
+		debug notes usually deleted leaving symptom and FIXED note
+			BUT not always deleted
+		compile and makefile notes
+		ABOVE/BELOW refs to code in enter
+		sub-thoughts often indented
+		broken IS SUE
+		90's tests, unit vs whole code, no file vs file
+		MC story, how to add your own ~2983
+
+
+
+
+
+
+
 
 

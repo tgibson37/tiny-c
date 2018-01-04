@@ -1,5 +1,7 @@
 STATUS.txt (latest on top, future at bottom)
 
+Dec 19, 2017 - pf.tc runs fine. Helped find a few bugs, PLUS many improvements to the debugger. Documentation on all is coming next.
+
 Nov 24, 2017 - First big test, pf.tc. Not working well, finding bugs.
 
 Nov 21, 2017 - A useful debugger. Classical lib needs file i/o, and unbuffered getchar. Need doc, i.e. a new OM.
