@@ -1,0 +1,30 @@
+TODO (maybe?)
+Dec 17, 2017
+scan of last 1/3 of notes.txt, looking for ideas over the last 10 weeks.
+Collected here those ideas still alive, plus items worth covering in a writing.
+---
+
+never did file i/o in lib
+Classical branches still exist
+gedit as wysiwig cannot do dialog (^T)
+	does append work? (^R)
+varargs ~2146
+malloc's
+what does verbose do?
+better understanding of gcc's -I
+~2977 issues survey, the whole list
+---
+WRITING
+seed,random now in classical lib (77 was in OM example)
+debug, incl hookup to gdb ~2681, also ~2760
+notes style
+	~
+	debug notes usually deleted leaving symptom and FIXED note
+		BUT not always deleted
+	compile and makefile notes
+	ABOVE/BELOW refs to code in enter
+	sub-thoughts often indented
+	broken IS SUE
+	90's tests, unit vs whole code, no file vs file
+	MC story, how to add your own ~2983
+

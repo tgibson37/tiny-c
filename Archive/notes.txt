@@ -3177,8 +3177,13 @@ TODO (maybe?) collected Dec 17, 2017...
 		broken IS SUE
 		90's tests, unit vs whole code, no file vs file
 		MC story, how to add your own ~2983
+---------------------
 
-
+Sun, Jan 7
+new document "the new classical tiny-C.docx" gathers together stuff in scattered txt files, plus new material. Decided to use links into github for sample programs, archive, maybe other stuff. Can decide those links after doing a tidy-up of the tiny-c directory.
+TIDY...
+	Archive: txt files EXCEPT the 3 intended for github (CONTENT,STATUS,MY_..)
+	SamplePrograms: pf.tc, other stuff in the future
 
 
 

@@ -1,0 +1,40 @@
+/* Test 94, must be run under ./tc -d testFiles/94
+
+int brk
+
+main [
+	int iArray(9)
+	char cArray(9)
+	char cString(0)
+	int iDatum
+	char cDatum
+/* setup	
+	int i
+	while(i<10) [
+		iArray(i)=i;
+		cArray(i)='A'+i
+		i=i+1
+	]
+	iDatum=5; cDatum='E'
+	
+/* test
+	ps "set break on symbol 'brk', then r, then p each..."
+	pl"   iArray, cArray, cString, iDatum, cDatum"
+	pl"";pl"";pl"";pl"";pl"";
+	brk=0
+	ps "Should get..."
+	pl"break at line 24 cursor pr[4088]: brk
+	brk=0
+(tc-db) p iArray
+ 0 1 2 3 4 5 6 7 8 9
+(tc-db) p cArray
+ ABCDEFGHIJ
+(tc-db) p cString
+ 0x 0x 0x 0x 0x 0x 0x 0x 0x 0x
+(tc-db) p iDatum
+ 5
+(tc-db) p cDatum
+ (45)E
+(tc-db)"
+]
+

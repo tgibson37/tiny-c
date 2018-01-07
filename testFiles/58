@@ -1,0 +1,9 @@
+/* test 58, subscripted var as lvalue
+main [
+	char health(9)
+	int p
+	p=2
+	health(p)=health(p)+2
+	pl"health(2) should be 2, is"
+	pn health(p)
+]

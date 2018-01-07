@@ -1,0 +1,21 @@
+using tc debug UNDER gdb
+	setup...
+		plant foo=1 in tc code (decl top as global)
+		gdb ./tc
+		b gdb_b		enables transition from [tcdb] to [gdb]
+		run -d pf.tc
+		(tc-db) b foo
+	session...
+		(tc-db) r
+		do app dialog if any until foo is hit 
+			you are in tc-db...
+			n to complete foo=1 statement
+			more n's to step to tc code of interest
+		g goes back to gdb still running.
+			bkpt @ gdb_b
+			5 n's get to st() ~758 stcurs=curs
+				n or s to step through interpreter code
+				c to resume tc-db (assuming only bkpt @ gdb_b enabled)
+		x to leave tc for restart back in gdb, 
+			run -d pf.tc again
+
