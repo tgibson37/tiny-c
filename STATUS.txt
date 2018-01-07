@@ -1,5 +1,7 @@
 STATUS.txt (latest on top, future at bottom)
 
+Jan 7, 2018 - Tidied the files. Moved much material into two new folders: SamplePrograms, and Archive. Added 'the new classical tiny-C.docx' file which gathers material from scattered txt files and presents it in a more readable fashion. 
+
 Dec 19, 2017 - pf.tc runs fine. Helped find a few bugs, PLUS many improvements to the debugger. Documentation on all is coming next.
 
 Nov 24, 2017 - First big test, pf.tc. Not working well, finding bugs.
