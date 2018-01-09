@@ -7,6 +7,9 @@ int db_running = 0;
 int db_next = 0;
 int db_skiplib = 1;
 
+/* breakpoint this function to enable using BOTH gdb and tcdb */
+void gdb_b() {}
+
 void prbegin(){
 	if(debug) {
 		db_cmds();
@@ -145,15 +148,16 @@ void print_b(char* param) {
 	}
 }
 
-void gdb_b() {}
-
+/* Does one command. Returns the command letter */
 int db_cmd() {
 	fgets(buf, BUF_SIZE, stdin);
 		int clen = ((int)strlen(buf))-1;
 		buf[clen]=0;
 	char cmd = buf[0];
 	switch(cmd) {
-/* back to gdb, to enable this set a gdb watch on gdb_b */
+/*	back to gdb. To enable this 
+ *		set a gdb breakpoint on gdb_b() (which does nothing).
+ */
 	case 'g':
 		gdb_b();
 		break;
@@ -194,6 +198,7 @@ int db_cmd() {
 	}
 }
 
+/* Does commands until either x (exit) or r,c,n (resume processing) */
 void db_cmds() {
 	while(1) {
 		db_next=0;

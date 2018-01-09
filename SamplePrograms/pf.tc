@@ -1,5 +1,5 @@
 /* pirahna fish, an original game from the 1977 Owner's Manual
-int foo
+int foo, bar
 
 char shore(9), health(9), canoe, move(4), ngoing, afloat
 int hfactor(6),sinkrate,paddle(9)
@@ -138,7 +138,6 @@ onefish [
   char p
   pl"A piranha fish has jumped into the boat. He is swimming"
   pl"around. He is looking at the toe of the "
-foo=1
   pname(p=move(random(1,ngoing)))
   ps"."
   if(health(p)>4)pl"Oh, well. He is dead anyway....."

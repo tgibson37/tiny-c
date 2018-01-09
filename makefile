@@ -12,7 +12,7 @@ DIFF = diff test_results good_results
 KEEP = cp test_results good_results
 
 # Install dirs, note name change of tc executable
-INSTALLTC = /usr/local/bin/tinyC
+INSTALLTC = /usr/local/bin/tinyc
 INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
 

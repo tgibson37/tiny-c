@@ -10,8 +10,8 @@ void tcexit(){};
 void stbegin() {};
  */
  
- /* debugging aid */
- int watchme;
+ /* debugging aid, see ~177 for sample use */
+ int watchme=0;
 
 /* chunk 1: literals
 /************** literals **************/
@@ -145,7 +145,7 @@ int toptoi() {
 	}
 	else if((*top).lvalue == 'A') {
 		if((*top).type==Char) datum  = (char)((*top).value.uc);
-		else if((*top).type==Int) datum  = (char)((*top).value.ui);
+		else if((*top).type==Int) datum  = ((*top).value.ui);
 		else eset(TYPEERR);
 	}
 	else { eset(LVALERR); }
@@ -174,7 +174,7 @@ void pushst( int class, int lvalue, Type type, union stuff *value ) {
 	stack[nxtstack].type = type;
 	stuffCopy( &stack[nxtstack].value, value);
 	++nxtstack;
-if((*value).ui==257)watchme=(*value).ui;
+if(((*value).ui)/1000000 == 110)watchme=(*value).ui;
 }
 
 /* push an int */
@@ -587,14 +587,16 @@ int term() {
 		}
 		factor();
 		int denom = toptoi();
-		if(!error)pushk(toptoi()/denom);
+		int numer = toptoi();
+		int div = numer/denom;
+		if(!error)pushk(div);
 	}
 	else if(lit(xpcnt)){
 		factor();
 		int b=toptoi();
 		int a=toptoi();
 		int pct = a%b;
-		if(!error)pushk(a%b);
+		if(!error)pushk(pct);
 	}
 	return 1;  /* factor is a term */
 }
