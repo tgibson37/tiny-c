@@ -3188,7 +3188,7 @@ Moved files around, main dir now quite clean. git status easier to read untracke
 Committed. Pushed.
 THEN decided to be sure it was ok. make install now uses name tinyc, not tinyC. NEW BUGS...
 	tinyc with no args segs
-	pf seed 7, 1234.1.1567.1.189. bombs on app line 143.
+FIXED	pf seed 7, 1234.1.1567.1.189. bombs on app line 143.
 Doc issues...
 	need to advise 2 notyetdone lib functions.
 	AND seed and random are lib items now.
@@ -3345,7 +3345,16 @@ app line 147 (cursor pr[6771])RANGERR
 AHAH! The value is popped as a character, uc not ui. But toptoi ONLY does ui. And pushk ONLY does 0,A,Int (which stack[1] is. What did toptoi DO???
 ANSWER: It popped and used the ui value, then CAST IT TO (char)!!! But ONLY for 0,A,Int. Evidently this is the first case of a large actual being pushed.
 Score is 970  --  Whoopee!!!
-Clean it up, run final test, commit, update status, push
+Clean it up, run final test, commit, update status, push, ALL DONE
+Doc issues...
+	need to advise 2 notyetdone lib functions.
+	AND seed and random are lib items now.
+---------------------
+
+Thur, Jan 11
+Final draft of document. Proofreading before committing.
+Idea: -s "statement" option runs the statement. 
+When paper is finalized, rm txt files incorporatedinto the paper.
 
 
 

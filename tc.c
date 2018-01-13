@@ -759,6 +759,7 @@ void vAlloc(Type type, union stuff *vpassed) {
  */
 
 /* Returns true if user signals quit, or any other error.
+ *	NOTE: MC 2 esets KILL on ESC
  */
 int quit() { 
 	if(error)return 1;

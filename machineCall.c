@@ -107,11 +107,9 @@ printf("\n\n63: MprF: nargs %d args[0..3] %d %d %d %d",
 	pFmt(*args,(args+1));  /* fmt, args */
 }
 
-/* original MC's, sparcely implemented */
+/* original MC's */
 int Mpc(int nargs, int *args)
 {
-/*printf("\n88: args,*args %x %x",args,*args);
-*/
     printf("%c", *args);
 }
 
