@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <unistd.h>
 
 /*	Typewriter plot routine in 80x80 space, Space. 
  */
@@ -133,22 +134,23 @@ void star() {
 	}
 }
 
-int main(int argc, char* argv) {
+int main(int argc, char* argv[]) {
 	int opt;
-	char* optarg;
-    while ((opt = getopt(argc, argv, "p:df")) != -1) {
+/*	char* optarg;
+ */
+     while ((opt = getopt(argc, argv, "dfp:")) != -1) {
         switch (opt) {
         case 'd': debug=1; break;
         case 'f': frame=1; break;
         case 'p':
-        	printf("%s point star",optarg);
+        	printf(">>> %s point star",optarg);
         	points = atoi(optarg);
         break;
         }
     }
-/*	test();*/
+/*	test();
 	star();
-    show();
+    show();*/
 }
 
 
