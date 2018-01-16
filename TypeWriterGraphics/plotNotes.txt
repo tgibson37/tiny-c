@@ -1,0 +1,27 @@
+Plot notes
+---
+Started 1/14/2018
+STATUS: plot.c has two drawings, test and star. Its main has a few - options, e.g. which to draw, and for star how many points.
+GOALs:
+x	1 - separate the infrastructure from the actual drawings and tests.
+x	2 - That implys a makefile to put stuff together.
+	3 - Problem space layer above plot below objects
+	4 - objects.c with line,circle,rectangle,etc.
+	5 - Add interactive drawing, saving, etc.
+	6 - Define a tc library that supports this type of drawing.
+	7 - A bash utility to produce jpeg/gif/png copies
+-----------
+Sun, Jan 14
+Still debugging.
+FIXED. 
+New issue: added code to plot() to label diag's "new object" to relieve object code of that issue.
+-----------
+Mon, Jan 15
+Still debugging.
+Now using makefile. Also gdb.
+-----------
+Tue, Jan 16
+mirrored line issue FIXED. 
+Starting work on Problem Space (#3 above).
+Git: Commit. Push, too. Need to tidy before commits (rm *.o, etc).
+
