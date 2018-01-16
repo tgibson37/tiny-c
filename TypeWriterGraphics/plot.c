@@ -117,6 +117,17 @@ void line( Point a, Point b ) {
 	}
 }
 
+void usage() {
+	printf("Usage: plot -gNAME [OPTIONS]\n");
+	printf("Plot a 23 point star, or some test lines\n");
+	printf("Options:\n");
+	printf("  -d		Debug mode.\n");
+	printf("  -f		Add a frame\n");
+	printf("  -gNAME	(required) name is either 'star' or 'test'\n");
+	printf("  -m 		Movie mode\n");
+	printf("  -pNUM	Number of points on the star.\n");
+}
+
 int main(int argc, char* argv[]) {
 	int opt;
 	char* graphic = "star";
@@ -124,8 +135,9 @@ int main(int argc, char* argv[]) {
 	debug=frame=0;
 	label='a';
 	points=17;
-
+   	int usageNeeded=1;
     while ((opt = getopt(argc, argv, "dfmp:g:")) != -1) {
+    	usageNeeded=0;
         switch (opt) {
         case 'd': debug=1; break;
         case 'f': frame=1; break;
@@ -133,9 +145,14 @@ int main(int argc, char* argv[]) {
         case 'p':
         	printf(">>> %s point star",optarg);
         	points = atoi(optarg);
-        break;
-        case 'g':	graphic=optarg; break;
+        	break;
+        case 'g': graphic=optarg; break;
+        case '?': usageNeeded=1; break;
         }
+    }
+    if(usageNeeded){
+    	usage();
+    	exit(0);
     }
 	blank();
 	if(strcmp(graphic,"test")==0)test();

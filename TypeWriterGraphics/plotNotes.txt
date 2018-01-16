@@ -3,6 +3,7 @@ Plot notes
 Started 1/14/2018
 STATUS: plot.c has two drawings, test and star. Its main has a few - options, e.g. which to draw, and for star how many points.
 GOALs:
+	0 - Usage
 x	1 - separate the infrastructure from the actual drawings and tests.
 x	2 - That implys a makefile to put stuff together.
 	3 - Problem space layer above plot below objects

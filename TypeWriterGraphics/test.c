@@ -3,7 +3,7 @@
 /* test, four lines */	
 void test() {
 
-/*	Point b1 = { 5,5 };
+	Point b1 = { 5,5 };
 	Point e1 = { 75,35 };
 	line(b1,e1); 
 
@@ -22,6 +22,6 @@ void test() {
  	Point b5 = { 40,75 };
 	Point e5 = { 46,5 };
 	line(b5,e5); 
-*/	
+	
 }
 
