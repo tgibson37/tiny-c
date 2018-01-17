@@ -7,7 +7,7 @@
 #include <math.h>
 #include <unistd.h>
 
-typedef struct { int x; int y; } Point;
+typedef struct { float x; float y; } Point;
 int debug;
 int frame;
 int movie;
@@ -15,23 +15,22 @@ char label;
 int points;
 
 /* problem space */
-float min_x;
-float min_y;
-float max_x;
-float max_y;
+float min_x, min_y, max_x, max_y;
+float range_x, range_y, inc_x, inc_y;
+void pallette(float minx, float miny, float maxx, float maxy );
+
+/* problem stuff */
+void plot(float x, float y);
+void line(Point, Point);
 
 /* basic stuff */
 void blank();
 void show();
 void basic_plot(int x, int y);
 
-/* problem stuff */
-void plot(float x, float y);
-
 /* basic drawings */
 void test();
 void star();
-void line(Point, Point);
 
 #endif /* PLOT_H */
 

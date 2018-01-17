@@ -3,10 +3,10 @@ Plot notes
 Started 1/14/2018
 STATUS: plot.c has two drawings, test and star. Its main has a few - options, e.g. which to draw, and for star how many points.
 GOALs:
-	0 - Usage
+x	0 - Usage
 x	1 - separate the infrastructure from the actual drawings and tests.
 x	2 - That implys a makefile to put stuff together.
-	3 - Problem space layer above plot below objects
+x	3 - Problem space layer above plot below objects
 	4 - objects.c with line,circle,rectangle,etc.
 	5 - Add interactive drawing, saving, etc.
 	6 - Define a tc library that supports this type of drawing.
@@ -24,5 +24,16 @@ Now using makefile. Also gdb.
 Tue, Jan 16
 mirrored line issue FIXED. 
 Starting work on Problem Space (#3 above).
-Git: Commit. Push, too. Need to tidy before commits (rm *.o, etc).
+Git: Commit. Push, too. Need to 'make clean' before commits.
+Working on pallette. test.c modified for 0011 pallette.
+	"Invalid space" Dumps all 0.0 space size.
+-----------
+Wed, Jan 17
+FIXED. pallette(..) doesn't initialize. 
+Map getting bad args? ...
+	increments bad.
+	a d good
+
+
+
 

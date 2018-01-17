@@ -2,15 +2,15 @@
 CC = /usr/bin/gcc
 
 # The tc object files
-OBJPLOT = plot.o star.o test.o
+OBJPLOT = plot.o star.o test.o objects.o
 
 # All the header and c files
-SRCS = plot.c star.c test.c
+SRCS = plot.c star.c test.c objects.c
 HDRS = plot.h
 
 # Add -I to the dir the include files are in
 #CFLAGS = -w -g -ansi -I /usr/lib/syslinux/com32/include/
-CFLAGS = 
+CFLAGS = -g
 
 PLOT = plot
 
@@ -22,7 +22,7 @@ all: $(PLOT)
 $(PLOT): $(OBJPLOT)
 	$(CC) $(CFLAGS) $(OBJPLOT) -o $(PLOT) -lm
 
-# Seperately compile each .c file
+# Separately compile each .c file
 test.o: test.c plot.h
 	$(CC) $(CFLAGS) -c test.c
 
@@ -32,7 +32,10 @@ plot.o: plot.c plot.h
 star.o: star.c plot.h
 	$(CC) $(CFLAGS) -c star.c
 
+objects.o: objects.c plot.h
+	$(CC) $(CFLAGS) -c objects.c
+
 # Clean up
 clean:
-	rm -fv core* $(PLOT) $(OBJS)
+	rm -fv core* $(PLOT) $(OBJPLOT)
 

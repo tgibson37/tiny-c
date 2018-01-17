@@ -27,17 +27,6 @@ int countdown=0;
 
 /* plot a small mark at raw position x,y */
 void raw_plot(int x, int y) {
-	if(debug){
-		if(lastLabel!=label){
-			lastLabel=label;
-			fprintf(stderr,"\nplot: new Object %c",label);
-			countdown = 3;
-		}
-		if(countdown){
-			fprintf(stderr,"\nplot %d %d", x, y);
-			if(!(--countdown))fprintf(stderr,"  ...");
-		}
-	}
 	int r,c;
 	char mark, test;
 	if( x<0 || x>=80 ) return;
@@ -60,62 +49,45 @@ void raw_plot(int x, int y) {
 }
 
 /* define problem space */
-void space(float minx, float miny, float maxx, float maxy ) {
+void pallette(float minx, float miny, float maxx, float maxy ) {
+	if(debug)fprintf(stderr,
+			"\npallette(plot~65) %f %f %f %f",minx,miny,maxx,maxy);
 	min_x=minx; min_y=miny; max_x=maxx; max_y=maxy;
+	range_x=maxx-minx; range_y=maxy-miny;
+	inc_x=range_x/80; inc_y=range_y/80;
+	if(inc_x<=0 || inc_y<=0 ) {
+		printf("\nInvalid space: min x,y %f %f  max x,y %f %f\n"
+				,minx,miny,maxx,maxy);
+		exit(1);
+	}
+	blank();
+}
+
+/* Map x from the range min..max to 0..80 */
+int map(float x, float min, float max) {
+	float range = max-min;
+	float a = 80/range;
+	float b = -80*min/range;
+	int p = (int)(a*x+b);
+	return p;
 }
 
 /* plot a small mark at problem position x,y */
-void plot(float x, float y) { raw_plot((int)x,(int)y); }
-
-
-/* Draw a line from a to b */
-void line( Point a, Point b ) {
-	if(debug)++label;
-	else label=0;
-	if(debug)fprintf(stderr,"\nLine: %d,%d -> %d,%d",a.x,a.y,b.x,b.y);
-
-	int xr = b.x-a.x;
-	int yr = b.y-a.y;
-	int x,y;
-	int little,big;
-	if( abs(xr) > abs(yr) ) {  /* near horizontal case */
-		float yinc, ypos;
-		yinc = ((float)yr)/xr;  /*  -1 < yinc < +1  */
-		if(a.x<b.x){
-			little=a.x;
-			big=b.x;
-			ypos=a.y+yinc/2;
+void plot(float x, float y) { 
+	if(debug){
+		if(lastLabel!=label){
+			lastLabel=label;
+			fprintf(stderr,"\nplot: new Object %c",label);
+			countdown=5;
 		}
-		else{
-			little=b.x;
-			big=a.x;
-			ypos=b.y+yinc/2;
-		}
-		for( x = little; x<=big; ++x ) {
-			y = (int)ypos;
-			plot(x,y);
-			ypos += yinc;
-		}
-	} else {       /* near vertical case */
-		float xinc, xpos;
-		xinc = ((float)xr)/yr;
-		if(a.y<b.y){
-			little=a.y;
-			big=b.y;
-			xpos=a.x+xinc;
-		}
-		else{
-			little=b.y;
-			big=a.y;
-			xpos=b.x+xinc/2;
-		}
-		for( y=little; y<=big; ++y ) {
-			x = (int)xpos;
-			plot(x,y);
-			xpos += xinc;
+		if(countdown){
+			fprintf(stderr,"\nplot %f %f", x, y);
+			if(!(--countdown))fprintf(stderr,"  ...");
 		}
 	}
+	raw_plot(map(x,min_x,max_x), map(y,min_y,max_y)); 
 }
+
 
 void usage() {
 	printf("Usage: plot -gNAME [OPTIONS]\n");
@@ -131,10 +103,13 @@ void usage() {
 int main(int argc, char* argv[]) {
 	int opt;
 	char* graphic = "star";
-/*globals*/
+/*set global defaults*/
 	debug=frame=0;
-	label='a';
+	label=0x60;  /*Just before 'a'*/
 	points=17;
+	min_x=min_y=0;
+	max_x=max_y=80;
+
    	int usageNeeded=1;
     while ((opt = getopt(argc, argv, "dfmp:g:")) != -1) {
     	usageNeeded=0;
@@ -154,7 +129,10 @@ int main(int argc, char* argv[]) {
     	usage();
     	exit(0);
     }
-	blank();
+	pallette(0,0,80,80);  /* default */
+	if(debug){
+		countdown=5;
+	}
 	if(strcmp(graphic,"test")==0)test();
 	else if(strcmp(graphic,"star")==0)star();
 	else {
