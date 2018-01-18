@@ -135,6 +135,7 @@ int main(int argc, char* argv[]) {
 	}
 	if(strcmp(graphic,"test")==0)test();
 	else if(strcmp(graphic,"star")==0)star();
+	else if(strcmp(graphic,"circle")==0)circle();
 	else {
 		printf("no graphic called %s\n",graphic);
 		exit(1);

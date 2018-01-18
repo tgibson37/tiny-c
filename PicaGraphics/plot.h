@@ -12,7 +12,6 @@ int debug;
 int frame;
 int movie;
 char label;
-int points;
 
 /* problem space */
 float min_x, min_y, max_x, max_y;
@@ -24,6 +23,7 @@ void plot(float x, float y);
 void line(Point, Point);
 
 /* basic stuff */
+typedef struct { int x; int y; } pgPoint;
 void blank();
 void show();
 void basic_plot(int x, int y);

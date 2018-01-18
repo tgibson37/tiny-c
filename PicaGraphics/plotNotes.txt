@@ -1,0 +1,70 @@
+Plot notes
+---
+Started 1/14/2018
+STATUS: plot.c has two drawings, test and star. Its main has a few - options, e.g. which to draw, and for star how many points.
+GOALs:
+x	0 - Usage
+x	1 - separate the infrastructure from the actual drawings and tests.
+x	2 - That implys a makefile to put stuff together.
+x	3 - Problem space layer above plot below objects
+	4 - objects.c with 
+x		line,
+x		circle,
+		rectangle,
+			all independant of palette
+	5 - better way to pick what to draw.
+		command line palette
+		
+	6 - Add interactive drawing, saving, etc.
+	7 - Define a tc library that supports this type of drawing.
+	8 - A bash utility to produce jpeg/gif/png copies
+-----------
+Sun, Jan 14
+Still debugging.
+FIXED. 
+New issue: added code to plot() to label diag's "new object" to relieve object code of that issue.
+-----------
+Mon, Jan 15
+Still debugging.
+Now using makefile. Also gdb.
+-----------
+Tue, Jan 16
+mirrored line issue FIXED. 
+Starting work on Problem Space (#3 above).
+Git: Commit. Push, too. Need to 'make clean' before commits.
+Working on palette. test.c modified for 0011 pallette.
+	"Invalid space" Dumps all 0.0 space size.
+-----------
+Wed, Jan 17
+FIXED. palette(..) doesn't initialize. 
+DONE. Line needs work.
+changes...
+	New function palette(..) defines problem coordinates.
+	The old plot(..) is now plot_basic(..), int args as always.
+	The new plot has floats as arguments, maps to int args for plot_basic.
+	Points now take floats as elelments.
+	line(..) now uses floats from Points, and all calcs.
+	void test() defines 5 lines using 10 Points, 
+		all floating point, on a palette(0,0,1,1).
+	User API so far:
+		palette, plot, line. All floating point.
+-----------
+Thur, Jan 18
+REFACTORING thoughts: The way to organize this is to do raw forms of circle and star, in a file called rawObj, I guess. Then objects.c just does maps into their corresponding raw. That way raw is what we put into a tc plot library. And main is outside all.
+And a better name for all is picaGraphics. Maybe raw becomes pg prefix.
+How to do the pts array? It has to be raw. So it is pgPts[]? How to do JUST a point?
+
+pgObjects.c defines integer only pgPlot(int,int) and pgLine(pgPoint,pgPoint). pgPlot.h is header. pgTest.c has main and test(), 5 lines so far. pgObjects defines all basic stuff: 80x80 Space, blank,show,label, pgPlot, pgLine. 
+To objects I intend to add circle, and a star(pos,points,radius), all int.
+To test I will add the shapes, all on one space.
+ISSUES
+x	-m is lost
+x	-d plot all float 0's
+x	-p deprecated as global, used globally in test.c
+	- star will use no globals, 
+		ditto circle, 
+		circleOfPoints
+
+
+
+
