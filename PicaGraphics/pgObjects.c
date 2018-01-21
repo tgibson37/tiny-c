@@ -27,14 +27,14 @@ int countdown=0;
 
 /* plot a small mark at raw position x,y */
 void pgPlot(int x, int y) {
-	if(debug){
+	if(debug>1){
 		if(lastLabel!=label){
 			lastLabel=label;
-			fprintf(stderr,"\nplot: new Object %c",label);
+			fprintf(stderr,"\n    pgPlot: new Object %c",label);
 			countdown=3;
 		}
 		if(countdown){
-			fprintf(stderr,"\nplot %d %d", x, y);
+			fprintf(stderr,"\n    pgPlot %d %d", x, y);
 			if(!(--countdown))fprintf(stderr,"  ...");
 		}
 	}
@@ -61,16 +61,16 @@ void pgPlot(int x, int y) {
 
 /* Draw a line from a to b */
 void pgLine( pgPoint a, pgPoint b ) {
-	if(debug)++label;
+	if(debug>1)++label;
 	else label=0;
-	if(debug)fprintf(stderr,"\nLine: %d,%d -> %d,%d",a.x,a.y,b.x,b.y);
+	if(debug>1)fprintf(stderr,"\n  pgline: %d,%d -> %d,%d",a.x,a.y,b.x,b.y);
 
 	int xr = b.x-a.x;
 	int yr = b.y-a.y;
 	int x,y;
 	int little,big,inc;
 	if( abs(xr) > abs(yr) ) {  /* near horizontal case */
-		if(debug)fprintf(stderr,"\nhorizontal");
+		if(debug>1)fprintf(stderr,"\n  horizontal");
 		float yinc, ypos;
 		yinc = (float)yr/xr;  /*   -1 < yinc < +1   */
 		if(a.x<b.x){
@@ -83,14 +83,14 @@ void pgLine( pgPoint a, pgPoint b ) {
 			big=a.x;
 			ypos=b.y;
 		}
-		if(debug)fprintf(stderr,
+		if(debug>1)fprintf(stderr,
 				"  little,big,yinc %d %d %f",little,big,yinc);
 		for( x=little; x<=big; ++x ) { 
 			pgPlot(x,(int)ypos);
 			ypos += yinc;
 		}
 	} else {       /* near vertical case */
-		if(debug)fprintf(stderr,"\nvertical");
+		if(debug>1)fprintf(stderr,"\n  vertical");
 		float xinc, xpos;
 		xinc = (float)xr/yr;
 		if(a.y<b.y){
@@ -103,7 +103,7 @@ void pgLine( pgPoint a, pgPoint b ) {
 			big=a.y;
 			xpos=b.x;
 		}
-		if(debug)fprintf(stderr,
+		if(debug>1)fprintf(stderr,
 				"  little,big,xinc %d %d %f",little,big,xinc);
 		for( y=little; y<=big; ++y ) {
 			pgPlot((int)xpos,y);
@@ -115,7 +115,6 @@ void pgLine( pgPoint a, pgPoint b ) {
 
 /* Define npts pgPoints in a circle, results in pts */
 void pgPointCircle(pgPoint center, int radius, pgPoint pts[], int npts ) {
-	if(debug)fprintf(stderr,"\npgObject~117 pgPointCircle");
 	int i;
 	float angle = 2*M_PI/npts;
 	for(i=0; i<npts; ++i) {
@@ -125,7 +124,6 @@ void pgPointCircle(pgPoint center, int radius, pgPoint pts[], int npts ) {
 }
 
 void pgCircle(pgPoint center, int radius, int npts) {
-	if(debug)fprintf(stderr,"\npgObject~127 circle");
 	pgPoint pts[npts];
 	pgPointCircle(center,radius,pts,npts);
 	int i;
@@ -136,7 +134,6 @@ void pgCircle(pgPoint center, int radius, int npts) {
 }
 
 void pgStar(pgPoint center, int radius, int npts) {
-	if(debug)fprintf(stderr,"\npgObject~127 circle");
 	pgPoint pts[npts];
 	pgPointCircle(center,radius,pts,npts);
 	int i, to;

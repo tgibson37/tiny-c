@@ -60,10 +60,39 @@ To test I will add the shapes, all on one space.
 ISSUES
 x	-m is lost
 x	-d plot all float 0's
-x	-p deprecated as global, used globally in test.c
-	- star will use no globals, 
-		ditto circle, 
-		circleOfPoints
+x	-p deprecated as global, still 
+x		used globally in test.c
+x	- pgStar will use no globals, 
+x		ditto pgCircle, 
+x		ditto pgPointCircle
+	- some evidence lines need half an inc adjust at start. A few spurious dots outside of circle, and line overrun for star.
+-----------
+Thur, Jan 18
+REFACTORING is done. All work. main is in pgTest. So is test. makefile not needed; tcc *.c -lm -o plot works fine. 
+	Small objects plot poorly, large ones look fine.
+-----------
+Fri, Jan 19
+ISSUE, tests with palatte 0,0,1,1 fine. Same test -1,-1,1,1 bad! The size doubles, should be half. Plot goes off the palette, should be 1st quad. map must be the culprit. * instead of /, offset wrong, too.
+-----------
+Sat, Jan 20
+Two debug levels -D -d. The former shows low level detail, the latter high level. 
+Evidence of lines needing end trimming..
+	palette(plot~65) -1.000000 -1.000000 1.000000 1.000000
+	Circle center: 0.000000 0.000000 radius: 0.650000 points: 25
+	 ...	
+o:	 pgline: 14,36 -> 15,30
+	  vertical  little,big,xinc 30 36 -0.166667
+		pgPlot: new Object o
+		pgPlot 15 30
+		pgPlot 14 31
+		pgPlot 14 32  ...
+	  ...
+z:	  pgline: 65,33 -> 66,40
+	  vertical  little,big,xinc 33 40 0.142857
+		pgPlot: new Object z
+		pgPlot 65 33
+		pgPlot 65 34
+		pgPlot 65 35  ...
 
 
 

@@ -2,81 +2,66 @@
 
 /* objects.c -- Library with for drawing lines, more */
 
+/* Map x from the range min..max to 0..80 */
+
+/* define problem space */
+void palette(float minx, float miny, float maxx, float maxy ) {
+	if(debug)fprintf(stderr,
+			"\npalette(plot~65) %f %f %f %f",minx,miny,maxx,maxy);
+	min_x=minx; min_y=miny; max_x=maxx; max_y=maxy;
+	range_x=maxx-minx; range_y=maxy-miny;
+	inc_x=range_x/80; inc_y=range_y/80;
+	if(inc_x<=0 || inc_y<=0 ) {
+		printf("\nInvalid space: min x,y %f %f  max x,y %f %f\n"
+				,minx,miny,maxx,maxy);
+		exit(1);
+	}
+	blank();
+}
+
+/* maps x(or y) position in palette to position in 80x80 grid */
+int map(float x, float min, float max) {
+	float range = max-min;
+	float a = 80/range;
+	float b = -80*min/range;
+	int p = (int)(a*x+b);
+	if(debug>1)fprintf(stderr,"\n  map %f %f %f -> %d",x,min,max,p );
+	return p;
+}
+
+/* scales x to 80x80 grid offset in x direction */
+int xScale(float x) {
+	int offset = 80*(x/range_x);
+	if(debug>1)fprintf(stderr,"\n  xScale: %f -> %d",x,offset);
+	return offset;
+}
+
+/* scales y to 80x80 grid offset in y direction */
+int yScale(float y) {
+	int offset = 80*(y/range_y);
+	if(debug>1)fprintf(stderr,"\n  yScale: %f -> %d",y,offset);
+	return offset;
+}
+
 /* Draw a line from a to b */
 void line( Point a, Point b ) {
-	if(debug)++label;
-	else label=0;
-	if(debug)fprintf(stderr,"\nLine: %f,%f -> %f,%f",a.x,a.y,b.x,b.y);
-
-	float xr = b.x-a.x;  /* .25 */
-	float yr = b.y-a.y;  /* -.15 */
-	float x,y;
-	float little,big,inc;
-	if( fabs(xr) > fabs(yr) ) {  /* near horizontal case */
-		if(debug)fprintf(stderr,"\nhorizontal");
-		float yinc, ypos;
-		yinc = (yr/xr)*inc_x;   /* (-.15/.25)*.0125 = -.0075 */
-		if(a.x<b.x){
-			little=a.x;
-			big=b.x;
-			ypos=a.y+yinc/2;
-		}
-		else{
-			little=b.x;
-			big=a.x;
-			ypos=b.y+yinc/2;
-		}
-		if(debug)fprintf(stderr,
-				"  little,big,inc_x %f %f %f",little,big,inc_x);
-		for( x=little+inc_x/2; x<=big; x+=inc_x ) { 
-							/* control from global inc_x */
-			plot(x,ypos);
-			ypos += yinc;	/* lesser yinc calculated above */
-		}
-	} else {       /* near vertical case */
-		if(debug)fprintf(stderr,"\nvertical");
-		float xinc, xpos;
-		xinc = (xr/yr)*inc_y;
-		if(a.y<b.y){
-			little=a.y;
-			big=b.y;
-			xpos=a.x+xinc/2;
-		}
-		else{
-			little=b.y;
-			big=a.y;
-			xpos=b.x+xinc/2;
-		}
-		if(debug)fprintf(stderr,
-				"  little,big,inc_y %f %f %f",little,big,inc_y);
-		for( y=little+inc_y/2; y<=big; y+=inc_y ) {
-			plot(xpos,y);
-			xpos += xinc;
-		}
-	}
+	if(debug)fprintf(stderr,"\nLine a: %f %f  b: %f %f",a.x,a.y,b.x,b.y);
+	pgPoint pa = {map(a.x,min_x,max_x), map(a.y,min_y,max_y)};
+	pgPoint pb = {map(b.x,min_x,max_x), map(b.y,min_y,max_y)};
+	pgLine(pa,pb);
 }
 
-void pointCircle(Point center, float radius, Point pts[], int npts ) {
-if(debug)fprintf(stderr,"\nobject~60 pointCircle");
-	int i;
-	float angle = 2*M_PI/npts;
-	for(i=0; i<npts; ++i) {
-		pts[i].x = radius*cos(i*angle)+center.x;
-		pts[i].y = radius*sin(i*angle)+center.y;
-	}
+void circle(Point c, float r, int npts) {
+	if(debug)fprintf(stderr,"\nCircle center: %f %f radius: %f points: %d",
+		c.x, c.y, r, npts);
+	pgPoint center = { map(c.x,min_x,max_x), map(c.y,min_y,max_y) };
+	pgCircle(center,xScale(r),npts);
 }
 
-void circle() {
-if(debug)fprintf(stderr,"\nobject~69 circle");
-	int npts=points;
-	Point pts[npts];
-	Point center = {40.0,40.0};
-	float radius=30.0;
-	pointCircle(center,radius,pts,npts);
-	int i;
-	for(i=0;i<npts-1;++i) {
-		line(pts[i],pts[i+1]);
-	}
-	line(pts[npts-1],pts[0]);
+void star(Point c, float r, int npts) {
+	if(debug)fprintf(stderr,"\nStar center: %f %f radius: %f points: %d",
+		c.x, c.y, r, npts);
+	pgPoint center = { map(c.x,min_x,max_x), map(c.y,min_y,max_y) };
+	pgStar(center,xScale(r),npts);
 }
 

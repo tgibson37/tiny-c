@@ -2,7 +2,7 @@
 CC = /usr/bin/gcc
 
 # The tc object files
-OBJPLOT = plot.o star.o test.o objects.o
+OBJPLOT = plot.o test.o objects.o
 
 # All the header and c files
 SRCS = plot.c star.c test.c objects.c

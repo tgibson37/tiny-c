@@ -1,54 +1,61 @@
-#include "pgPlot.h"
+#include "plot.h"
 
 int points;
 extern int countdown;
 /* test, four lines */	
 void test() {
-	pgPoint b1 = { 5,5 };
-	pgPoint e1 = { 75,35 };
-	pgLine(b1,e1); 
+	palette(-1,-1,1,1);
+/*	Point a = {0.25,0.25};
+	Point b = {0.75,0.75};
+	line(a,b);
 
-	pgPoint b2 = { 5,7 };
-	pgPoint e2 = { 75,30 };
-	pgLine(b2,e2); 
+	Point b1 = { .5,.5 };
+	Point e1 = { .75,.35 };
+	line(b1,e1); 
 
- 	pgPoint b3 = { 75,7 };
-	pgPoint e3 = { 65,75 };
-	pgLine(b3,e3); 
+	Point b2 = { .5,.7 };
+	Point e2 = { .75,.30 };
+	line(b2,e2); 
+
+ 	Point b3 = { .75,.7 };
+	Point e3 = { .65,.75 };
+	line(b3,e3); 
 	
- 	pgPoint b4 = { 65,7 };
-	pgPoint e4 = { 75,75 };
-	pgLine(b4,e4); 
-	
- 	pgPoint b5 = { 20,60 };
-	pgCircle(b5, 15, 30);
-	pgStar(b5, 15, 5);
-	
+ 	Point b4 = { .65,.7 };
+	Point e4 = { .75,.75 };
+	line(b4,e4); 
+*/
+ 	Point b5 = { 0,0 };
+/*	star(b5, .65, 5);*/
+	circle(b5, .65, 25);
+
 }
 
-void star() {
+void teststar() {
  	pgPoint b5 = { 40,40 };
 	pgStar(b5, 35, points);
 }
 
-void circle() {
+void testcircle() {
  	pgPoint b5 = { 40,40 };
 	pgCircle(b5, 35, points);
 }
 
-void both() {
-	star(); circle();
+void testboth() {
+	teststar(); testcircle();
 }
 
 void usage() {
 	printf("Usage: plot -gNAME [OPTIONS]\n");
 	printf("Plot a 23 pgPoint star, or some test lines\n");
 	printf("Options:\n");
-	printf("  -d		Debug mode.\n");
+	printf("  -d		Debug mode high level\n");
+	printf("  -D		Debug mode Deep\n");
 	printf("  -f		Add a frame\n");
-	printf("  -gNAME	(required) name is either 'star' or 'test'\n");
+	printf("  -gNAME	(required)\n");
 	printf("  -m 		Movie mode\n");
-	printf("  -pNUM	Number of pgPoints on the star.\n");
+	printf("  -pNUM		points\n");
+	printf("  NUM is points on the star, or line segments for circle (default 17)\n");
 	printf("  NAME is one of test, circle, star, both.\n");
 }
 
@@ -61,10 +68,11 @@ int main(int argc, char* argv[]) {
 	points=17;
 
    	int usageNeeded=1;
-    while ((opt = getopt(argc, argv, "dfmp:g:")) != -1) {
+    while ((opt = getopt(argc, argv, "dDfmp:g:")) != -1) {
     	usageNeeded=0;
         switch (opt) {
-        case 'd': debug=1; break;
+        case 'd': debug=1; break;  /* just palette level */
+        case 'D': debug=2; break;  /* Deep, includes pg level */
         case 'f': frame=1; break;
         case 'm': movie=1; break;
         case 'g': graphic=optarg; break;
@@ -82,9 +90,9 @@ int main(int argc, char* argv[]) {
 	}
 	blank();
 	if(strcmp(graphic,"test")==0)test();
-	else if(strcmp(graphic,"star")==0)star();
-	else if(strcmp(graphic,"circle")==0)circle();
-	else if(strcmp(graphic,"both")==0)both();
+	else if(strcmp(graphic,"star")==0)teststar();
+	else if(strcmp(graphic,"circle")==0)testcircle();
+	else if(strcmp(graphic,"both")==0)testboth();
 	else {
 		printf("no graphic called %s\n",graphic);
 		exit(1);
