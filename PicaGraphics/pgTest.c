@@ -47,7 +47,7 @@ void testboth() {
 
 void usage() {
 	printf("Usage: plot -gNAME [OPTIONS]\n");
-	printf("Plot a 23 pgPoint star, or some test lines\n");
+	printf("Plot a 17 pgPoint star, or some test lines\n");
 	printf("Options:\n");
 	printf("  -d		Debug mode high level\n");
 	printf("  -D		Debug mode Deep\n");

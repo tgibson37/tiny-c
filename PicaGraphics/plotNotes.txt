@@ -87,7 +87,7 @@ o:	 pgline: 14,36 -> 15,30
 		pgPlot 14 31
 		pgPlot 14 32  ...
 	  ...
-z:	  pgline: 65,33 -> 66,40
+z:q	  pgline: 65,33 -> 66,40
 	  vertical  little,big,xinc 33 40 0.142857
 		pgPlot: new Object z
 		pgPlot 65 33
