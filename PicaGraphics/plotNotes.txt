@@ -93,6 +93,16 @@ z:q	  pgline: 65,33 -> 66,40
 		pgPlot 65 33
 		pgPlot 65 34
 		pgPlot 65 35  ...
+-----------
+Sun, Jan 21
+Usage-design docx committed and pushed.
+-----------
+Mon, Jan 22
+Using gcc plot is 18.5K, Using tcc its 14.3K. tcc args ok in any order, gcc requires the -lm to be last. Interesting.
+	tcc -o plot -lm *.c		OK (but not for gcc)
+	tcc -lm -o plot *.c		OK (but not for gcc)
+	gcc -o plot *.c -lm		OK
+
 
 
 
