@@ -1015,7 +1015,7 @@ void checkBrackets() {
  * 	in next fctn layer. An "endlibrary" line causes a new fctn layer
  * 	to be opened and globals done there.
  */
-void link() {
+void tclink() {
 	char* x;
 	char* problemCursor=cursor;
 	checkBrackets();
@@ -1242,14 +1242,14 @@ void readTheFiles(int argc, char *argv[], int optind) {
 		curglbl = fun+1;
 	}
 	else if(argc-optcount==3){
-		/* sys */
+		/* sys, e.g. lib */
 		nread = FileRead(argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
 			printf("file read error: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such file: %s\n",argv[optcount+1]);
+			printf("no such lib file: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		apr = epr += nread;
@@ -1260,11 +1260,15 @@ void readTheFiles(int argc, char *argv[], int optind) {
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such file: %s\n",argv[optcount+2]);
+			printf("no such app file: %s\n",argv[optcount+2]);
 			exit(1);
 		}
 		epr += nread;
 		curglbl = 1;
+	}
+	else {
+		usage();
+		exit(1);
 	}
 }
 

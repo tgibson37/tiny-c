@@ -3355,8 +3355,56 @@ Thur, Jan 11
 Final draft of document. Proofreading before committing.
 Idea: -s "statement" option runs the statement. 
 When paper is finalized, rm txt files incorporatedinto the paper.
+---------------------
 
+Mon, Jan 22
+Adding prototypes to tc.h so it will compile ok with tcc *.c. 
+PROBLEM with link()...
+	$ tcc -c tcMain.c 
+	In file included from tcMain.c:1:
+	tc.h:172: error: incompatible types for redefinition of 'link'
+	tom@East ~/UbuTom/Projects/tiny-c $ grep link *.[ch]
+	tc.c:/* chunk 8: enter, setarg, link
+	tc.c:void link() {
+	tc.h:void link();
+	tcMain.c:	link();
+	tom@East
+I guess link is defined in some other header??? YES, renamed tclink (3 places) SOLVED.
+tcc compiles bug result segs...
+	$ tcc -o tc *.c
+about 20 warnings, no errors.  $ ./tc
+***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+        This C version copyright 2017, T A Gibson
+Segmentation fault
+make barfs on test.c. 
+	$ make
+	make: *** No rule to make target `test.c', needed by `test.o'.
+I had moved test.c and tcTestMain.c to subord dir, so *.c would do only tc. MOVED BACK UP. make is happy.
+USING gdb to find above seg...
+	(gdb) bt
+	#0  0x0000000000403e80 in countch (
+		f=0x1 <error: Cannot access memory at address 0x1>, t=0x608b26 <pr+6> "();]", 
+		c=10 '\n') at tc.c:1290
+	#1  0x0000000000403f58 in whatHappened () at tc.c:1307
+	#2  0x00000000004055a1 in main (argc=1, argv=0x7fffffffe0a8) at tcMain.c:37
+./tc<RET> should do usage.
 
+BUT it makes and tcc compiles, and both run xpf.tc identically. The both seg if no args given. 
+ls	after tcc -o tc *.c
+	-rwxr-xr-x 1 tom tom 48476 Jan 22 13:27 tc
+	after make
+	-rwxr-xr-x 1 tom tom   68524 Jan 22 13:32 tc
+But the latter has a gdb symbol table. 
 
+ISSUE: regression has lots of differences: 34,43,44,45,50 $ up
+
+Executable tc is on github, compiled with tcc.
+Here is how to compile:
+	 $ tcc -o tc *.c   (lots of warnings, I'll work on those.)
+And to run pirahna fish:
+	 $ ./tc xpf.tc
+	 seed 7
+	 move 1   (etc as follows)
+I move 1234. to opposite shore, the 1. back, then 1567. then 1. then 178.  game ends  score 970
 
 

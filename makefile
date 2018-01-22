@@ -54,6 +54,7 @@ latest:
 # Build the executable files
 $(TC): $(OBJTC)
 	$(CC) $(CFLAGS) $(OBJTC) -o $(TC)
+
 $(TEST): $(OBJTEST)
 	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST)
 

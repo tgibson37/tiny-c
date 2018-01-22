@@ -116,7 +116,7 @@ void print_val(struct var *var) {
 			int len=(*var).len;
 			int iDatum, i;
 			for(i=0;i<len;++i){
-				iDatum = get_int(where+i);
+				iDatum = get_int((char*)(where+i));
 				printf(" %d", iDatum);
 			}
 		}

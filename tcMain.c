@@ -28,8 +28,8 @@ int main(int argc, char *argv[]) {
 	nxtstack = 0;
 	efun = fun+FUNLEN;
 	curfun = fun-1;   /* none */
-	logo();
-	link();
+	logo(); 
+	tclink();
 	cursor=pr;
 	prbegin();
 	st();   /* <<<== executes statement above, line 19 */
@@ -38,11 +38,11 @@ int main(int argc, char *argv[]) {
 }
 
 void usage() {
-	printf("Usage: tc [-d] [file1 [file2]]");
+	printf("Usage: tc [-d] [libfile] appfile");
 	printf("\n  no args prints this usage");
-	printf("\n  one arg loads the standard library, and file1 as app");
-	printf("\n  two args loads file1 as library, and file2 as app");
-	printf("\nThe app will be started at its main() function");
+	printf("\n  one arg loads the standard library, and the appfile");
+	printf("\n  two args loads your library, and the appfile");
+	printf("\nThe tinyC app will be started at its main() function");
 	printf("\n  (no arguments to this main()");
 	printf("\n -d enables the debugger");
 	printf("\n");

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
+#include <string.h>
 
 #define ECHO 1
 #define VLEN 8
@@ -160,3 +161,18 @@ void put_ptr(char *where, void* datum);
 char* get_ptr(char *where);
 int FileRead(char*filename, char* buffer, int bufflen);
 void readTheFiles(int argc, char *argv[], int optind);
+void db_cmds();
+int countch(char*,char*,char);
+char* lchar(char*);
+struct var* addrval_all(char*);
+void showLine(char*);
+char getch_(int echo);
+int kbhit(void);
+void logo();
+void tclink();
+void prbegin();
+void prdone();
+void whatHappened();
+void errToWords();
+void usage();
+
