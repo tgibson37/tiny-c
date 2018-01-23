@@ -3396,7 +3396,7 @@ ls	after tcc -o tc *.c
 	-rwxr-xr-x 1 tom tom   68524 Jan 22 13:32 tc
 But the latter has a gdb symbol table. 
 
-ISSUE: regression has lots of differences: 34,43,44,45,50 $ up
+ISSUE: regression has lots of differences: 34,43,44,45,50&up
 
 Executable tc is on github, compiled with tcc.
 Here is how to compile:
@@ -3406,5 +3406,31 @@ And to run pirahna fish:
 	 seed 7
 	 move 1   (etc as follows)
 I move 1234. to opposite shore, the 1. back, then 1567. then 1. then 178.  game ends  score 970
+---------------------
+
+Tue, Jan 23
+Two goals before joining PG to TC: regression cleanup, warning cleanup.
+One goal before these cleanups: Make gcc makefile build both executables WITHOUT harming the simple tcc compile. Leave the two test codes in their own dir, and makefile know how to find them.
+Lee trying to get a goood compile and then run of xpf.tc. Helping him. He gets a seg, and so do I when loading the library specically from commandline...
+	$ gdb ./tc
+	(gdb) run pps/library.tc xpf.tc
+	Starting program: ...
+	***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+		    This C version copyright 2017, T A Gibson
+	Program received signal SIGSEGV, Segmentation fault.
+	0x0000000000401d50 in _addrval (sym=0x7fffffffdc80 "pl", level=0x1) at tc.c:427
+	427		int first = (*level).fvar;
+	(gdb) bt
+	#0  0x0000000000401d50 in _addrval (sym=0x7fffffffdc80 "pl", level=0x1) at tc.c:427
+	#1  0x0000000000401e61 in addrval_all (sym=0x7fffffffdc80 "pl") at tc.c:444
+	#2  0x0000000000401ec4 in addrval () at tc.c:456
+	#3  0x0000000000402673 in factor () at tc.c:642
+	...
+curfun is 1. Its supposed to be a pointer into funtab, i.e. funtab+1. How can it be 1 NOW? Gotta be in readTheFiles().
+
+Status: When it seg'd the load of the two files was successful and xpf.tc is running. It seg'd looking up the symbol pl. But before the seg it executed 3 pl's, printing the copyright message.
+Starup with -d and two files works, can set breakpts, i shows they are set, so link happened. BUT even one n causes the seg. even b main then run. But b pl itself segs. Debug itself not involved, because it happens without the -d. And it DOESN'T happen with defualt lib load. And the two libs (installed, and in pps) have ZERO differences.
+It has to be the non-default explicit load.
+FIXED!
 
 
