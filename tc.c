@@ -1224,7 +1224,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("tc-lib: no such file: $s\n",sysfile);
+			printf("tc-lib: no such file: %s\n",sysfile);
 			exit(1);
 		}
 		apr = epr += nread;
@@ -1264,7 +1264,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 			exit(1);
 		}
 		epr += nread;
-		curglbl = 1;
+		curglbl = fun+1;
 	}
 	else {
 		usage();
