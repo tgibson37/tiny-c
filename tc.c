@@ -1098,8 +1098,9 @@ void dumpStackEntry(int e){
 	if( 0<=e && e<=nxtstack ) {
 		printf("\n stack entry at %d: %d %c %d ", e, stack[e].class, 
 			stack[e].lvalue, stack[e].type );
-		PrVal(stack[e].type, stack[e].class, 
+/*		PrVal(stack[e].type, stack[e].class, 
 				&stack[e].value,stack[e].lvalue);
+*/
 	}
 	else {
 		printf("no stack entry at %d", e);
@@ -1209,8 +1210,8 @@ void dumpName() {
 
 /*	reads two files using command line args for one or both.
  *		./tc                      Usage
- *		./tc [sysfile] appfile    Load and go
- *	  Default sysfile is ./pps/library.tc
+ *		./tc [libfile] appfile    Load and go
+ *	  Default libfile is ./pps/library.tc
  */
 void readTheFiles(int argc, char *argv[], int optind) {
 	int nread;
@@ -1267,7 +1268,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 		curglbl = fun+1;
 	}
 	else {
-		usage();
+		tcUsage();
 		exit(1);
 	}
 }

@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	whatHappened();
 }
 
-void usage() {
+void tcUsage() {
 	printf("Usage: tc [-d] [libfile] appfile");
 	printf("\n  no args prints this usage");
 	printf("\n  one arg loads the standard library, and the appfile");

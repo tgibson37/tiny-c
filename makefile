@@ -11,7 +11,7 @@ TEST_RESULTS = test_results
 DIFF = diff test_results good_results
 KEEP = cp test_results good_results
 
-# Install dirs, note name change of tc executable
+# Linix install dirs, note these are file names
 INSTALLTC = /usr/local/bin/tinyc
 INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
@@ -22,7 +22,7 @@ OBJTC = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o
 # The test object files
 OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcTestMain.o
 
-# All the header and c files
+# All the header and c files gcc-able with CFLAGS
 SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c 
 HDRS = tc.h
 
@@ -44,14 +44,15 @@ dotest:
 	$(DOTEST)
 	ls -lt *_results
 
-install:
+# Linux only, requires privilage to write install dirs. 
+install: tc
 	cp tc $(INSTALLTC)
 	cp pps/library.tc $(INSTALLLIB)
 
 latest:
 	$(LATEST)
 
-# Build the executable files
+# Build (link) the executable files
 $(TC): $(OBJTC)
 	$(CC) $(CFLAGS) $(OBJTC) -o $(TC)
 

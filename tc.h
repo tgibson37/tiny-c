@@ -174,5 +174,5 @@ void prbegin();
 void prdone();
 void whatHappened();
 void errToWords();
-void usage();
+void tcUsage();
 
