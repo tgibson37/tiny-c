@@ -30,10 +30,10 @@ int scann( char *from, char *to, char c, int *n ) {
 	return f-from;
 }
 int Mscann(int nargs, int *args) {
-	char *from = args[0];
-	char *to   = args[1];
+	char *from = (char*)args[0];
+	char *to   = (char*)args[1];
 	char c     = args[2];
-	int *starN = args[3];
+	int *starN = (int*)args[3];
 	int n = *starN;
 	int offset = scann(from,to,c,&n);
 	*starN = n;
@@ -68,7 +68,8 @@ void pFmt(char *fmt, int *args) {
 	if(!(*fmt))return;
 	if(*fmt=='%'){
 		x = ++fmt;
-		if( fmtchar=charIn(*x,"dcsx") ){
+		fmtchar=charIn(*x,"dcsx");
+		if(fmtchar){
 			++fmt;
 			datum = *(args++);
 		}
@@ -79,13 +80,13 @@ void pFmt(char *fmt, int *args) {
 		break;
 		case 2: printf("%c",datum);
 		break;
-		case 3: printf("%s",datum);
+		case 3: printf("%s",(char*)datum);
 		break;
 		case 4: printf("%x",datum);
 		break;
 		}
 	}
-	else if( x=find(fmt, fmt+strlen(fmt), '%') ) {
+	else if( (x=find(fmt,fmt+strlen(fmt),'%')) ) {
 		pft(fmt,x-1);	/* block print */
 		fmt = x;
 	}
@@ -104,7 +105,7 @@ int MprF(int nargs, int *args)
 printf("\n\n63: MprF: nargs %d args[0..3] %d %d %d %d",
 			nargs,args[0],args[1],args[2],args[3]);
 */
-	pFmt(*args,(args+1));  /* fmt, args */
+	pFmt((char*)*args,(args+1));  /* fmt, args */
 }
 
 /* original MC's */
@@ -127,8 +128,8 @@ int Mgch(int nargs, int *args)
 }
 
 int Mpft(int nargs, int *args) {
-	char *from = *args;
-	char *to = *(args+1);
+	char *from = (char*)*args;
+	char *to = (char*)*(args+1);
 /*printf("\nMC 109: from to %d %d\n", from-pr, to-pr );*/
 	for(;from<=to;++from) printf("%c",*from);
 		/*putchar(*from);*/
@@ -144,7 +145,7 @@ int bar(int nargs, int *args)
 int MmvBl(int nargs, int *args) 
 {
 	char *a, *b; int dist;
-	a=args[0]; b=args[1]; dist=args[2];
+	a=(char*)args[0]; b=(char*)args[1]; dist=args[2];
 	char *src = a;
 	char *dest = a+dist;
 	int n = b-a+1;

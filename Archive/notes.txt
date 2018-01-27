@@ -3419,31 +3419,33 @@ One goal before these cleanups: Make gcc makefile build both executables WITHOUT
 So the makefile needs explicit link goals for the objects for each main.
 ---------------------
 
-Wed, Jan 25
+Thur, Jan 25
 x	All code in tiny-c, no subord dir for the test code
 x	Shell script for tcc compile
 	audit docx for install words
+	support <cr> in eol
 FIXED: undefined ref to usage (tc.c ~1270). probably link order. 
 DONE: regression cleanup
 NEXT: clear tcc warnings
-	machineCall.c:33: warning: assignment makes pointer from integer without a cast
-	machineCall.c:34: warning: assignment makes pointer from integer without a cast
-	machineCall.c:36: warning: assignment makes pointer from integer without a cast
-	machineCall.c:107: warning: assignment makes pointer from integer without a cast
-	machineCall.c:130: warning: assignment makes pointer from integer without a cast
-	machineCall.c:131: warning: assignment makes pointer from integer without a cast
-	machineCall.c:147: warning: assignment makes pointer from integer without a cast
-	machineCall.c:147: warning: assignment makes pointer from integer without a cast
-	tc.c:82: warning: assignment makes pointer from integer without a cast
-	tc.c:137: warning: assignment makes integer from pointer without a cast
-	tc.c:139: warning: assignment makes integer from pointer without a cast
-	tc.c:249: warning: implicit declaration of function 'isalpha'
-	tc.c:253: warning: implicit declaration of function 'isalnum'
-	tc.c:432: warning: implicit declaration of function 'br_hit'
-	tc.c:1035: warning: unknown escape sequence: '\['
-	tc.c:1037: warning: unknown escape sequence: '\['
-	tc.c:1037: warning: unknown escape sequence: '\]'
-	tc.c:1322: warning: implicit declaration of function 'pft'
+---------------------
+
+Fri, Jan 26
+tcc warning fixup...
+x	Machine call warnings
+x	tc call warnings, DONE except for unknown escape sequences for '\['
+OK now gcc warnings. Change the makefile removing -w
+---------------------
+
+Sat, Jan 27
+
+
+
+
+
+
+
+
+
 
 
 

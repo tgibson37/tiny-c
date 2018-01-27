@@ -7,7 +7,7 @@
 	<meta name="author" content="Tom "/>
 	<meta name="created" content="2017-12-23T11:47:48"/>
 	<meta name="changedby" content="Tom "/>
-	<meta name="changed" content="2018-01-25T20:05:54.956304024"/>
+	<meta name="changed" content="2018-01-26T09:04:50.826311546"/>
 	<style type="text/css">
 		@page { margin: 0.79in }
 		p { margin-bottom: 0.1in; direction: ltr; color: #00000a; line-height: 120%; text-align: left; orphans: 0; widows: 0 }
@@ -559,7 +559,7 @@ implementation uses a union of int, char, and void* into one typeless
 container, <font face="Courier 10 Pitch, serif">union stuff</font>. 
 See tc.h lines 40..68. Both <font face="Courier 10 Pitch, serif">stackEntry</font>
 and the <font face="Courier 10 Pitch, serif">variableEntry</font>
-have union stuff to hold values. Datum are moved between stuff and C
+have union stuff to hold values. Datum moved between stuff and C
 variables obey type, but once in stuff they can be passed around in a
 typeless manner. That technique made it easier for me to translate
 8080 code into C. 

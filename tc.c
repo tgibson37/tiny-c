@@ -79,7 +79,7 @@ int eq() {
 	if(class==1 && (*val).class==1) {
 		pDatum = (*val).value.up;
 		if( (*val).lvalue=='L' ){
-			pDatum = *(int*)pDatum;   /* now its 'A' */
+			pDatum = (char*)(*(int*)pDatum);   /* now its 'A' */
 		}
 		char **where = (*lval).value.up;
 		*where = (char*)pDatum;
@@ -134,9 +134,9 @@ int toptoi() {
 	if( (*top).class==1 ) {
 		if((*top).lvalue == 'L') {
 			ptr = (union stuff *)((*top).value.up);
-			datum=(*ptr).up;
+			datum=(int)((*ptr).up);
 		}
-		else datum=(char*)((*top).value.up);
+		else datum=(int)((*top).value.up);
 	}
 	else if((*top).lvalue == 'L') {
 		if((*top).type==Int ) datum = *((int*)((*top).value.up));
@@ -149,10 +149,6 @@ int toptoi() {
 		else eset(TYPEERR);
 	}
 	else { eset(LVALERR); }
-/*if(cursor>pr+5170) printf("~141 datum,class,type,lvalue %d %d %d %d\n",
-datum,(*top).class,(*top).type,(*top).lvalue);
-if(datum==257)watchme=datum;
-*/
 	return datum;
 }
 /* basic popper, entry stays accessible until popped over */
@@ -1032,9 +1028,9 @@ void tclink() {
 			union stuff kursor;
 			kursor.up = cursor = lname+1;
 			newvar('E',2,1,&kursor);
-			if(x=mustfind(cursor, epr, '\[',LBRCERR)) {
+			if(x=mustfind(cursor, epr, '[',LBRCERR)) {
 				cursor=x+1;
-				skip('\[','\]');
+				skip('[',']');
 			}
 		}
 		if(cursor==lastcur)eset(LINKERR);

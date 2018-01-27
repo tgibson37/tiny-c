@@ -175,4 +175,10 @@ void prdone();
 void whatHappened();
 void errToWords();
 void tcUsage();
+struct var* br_hit(struct var *v);
+void pft(char *from, char *to );
+  /* unfortunately #include ctypes.h causes gcc link problems, so... */
+int isalpha(int);
+int isalnum(int);  
+  /* All these two do is prevent warnings for tcc compile */
 

@@ -27,7 +27,8 @@ SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c
 HDRS = tc.h
 
 # Add -I to the dir the include files are in
-CFLAGS = -w -g -ansi -I /usr/lib/syslinux/com32/include/
+CFLAGS = -Wall -g -ansi -I /usr/lib/syslinux/com32/include/ -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
+#CFLAGS = -Wall -m32 -g 
 
 all: $(TC) $(TEST)
 
