@@ -18,7 +18,7 @@ chrdy [
 
 /* sleep for n seconds
 sleep int n [
-	MC 102
+	MC n,102
 ]
 
 /* put a block of chars from f to l inclusive

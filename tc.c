@@ -755,9 +755,13 @@ void vAlloc(Type type, union stuff *vpassed) {
  */
 
 /* Returns true if user signals quit, or any other error.
- *	NOTE: MC 2 esets KILL on ESC
+ *	NOTE: MC 2 esets KILL on ESC, but test here for hard loop
  */
-int quit() { 
+int quit() {
+	if(Mchrdy()==0x1b){
+		eset(KILL);
+		Mgch();
+	}
 	if(error)return 1;
 	return 0; 
 }

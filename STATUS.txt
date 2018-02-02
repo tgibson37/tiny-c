@@ -1,4 +1,7 @@
 STATUS.txt (latest on top, future at bottom)
+
+Feb 2, 2018 - ESC now kills hard loop.
+
 Jan 9, 2018 - BUG in library's random(little,big). Returns -1 often. Flaw is arithmetic. Big positive (110M+) pushed. % operator pops -20.
 
 Jan 7, 2018 - Tidied the files. Moved much material into two new folders: SamplePrograms, and Archive. Added 'the new classical tiny-C.docx' file which gathers material from scattered txt files and presents it in a more readable fashion. 

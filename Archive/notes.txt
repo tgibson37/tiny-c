@@ -3414,15 +3414,17 @@ curfun is 1. Its supposed to be a pointer into funtab, i.e. funtab+1. How can it
 It has to be the non-default explicit load.
 FIXED! Usual stupidity.
 
-Two goals before joining PG to TC: regression cleanup, warning cleanup.
-One goal before these cleanups: Make gcc makefile build both executables WITHOUT harming the simple tcc command line compile. Leaving the two test codes in their own dir, and makefile know how to find them LEADS TO A BIG MESS.
-So the makefile needs explicit link goals for the objects for each main.
+Two goals before joining PG to TC: 
+x	regression cleanup, 
+x	warning cleanup. tcc DONE. gcc seems way overkill.
+One goal before these cleanups: 
+x	Make gcc makefile build both executables with explicit link goals
 ---------------------
 
 Thur, Jan 25
 x	All code in tiny-c, no subord dir for the test code
 x	Shell script for tcc compile
-	audit docx for install words
+x	audit docx for install words
 	support <cr> in eol
 FIXED: undefined ref to usage (tc.c ~1270). probably link order. 
 DONE: regression cleanup
@@ -3436,13 +3438,18 @@ x	tc call warnings, DONE except for unknown escape sequences for '\['
 OK now gcc warnings. Change the makefile removing -w
 ---------------------
 
-Sat, Jan 27
+Thu, Feb 1
+TODO:
+	support <cr> in eol
+	Multiple lib loading. Need smarter command line to do this.
+	Lib fcn to flush stdout buffer.
+	implement readfile/writefile
+---------------------
 
-
-
-
-
-
+Fri, Feb 2
+FIXED: ESC fails to leave a loop.
+	test both gcc and tcc
+BUT NOW regression bombs, prints tc usage and halts.
 
 
 
