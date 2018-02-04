@@ -5,7 +5,7 @@
 */
 
 /* read the named file into buffer pr. Return amount read
-	or zero on error. */
+	or zero on 'no such file' or -1 on read error. */
 int FileRead(char* name, char* buff, int bufflen){
 	int readlen,err;
 	FILE *fp = fopen( name, "rb");

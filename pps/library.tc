@@ -162,8 +162,9 @@ scann char from(0), to(0), c; int n(0) [
 	return MC(from, to, c, n, 9)
 ]
 
-/* 
-readfile char n(0), w(0), l(0); int u [
+/* Read file name into buff of length len returning number of bytes read. 
+readfile char name(0), buff(0); int len [
+	return MC name, buff, len, 103
 ]
 
 /* 
@@ -178,6 +179,10 @@ fopen int m; char n(0); int s,u [
 fread char a(0); int u [
 ]
 
+/* 
+strlen char s(0) [
+	return MC s,104
+]
 /* 
 fwrite char f(0), t(0); int u [
 ]

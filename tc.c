@@ -959,6 +959,9 @@ void enter( char* where) {
 				break;		/* and the only way outa here */
 			}
 		}
+/*printf("\n-----------\ncursor-apr %d   ->",cursor-apr);
+pft(cursor,cursor+99);
+printf("\n962 arg, nxtstack %d %d", arg, nxtstack);*/
 		if(arg != nxtstack) {
 			cursor=localcurs;
 			stcurs=localstcurs;

@@ -3448,8 +3448,36 @@ TODO:
 
 Fri, Feb 2
 FIXED: ESC fails to leave a loop.
-	test both gcc and tcc
-BUT NOW regression bombs, prints tc usage and halts.
+x	test both gcc and tcc
+x	regression OK
+x	commit/push
+---------------------
+
+Sat, Feb 3
+Downloaded Lee's double.tc and its input file decl_of_indep.txt into SamplePrograms. 
+GOAL is to get them to run. 
+x	DONE readfile in the library, and thoroughly tested
+	NEED strlen, bigger pr, main args, 
+		temp: can modify Lee's main and hardwire to text file
+	CLASERR line 8 of double.tc, ds=strlen(d); 
+		both ds and strlen are ints
+		(d)   ??  The ^ is inder the (, so just parsed is strlen.
+			int strlen char s(0) [
+				return MC s,104
+			]
+readfile is vartab[20]
+bk at tc.c:639 in factor 
+cursor at pr+4072  -> (d) just after strlen
+Lookup returns class 0, NOT class E (65), WHY???
+ p *v
+$17 = {name = "strlen\000\000", class = 0, type = Int, len = 1, brkpt = 1, 
+  value = {uc = -3 '\375', ui = 6332157, up = 0x609efd <pr+5085>}}
+strlen in var as class 0 int
+$ grep strlen vartab
+      up = 0x609873 <pr+3411>}}, {name = "strlen\000\000", class = 0, 
+Its there ONCE, class 0. 
+BUG: in tc DON'T declare return type of a fcn. They all return ints.
+
 
 
 

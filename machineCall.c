@@ -165,6 +165,19 @@ void Msleep(int N)
 	sleep(N+1);
 }
 
+int Mfilrd(int nargs, int *argsv) {
+	if(nargs<3){ eset(MCERR); return -1; }
+	char *name = (char*)argsv[0];
+	char *buff = (char*)argsv[1];
+	int bufflen = argsv[2];
+	return FileRead(name, buff, bufflen);
+}
+
+int Mstrlen(int nargs,int *argsv) {
+	char* s=argsv[0];
+	return strlen(s);
+}
+
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
@@ -173,7 +186,7 @@ McList origList[] =
 };
 /* first in this list is MC 101 */
 McList newList[] = 
-	{ &MprF, &Msleep, &bar, &bar, &bar
+	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &bar
 	, &bar, &bar, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
