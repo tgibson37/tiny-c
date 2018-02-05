@@ -1,0 +1,9 @@
+/* test of strlen
+main [
+	char s(0)
+	int len
+	s = "abcdefg"
+	pl s
+	len = strlen s
+	pn len
+]

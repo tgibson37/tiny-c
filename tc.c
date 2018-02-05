@@ -68,13 +68,22 @@ int eq() {
 
 	struct stackentry *val = &stack[nxtstack-1]; /* value (on top) */
 	struct stackentry *lval = &stack[nxtstack-2]; /* where to put it */
-	popst();popst();  
+	if(verbose){
+		printf("\neq: lval");
+		dumpStackEntry(nxtstack-2);
+		printf("\neq: val");
+		dumpStackEntry(nxtstack-1);
+	}
+/*	popst();popst();  */
 	void* where = &((*lval).value.up);
 	int class = (*lval).class;
 	int type = (*lval).type;
 	int whereSize = typeToSize(class,type);  /* of the lvalue */
 
-	if((*lval).lvalue != 'L') { eset(LVALERR); return; }
+	if((*lval).lvalue != 'L') { 
+		eset(LVALERR); 
+		return; 
+	}
 	
 	if(class==1 && (*val).class==1) {
 		pDatum = (*val).value.up;
@@ -85,11 +94,34 @@ int eq() {
 		*where = (char*)pDatum;
 		pushst(class, 'A', type, &(*val).value);
 	}
-	else if(class==1 && (*val).class==0) {
-		eset(EQERR);
+	else if(class==1 && (*val).class==0) {  /* ptr = int */
+		if( (*val).type != Int ){
+			eset(EQERR);
+			return;
+		}
+		if( (*val).lvalue=='L' ) {
+			iDatum = get_int((*val).value.up);
+		}
+		else {
+			iDatum = (*val).value.ui;
+		}
+		pDatum = (void*)iDatum;
+		char **where = (*lval).value.up;
+		*where = (char*)pDatum;
+		pushst(class, 'A', type, &(*val).value);
 	}
-	else if(class==0 && (*val).class==1) {
-		eset(EQERR);
+	else if(class==0 && (*val).class==1) {  /* int = ptr */
+		if(type!=Int){
+			eset(EQERR);
+			return;
+		}
+		pDatum = (*val).value.up;
+		if( (*val).lvalue=='L' ){
+			pDatum = (char*)(*(int*)pDatum);   /* now its 'A' */
+		}
+		iDatum = (int)pDatum;
+		put_int( (*lval).value.up, iDatum);
+		pushk(iDatum);
 	}
 	else if(class==0 && (*val).class==0) {
 		if(type==Int){
@@ -114,7 +146,7 @@ int eq() {
 			pushk(cDatum);
 		}
 	}
-	
+	popst();popst();  
 }
 
 /************ derived convenient pushers and poppers ************/
@@ -130,6 +162,11 @@ int topdiff() {
 int toptoi() {
 	int datum;
 	union stuff *ptr;
+/*	if(verbose){
+		printf("\ntoptoi pop: ");
+		dumpStackEntry(nxtstack-1);
+	}
+*/
 	struct stackentry *top = &stack[--nxtstack];
 	if( (*top).class==1 ) {
 		if((*top).lvalue == 'L') {
@@ -151,9 +188,14 @@ int toptoi() {
 	else { eset(LVALERR); }
 	return datum;
 }
-/* basic popper, entry stays accessible until popped over */
+/* basic popper, entry stays accessible until pushed over */
 struct stackentry* popst() {
 	if( nxtstack-1 < 0 ) { error = POPERR; return; }
+/*	if(verbose){
+		printf("\nstack pop: ");
+		dumpStackEntry(nxtstack-1);
+	}
+*/
 	--nxtstack;
 	return &stack[nxtstack];
 }
@@ -170,7 +212,11 @@ void pushst( int class, int lvalue, Type type, union stuff *value ) {
 	stack[nxtstack].type = type;
 	stuffCopy( &stack[nxtstack].value, value);
 	++nxtstack;
-if(((*value).ui)/1000000 == 110)watchme=(*value).ui;
+/*	if(verbose){
+		printf("\nstack push: ");
+		dumpStackEntry(nxtstack-1);
+	}
+*/
 }
 
 /* push an int */
@@ -237,7 +283,9 @@ int skip(char l, char r) {
 }
 
 
-/* Parse a symbol defining fname, lname. ret: true if symbol */
+/* Parse a symbol defining fname, lname. ret: true if symbol.
+ *	Advances the cursor to but not over the symbol,
+ */
 int symname() {
 	char* temp;
 	while( *cursor == ' ' || *cursor == '\t' ) ++cursor;
@@ -250,6 +298,10 @@ int symname() {
 		++temp; 
 	}
 	lname = temp-1;
+	if(verbose){
+		printf("\nparsed ");
+		pft(fname,lname);
+	}
 	return lname-fname+1;  /* good, fname and lname defined */
 }
 
@@ -298,6 +350,10 @@ Type konst() {
 			++cursor; c=*cursor;
 		} while(c>='0'&&c<='9');
 		lname=cursor-1;
+		if(verbose){
+			printf("\nparsed ");
+			pft(fname,lname);
+		}
 		return Int;
 
 	} else if(lit("\"")) {
@@ -309,6 +365,10 @@ Type konst() {
 			*x = 0;
 		}
 		else { eset(CURSERR); return Err; }
+		if(verbose){
+			printf("\nparsed ");
+			pft(fname,lname);
+		}
 		return CharStar;
 
 	} else if(lit("\'")) {
@@ -319,6 +379,10 @@ Type konst() {
 			cursor = x+1;
 		}
 		else { eset(CURSERR); return -1; }
+		if(verbose){
+			printf("\nparsed ");
+			pft(fname,lname);
+		}
 		return Char;
 	
 	} else return Err;  /* no match, Err==0 */
@@ -1081,7 +1145,9 @@ void dumpLine() {
 void PrVal(Type t, int class, union stuff *val, char lval){
 	printf("pr[%d]",(*val).up-(int)pr);
 	if(class==1 && t==Char ){
-		printf("->%s<-", (char*)((*val).up) );
+		char sval[30];
+		strncpy(sval, (char*)((*val).up), 30);
+		printf("->%s<-", sval);
 	}
 	else if(class==0 && lval!='A'){ 
 		if(t==Char){
@@ -1101,9 +1167,8 @@ void dumpStackEntry(int e){
 	if( 0<=e && e<=nxtstack ) {
 		printf("\n stack entry at %d: %d %c %d ", e, stack[e].class, 
 			stack[e].lvalue, stack[e].type );
-/*		PrVal(stack[e].type, stack[e].class, 
+		if(verbose)PrVal(stack[e].type, stack[e].class, 
 				&stack[e].value,stack[e].lvalue);
-*/
 	}
 	else {
 		printf("no stack entry at %d", e);

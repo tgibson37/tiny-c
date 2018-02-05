@@ -3465,22 +3465,102 @@ x	DONE readfile in the library, and thoroughly tested
 			int strlen char s(0) [
 				return MC s,104
 			]
-readfile is vartab[20]
-bk at tc.c:639 in factor 
-cursor at pr+4072  -> (d) just after strlen
-Lookup returns class 0, NOT class E (65), WHY???
- p *v
-$17 = {name = "strlen\000\000", class = 0, type = Int, len = 1, brkpt = 1, 
-  value = {uc = -3 '\375', ui = 6332157, up = 0x609efd <pr+5085>}}
-strlen in var as class 0 int
-$ grep strlen vartab
-      up = 0x609873 <pr+3411>}}, {name = "strlen\000\000", class = 0, 
-Its there ONCE, class 0. 
-BUG: in tc DON'T declare return type of a fcn. They all return ints.
+BUG: in tc DON'T declare return type of a fcn. They all return ints. Declaring a return type turns your function into a class 0 variable which is certainly not what is intended!
+---------------------
 
+Sun, Feb 4
+Goal is to solve the Seg from last night. The machine call is doing strlen(1)
+AND goal is a better set of command line args to allow...
+		personal library (multiple lib loads) -p
+		args to main -a
+		maybe some verbose dumps -v
+			send to file 'trace' with dump limit
+		settings -s
+			sizes of 4 main arrays
+split int t(0);char s(0),d(0) [
+ int y,ix,tx,sl,ds;
+ ...
+ t(y=y+1)=s+tx;   /* EQERR, =s+tx, ^under x */
+Adding int tx to ptr s should be ok. Assigning the resulting POINTER to int array cell also ok. So wha' hap'n???
+	(tc-db) n
+	line 14 cursor(pr[6331245])->t(y=y+1)=s+tx;   /* changed(++) 
+	(tc-db) t s
+	 var 44: s 1 Char 1 pr[9401]-> IN CONGRESS, JULY 4, 1776 The<-
+	(tc-db) t tx
+	 var 48: tx 0 Int 1 pr[14419]->1<-
+	(tc-db) t t
+	 var 43: t 1 Int 1 pr[9401]
+So t is class 1, t(y) y==1 should be class 0 we have case Int = Char*
+Is that what is on the stack? How does eq handle this?
 
+Dumping the stack not helpful because no eval of this expression has happened. So do a 'n' THEN dump. But 'n' sends you to EQERR. Can we enter db from wha'hap'n? Yes but by then the fun and var stuff is popped. But not erased. In eset capture curfun, curstack, and if debug is set wha'hap'n enters. Provide stack dump 's [f[,t]]' (from,to relative to captured curfun).
+OR s sets stack trace (pushes,pops) and another s suppresses it??? That way you see stuff in the middle of the evaluation of an expression. Simpler and better.
+OR v sets verbose, - turns it off. Simpler still, and offers growth to other stuff.
+Verbose should go to stderr, and be redirectable to a file, and that can be a setting option, default ./verbose.
 
+A restart needs tcMain refactored, separating read files, init globals, link, run. Restart does just the last 3.
+---------------------
 
-
-
-
+Mon, Feb 5
+CODED: (tc-db) v toggles verbosity. Future v p, v e, others for selective tracing. 
+	But need to design multiple selects.
+	v toogle needs to print on/off
+	stack push/pop needs to say what symbol
+	indenting would be nice
+	whatHappened could print some params
+Only two EQERR's, mismatch class. Last two pushes:
+	stack push: 
+	 stack entry at 2: 0 A 2 
+	stack push: 
+	 stack entry at 3: 0 A 2
+	app line 14 (cursor pr[4186])EQERR, illegal assign
+	  t(y=y+1)=s+tx; 
+Why didn't verbose ~71 print??? 
+Looks like int to int, both class 0 both A's. LVAL error???
+We are not getting all the pushes. s+tx should do two pops, one push. 
+$ grep -n nxtstack tc.[ch]  [edited, leaving just push/pop candidates]
+toptoi IMPLIED POP
+	tc.c:139:	struct stackentry *top = &stack[--nxtstack];
+popst
+	tc.c:162:	if( nxtstack-1 < 0 ) { error = POPERR; return; }
+	tc.c:165:		dumpStackEntry(nxtstack-1);
+	tc.c:167:	--nxtstack;
+	tc.c:168:	return &stack[nxtstack];
+pushst
+	tc.c:177:	if( nxtstack > STACKLEN) { error = PUSHERR; return; }
+	tc.c:178:	stack[nxtstack].class = class;
+	tc.c:179:	stack[nxtstack].lvalue = lvalue;
+	tc.c:180:	stack[nxtstack].type = type;
+	tc.c:181:	stuffCopy( &stack[nxtstack].value, value);
+	tc.c:182:	++nxtstack;
+	tc.c:185:		dumpStackEntry(nxtstack-1);
+expr
+	tc.c:562:		int leftclass = stack[nxtstack-1].class;
+	tc.c:566:			rightclass = stack[nxtstack-1].class;
+	tc.c:574:			rightclass = stack[nxtstack-1].class;
+enter
+	tc.c:927:	int arg=nxtstack, nargs=0;
+	tc.c:947:		if(nxtstack) machinecall( nargs );
+	tc.c:977:printf("\n962 arg, nxtstack %d %d", arg, nxtstack);*/
+	tc.c:978:		if(arg != nxtstack) {
+dumps
+	tc.c:1116:	if( 0<=e && e<=nxtstack ) {
+	tc.c:1130:	for( e=nxtstack-1; e>=0; --e) {
+	tc.c:1137:	dumpStackEntry(nxtstack);
+	tc.c:1142:	dumpStackEntry(nxtstack-1);
+----------------------
+  t(y=y+1)=s+tx;   /* changed(++) ALSO EQERR, =s+tx, ^under x */
+              ^
+tom@East ~/UbuTom/Projects/tiny-c $ 
+------------------
+What is class. Does class 1 mean the datum is in varEntry?
+~281 this doc
+	first writing of eq
+	class 1 means the decl has ().
+	int p() makes p class 1
+	char t() makes t class 1
+	int i is class 0
+	p(i) SHOULD BE CLASS 0
+	t+1 should be class 1
+	p(i)=t+1 should be case 0 1.
+10 verboses. 

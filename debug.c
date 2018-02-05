@@ -124,7 +124,12 @@ void print_val(struct var *var) {
 			char* where=(*var).value.up;
 			if(*where<32) {
 				int i;
-				for(i=0; i<10; ++i) printf(" 0x%x",*(where+i));
+				for(i=0; i<30; ++i) {
+					char c = *(where+i);
+					if(!c || c == 0x0d || c==0x0a ) break;
+					printf(" 0x%x",c);
+					
+				}
 			}
 			else printf(" %s", where);
 		}
@@ -140,12 +145,40 @@ void print_b(char* param) {
 	struct var *found;
 	canonThis( param, param+strlen(param)-1, &sym );
 	found = addrval_all(sym.name);
-	if(!found) printf("no such sym\n");
+	if(!found) printf("no such symbol\n");
 	else{
 		printf("%s: ",param);
 		print_val(found);
 		printf("\n");
 	}
+}
+
+void dbUsage() {
+	printf("	b <symbol>    set breakpoint\n");
+	printf("	r             start or continue run to next breakpoint\n");
+	printf("	i [b]         display breakpoints\n");
+	printf("	n             finish current and display next statement");
+	printf("	p <symbol>    print the value of symbol\n");
+	printf("	g             enter your C debugger (see setup notes)\n");
+	printf("	?             print this usage (default)\n");
+	printf("	x             exit tiny C\n");
+}
+
+void type_b(char* param) {
+	struct var sym;
+	struct var *found;
+	canonThis( param, param+strlen(param)-1, &sym );
+	found = addrval_all(sym.name);
+	if(!found) printf("no such symbol\n");
+	else {
+		dumpVar(found);
+		printf("\n");
+	}
+}
+
+void verbose_b(char *param) {
+	char mode = *param;   /* use this later */
+	verbose = 1-verbose;
 }
 
 /* Does one command. Returns the command letter */
@@ -158,42 +191,54 @@ int db_cmd() {
 /*	back to gdb. To enable this 
  *		set a gdb breakpoint on gdb_b() (which does nothing).
  */
-	case 'g':
-		gdb_b();
-		break;
 /* set breakpt */
 	case 'b':
 		set_b(param());
 		break;
+/* continue */
+	case 'c':
+		db_next=0;
+		return 'c';
+		break;
+	case 'g':
+		gdb_b();
+		break;
 /* info, list breakpts */
 	case 'i':
 		inf_b();
-		break;
-/* run */
-	case 'r':
-		db_running = 1;
-		return 'r';
-		break;
-/* print */
-	case 'p':
-		print_b(param());
-		return 'p';
 		break;
 /* next */
 	case 'n':
 		db_next=1;	
 		return 'n';
 		break;
-/* next */
-	case 'c':
-		db_next=0;
-		return 'c';
+/* print */
+	case 'p':
+		print_b(param());
+		return 'p';
+		break;
+/* run */
+	case 'r':
+		db_running = 1;
+		return 'r';
+		break;
+/* symbol type */
+	case 't':
+		type_b(param());
+		return 't';
+		break;
+/* toggle verbosity */
+	case 'v':
+		verbose_b(param());
+		return 'v';
 		break;
 /* exit */
+	case 'q':
 	case 'x':
 		return 'x';
 		break;
 	default:
+		dbUsage();
 		return '?';
 	}
 }

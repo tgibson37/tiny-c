@@ -1,0 +1,20 @@
+/* test of lib function readfile, reads and prints itself
+main[
+	char buff(1000)
+	char name(0)
+	int numread
+
+	name = "./testFiles/59"
+	numread = readfile name, buff, 1000
+	pl"numread"; pn numread; pl"First 100 chars...";pl""
+	pft buff, buff+100
+	ps"<<--"
+	pl""
+	name = "./testFiles/alphabet.txt"
+	pl"numread"; numread = readfile name, buff, 1000
+	pn numread; pl" should be 27 including linefeed"
+	buff(numread) = 0  /* after the linefeed
+	pl buff
+	ps"<<--"     /* should be on new line
+	
+]

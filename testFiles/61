@@ -1,0 +1,15 @@
+/* test assignment of int to/from pointer
+main[
+	char ptr(0), rtp(0)
+	ptr = "foobar"
+	int iDatum
+	pl "try i = p;"
+	iDatum = ptr
+	ps " good, now p = i;"
+	rtp = iDatum
+	ps " almost there; "
+	pl rtp
+	ps" is that foobar? GOOD"
+	pl""
+]
+	

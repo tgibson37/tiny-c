@@ -1,0 +1,6 @@
+/* Loop test. Does ESC cause exit with whatHappened() message
+main [
+  while(1)[
+    ps" ."
+  ]
+]
