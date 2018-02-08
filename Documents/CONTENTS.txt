@@ -3,31 +3,30 @@ CONTENTS.txt
 Oct 25, 2017, updated: Nov 8
 Notice: this is work in progress. My testing is fairly advanced, and all my test materials and results are included. But it is ready for Beta testing by others. See STATUS for latest info. 
 
-Original source from 1977
-	tc.asm
+	LICENSE (gpl)
+	README.md (simple greeting from me)
+	tc.asm (Original source from 1977)
 Source code...
-	FileRead.c
-	tcTestMain.c
-	tc.c
-	time.c
-	tcMain.c
-	test.c
-	machineCall.c
 	tc.h
-	debug.c
+	tc.c
+	machineCall.c
+	debug.c  (built in debugger for users tiny-C code)
+	tcMain.c
+	test.c   (regression tests)
+	tcTestMain.c
+	time.c
+	FileRead.c
+	kbhit.c
 Makefile
 	makefile
 Log of my work
-	notes.txt
-	about_testing.txt
-The latest results of a good regression
-	good_results
+	Archive/notes.txt
+	Archive/about_testing.txt
 Directories
 	testFiles (see about_testing.txt)
 	pps (just the library)
-Other documentation
+Other documentation in Documents/
 	CONTENTS.txt (this document)
     MY_ENVIRONMENT.txt (may be useful for porting)
     STATUS (brief description, latest on top)
-	LICENSE (gpl)
-	README.md (simple greeting from me)
+

@@ -1,5 +1,9 @@
 about_testing.txt
 ---
+Feb 8 update
+After cleaning up stderr vs stdout usage the regression tester, test.c, produces to result files, test_results and dump_results. The make command 'make dotest' is the best way to produce these. Then there are two diffs to run, 'make difft' and 'make diffb'. Scroll up/down after running each. If all you see is TEST headers (they come in pairs) the tests all produced what is expected. Any extra stuff comes from changed behavior, and must be examined more thoroughly. If the extra stuff is BAD then work is needed to make them GOOD. When all extra stuff is GOOD for BOTH test and dump results use 'make keep' to copy both results files to testFiles/good_test_results and testFiles/good_dump_results.
+These two files define the expected results.
+---
 Nov 15 update
 There are now regression tests 1..57, but some (13) are not used. Those simply print "empty case".
 There are others 90..93 which are not in the regression. They each require manual interaction, as they test the g's (gs, gn, etc.) And my regression technique would fail to print the prompts.
