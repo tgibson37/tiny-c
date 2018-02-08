@@ -11,6 +11,15 @@
 #define STACKLEN 100
 #define FUNLEN 100
 
+/* debug and verbosity tags */
+#define VE 0
+#define VL 1
+#define VS 2
+#define VT 3
+char verbose[8];
+int debug;
+
+/* error tags */
 #define STATERR      1
 #define CURSERR      2
 #define SYMERR       3
@@ -34,9 +43,6 @@
 #define EQERR		 27
 #define PTRERR		 28
 #define KILL         99
-
-/* globals */
-int debug, verbose;
 
 /*	All tc data are ints or chars. Pointers are an int index into pr. 
  *	stuff is the typless holder of any value.
@@ -141,7 +147,7 @@ void enter();
 void setarg( Type type, struct stackentry *arg );
 void machinecall();
 char* typeToWord(Type t);
-void PrVal(Type t, int class, union stuff *val, char lval);
+void dumpVal(Type t, int class, union stuff *val, char lval);
 void dumpLine();
 void dumpStuff(int v, int class, Type type);
 void dumpStackEntry(int e);

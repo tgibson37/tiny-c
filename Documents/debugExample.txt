@@ -1,0 +1,83 @@
+Example of use of built in tinyC debugger
+Tom Gibson, Feb 7, 2018
+----
+Lee Bradley's "double.tc" fragment...
+
+/* double takes phrase and displays all words that have double letters */
+/* along w/ the number of double letters in each word */
+/* if verbose is 1 all words are displayed */
+double char phrase(0);int verbose [
+ int i,k,count;char lfs(1)
+ lfs(0)=10
+ k=strlen(phrase)
+ /* replace lfs w/ spaces */
+ while(i=index(phrase,k,lfs,1))[
+  phrase(i-1)=32
+  ]
+ strcat(phrase," ")
+ /* need trailing space! */
+...   (enough for this example)
+
+
+/Projects/tiny-c $ ./tc -d Samples/double-lb.tc       <<==  notice -d
+ ...(tc's copyright msg)
+(tc-db) b double                               <<==  set breakpoint
+(tc-db) r                                      <<==  run
+...
+double.tg - lrb - 2/5/18                       <<==  Lee's opening message
+Enter phrase : hello world                     <<==  prompt, and input
+break at line 66 cursor pr[5120]: double       <<==  at the breakpoint
+  double phrase,1                              <<==  prints line 66, the call
+                            from main of double, not shown in fragment above
+(tc-db) n                                      <<==  next line
+line 38 cursor(pr[6335744])->[                 <<==  line 38 is shown above.
+                             double char phrase(0);int verbose [,
+                             The declaration of double. The cursor is 
+                             positioned at the [, which means that is 
+                             the next statement to process.
+ int i,k                                       <<== part of the cursor print,
+                             a few characters after the [. Just a 10 character
+                             clue which seems enough to follow the cursor 
+                             position as you enter n's
+(tc-db) n                                      <<== next
+line 38 cursor(pr[6335747])->int i,k,co        <<== notice the 10 characters
+(tc-db) n
+line 38 cursor(pr[6335761])->char lfs(1
+(tc-db) n
+line 39 cursor(pr[6335774])->lfs(0)=10         <<== including linefeeds
+
+(tc-db) n
+line 40 cursor(pr[6335785])->k=strlen(p
+(tc-db) n
+line 42 cursor(pr[6335832])->while(i=in
+(tc-db) p k                                    <<== print k
+k:  11                                         <<== its 11, strlen works
+(tc-db) n
+line 45 cursor(pr[6335886])->strcat(phr
+(tc-db) p i
+i:  0                                          <<== i is 0, as expected
+(tc-db) p phrase
+phrase:  hello world                           <<== and the phrase
+(tc-db) ?                                      <<== any unrecognized command
+                             prints this usage
+	b <symbol>    set breakpoint
+	r,c           start or continue run to next breakpoint
+	i             display breakpoints
+	n             finish current and display next statement	p <symbol>    print the value of symbol
+	g             enter your C debugger (see setup notes)
+	?             print this usage (default)
+	x,q           exit tiny C
+(tc-db) n                                      <<== One more next even though
+                             I knew the issue before doing this run
+app line 45 (cursor pr[4724])SYMERR, decl needed
+ strcat(phrase," ")
+      ^                                        <<== OPPS! Here's the
+                              problem. My library doesn't have strcat yet.
+                              And tc standard error message, and exit
+/Projects/tiny-c $                             <<== My terminal prompt
+
+Ok, just enough to get the idea. Give it a try.
+
+
+Tom Gibson, Feb 7, 2018
+

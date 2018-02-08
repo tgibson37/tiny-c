@@ -6,12 +6,11 @@
 extern int optind;
 int main(int argc, char *argv[]) {
 	int opt;
-    while ((opt = getopt(argc, argv, "dv")) != -1) {
+    while ((opt = getopt(argc, argv, "d")) != -1) {
         switch (opt) {
         case 'd': debug=1; break;
-        case 'v': verbose=1; break;
         default:
-            fprintf(stderr, "Usage: %s [-dv] [file...]\n", argv[0]);
+            fprintf(stderr, "Usage: %s [-d] [file...]\n", argv[0]);
             exit(1);
         }
     }

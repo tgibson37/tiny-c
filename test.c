@@ -78,14 +78,14 @@ void testing(int argc, char *argv[]) {
 	} 
 	else {
 /* do all tests */	
-		printf("\nDONT FORGET: test 35 requires keyboard input A<cr>");
-		ps("\ninitial state before any tests\n");
 		nxtstack=nxtvar=0;
 		cursor=prused=epr=pr;
+		fprintf(stderr,"\ninitial state before any tests\n");
 		dumpState();
 		pl("\nBEGIN TESTING ALL");
 		for(testcase=1; testcase<=testcases; ++testcase) {
 			printf("\n\nTEST %d %s", testcase, timeStamp);
+			fprintf(stderr,"\n\nTEST %d %s", testcase, timeStamp);
 			doTest(testcase);
 		}
 		pl("");

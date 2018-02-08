@@ -97,6 +97,13 @@ void canonThis(char* f, char* l, struct var *buf) {
 	lname=tl;
 }
 
+void printVar(struct var *v) {
+	printf("\n var %d: %s %d %s %d ", v-vartab,
+		(*v).name, (*v).class, typeToWord((*v).type), (*v).len );
+		print_val(v);
+}
+
+/* printf a value ref'd from a struct var, strings trunc'd at 32 */
 void print_val(struct var *var) {
 	int class=(*var).class;
 	int type =(*var).type;
@@ -155,13 +162,13 @@ void print_b(char* param) {
 
 void dbUsage() {
 	printf("	b <symbol>    set breakpoint\n");
-	printf("	r             start or continue run to next breakpoint\n");
+	printf("	r,c           start or continue run to next breakpoint\n");
 	printf("	i [b]         display breakpoints\n");
 	printf("	n             finish current and display next statement");
 	printf("	p <symbol>    print the value of symbol\n");
 	printf("	g             enter your C debugger (see setup notes)\n");
 	printf("	?             print this usage (default)\n");
-	printf("	x             exit tiny C\n");
+	printf("	x,q           exit tiny-C\n");
 }
 
 void type_b(char* param) {
@@ -171,14 +178,27 @@ void type_b(char* param) {
 	found = addrval_all(sym.name);
 	if(!found) printf("no such symbol\n");
 	else {
-		dumpVar(found);
+		printVar(found);
 		printf("\n");
 	}
 }
 
-void verbose_b(char *param) {
-	char mode = *param;   /* use this later */
-	verbose = 1-verbose;
+void verbose_clear() {
+	int i;
+	for(i=0; i<sizeof(verbose); ++i ) 
+		verbose[i]=0;
+}
+void verbose_toggle(char* param) {
+	int bit;
+	int kase=*param;
+	switch(kase) {
+	case 'e': bit=VE; break;
+	case 'l': bit=VL; break;
+	case 's': bit=VS; break;
+	case 't': bit=VT; break;
+	default: printf("v needs e, l, s or t"); return;
+	}
+	verbose[bit] = 1-verbose[bit];
 }
 
 /* Does one command. Returns the command letter */
@@ -229,7 +249,7 @@ int db_cmd() {
 		break;
 /* toggle verbosity */
 	case 'v':
-		verbose_b(param());
+		verbose_toggle(param());
 		return 'v';
 		break;
 /* exit */

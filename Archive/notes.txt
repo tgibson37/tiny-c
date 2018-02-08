@@ -3457,19 +3457,11 @@ Sat, Feb 3
 Downloaded Lee's double.tc and its input file decl_of_indep.txt into SamplePrograms. 
 GOAL is to get them to run. 
 x	DONE readfile in the library, and thoroughly tested
-	NEED strlen, bigger pr, main args, 
-		temp: can modify Lee's main and hardwire to text file
-	CLASERR line 8 of double.tc, ds=strlen(d); 
-		both ds and strlen are ints
-		(d)   ??  The ^ is inder the (, so just parsed is strlen.
-			int strlen char s(0) [
-				return MC s,104
-			]
-BUG: in tc DON'T declare return type of a fcn. They all return ints. Declaring a return type turns your function into a class 0 variable which is certainly not what is intended!
+x	NEED strlen, bigger pr, main args, 
+x		temp: can modify Lee's main and hardwire to text file
 ---------------------
 
 Sun, Feb 4
-Goal is to solve the Seg from last night. The machine call is doing strlen(1)
 AND goal is a better set of command line args to allow...
 		personal library (multiple lib loads) -p
 		args to main -a
@@ -3481,86 +3473,154 @@ split int t(0);char s(0),d(0) [
  int y,ix,tx,sl,ds;
  ...
  t(y=y+1)=s+tx;   /* EQERR, =s+tx, ^under x */
-Adding int tx to ptr s should be ok. Assigning the resulting POINTER to int array cell also ok. So wha' hap'n???
-	(tc-db) n
-	line 14 cursor(pr[6331245])->t(y=y+1)=s+tx;   /* changed(++) 
-	(tc-db) t s
-	 var 44: s 1 Char 1 pr[9401]-> IN CONGRESS, JULY 4, 1776 The<-
-	(tc-db) t tx
-	 var 48: tx 0 Int 1 pr[14419]->1<-
-	(tc-db) t t
-	 var 43: t 1 Int 1 pr[9401]
-So t is class 1, t(y) y==1 should be class 0 we have case Int = Char*
-Is that what is on the stack? How does eq handle this?
 
-Dumping the stack not helpful because no eval of this expression has happened. So do a 'n' THEN dump. But 'n' sends you to EQERR. Can we enter db from wha'hap'n? Yes but by then the fun and var stuff is popped. But not erased. In eset capture curfun, curstack, and if debug is set wha'hap'n enters. Provide stack dump 's [f[,t]]' (from,to relative to captured curfun).
-OR s sets stack trace (pushes,pops) and another s suppresses it??? That way you see stuff in the middle of the evaluation of an expression. Simpler and better.
-OR v sets verbose, - turns it off. Simpler still, and offers growth to other stuff.
+debug new commands...
+v toggles verbose
 Verbose should go to stderr, and be redirectable to a file, and that can be a setting option, default ./verbose.
 
 A restart needs tcMain refactored, separating read files, init globals, link, run. Restart does just the last 3.
 ---------------------
 
 Mon, Feb 5
-CODED: (tc-db) v toggles verbosity. Future v p, v e, others for selective tracing. 
+CODED: (tc-db) v toggles verbosity. 
+Future v p, v e, others for selective tracing. 
 	But need to design multiple selects.
 	v toogle needs to print on/off
 	stack push/pop needs to say what symbol
 	indenting would be nice
 	whatHappened could print some params
-Only two EQERR's, mismatch class. Last two pushes:
-	stack push: 
-	 stack entry at 2: 0 A 2 
-	stack push: 
-	 stack entry at 3: 0 A 2
-	app line 14 (cursor pr[4186])EQERR, illegal assign
-	  t(y=y+1)=s+tx; 
-Why didn't verbose ~71 print??? 
-Looks like int to int, both class 0 both A's. LVAL error???
-We are not getting all the pushes. s+tx should do two pops, one push. 
-$ grep -n nxtstack tc.[ch]  [edited, leaving just push/pop candidates]
-toptoi IMPLIED POP
-	tc.c:139:	struct stackentry *top = &stack[--nxtstack];
-popst
-	tc.c:162:	if( nxtstack-1 < 0 ) { error = POPERR; return; }
-	tc.c:165:		dumpStackEntry(nxtstack-1);
-	tc.c:167:	--nxtstack;
-	tc.c:168:	return &stack[nxtstack];
-pushst
-	tc.c:177:	if( nxtstack > STACKLEN) { error = PUSHERR; return; }
-	tc.c:178:	stack[nxtstack].class = class;
-	tc.c:179:	stack[nxtstack].lvalue = lvalue;
-	tc.c:180:	stack[nxtstack].type = type;
-	tc.c:181:	stuffCopy( &stack[nxtstack].value, value);
-	tc.c:182:	++nxtstack;
-	tc.c:185:		dumpStackEntry(nxtstack-1);
-expr
-	tc.c:562:		int leftclass = stack[nxtstack-1].class;
-	tc.c:566:			rightclass = stack[nxtstack-1].class;
-	tc.c:574:			rightclass = stack[nxtstack-1].class;
-enter
-	tc.c:927:	int arg=nxtstack, nargs=0;
-	tc.c:947:		if(nxtstack) machinecall( nargs );
-	tc.c:977:printf("\n962 arg, nxtstack %d %d", arg, nxtstack);*/
-	tc.c:978:		if(arg != nxtstack) {
-dumps
-	tc.c:1116:	if( 0<=e && e<=nxtstack ) {
-	tc.c:1130:	for( e=nxtstack-1; e>=0; --e) {
-	tc.c:1137:	dumpStackEntry(nxtstack);
-	tc.c:1142:	dumpStackEntry(nxtstack-1);
-----------------------
-  t(y=y+1)=s+tx;   /* changed(++) ALSO EQERR, =s+tx, ^under x */
-              ^
-tom@East ~/UbuTom/Projects/tiny-c $ 
-------------------
-What is class. Does class 1 mean the datum is in varEntry?
-~281 this doc
-	first writing of eq
-	class 1 means the decl has ().
-	int p() makes p class 1
-	char t() makes t class 1
-	int i is class 0
-	p(i) SHOULD BE CLASS 0
-	t+1 should be class 1
-	p(i)=t+1 should be case 0 1.
-10 verboses. 
+New debug commands implemented yesterday/today
+	t <sym>		show symbol type
+	v			toggle verbose mode
+	q			synonym for x (exit,quit)
+10 verboses, too many. It prints TONS. Turning it on for one statement prints 3 or 4 screen-loads.
+---------------------
+
+Tue, Feb 6
+Need to implement v param to narrow verbosity. Step 1 is survey existing stuff. 
+x	71		eq					e 0
+x	1110	link				l 1
+x	165		toptoi				s 2
+x	194		pushst				s 
+x	215		popst				s 
+x	1170	dumpStackEntry		s 
+x	301		symname				t 3
+x	353,368,382		konst		t 
+
+Step 2 is design a param tool easy to test.
+in tc.h
+x	#define VE 0
+x	#define VL 1
+x	#define VS 2
+x	#define VT 3
+x	char verbose[8]
+10 places, tc.c
+x	if(verbose[VE])whatever
+in debug.c
+x	void verbose_clear() {
+x	void verbose_toggle(char* param) {
+
+debug usage & dialog should use printf
+NASTY -I/lib BUG, FIXED, did away with the -I, just -w -g, and now have a pure 64 bit version. The -I was a poor attempt to produce a 32 bit version. Never had a proper matching -L, and could not find out how to make one.
+---------------------
+
+Wed, Feb 7
+Now recovering the modified tc.c, the one with fprintf's.
+x	Global replace printf( with fprintf(stderr,  which is overkill
+x		logo and whatHappened back to printf's
+x		debug dialog is all printf's
+			NEEDS printVar (clone of dumpVar)
+x			dumpVar calls PrVal
+x				PrVal has 2 uses, and tc.h entry, SHOULD BE dumpVal
+		test outputs all printf's 
+			BUT uses tons of dumps, about 35 or so.
+SO: Two subgoals:
+	Get debug -v parm working 
+		DO NOW because almost there.
+x			do printVar, don't forget tc.h
+			test
+	Get make dotest working
+		test is now a mix of printf's and dumps. 
+		use fprint's for results, printf's for dialog (if any)
+		make dotest redirects 2> instead of >
+TODO debug:
+	v e  printf on/off 
+	v - turns off all
+	p NULL prints the current line
+PROBLEM with regression. Just 2> isn't good enough. Need BOTH to redirect, because a lot of the tests output using ps, pl, etc. Every test needs to end with a flush(stdout) to keep stdout and stderr somewhat synchronized.
+With both redirected, Many tests are ok, but quite a few are not.
+	< TEST 1  13:57
+	---
+	> TEST 1  06:36
+	13a22,25
+	>  var 0: foobaaaz 0 Int 1 pr[51]->0<-
+	>  var 1: foobaaaz 0 Int 1 pr[55]->0<-
+	>  var 2: foobaaaz 0 Int 1 pr[59]->0<-
+	>  var 3: foobaaaz 0 Int 1 pr[63]->0<-
+	16c28
+	< TEST 2  13:57
+	---
+	> TEST 2  06:36
+	18a31,34
+	>  var 0: foob5678 0 Int 1 pr[21]->0<-
+	>  var 1: foob5678 0 Int 1 pr[25]->0<-
+	>  var 2: foob5678 0 Int 1 pr[29]->0<-
+	>  var 3: foob5678 0 Int 1 pr[33]->0<-
+	21c37
+	< TEST 3  13:57
+	---
+	> TEST 3  06:36
+	23a40,43
+	>  var 0: foob 0 Int 1 pr[21]->0<-
+	>  var 1: foob 0 Int 1 pr[25]->0<-
+	>  var 2: foob 0 Int 1 pr[29]->0<-
+	>  var 3: foob 0 Int 1 pr[33]->0<-
+	26c46
+	< TEST 4  13:57
+Just a sample. The > lines disappeared from the test results.
+Lets add fflush(stdout); after these prints.
+Done, but stuff from dumps is not making it. Some is, some gets lost. Best guess what is happening is that the merger into the file has collisions, and stuff gets lost. If so we cannot use TWO redirects in one file but must find a way to get regression info from two sources in a human checkable way.
+Redirect to 2 files with design that allows easy correlation. E.g. TEST 4 <time> sent to BOTH files.
+This is gonna take some work. Why not push the debug stuff, and email w/ att debugExample doc to Lee. Is it solid enough?
+TOMMOROW: test lee's orig with split, and -v s the line I needed to examine before, line 14 I think. And play with it a bit more. 
+TONIGHT: try two file redirection...
+	makefile changes, 
+x		stderr goes to dump_results
+		keep
+		diff
+x	duplicate headers (TEST ...) one to each stream
+	optional, write a bash program to do a merge of these two streams
+WORKS so far, two files look good. If I keep two good results and do two diffs will that be humanly nice to use. Avoids the optional merger. Lets go down that road a bit further. We need new file names. DONE...
+	good_dump_results, good_test_results
+	Never have to type these names, and still handy to ls *ults. 
+Next goal: make keep, make diff
+
+Alternative worth examining: everything to stderr. 
+	Leave two files for awhile.
+x	Back up test.c
+		audit test_results. What prints/ps/pl should be fprints.
+		change these to fprints
+		Run regression, less test_results
+	Rinse and repeat until test_results has nothing
+	Then audit dump_results against expected results in comments.
+	If OK erase
+		erase test_results (essentially empty by now)
+		rename dump to test_results
+	Else fix whatever, loop until OK
+	make diff
+	If all is kool we still have a one file solution
+---------------------
+
+Thur, Feb 8
+ISSUE with alternative. When the tc code under test calls ps,pl, or the test case code calls whatHappened, it goes to stdout. So we still have need of two files.
+Go with plan A, two files, test.c writes to stdout.
+Status, 
+x	Producing 2 files. 
+x	Got 2 dump headers fixed, stack and varTab
+x	Auditing test results (stdout) for other stuff from dumps
+x	good results now in testFiles directory
+x	make dotest works
+x	make difft, make diffd work
+x	make keep works
+
+

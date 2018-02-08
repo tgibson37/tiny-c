@@ -1,0 +1,232 @@
+
+initial state before any tests
+
+ADDRESSES (hex)
+pr:     60cb20
+stack:  6119a0
+vartab: 612340
+----
+STATE 0
+parsing: <--end of line--
+Var Table: name class type len (type)value empty
+Stack (from top) class lvalue type stuff
+
+
+TEST 1  11:04
+Var Table: name class type len (type)value
+ var 0: foobaaaz 0 Int 1 pr[51]->0<-
+ var 1: foobaaaz 0 Int 1 pr[55]->0<-
+ var 2: foobaaaz 0 Int 1 pr[59]->0<-
+ var 3: foobaaaz 0 Int 1 pr[63]->0<-
+
+TEST 2  11:04
+Var Table: name class type len (type)value
+ var 0: foob5678 0 Int 1 pr[21]->0<-
+ var 1: foob5678 0 Int 1 pr[25]->0<-
+ var 2: foob5678 0 Int 1 pr[29]->0<-
+ var 3: foob5678 0 Int 1 pr[33]->0<-
+
+TEST 3  11:04
+Var Table: name class type len (type)value
+ var 0: foob 0 Int 1 pr[21]->0<-
+ var 1: foob 0 Int 1 pr[25]->0<-
+ var 2: foob 0 Int 1 pr[29]->0<-
+ var 3: foob 0 Int 1 pr[33]->0<-
+
+TEST 4  11:04
+Var Table: name class type len (type)value
+ var 0: foo 0 Int 1 pr[21]->0<-
+ var 1: foo 0 Int 1 pr[25]->0<-
+ var 2: foo 0 Int 1 pr[29]->0<-
+ var 3: foo 0 Int 1 pr[33]->0<-
+
+TEST 5  11:04
+
+TEST 6  11:04
+Var Table: name class type len (type)value
+ var 0: symbol 0 Char 1 pr[21]->NULL<-
+
+TEST 7  11:04
+
+TEST 8  11:04
+Var Table: name class type len (type)value
+ var 0: a 0 Char 1 pr[101]->NULL<-
+ var 1: b 1 Char 10 pr[102]-><-
+ var 2: c 0 Char 1 pr[112]->NULL<-
+ var 3: d 0 Int 1 pr[113]->0<-
+ var 4: e 1 Int 10 pr[117]
+ var 5: f 0 Int 1 pr[157]->0<-
+
+TEST 9  11:04
+
+TEST 10  11:04
+
+TEST 11  11:04
+Stack (from top) class lvalue type stuff
+ stack entry at 0: 0 A 2 
+
+
+TEST 12  11:04
+Stack (from top) class lvalue type stuff
+ stack entry at 3: 1 A 2 
+ stack entry at 2: 0 A 2 
+ stack entry at 1: 0 A 1 
+ stack entry at 0: 1 A 1 
+
+ stack entry at 3: 1 A 2 
+ stack entry at 2: 0 A 2 
+ stack entry at 1: 0 A 1 
+ stack entry at 0: 1 A 1 
+ stack entry at 0: 1 A 1 
+Stack (from top) class lvalue type stuff
+
+
+TEST 13  11:04
+
+TEST 14  11:04
+
+TEST 15  11:04
+
+TEST 16  11:04
+Stack (from top) class lvalue type stuff
+ stack entry at 2: 0 A 1 
+ stack entry at 1: 1 A 1 
+ stack entry at 0: 0 A 2 
+
+
+TEST 17  11:04
+Var Table: name class type len (type)value
+ var 0: foobaaaz 11 Char 13 pr[10]
+ var 1: foob5678 21 Int 23 pr[23]
+ var 2: foob 31 Int 33 pr[115]
+ var 3: foo 41 Char 43 pr[247]
+ var 3: foo 41 Char 43 pr[247]
+ var 1: foob5678 21 Int 23 pr[23]
+ var 0: foobaaaz 11 Char 13 pr[10]
+
+TEST 18  11:04
+
+TEST 19  11:04
+
+TEST 20  11:04
+
+TEST 21  11:04
+Var Table: name class type len (type)value
+ var 0: a 0 Char 1 pr[25]->NULL<-
+Var Table: name class type len (type)value
+ var 0: a 0 Char 1 pr[25]->A<-
+
+TEST 22  11:04
+
+TEST 23  11:04
+Var Table: name class type len (type)value
+ var 0: x 0 Int 1 pr[18]->0<-
+Stack (from top) class lvalue type stuff
+
+
+TEST 24  11:04
+Var Table: name class type len (type)value
+ var 0: x 1 Int 3 pr[26]
+
+TEST 25  11:04
+Stack (from top) class lvalue type stuff
+
+
+TEST 26  11:04
+
+TEST 27  11:04
+
+TEST 28  11:04
+
+TEST 29  11:04
+
+TEST 30  11:04
+
+TEST 31  11:04
+Var Table: name class type len (type)value
+ var 0: i 0 Int 1 pr[136]->0<-
+
+TEST 32  11:04
+Var Table: name class type len (type)value
+ var 0: foo 69 Int 1 pr[6]
+
+TEST 33  11:04
+Var Table: name class type len (type)value
+ var 0: a 0 Int 1 pr[57]->0<-
+ var 1: b 1 Int 1 pr[61]
+ var 2: c 0 Int 1 pr[65]->0<-
+ var 3: d 0 Char 1 pr[69]->NULL<-
+ var 4: e 1 Char 1 pr[70]-><-
+ var 5: f 0 Char 1 pr[71]->NULL<-
+
+TEST 34  11:04
+fun table: fvar, lvar, prused
+ fun entry at 0:  0 3 396
+ fun entry at 1:  4 11 412
+Var Table: name class type len (type)value
+ var 0: putchar 69 Int 1 pr[51]
+ var 1: pft 69 Int 1 pr[136]
+ var 2: ps 69 Int 1 pr[201]
+ var 3: scann 69 Int 1 pr[275]
+ var 4: a 0 Int 1 pr[413]->0<-
+ var 5: b 1 Int 1 pr[417]
+ var 6: c 0 Int 1 pr[421]->0<-
+ var 7: d 0 Char 1 pr[425]->NULL<-
+ var 8: e 1 Char 1 pr[426]-><-
+ var 9: f 0 Char 1 pr[427]->NULL<-
+ var 10: main 69 Int 1 pr[369]
+ var 11: foobar 69 Int 1 pr[381]
+
+TEST 35  11:04
+
+TEST 36  11:04
+
+TEST 37  11:04
+
+TEST 38  11:04
+
+TEST 39  11:04
+
+TEST 40  11:04
+
+TEST 41  11:04
+
+TEST 42  11:04
+
+TEST 43  11:04
+
+TEST 44  11:04
+
+TEST 45  11:04
+
+TEST 46  11:04
+
+TEST 47  11:04
+
+TEST 48  11:04
+
+TEST 49  11:04
+
+TEST 50  11:04
+
+TEST 51  11:04
+
+TEST 52  11:04
+
+TEST 53  11:04
+
+TEST 54  11:04
+
+TEST 55  11:04
+
+TEST 56  11:04
+
+TEST 57  11:04
+
+TEST 58  11:04
+
+TEST 59  11:04
+
+TEST 60  11:04
+
+TEST 61  11:04

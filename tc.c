@@ -68,10 +68,10 @@ int eq() {
 
 	struct stackentry *val = &stack[nxtstack-1]; /* value (on top) */
 	struct stackentry *lval = &stack[nxtstack-2]; /* where to put it */
-	if(verbose){
-		printf("\neq: lval");
+	if(verbose[VE]){
+		fprintf(stderr,"\neq: lval");
 		dumpStackEntry(nxtstack-2);
-		printf("\neq: val");
+		fprintf(stderr,"\neq: val");
 		dumpStackEntry(nxtstack-1);
 	}
 /*	popst();popst();  */
@@ -162,11 +162,11 @@ int topdiff() {
 int toptoi() {
 	int datum;
 	union stuff *ptr;
-/*	if(verbose){
-		printf("\ntoptoi pop: ");
+	if(verbose[VS]){
+		fprintf(stderr,"\ntoptoi pop: ");
 		dumpStackEntry(nxtstack-1);
 	}
-*/
+
 	struct stackentry *top = &stack[--nxtstack];
 	if( (*top).class==1 ) {
 		if((*top).lvalue == 'L') {
@@ -191,11 +191,10 @@ int toptoi() {
 /* basic popper, entry stays accessible until pushed over */
 struct stackentry* popst() {
 	if( nxtstack-1 < 0 ) { error = POPERR; return; }
-/*	if(verbose){
-		printf("\nstack pop: ");
+	if(verbose[VS]){
+		fprintf(stderr,"\nstack pop: ");
 		dumpStackEntry(nxtstack-1);
 	}
-*/
 	--nxtstack;
 	return &stack[nxtstack];
 }
@@ -212,11 +211,10 @@ void pushst( int class, int lvalue, Type type, union stuff *value ) {
 	stack[nxtstack].type = type;
 	stuffCopy( &stack[nxtstack].value, value);
 	++nxtstack;
-/*	if(verbose){
-		printf("\nstack push: ");
+	if(verbose[VS]){
+		fprintf(stderr,"\nstack push: ");
 		dumpStackEntry(nxtstack-1);
 	}
-*/
 }
 
 /* push an int */
@@ -298,9 +296,9 @@ int symname() {
 		++temp; 
 	}
 	lname = temp-1;
-	if(verbose){
-		printf("\nparsed ");
-		pft(fname,lname);
+	if(verbose[VT]){
+		fprintf(stderr,"\nparsed ");
+		dumpft(fname,lname);
 	}
 	return lname-fname+1;  /* good, fname and lname defined */
 }
@@ -350,9 +348,9 @@ Type konst() {
 			++cursor; c=*cursor;
 		} while(c>='0'&&c<='9');
 		lname=cursor-1;
-		if(verbose){
-			printf("\nparsed ");
-			pft(fname,lname);
+		if(verbose[VT]){
+			fprintf(stderr,"\nparsed ");
+			dumpft(fname,lname);
 		}
 		return Int;
 
@@ -365,9 +363,9 @@ Type konst() {
 			*x = 0;
 		}
 		else { eset(CURSERR); return Err; }
-		if(verbose){
-			printf("\nparsed ");
-			pft(fname,lname);
+		if(verbose[VT]){
+			fprintf(stderr,"\nparsed ");
+			dumpft(fname,lname);
 		}
 		return CharStar;
 
@@ -379,9 +377,9 @@ Type konst() {
 			cursor = x+1;
 		}
 		else { eset(CURSERR); return -1; }
-		if(verbose){
-			printf("\nparsed ");
-			pft(fname,lname);
+		if(verbose[VT]){
+			fprintf(stderr,"\nparsed ");
+			dumpft(fname,lname);
 		}
 		return Char;
 	
@@ -1023,9 +1021,6 @@ void enter( char* where) {
 				break;		/* and the only way outa here */
 			}
 		}
-/*printf("\n-----------\ncursor-apr %d   ->",cursor-apr);
-pft(cursor,cursor+99);
-printf("\n962 arg, nxtstack %d %d", arg, nxtstack);*/
 		if(arg != nxtstack) {
 			cursor=localcurs;
 			stcurs=localstcurs;
@@ -1107,7 +1102,7 @@ void tclink() {
 		if(cursor==lastcur)eset(LINKERR);
 	}
 	cursor = problemCursor;
-	if(verbose)dumpVarTab();
+	if(verbose[VL])dumpVarTab();
 }
 
 /* chunk 11: MC's. 
@@ -1128,6 +1123,10 @@ char* typeToWord(Type t){
 	}
 }
 
+/* dump from..to inclusive  */
+void dumpft(char *from, char *to ) {
+	while(from <= to) fprintf(stderr,"%c",*(from++));
+}
 
 /* dump the line cursor is in from cursor to nl */
 void dumpLine() {
@@ -1137,50 +1136,51 @@ void dumpLine() {
 		++end;
 	}
 	while(begin<end){
-		printf("%c",*begin);
+		fprintf(stderr,"%c",*begin);
 		++begin;
 	}
 }
 
-void PrVal(Type t, int class, union stuff *val, char lval){
-	printf("pr[%d]",(*val).up-(int)pr);
+/*	prints a value given its description taken from a struct stackEntry */
+void dumpVal(Type t, int class, union stuff *val, char lval){
+	fprintf(stderr,"pr[%d]",(*val).up-(int)pr);
 	if(class==1 && t==Char ){
 		char sval[30];
 		strncpy(sval, (char*)((*val).up), 30);
-		printf("->%s<-", sval);
+		fprintf(stderr,"->%s<-", sval);
 	}
 	else if(class==0 && lval!='A'){ 
 		if(t==Char){
 			char x = *(char*)((*val).up);
-			if(x)printf("->%c<-", x );
-			else printf("->NULL<-");
+			if(x)fprintf(stderr,"->%c<-", x );
+			else fprintf(stderr,"->NULL<-");
 		}
-		else printf("->%d<-", *(int*)((*val).up) );
+		else fprintf(stderr,"->%d<-", *(int*)((*val).up) );
 	}
 /*
-	else if(t==Char) printf("%c",(*val).uc);
-	else printf("%d",(*val).ui);
+	else if(t==Char) fprintf(stderr,"%c",(*val).uc);
+	else fprintf(stderr,"%d",(*val).ui);
 */
 }
 
 void dumpStackEntry(int e){
 	if( 0<=e && e<=nxtstack ) {
-		printf("\n stack entry at %d: %d %c %d ", e, stack[e].class, 
+		fprintf(stderr,"\n stack entry at %d: %d %c %d ", e, stack[e].class, 
 			stack[e].lvalue, stack[e].type );
-		if(verbose)PrVal(stack[e].type, stack[e].class, 
+		if(verbose[VS])dumpVal(stack[e].type, stack[e].class, 
 				&stack[e].value,stack[e].lvalue);
 	}
 	else {
-		printf("no stack entry at %d", e);
+		fprintf(stderr,"no stack entry at %d", e);
 	}
 }
 void dumpStack(){
 	int e;
-	pl("Stack (from top) class lvalue type stuff");
+	fprintf(stderr,"\nStack (from top) class lvalue type stuff");
 	for( e=nxtstack-1; e>=0; --e) {
 		dumpStackEntry(e); 
 	}
-	printf("\n");
+	fprintf(stderr,"\n");
 }
 /* dumps the just popped stack entry */
 void dumpPopTop() {
@@ -1193,12 +1193,12 @@ void dumpTop() {
 }
 
 void dumpFunEntry( int e ) {
-	printf("\n fun entry at %d:  %d %d %d", e,
+	fprintf(stderr,"\n fun entry at %d:  %d %d %d", e,
 		fun[e].fvar, fun[e].lvar, fun[e].prused-pr );
 }
 
 void dumpFun() {
-	printf("\nfun table: fvar, lvar, prused");
+	fprintf(stderr,"\nfun table: fvar, lvar, prused");
 	int i;
 	int num = curfun-fun;
 	for(i=0;i<=num;++i) {
@@ -1207,44 +1207,44 @@ void dumpFun() {
 }
 
 void dumpVar(struct var *v) {
-	printf("\n var %d: %s %d %s %d ", v-vartab,
+	fprintf(stderr,"\n var %d: %s %d %s %d ", v-vartab,
 		(*v).name, (*v).class, typeToWord((*v).type), (*v).len );
 /*	if((*v).value.up) 
-		printf(" ref to pr[%d]", (char*)((*v).value.up)-pr);
+		fprintf(stderr," ref to pr[%d]", (char*)((*v).value.up)-pr);
 */
-		PrVal( (*v).type, (*v).class, &((*v).value), 0 );
+		dumpVal( (*v).type, (*v).class, &((*v).value), 0 );
 }
 
 void dumpVarTab() {
 	int pos = 0;
-	ps("\nVar Table: name class type len (type)value");
+	fprintf(stderr,"\nVar Table: name class type len (type)value");
 	struct var *v = vartab-1;
 	while(++v < &vartab[nxtvar]) {
 		dumpVar(v);
 		++pos;
 	};
-	if( !pos )pl(" empty");
+	if( !pos )fprintf(stderr," empty");
 }
 
 void dumpHex( void* where, int len ) {
 	char* w=where;
-	printf("\n%x: ",w);
+	fprintf(stderr,"\n%x: ",w);
 	int i;
-	for( i=0; i<len; ++i )printf(" %x",w[i]);
+	for( i=0; i<len; ++i )fprintf(stderr," %x",w[i]);
 }
 
 int stateCallNumber=0;
 void dumpState() {
-	if(stateCallNumber++==0){
-		printf("\nADDRESSES (hex)");
-		printf("\npr:     %x",pr);
-		printf("\nstack:  %x",stack);
-		printf("\nvartab: %x",vartab);	
+	if(stateCallNumber==0){
+		fprintf(stderr,"\nADDRESSES (hex)");
+		fprintf(stderr,"\npr:     %x",pr);
+		fprintf(stderr,"\nstack:  %x",stack);
+		fprintf(stderr,"\nvartab: %x",vartab);	
 	}
 
-	printf("\n----\nSTATE %d\nparsing: ",stateCallNumber);
+	fprintf(stderr,"\n----\nSTATE %d\nparsing: ",stateCallNumber++);
 	dumpLine();
-	ps("<--end of line--");
+	fprintf(stderr,"<--end of line--");
 	dumpVarTab();
 	dumpStack();
 }
@@ -1289,22 +1289,22 @@ void readTheFiles(int argc, char *argv[], int optind) {
 		char* sysfile = "/usr/local/share/tinyC/library.tc";
 		nread = FileRead(sysfile,epr,EPR-epr);
 		if(nread == -1) {
-			printf("tc: file read error: %s",sysfile);
+			fprintf(stderr,"tc: file read error: %s",sysfile);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("tc-lib: no such file: %s\n",sysfile);
+			fprintf(stderr,"tc-lib: no such file: %s\n",sysfile);
 			exit(1);
 		}
 		apr = epr += nread;
 		/* app */
 		nread = FileRead( argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
-			printf("tc: file read error: %s\n",argv[optcount+1]);
+			fprintf(stderr,"tc: file read error: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("tc-app: no such file: %s\n",argv[optcount+1]);
+			fprintf(stderr,"tc-app: no such file: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		epr += nread;
@@ -1314,22 +1314,22 @@ void readTheFiles(int argc, char *argv[], int optind) {
 		/* sys, e.g. lib */
 		nread = FileRead(argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
-			printf("file read error: %s\n",argv[optcount+1]);
+			fprintf(stderr,"file read error: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such lib file: %s\n",argv[optcount+1]);
+			fprintf(stderr,"no such lib file: %s\n",argv[optcount+1]);
 			exit(1);
 		}
 		apr = epr += nread;
 		/* app */
 		nread = FileRead(argv[optcount+2],epr,EPR-epr);
 		if(nread == -1) {
-			printf("file read error: %s\n",argv[optcount+2]);
+			fprintf(stderr,"file read error: %s\n",argv[optcount+2]);
 			exit(1);
 		}
 		else if(nread == 0) {
-			printf("no such app file: %s\n",argv[optcount+2]);
+			fprintf(stderr,"no such app file: %s\n",argv[optcount+2]);
 			exit(1);
 		}
 		epr += nread;

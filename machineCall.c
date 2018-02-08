@@ -52,7 +52,7 @@ int charIn(char c, char *choices ){
 	return 0;
 }
 
-/* print a block of ram from from to to inclusive 
+/* print from..to inclusive 
  */
 void pft(char *from, char *to ) {
 	while(from <= to) printf("%c",*(from++));
