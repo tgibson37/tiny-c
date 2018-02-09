@@ -10,15 +10,15 @@ Collected here those ideas still alive, plus items worth covering in a writing.
 		does append work? (^R)
 	varargs ~2146
 	malloc's
-	what does verbose do?
-	better understanding of gcc's -I
+x	what does verbose do?
+x	better understanding of gcc's -I
 	726 : it (77 OM) describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
 	---
 	WRITING
 	seed,random now in classical lib (77 was in OM example)
 	debug, incl hookup to gdb ~2681, also ~2760
 	notes style
-		~
+		~ (its meaning, line number)
 		debug notes usually deleted leaving symptom and FIXED note
 			BUT not always deleted
 		compile and makefile notes

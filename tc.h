@@ -15,7 +15,7 @@
 #define VE 0
 #define VL 1
 #define VS 2
-#define VT 3
+#define VP 3
 char verbose[8];
 int debug;
 

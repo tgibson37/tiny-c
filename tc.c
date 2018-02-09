@@ -296,7 +296,7 @@ int symname() {
 		++temp; 
 	}
 	lname = temp-1;
-	if(verbose[VT]){
+	if(verbose[VP]){
 		fprintf(stderr,"\nparsed ");
 		dumpft(fname,lname);
 	}
@@ -348,7 +348,7 @@ Type konst() {
 			++cursor; c=*cursor;
 		} while(c>='0'&&c<='9');
 		lname=cursor-1;
-		if(verbose[VT]){
+		if(verbose[VP]){
 			fprintf(stderr,"\nparsed ");
 			dumpft(fname,lname);
 		}
@@ -363,7 +363,7 @@ Type konst() {
 			*x = 0;
 		}
 		else { eset(CURSERR); return Err; }
-		if(verbose[VT]){
+		if(verbose[VP]){
 			fprintf(stderr,"\nparsed ");
 			dumpft(fname,lname);
 		}
@@ -377,7 +377,7 @@ Type konst() {
 			cursor = x+1;
 		}
 		else { eset(CURSERR); return -1; }
-		if(verbose[VT]){
+		if(verbose[VP]){
 			fprintf(stderr,"\nparsed ");
 			dumpft(fname,lname);
 		}

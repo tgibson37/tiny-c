@@ -63,7 +63,8 @@ phrase:  hello world                           <<== and the phrase
 	b <symbol>    set breakpoint
 	r,c           start or continue run to next breakpoint
 	i             display breakpoints
-	n             finish current and display next statement	p <symbol>    print the value of symbol
+	n             finish current and display next statement
+	p <symbol>    print the value of symbol
 	g             enter your C debugger (see setup notes)
 	?             print this usage (default)
 	x,q           exit tiny C

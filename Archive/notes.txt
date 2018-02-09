@@ -3529,22 +3529,22 @@ Now recovering the modified tc.c, the one with fprintf's.
 x	Global replace printf( with fprintf(stderr,  which is overkill
 x		logo and whatHappened back to printf's
 x		debug dialog is all printf's
-			NEEDS printVar (clone of dumpVar)
+x			NEEDS printVar (clone of dumpVar)
 x			dumpVar calls PrVal
 x				PrVal has 2 uses, and tc.h entry, SHOULD BE dumpVal
-		test outputs all printf's 
-			BUT uses tons of dumps, about 35 or so.
+x		test outputs all printf's 
+x			BUT uses tons of dumps, about 35 or so.
 SO: Two subgoals:
-	Get debug -v parm working 
-		DO NOW because almost there.
+x	Get debug -v parm working 
+x		DO NOW because almost there.
 x			do printVar, don't forget tc.h
-			test
-	Get make dotest working
-		test is now a mix of printf's and dumps. 
-		use fprint's for results, printf's for dialog (if any)
-		make dotest redirects 2> instead of >
+x			test
+x	Get make dotest working
+x		test is now a mix of printf's and dumps. 
+x		use fprint's for results, printf's for dialog (if any)
+x		make dotest redirects 2> instead of >
 TODO debug:
-	v e  printf on/off 
+x	v e  printf on/off 
 	v - turns off all
 	p NULL prints the current line
 PROBLEM with regression. Just 2> isn't good enough. Need BOTH to redirect, because a lot of the tests output using ps, pl, etc. Every test needs to end with a flush(stdout) to keep stdout and stderr somewhat synchronized.
@@ -3597,7 +3597,7 @@ Next goal: make keep, make diff
 
 Alternative worth examining: everything to stderr. 
 	Leave two files for awhile.
-x	Back up test.c
+	Back up test.c
 		audit test_results. What prints/ps/pl should be fprints.
 		change these to fprints
 		Run regression, less test_results
@@ -3609,6 +3609,7 @@ x	Back up test.c
 	Else fix whatever, loop until OK
 	make diff
 	If all is kool we still have a one file solution
+ABANDON, see next...
 ---------------------
 
 Thur, Feb 8
@@ -3623,7 +3624,100 @@ x	make dotest works
 x	make difft, make diffd work
 x	make keep works
 
-COMMITed, 
+COMMITed, PUSHed
+
+What next? Status, 
+	improved debug, 
+	improved stderr/stdout separation,
+	new doc debug example,
+	file cleanup (some)
+	more reliable compilation
+		maybe FileRead no longer needed???
+TODO 
+	debug:
+		v - turns off all
+		p NULL prints the current line
+	lib:
+		strcat
+		read/write file
+		printf
+		varargs
+	doc:
+		audit main doc vs Archive/todo.txt writing ideas
+		in Archive, move to Doc..
+			debug.txt (needs update)
+			q
+	tidy:
+		put each structure in own file, object style
+			reduce tc.h to JUST the publics
+	interpreter:
+		//
+		malloc's/settings
+		multi-libs
+		
+Of the above, which is priority???
+	1 - malloc/settings
+	2 - doc stuff
+---------------------
+
+Fri, Feb 9
+debug funnies (blank lines deleted):
+	Enter phrase : hello world
+	break at line 66 cursor pr[5120]: double
+	  double phrase,1
+	(tc-db) t double
+	break at line 66 cursor pr[5120]: double  <<== WRONG
+	  double phrase,1
+	(tc-db) t double
+	break at line 66 cursor pr[5120]: double  <<== WRONG, why twice
+	  double phrase,1
+	(tc-db) n
+	 var 33: double 69 Int 1 double is a function  <<== finally t's output
+	(tc-db) 
+	n
+	 var 33: double 69 Int 1 double is a function
+	(tc-db) n
+	line 38 cursor(pr[6335744])->[ int i,k
+---
+It has to be interleaving of stderr/stdout. What does each produce? 
+(tc-db) does not end with \n. MAYBE flushing just that? 
+	n repeats the previous message
+	2nd n actually does n AND flushes stderr message
+All of debug is printf, no fprintf's.
+Debug uses dumps? NO. Confirmed NOTHING goes to stderr, all stdout. SO 
+seems a pure debugger issue. Try it via eyeball.
+
+
+Tidied debug, no code changes.
+printf ~ debugging.. 
+	(tc-db) b double
+	(tc-db) r
+	Enter phrase : hello world
+	break at line 66 cursor pr[5120]: double
+	  double phrase,1    <<== the call
+	(tc-db) t
+	t~243
+	2~162
+	2~167
+	2~169 0
+	no such symbol       <<== TRUE, I didn't give a symbol
+	(tc-db) i
+	num sym enabled hits
+	 1   double  y  0 
+	(tc-db) 
+---
+(tc-db) t double
+t~243
+2~162
+2~167
+
+break at line 62 cursor pr[5004]: double
+main [
+SUGGESTS problem is at ~163
+	found = addrval_all(sym.name);
+The t causes a br_hit in _addrval. That feedback loop is probably the probllem.
+	Can we turn off debug befoe calling addrval and turn it back on afterwards?
+	wrapper: addrval_nohit, called in 3 places
 
 
 
