@@ -159,6 +159,7 @@ void dumpVarTab();
 void dumpHex( void* where, int len );
 void dumpState();
 void dumpName();
+void dumpft(char*,char*);
 void put_int(char *where, int datum);
 int  get_int(char *where);
 void put_char(char *where, char datum);
@@ -187,4 +188,6 @@ void pft(char *from, char *to );
 int isalpha(int);
 int isalnum(int);  
   /* All these two do is prevent warnings for tcc compile */
+int Mchrdy();
+int Mgch(int,int*);
 

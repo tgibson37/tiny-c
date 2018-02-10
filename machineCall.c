@@ -174,7 +174,7 @@ int Mfilrd(int nargs, int *argsv) {
 }
 
 int Mstrlen(int nargs,int *argsv) {
-	char* s=argsv[0];
+	char* s=(char*)argsv[0];
 	return strlen(s);
 }
 

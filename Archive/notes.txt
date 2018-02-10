@@ -3656,70 +3656,25 @@ TODO
 		multi-libs
 		
 Of the above, which is priority???
+	0 - strcat
 	1 - malloc/settings
 	2 - doc stuff
 ---------------------
 
 Fri, Feb 9
-debug funnies (blank lines deleted):
-	Enter phrase : hello world
-	break at line 66 cursor pr[5120]: double
-	  double phrase,1
-	(tc-db) t double
-	break at line 66 cursor pr[5120]: double  <<== WRONG
-	  double phrase,1
-	(tc-db) t double
-	break at line 66 cursor pr[5120]: double  <<== WRONG, why twice
-	  double phrase,1
-	(tc-db) n
-	 var 33: double 69 Int 1 double is a function  <<== finally t's output
-	(tc-db) 
-	n
-	 var 33: double 69 Int 1 double is a function
-	(tc-db) n
-	line 38 cursor(pr[6335744])->[ int i,k
----
-It has to be interleaving of stderr/stdout. What does each produce? 
-(tc-db) does not end with \n. MAYBE flushing just that? 
-	n repeats the previous message
-	2nd n actually does n AND flushes stderr message
-All of debug is printf, no fprintf's.
-Debug uses dumps? NO. Confirmed NOTHING goes to stderr, all stdout. SO 
-seems a pure debugger issue. Try it via eyeball.
-
-
-Tidied debug, no code changes.
-printf ~ debugging.. 
-	(tc-db) b double
-	(tc-db) r
-	Enter phrase : hello world
-	break at line 66 cursor pr[5120]: double
-	  double phrase,1    <<== the call
-	(tc-db) t
-	t~243
-	2~162
-	2~167
-	2~169 0
-	no such symbol       <<== TRUE, I didn't give a symbol
-	(tc-db) i
-	num sym enabled hits
-	 1   double  y  0 
-	(tc-db) 
----
-(tc-db) t double
-t~243
-2~162
-2~167
-
-break at line 62 cursor pr[5004]: double
-main [
-SUGGESTS problem is at ~163
-	found = addrval_all(sym.name);
-The t causes a br_hit in _addrval. That feedback loop is probably the probllem.
+debug funnies...
+The t causes a br_hit in _addrval. That feedback loop is probably the problem.
 	Can we turn off debug befoe calling addrval and turn it back on afterwards?
-	wrapper: addrval_nohit, called in 3 places
+	wrapper: addrval_nohit, called in 3 places DONE Tested
+FIXED. COMMITED. PUSHED.
+---------------------
 
+Sat, Feb 10
+Issue, tcc compile fails.  
+	ALL CLEAN NOW, committed, pushed.
 
+Goal: strcat, and get Lee's latest to work.
+	
 
 
 

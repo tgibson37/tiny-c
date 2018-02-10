@@ -820,9 +820,10 @@ void vAlloc(Type type, union stuff *vpassed) {
  *	NOTE: MC 2 esets KILL on ESC, but test here for hard loop
  */
 int quit() {
+	int foo[]={0};  /* to avoid tcc error */
 	if(Mchrdy()==0x1b){
 		eset(KILL);
-		Mgch();
+		Mgch(0,foo);
 	}
 	if(error)return 1;
 	return 0; 

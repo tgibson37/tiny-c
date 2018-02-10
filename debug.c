@@ -205,6 +205,9 @@ char *param() {
 	return buf[1]==' ' ? &buf[2] : &buf[1];
 }
 
+/* breakpoint this function to enable using BOTH gdb and tcdb */
+void gdb_b() {}
+
 /* Does one command. Returns the command letter */
 int db_cmd() {
 	fgets(buf, BUF_SIZE, stdin);
@@ -222,7 +225,7 @@ int db_cmd() {
 		return 'c';
 		break;
 /*	back to gdb (or other debugger). To enable this set a gdb breakpoint on 
- *	gdb_b(), a function below which does nothing. Typing g<ret> from this 
+ *	gdb_b(), a function which does nothing. Typing g<ret> from this 
  *	debugger sends you into the external debugger where you can step through
  *	the interpreter code.
  */
@@ -283,9 +286,6 @@ void db_cmds() {
 		if(cmd=='n') return;
 	}
 }
-
-/* breakpoint this function to enable using BOTH gdb and tcdb */
-void gdb_b() {}
 
 /********* BUGOUTs from interpreter *****************/
 /* Four standard bugouts, even the 1977 8080 code had these... */
