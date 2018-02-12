@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 61
+#define testcases 62
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1040,6 +1040,13 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 /* 	Should get... 
  *				try i = p; good, now p = i; almost there; 
  *				foobar; is that foobar? GOOD
+ */
+		case 62:
+			testWhole("./testFiles/62");
+			break;
+/* 	Should get... 
+ *				before: The cat in the the hat? or the cathouse?
+ *				after: The cat in the the hat? or the cathouse?
  */
 
 /***************  keyboard input tests, run manually *********/

@@ -1280,7 +1280,7 @@ void dumpName() {
 /*	reads two files using command line args for one or both.
  *		./tc                      Usage
  *		./tc [libfile] appfile    Load and go
- *	  Default libfile is ./pps/library.tc
+ *	  Default libfile is /usr/local/share/tinyC/library.tc
  */
 void readTheFiles(int argc, char *argv[], int optind) {
 	int nread;

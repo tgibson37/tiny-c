@@ -3656,7 +3656,7 @@ TODO
 		multi-libs
 		
 Of the above, which is priority???
-	0 - strcat
+x	0 - strcat
 	1 - malloc/settings
 	2 - doc stuff
 ---------------------
@@ -3673,8 +3673,10 @@ Sat, Feb 10
 Issue, tcc compile fails.  
 	ALL CLEAN NOW, committed, pushed.
 
-Goal: strcat, and get Lee's latest to work.
-	
+Goal: 
+x	strcat, and 
+x	get Lee's latest to work.
+	COMMIT/PUSH
 
 
 

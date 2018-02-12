@@ -174,8 +174,23 @@ int Mfilrd(int nargs, int *argsv) {
 }
 
 int Mstrlen(int nargs,int *argsv) {
+	if(nargs<1){ eset(MCERR); return -1; }
 	char* s=(char*)argsv[0];
 	return strlen(s);
+}
+
+int Mstrcat(int nargs, int *argsv) {
+	if(nargs<2){ eset(MCERR); return -1; }
+	char* a=(char*)argsv[0];
+	char* b=(char*)argsv[1];
+	return (int)strcat(a,b);	
+}
+
+int Mstrcpy(int nargs, int *argsv) {
+	if(nargs<2){ eset(MCERR); return -1; }
+	char* a=(char*)argsv[0];
+	char* b=(char*)argsv[1];
+	return (int)strcpy(a,b);
 }
 
 /* first in this list is MC 1 */
@@ -186,8 +201,8 @@ McList origList[] =
 };
 /* first in this list is MC 101 */
 McList newList[] = 
-	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &bar
-	, &bar, &bar, &bar, &bar, &bar
+	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
+	, &Mstrcpy, &bar, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
 /* first in this list is MC 201 */

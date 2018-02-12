@@ -114,6 +114,14 @@ ceqn char a(0), b(0); int n
 	return 1
 ]
 
+strcat char a(0), b(0) [
+	return MC a, b, 105
+]
+
+strcpy char a(0), b(0) [
+	return MC a, b, 106
+]
+
 /* finds the leftmost copy IN [s1..s1+n1] OF [s2..s2+n2] (memory blocks,
 /* left inclusive, right exclusive) returning false (0) if no match, else
 /* the index of the first match character starting with 1 (one). 
