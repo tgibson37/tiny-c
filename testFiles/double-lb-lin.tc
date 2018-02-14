@@ -1,15 +1,14 @@
 /* removed use of split since I couldn't get it to work */
 /* this version takes its input from the console, not from a file */
 
-/* double-lb-2.tc - lrb - 2/1-7/18 */
+/* double.tg - lrb - 2/1-5/18 */
 
-/* rwait waits roughly 1 second */
+/* rwait waits p milliseconds */
 
-rwait [
+rwait int p [
  int i,j
- while(i<200)[
-  j=0
-  while(j<200)[
+ while(i<p)[
+  while(j<p)[
    j=j+1
    ]
   i=i+1
@@ -48,7 +47,7 @@ double char phrase(0);int verbose [
  int ix
  ix=index(phrase,k+1," ",1)
  while(ix) [
-  rwait
+  rwait 1000
   phrase(ix-1)=0
   count=foo(phrase)
   if verbose pl phrase
@@ -61,7 +60,7 @@ double char phrase(0);int verbose [
 
 main [
  char phrase(200);int n
- pl "double.tg.lee - lrb - 2/7/18";pl ""
+ pl "double.tg - lrb - 2/5/18";pl ""
  pl "Enter phrase : ";n=gs phrase
  while(n)[
   double phrase,1

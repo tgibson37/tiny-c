@@ -1,0 +1,9 @@
+/* test strcpy and strcat
+main[
+  char a(200), b(100)
+  strcpy a, "The cat in the "
+  strcpy b, "the hat? or the cathouse?"
+  ps "before: "; ps a; ps b;
+  strcat a,b
+  pl "after: "; ps a;
+]

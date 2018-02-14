@@ -3657,6 +3657,12 @@ TODO
 		
 Of the above, which is priority???
 x	0 - strcat
+	1 - remove annoyances for those porting tc code 
+		0x0D tolerance
+		// comments
+		finish library
+			writefile
+			other file i/o (fopen, etc)
 	1 - malloc/settings
 	2 - doc stuff
 ---------------------
@@ -3676,10 +3682,101 @@ Issue, tcc compile fails.
 Goal: 
 x	strcat, and 
 x	get Lee's latest to work.
-	COMMIT/PUSH
+x	tcc test
+x	COMMIT/PUSH
+x	email to Lee
+---------------------
 
+Mon, Feb 12
+Goal: porting annoyances, 0x0d tolerance
+	$ grep -n NEWLINE tc.asm
+	155:NEWLINE DB      ASCRET
+	660:REM     LXI     D,NEWLINE	.rem
+	$ grep -n ASCRET tc.asm
+	33:ASCRET  EQU     0DH
+	155:NEWLINE DB      ASCRET
+	186:XNL     DB      ASCRET
+	673:        MVI     C,ASCRET	.rem
+	1338:        CPI     ASCRET		.skipst
+	1613:        CPI     ASCRET		.enter, part of args done test
+	Also tc.c ~642 term(), test that / really is divide
+---------------------
 
+Tue, Feb 13
+I need more study of the logic at each of the above places. How is the test used, what is the change of state. Both .c and .asm
 
+asm~	c~
+660		391
+	rem: skip over comments and/or empty lines in any order but not over epr
+1338	766
+	skipst: skip a possibly compound statement. Uses skip to pass over balanced [] and (). Calls rem() before and after.
+1613	980
+	enter: part of test that all args are parsed and on the stack
+		    CPI     ASCRET
+		    JZ      ARGSDNE    one of 5 tests.
+		c: 	int haveArgs = ! (  lit(xrpar)
+						 || lit(xlb)
+						 || lit(xsemi)
+						 || lit(xnl) 
+						 || lit(xslash) 
+						);
+			if ( haveArgs ) {
+		test is before the parse loop, which continues as long as commas are
+		present. Test DOES NOT advance the cursor.
+So what is generic in the above...
+	rem() does it all EXCEPT for the argsdone test. In C that test can be done 
 
+2pm: tclink is happy, pf.tc, too. BUT test 14 is not.
+2:30: all happy including regressions.
+NEXT test again with 0D's, then with 0D0A, then with mix.
+THEN some // comments
+---------------------
+
+Wed, Feb 14
+Using sublime saved 3 versions of double...
+ $ ls -lt Sa*/double-lb-*.tc
+-rw-r--r-- 1 tom tom 1325 Feb 14 09:15 SamplePrograms/double-lb-mac.tc
+-rw-r--r-- 1 tom tom 1395 Feb 14 08:50 SamplePrograms/double-lb-win.tc
+-rw-r--r-- 1 tom tom 1325 Feb  5 14:21 SamplePrograms/double-lb-lin.tc
+mac uses JUST 0d, win uses 0d oa, linux uses 0a, The file has 70 lines
+win and lin run ok, mac is unhappy
+	----tc system level, calling appl main
+	double.tg - lrb - 2/5/18
+	Enter phrase : hello world
+	app line 1 (cursor pr[4730])SYMERR, decl needed
+	] ]l "";pl "Enter phrase : ";n=gs phraseed */ach word */double letters */
+line 1 is known issue: The whatHappened line counter doesn't know about 0d's yet, so to it the whole mac version is one line.
+
+Not sure WHERE the symerr happened. But the cursor goes wild.
+If I fix the line count algorithm to be eol tolerant that may help.
+
+Newlines in the logic of tc.c ...
+x	33:char* newline = "\n";
+x	49:char* xnl = "\n";
+x		declares
+x	410:		while( *cursor != '\n' && cursor<epr ) ++cursor;
+x		OLD rem
+5 places need attention...
+x	799:			if( (*cursor=='\n') || (*cursor==';') )break;
+x		skipst
+x	1151:	while (*end!='\n' && end<epr){  /* find end of line */
+x		dumpline
+x	1364:		if(*k=='\n')break;
+x		fchar
+x	1372:		if(*k=='\n')break;
+x		lchar
+x	1390:		if(*errat=='\n')--errat;
+x	1392:			lineno = countch(pr,errat,'\n');
+x	1396:			lineno = countch(apr,errat,'\n');
+x		whatHappened
+TESTing: 
+xt	3 doubles, 
+xt		linux
+xt		windows
+xt		mac
+xt	pf.tc, 
+x	regression
+t	tcc test
+COMMIT/PUSH/note to Lee
 
 

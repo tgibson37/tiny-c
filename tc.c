@@ -32,6 +32,7 @@ char* xrpar = ")";
 char* xcomma = ",";
 char* newline = "\n";
 char* xcmnt = "/*";
+char* xcmnt2 = "//";
 char* xstar = "*";
 char* xsemi = ";";
 char* xpcnt = "%";
@@ -386,16 +387,30 @@ Type konst() {
 	} else return Err;  /* no match, Err==0 */
 }
 
-/* skip over comments and/or empty lines in any order
+/* skip over comments and/or empty lines in any order, new version
+	tolerates 0x0d's, and implements // as well as old /* comments.
  */
 void rem() {
+	for(;;) {
+		while(    *cursor==0x0a
+				||*cursor==0x0d
+				||*cursor==' '
+				||*cursor=='\t'
+			  )++cursor;
+		if( !(lit(xcmnt)||lit(xcmnt2)) ) return;
+		while( *cursor != 0x0a && *cursor != 0x0d && cursor<epr )
+			++cursor;
+	}
+}
+
+/*void rem() {
 	for(;;) {
 		while(lit(xnl));
 		if( !lit(xcmnt) ) return;
 		while( *cursor != '\n' && cursor<epr ) ++cursor;
 		++cursor;
 	}
-}
+}*/
 
 /* chunk 4: newfun, fundone, newvar, addrval, canon
  */
@@ -779,9 +794,9 @@ void skipst() {
 		rem();
 		return;
 	}
-	else {					/* simple statement, newline or semi ends */
+	else {					/* simple statement, eol or semi ends */
 		while(++cursor<epr) {
-			if( (*cursor=='\n') || (*cursor==';') )break;
+			if( (*cursor==0x0d)||(*cursor=='\n')||(*cursor==';') )break;
 		}
 		++cursor;
 		rem();
@@ -1133,7 +1148,7 @@ void dumpft(char *from, char *to ) {
 void dumpLine() {
 	char* begin = cursor;
 	char* end = cursor;
-	while (*end!='\n' && end<epr){  /* find end of line */
+	while (*end!=0x0a && *end!=0x0d && end<epr){  /* find end of line */
 		++end;
 	}
 	while(begin<end){
@@ -1346,7 +1361,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
  */
 char* fchar(char* k){
 	do{
-		if(*k=='\n')break;
+		if(*k==0x0a||*k==0x0d)break;
 	} while( --k > apr);
 	return k+1;
 }
@@ -1354,7 +1369,7 @@ char* fchar(char* k){
  */
 char* lchar(char* k){
 	do{
-		if(*k=='\n')break;
+		if(*k==0x0a||*k==0x0d)break;
 	} while( ++k < epr);
 	return k-1;
 }
@@ -1372,13 +1387,15 @@ void whatHappened() {
 	else if(error){
 		char *fc, *lc;
 		int firstSignif=0, blanks, lineno;
-		if(*errat=='\n')--errat;
+		if(*errat==0x0a||*errat==0x0d)--errat;
 		if(errat<apr){
-			lineno = countch(pr,errat,'\n');
+			lineno = countch(pr,errat,0x0a);
+			if(!lineno)lineno = countch(pr,errat,0x0d);
 			printf("\nlib ");
 		}
 		else {
-			lineno = countch(apr,errat,'\n');
+			lineno = countch(apr,errat,0x0a);
+			if(!lineno)lineno = countch(apr,errat,0x0d);
 			printf("\napp ");
 		}
 		printf("line %d (cursor pr[%d])", lineno,errat-pr); errToWords();
