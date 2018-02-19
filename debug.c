@@ -303,10 +303,14 @@ void prdone(){}
 /* before exiting tc (and old pps) */
 void tcexit(){}
 
+/* breakpoint appstbegin to see JUST app statments. */
+void appstbegin(){}
+
 /* beginning of each statement */
 void stbegin() {
 	if(!debug)return;
 	if(db_skiplib && cursor<apr)return;
+	appstbegin();
 	if(db_next){
 		int lineno = countch(apr,cursor,'\n');
 		char* lc = lchar(cursor);

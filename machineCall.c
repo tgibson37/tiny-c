@@ -160,9 +160,10 @@ int Mchrdy()
 }
 
 /* sleep for N seconds */
-void Msleep(int N) 
+void Msleep(int nargs, int *argsv) 
 {
-	sleep(N+1);
+	int N = *argsv;
+	sleep(N);
 }
 
 int Mfilrd(int nargs, int *argsv) {

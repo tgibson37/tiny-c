@@ -993,10 +993,12 @@ void enter( char* where) {
 
 	lit(xlpar); /* optional (   */
 	int haveArgs = ! (  lit(xrpar)
-					 || lit(xlb)
-					 || lit(xsemi)
-					 || lit(xnl) 
-					 || lit(xslash) 
+					 || *cursor==*xlb
+					 || *cursor==*xrb
+					 || *cursor==*xsemi
+					 || *cursor==*xnl
+					 || *cursor==0x0d
+					 || *cursor==*xslash
 					);
 	if ( haveArgs ) {
 		do {

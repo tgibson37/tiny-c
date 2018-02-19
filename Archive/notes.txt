@@ -3777,6 +3777,198 @@ xt		mac
 xt	pf.tc, 
 x	regression
 t	tcc test
-COMMIT/PUSH/note to Lee
+x COMMIT/PUSH/
+x note to Lee
+--------------------
+
+Fri, Feb 16
+Lee sent a new test program. Goal is to incorporate his and mine into the regression. Need to avoid dialog. Need to use just the std lib. (Lee uses his private lib.)
+
+ALSO switching to sublime. No real need to print, and I miss the macroes and the ability to choose eol's on saving. Its a setting in the view menu.
+
+New directory: Experiments, has various six*'s.
+six-lb-lin.tc
+		sak [pl "Press enter..."; return getchar]
+	This line had SYNXERR. Adding () or ; after getchar fixed it.
+x	sleep(10) slept for 2 seconds. My lib/MC. FIXED
+-----------
+	$ gdb ../tc
+	...
+	(gdb) b gdb_b
+	...
+	(gdb) run *lin* -d
+	...
+	(tc-db) b sak
+	(tc-db) r
+	...
+	sixmacs.tg - 2/16/18 - lrb
+	I feel ridiculous since learning of Sublime's 3-way approach ;-)
+	...
+	break at line 23 cursor pr[4596]: sak
+	...
+	(tc-db) n
+	line 3 cursor(pr[6335174])->[pl "Press
+	(tc-db) n
+	line 3 cursor(pr[6335175])->pl "Press 
+	(tc-db) n
+	Press enter...line 3 cursor(pr[6335196])->return get
+	(tc-db) g   <<==  4 n's hits the ERR, SO USE g
+	...
+	(gdb) p cursor  -->>  return getchar ]
+	...
+	(gdb) 
+---------
+~920 tc.c
+		else if(lit(xreturn)) {
+			if(lit(xsemi)||lit(xnl)) {  <<== ???
+				pushzero(); /* default return value */
+			}
+			else {
+				asgn();  /* specified return value */
+			}
+			leave=1;		/* signal st() to leave the compound 
+							statement containing this return */
+			return;
+		}
+	NOTE ??? on lit(xnl). 
+	BUT this is *lin*, so not an eol bug being chased. Just another bug stumbpled over.
+---------
+gdb goes to asgn, on return stack top is actual 0. There was no getchar prompt (or rather wait). cursor at ]. 
+st() is returning. The ] is the syntax error.
+WHAT SHOULD HAVE HAPPENED???
+--------------------
+
+Fri, Feb 16
+Thoughts...
+	Need to read OM's about required ()'s
+		Pages 2-12,13. Need to scan and post.
+	liteos() tests for end of statement, but does not change state
+		Clone from rem/enter's if statements. Study these!!!
+	Check brake, leave, enter
+		Why getchar not called? Seems an enter issue
+		brake,leave can cause premature end of compound statement. 
+		leave/brake should advance cursor beyond next ] ???
+		Exact trace of those needed
+--------------------
+
+Sat, Feb 17
+	Refactor might clear up stuff. 
+		Make each state a class in its own file
+		services incl dump/pr. 
+			Every dump is _dump with FILE as param, and each
+			has two wrappers, dump and pr that pass stdout/stderr as FILE.
+		Put only publics in tc.h
+		Tools is the base class
+		Should Refactor be a git branch?
+ISSUE: void enter() ~995, haveArgs logic needs 0x0d tolerance
+	SYMERR at tc.c ~716 factor, ~811 addrval
+	SYNXERR at ~756 factor
+	WHAT SHOULD HAPPEN   return getchar ]   ...
+		enter with where->lib copy of getchar
+		from ~724, factor after parsing getchar
+--------------------
+
+Sun, Feb 18
+Goal: next through what happens starting with getchar break. Compare with what should happen.
+	(tc-db) 7 n's to SYNXERR
+		OR
+	(tc-db) b getchar; r; n to SYNXERR
+---
+	$ gdb ../tc
+	(gdb) b gdb_b
+	(gdb) r bug.tc -d
+	(tc-db) 
+	...
+---
+ISSUE: in gdb caught in the (tc-db) command loop. Not getting prompt, cannot g or c or anything.
+(gdb) b st ; r bug.tc  THEN
+	17 c's to "return getchar ]..."
+	many c's to lit(xreturn) ~920
+		(gdb) p cursor " getchar..."
+		(gdb) n    asgn   <<==  here bk assign, also ~709 symname
+		(gdb) c got out of gdb to (tc-db)
+		(tc-db) x killed the run
+		(gdb) run bug.tc    WITHOUT -d
+---
+After asgn() ~927 leave=1;
+	p cursor   -->>  ]   BAD
+	p nxtstack    1      Stack is EMPTY???   BAD
+		getchar WAS NOT RUN. Was enter called.
+Need to walk through asgn, factor actually
+	~995 in factor, 
+	getchar has been parsed
+	cursor -> ]
+	no args
+		(gdb) p cursor
+		$15 = 0x60aabb <pr+3995> "]/* comment\nmain [ char x; x=sak(); putchar x; pl\"\"; ] \n"
+		(gdb) n
+		996						 || lit(xlb)
+		(gdb) n
+		997						 || lit(xsemi)
+		(gdb) n
+		998						 || lit(xnl) 
+		(gdb) n
+		999						 || lit(xslash) 
+		(gdb) n
+		995		int haveArgs = ! (  lit(xrpar)
+		(gdb) n
+		1001		if ( haveArgs ) {
+		(gdb) p haveArgs
+		$16 = 1
+		(gdb) p cursor
+		$17 = 0x60aabb <pr+3995> "]/* comment\nmain [ char x; x=sak(); putchar x; pl\"\"; ] \n"
+		(gdb) 
+	haveArgs==1 implies NONE of above lit's.
+	Put any of them there:   )  [  ;  \n  /    and haveArgs==0
+	() works, too, because haveArgs==1 but ~1004 nargs stays 0.
+This does not exactly mimic '77 8080 tinyC. 
+8080 didn't use lit everywhere...
+ENTER (psuedo code of 8080 version)  
+	nargs=0;
+	arg=top+5
+	lit(xlp) //optional
+	if	lit(xrp)
+		|| *cursor == one of
+			']'
+			';'
+			<cr> 
+			'/'
+	then haveArgs==0
+	else haveArgs==1
+
+xrb is not on the list. 
+And of course neither are the other two eol's. 
+CODED and 1st test works.
+More extensive test needed
+x	regressions
+x	Several "after the getchar" stuff, 
+x		] 
+x		/* 
+x		3 eol's
+x			lin
+x			mac
+x			win
+--------------------
+
+Man, Feb 19
+finished above tests.
+COMMIT/PUSH
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TODO: (tc-db)p prints the current line
+gdb setup: to get BACK to gdb, set a gdb breakpoint on gdb's } line and use (tc-db)'s 'c'.
+Get latest tests into the regression

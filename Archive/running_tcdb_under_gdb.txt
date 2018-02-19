@@ -1,9 +1,9 @@
 using tc debug UNDER gdb
 	setup...
-		plant foo=1 in tc code (decl top as global)
+		declare foo and plant foo=1 in tc (bug.tc) code
 		gdb ./tc
-		b gdb_b		enables transition from [tcdb] to [gdb]
-		run -d pf.tc
+		b gdb_b		enables g, transition from [tc-db] to [gdb]
+		run -d bug.tc
 		(tc-db) b foo
 	session...
 		(tc-db) r
@@ -17,5 +17,5 @@ using tc debug UNDER gdb
 				n or s to step through interpreter code
 				c to resume tc-db (assuming only bkpt @ gdb_b enabled)
 		x to leave tc for restart back in gdb, 
-			run -d pf.tc again
+			run -d pf.tc 
 
