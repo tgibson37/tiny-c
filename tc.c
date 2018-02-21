@@ -918,7 +918,15 @@ void st() {
 		rem();
 	}
 	else if(lit(xreturn)) {
-		if(lit(xsemi)||lit(xnl)) {
+		int eos = ( lit(xrpar)
+					 || *cursor==*xlb
+					 || *cursor==*xrb
+					 || *cursor==*xsemi
+					 || *cursor==*xnl
+					 || *cursor==0x0d
+					 || *cursor==*xslash
+					);
+		if ( eos ) {
 			pushzero(); /* default return value */
 		}
 		else {

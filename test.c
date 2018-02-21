@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 66
+#define testcases 68
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1075,6 +1075,22 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  *				amount read:  33
  *				content read: This is test 64, fwrite and fread
  */
+		case 67:
+			testWhole("./testFiles/67");
+			break;
+/* 	Should get... 
+ *			calling foo 
+ *				back from foo
+ *				foo returns bar
+ */
+		case 68:
+			testWhole("./testFiles/68");
+			break;
+/* 	Should get... 
+ *			calling foo 
+ *				back from foo
+ *				foo returns bar
+ */
 
 /***************  keyboard input tests, run manually *********/
 /*	Test 90 MUST be run using ./test 90. It is NOT a tc program.
@@ -1150,17 +1166,31 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 		case 94:
 			testWhole("./testFiles/94");
 			break;
-/* 	Should get... 
- *	
+/* 			RUN USING ./tc testFiles/94 -d
+			set break on symbol 'brk', then r, then p each...
+			   iArray, cArray, cString, iDatum, cDatum
+	Should get... 
+			break at line 24 cursor pr[4369]: brk
+				brk=0
+			(tc-db) p cArray
+			cArray:  ABCDEFGHIJ
+			(tc-db) p cString
+			cString: 
+			(tc-db) p iDatum
+			iDatum:  5
+			(tc-db) p cDatum
+			cDatum:  (45)E
+			(tc-db) x
  */
 		case 95:
 			testWhole("./testFiles/95");
 			break;
-/* 	Should get... 
- *	
+/* 	ESC test. Run under either tc or test. Hit ESC
+	Should get... 
+		lots of dots, then KILL, stopped by user
  */
 		case 99:
-			testWhole("./testFiles/91");
+			testWhole("./testFiles/99");
 			break;
 /* 	Should get... 
  *	

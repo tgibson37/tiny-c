@@ -3956,17 +3956,17 @@ x COMMIT/PUSH
 x debug p now prints from cursor to eol.
 NEW GOALS:
 	Get latest tests into the regression
-		line end tests (3 double*.tc)
-			modify to remove dialog
-			save 3 ways, keeping name
-			link to these saved using number file names
-		bug.tc
-			remove dialog, use foo() instead of getchar()
-			prove it shows the bug (
-				comment out fixes
-				put back 5 or so lit's 
-		visit ~3821 above, and  920 tc.c and decide fix needed?
-->	writeFile(name,buff,bufflen)
+x		line end tests (3 double*.tc)
+x			modify to remove dialog
+x			save 3 ways, keeping name
+x			link to these saved using number file names
+x		bug.tc
+x			remove dialog, use foo() instead of getchar()
+x			prove it shows the bug (
+x				comment out fixes
+x				put back 5 or so lit's 
+x		visit ~3821 above, and  920 tc.c and decide fix needed?
+x	writeFile(name,buff,bufflen)
 	LATER refactor source files (not code)
 	LATER unify makefile treatment of source (FileRead,gech,kbhit)
 --------------------
@@ -3975,5 +3975,30 @@ Tue, Feb 20
 This am studied Lee's six-lb not working issue. Took awhile, but found the flaw: strcpy's second arg is const char*, i.e. NO OVERLAP allowed. No bug in tc or lib. Phew! 
 CODED fwrite in FileRead.c. Test in testFiles/66.
 Works fine. Since last commit...
-	
+	fileWrite
+	fileRead leading lowercase 'f'
+	debug p without param prints from cursor to eol
+	machine call 107 does fileWrite
+COMMIT, PUSH
+Goal tomorrow: Feb 19 regression items
+	bug     ~3963 above
+	visit   ~3821
+--------------------
 
+Wed, Feb 21
+x		bug.tc
+x			remove dialog, use foo() instead of getchar()
+x			prove it shows the bug (
+x				comment out fixes
+x				put back 5 or so lit's 
+x		visit ~3821 above, and  920 tc.c and decide fix needed?
+All above is ok, the last did require eos fix.
+Goal list...
+	LATER refactor source files (not code)
+	LATER unify makefile treatment of source (FileRead,gech,kbhit)
+Test 92, the arrow keys use ESC [ <code> 
+	A	up,	B	down,	C	right,	D	left	
+BUT the esc sets a kill! 
+MC2 (test 91) doesn't do that. Must be in the lib code.
+	Is this an ISSUE ???
+	macnine call ~125; also tc.c ~840
