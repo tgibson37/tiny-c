@@ -1,0 +1,17 @@
+/* TEST 66: fwrite and fread
+main [
+	char foo(99)
+	char bar(0)
+	int n
+	bar = "This is test 64, fwrite and fread"
+	int len
+	len = strlen bar
+	ps"writing to test64tempfile: "; ps bar
+	writefile "test64tempfile", bar, len
+	pl"reading test64tempfile: "
+	n=readfile("test64tempfile", foo, 99)
+	pl("amount read: ");
+	pn(n)
+	pl"content read: "
+	ps foo
+]

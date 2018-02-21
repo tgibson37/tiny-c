@@ -171,7 +171,15 @@ int Mfilrd(int nargs, int *argsv) {
 	char *name = (char*)argsv[0];
 	char *buff = (char*)argsv[1];
 	int bufflen = argsv[2];
-	return FileRead(name, buff, bufflen);
+	return fileRead(name, buff, bufflen);
+}
+
+int Mfilwt(int nargs, int *argsv) {
+	if(nargs<3){ eset(MCERR); return -1; }
+	char *name = (char*)argsv[0];
+	char *buff = (char*)argsv[1];
+	int bufflen = argsv[2];
+	return fileWrite(name, buff, bufflen);
 }
 
 int Mstrlen(int nargs,int *argsv) {
@@ -203,7 +211,7 @@ McList origList[] =
 /* first in this list is MC 101 */
 McList newList[] = 
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
-	, &Mstrcpy, &bar, &bar, &bar, &bar
+	, &Mstrcpy, &Mfilwt, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
 /* first in this list is MC 201 */

@@ -3950,25 +3950,30 @@ x			mac
 x			win
 --------------------
 
-Man, Feb 19
-finished above tests.
-COMMIT/PUSH
+Mon, Feb 19
+x finished above tests.
+x COMMIT/PUSH
+x debug p now prints from cursor to eol.
+NEW GOALS:
+	Get latest tests into the regression
+		line end tests (3 double*.tc)
+			modify to remove dialog
+			save 3 ways, keeping name
+			link to these saved using number file names
+		bug.tc
+			remove dialog, use foo() instead of getchar()
+			prove it shows the bug (
+				comment out fixes
+				put back 5 or so lit's 
+		visit ~3821 above, and  920 tc.c and decide fix needed?
+->	writeFile(name,buff,bufflen)
+	LATER refactor source files (not code)
+	LATER unify makefile treatment of source (FileRead,gech,kbhit)
+--------------------
 
+Tue, Feb 20
+This am studied Lee's six-lb not working issue. Took awhile, but found the flaw: strcpy's second arg is const char*, i.e. NO OVERLAP allowed. No bug in tc or lib. Phew! 
+CODED fwrite in FileRead.c. Test in testFiles/66.
+Works fine. Since last commit...
+	
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-TODO: (tc-db)p prints the current line
-gdb setup: to get BACK to gdb, set a gdb breakpoint on gdb's } line and use (tc-db)'s 'c'.
-Get latest tests into the regression

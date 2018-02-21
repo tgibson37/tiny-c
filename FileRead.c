@@ -6,7 +6,7 @@
 
 /* read the named file into buffer pr. Return amount read
 	or zero on 'no such file' or -1 on read error. */
-int FileRead(char* name, char* buff, int bufflen){
+int fileRead(char* name, char* buff, int bufflen){
 	int readlen,err;
 	FILE *fp = fopen( name, "rb");
 	if (fp != NULL) {
@@ -24,22 +24,24 @@ int FileRead(char* name, char* buff, int bufflen){
 	return readlen;
 }
 
-/*int main(int argc,char* argv[]){
-	if(argc<2) {
-		printf("Usage: testFileRead fileName\n");
-		exit(1);
+/* write the named file from buffer pr. Return amount written
+ *	or -1 on write error. If the named file exists its contents are
+ *	truncated to zero before the write. If it doesn't exist it is 
+ *	created.
+ */
+int fileWrite(char* name, char* buff, int bufflen){
+	int wrlen,err;
+	FILE *fp = fopen( name, "wb");
+	if (fp != NULL) {
+	    wrlen = fwrite(buff, 1, bufflen, fp);  /* FWRITE */
+	    if ( err=ferror( fp ) != 0 ) {
+	        return -1;
+	    }
+	    fclose(fp);
 	}
-	int len = testFileRead(argv[1]);
-	switch(len){
-		default:
-			printf("\nlen %d\n-->%s<--\n",len,pr);
-		break;
-		case 0:
-			printf("no such file\n");
-		break;
-		case -1:
-	        printf("Error reading file %d", error);
-		break;
+	else {
+		return 0;
 	}
+	return wrlen;
 }
-*/
+

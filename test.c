@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 62
+#define testcases 66
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -42,11 +42,11 @@ int testSetupFile(char* filename, int lib) {
 	cursor = pr;
 	curglbl = fun;
 	if(lib) {
-		len = FileRead("pps/library.tc",pr,PRLEN);
+		len = fileRead("pps/library.tc",pr,PRLEN);
 		cursor += len; 	/*  cursor->app */
 		curglbl = fun+1;
 	}
-	len += FileRead(filename,pr+len,PRLEN-len);
+	len += fileRead(filename,pr+len,PRLEN-len);
 	error=0;
 	epr = pr+len;
 	prused = epr+10;  /* a little slack */
@@ -1047,6 +1047,33 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 /* 	Should get... 
  *				before: The cat in the the hat? or the cathouse?
  *				after: The cat in the the hat? or the cathouse?
+ */
+
+		case 63:
+			testWhole("./testFiles/63");
+			break;
+		case 64:
+			testWhole("./testFiles/64");
+			break;
+		case 65:
+			testWhole("./testFiles/65");
+			break;
+/* 	Should get for each: 63,64,65... 
+ *				double.tg - lrb - 2/5/18
+ *				Enter phrase : 
+ *				hello
+ *				hello 1
+ *				world
+ *	Test test linux, dos, and macintosh eol's
+ */
+		case 66:
+			testWhole("./testFiles/66");
+			break;
+/* 	Should get... 
+ *				writing to test64tempfile: This is test 64, fwrite and fread
+ *				reading test64tempfile: 
+ *				amount read:  33
+ *				content read: This is test 64, fwrite and fread
  */
 
 /***************  keyboard input tests, run manually *********/

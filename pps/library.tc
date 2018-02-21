@@ -176,7 +176,8 @@ readfile char name(0), buff(0); int len [
 ]
 
 /* 
-writefile char n(0), b(0), e(0); int u [
+writefile char name(0), buff(0); int len [
+	return MC name, buff, len, 107
 ]
 
 /* 

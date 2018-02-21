@@ -139,14 +139,19 @@ void inf_b() {
 
 /* p <sym>  */
 void print_b(char* param) {
-	struct var sym;
-	struct var *found;
-	canonThis( param, param+strlen(param)-1, &sym );
-	found = addrval_nohit(sym.name);
-	if(!found) printf("no such symbol\n");
-	else{
-		printf("%s: ",param);
-		print_val(found);
+	if(*param) {
+		struct var sym;
+		struct var *found;
+		canonThis( param, param+strlen(param)-1, &sym );
+		found = addrval_nohit(sym.name);
+		if(!found) printf("no such symbol\n");
+		else{
+			printf("%s: ",param);
+			print_val(found);
+			printf("\n");
+		}
+	} else {
+		dumpLine();
 		printf("\n");
 	}
 }

@@ -1,34 +1,34 @@
- 18:57
+ 19:25
 
 BEGIN TESTING ALL
 
-TEST 1  18:57
+TEST 1  19:25
 name in pr ->foobaaarwxyz<-
 Test 1 done, error=0
 
-TEST 2  18:57
+TEST 2  19:25
 name in pr ->foob5678<-
 Test 2 done, error=0
 
-TEST 3  18:57
+TEST 3  19:25
 name in pr ->foob<-
 Test 3 done, error=0
 
-TEST 4  18:57
+TEST 4  19:25
 name in pr ->foo(baaarwxyz<-
 Test 4 done, error=0
 
-TEST 5  18:57
+TEST 5  19:25
 symbol
 fname,lname,cursor= 5 10 11
 Test 5 done, error=0
 
-TEST 6  18:57
+TEST 6  19:25
 pr ->char symbol, 34567890<-
 pr ->23456789012345<-
 Test 6 done, error=0
 
-TEST 7  18:57
+TEST 7  19:25
 cursor->char symbol, more stuff
 match,cursor= 1 4
 cursor-> symbol, more stuff
@@ -36,22 +36,22 @@ match,cursor= 0 5
 cursor->symbol, more stuff
 Test 7 done, error=0
 
-TEST 8  18:57
+TEST 8  19:25
 Test 8 done, error=0
 
-TEST 9  18:57
+TEST 9  19:25
  empty case
 Test 9 done, error=0
 
-TEST 10  18:57
+TEST 10  19:25
  empty case
 Test 10 done, error=0
 
-TEST 11  18:57
+TEST 11  19:25
 test 11, stack, popped val is 7
 Test 11 done, error=0
 
-TEST 12  18:57
+TEST 12  19:25
 nxtstack 0
 after 4 pushes nxtstack 4
 begin 5 pops
@@ -66,7 +66,7 @@ nxtstack 0
 after 5th pop err: 15
 Test 12 done, error=15
 
-TEST 13  18:57
+TEST 13  19:25
 at start cursor,epr,error = 1 35 0
 cursor->}   {}   {{}{{}}}   {    STRING-END
 4 skips: 
@@ -76,7 +76,7 @@ error,cursor = 0    {    STRING-END
 error,cursor = 2 D
 Test 13 done, error=2
 
-TEST 14  18:57
+TEST 14  19:25
 BEFORE rem()
 cursor 0-->   
 
@@ -86,7 +86,7 @@ AFTER rem()
 cursor 36-->next-line  string-end
 Test 14 done, error=0
 
-TEST 15  18:57
+TEST 15  19:25
 1 cursor->   17  "hello"  'c'  STRING-END<-
 konst returns 2 17
 2 cursor->  "hello"  'c'  STRING-END<-
@@ -98,7 +98,7 @@ konst returns 0
 5 cursor->STRING-END<-
 Test 15 done, error=0
 
-TEST 16  18:57
+TEST 16  19:25
 pr->   17  "hello"  'c'  STRING-END
 3 factor()'s
 3 popst()'s
@@ -107,7 +107,7 @@ pr->   17  "hello"  'c'  STRING-END
  int 17
 Test 16 done, error=0
 
-TEST 17  18:57
+TEST 17  19:25
 name in pr ->foobaaarwx<-
 name in pr ->foob5678<-
 name in pr ->foob<-
@@ -117,14 +117,14 @@ look up foob5678
 look up foobaaaz
 Test 17 done, error=0
 
-TEST 18  18:57
+TEST 18  19:25
 asgn returned 1, 1+2 is 3
 asgn returned 1, 1+2+3 is 6
 asgn returned 1, 1*2 is 2
 asgn returned 1, (1+2)*3 is 9
 Test 18 done, error=0
 
-TEST 19  18:57
+TEST 19  19:25
 1<2 is 1 
 1>2 is 0 
 1==2 is 0 
@@ -145,7 +145,7 @@ TEST 19  18:57
 2<=1 is 0 
 Test 19 done, error=0
 
-TEST 20  18:57
+TEST 20  19:25
 7+2 is 9 
 7-2 is 5 
 7*2 is 14 
@@ -153,11 +153,11 @@ TEST 20  18:57
 7%2 is 1 
 Test 20 done, error=0
 
-TEST 21  18:57
+TEST 21  19:25
 pr: char a; a='A'; 
 Test 21 done, error=0
 
-TEST 22  18:57
+TEST 22  19:25
 pr:  char a; int x; char p(7); xXXXXXXXXXXXXXXXXXXXXx
 decl char a
 prused,obsize 30 0 
@@ -171,7 +171,7 @@ prused,obsize 42 0
 prused,obsize 42 0 
 Test 22 done, error=0
 
-TEST 23  18:57
+TEST 23  19:25
 pr:  int x; x=77;  xXXXXXXXXXXXXXXXXXXXXx
 parsing int x;
 78 58 58 0 0 0 0 58 58 58 58 58 58 58 58 58 58 58 58 58 58 78 
@@ -180,7 +180,7 @@ parsing x=77
  x is 0
 Test 23 done, error=14
 
-TEST 24  18:57
+TEST 24  19:25
 pr:  int x(2); x(1)=77; xXX...XXXXXXXXXXXX...XXXXx
 parsing int x(3);
 78 58 58 2e 2e 2e 0 0 0 0 0 0 0 0 0 0 0 0 2e 2e 2e 58 58 58 58 78 
@@ -188,27 +188,27 @@ parsing x(1)=77;
 78 58 58 2e 2e 2e 0 0 0 0 4d 0 0 0 0 0 0 0 2e 2e 2e 58 58 58 58 78 
 Test 24 done, error=0
 
-TEST 25  18:57
+TEST 25  19:25
 ->M<- Back from MC('M',1);
 Test 25 done, error=0
 
-TEST 26  18:57
+TEST 26  19:25
 TF
 Test 26 done, error=0
 
-TEST 27  18:57
+TEST 27  19:25
  empty case
 Test 27 done, error=0
 
-TEST 28  18:57
+TEST 28  19:25
  empty case
 Test 28 done, error=0
 
-TEST 29  18:57
+TEST 29  19:25
 o
 Test 29 done, error=0
 
-TEST 30  18:57
+TEST 30  19:25
 Test 30 (97):
 /* test 30
 [
@@ -221,7 +221,7 @@ applying st()...
 hello tc
 Test 30 done, error=0
 
-TEST 31  18:57
+TEST 31  19:25
 Test 31 (125):
 /* test 31
 [
@@ -242,12 +242,12 @@ applying st()...
 321F0
 Test 31 done, error=0
 
-TEST 32  18:57
+TEST 32  19:25
 parsing foo(77);
 77
 Test 32 done, error=0
 
-TEST 33  18:57
+TEST 33  19:25
 Test 33 (46):
 /* test 33
 [
@@ -259,7 +259,7 @@ applying st()...
 
 Test 33 done, error=0
 
-TEST 34  18:57
+TEST 34  19:25
 Test 34 (386):
 /* test 34, link
 
@@ -300,44 +300,44 @@ applying link()...
 
 Test 34 done, error=0
 
-TEST 35  18:57
+TEST 35  19:25
 t<--MC 1 echoed, and returns t
 Test 35 done, error=0
 
-TEST 36  18:57
+TEST 36  19:25
 charIn a abc is 1
 charIn b abc is 2
 charIn c abc is 3
 charIn x abc is 0
 Test 36 done, error=0
 
-TEST 37  18:57
+TEST 37  19:25
 Seventy seven 77
 Test 37 done, error=0
 
-TEST 38  18:57
+TEST 38  19:25
 pr: -->[ MC("%d %s %d",11,"abc",33,101) ]  <--
  calling st();
 11 abc 33
 Test 38 done, error=0
 
-TEST 39  18:57
+TEST 39  19:25
 empty case
 Test 39 done, error=0
 
-TEST 40  18:57
+TEST 40  19:25
  empty case
 Test 40 done, error=0
 
-TEST 41  18:57
+TEST 41  19:25
  empty case
 Test 41 done, error=0
 
-TEST 42  18:57
+TEST 42  19:25
  empty case
 Test 42 done, error=0
 
-TEST 43  18:57
+TEST 43  19:25
 Hello, test  43
  testing pl,ps,pn,alpha,num,atoi
  should be 1 1 0 -> 1 1 0
@@ -346,7 +346,7 @@ num 77 has  2 digits
 
 Test 43 done, error=0
 
-TEST 44  18:57
+TEST 44  19:25
 ----tc system level, calling appl main
 
 Hello, test  44
@@ -358,33 +358,33 @@ done
 
 Test 44 done, error=0
 
-TEST 45  18:57
+TEST 45  19:25
 ----tc system level, calling appl main
 
 whatHappened, INTENTIONAL ERROR...
-app line 6 (cursor pr[4067])SYMERR, decl needed
+app line 6 (cursor pr[4101])SYMERR, decl needed
 	  Kcount = 30;   /* <<== tab-tab-space-space K...
 	       ^
 
 Test 45 done, error=3
 
-TEST 46  18:57
+TEST 46  19:25
  empty case
 Test 46 done, error=0
 
-TEST 47  18:57
+TEST 47  19:25
  empty case
 Test 47 done, error=0
 
-TEST 48  18:57
+TEST 48  19:25
  empty case
 Test 48 done, error=0
 
-TEST 49  18:57
+TEST 49  19:25
  empty case
 Test 49 done, error=0
 
-TEST 50  18:57
+TEST 50  19:25
 ----tc system level, calling appl main
 
 Hello, Application main
@@ -393,7 +393,7 @@ done
 
 Test 50 done, error=0
 
-TEST 51  18:57
+TEST 51  19:25
 ----tc system level, calling appl main
 hello tc
 hello ps
@@ -403,7 +403,7 @@ done
 
 Test 51 done, error=0
 
-TEST 52  18:57
+TEST 52  19:25
 ----tc system level, calling appl main
 
 23456
@@ -412,7 +412,7 @@ done
 
 Test 52 done, error=0
 
-TEST 53  18:57
+TEST 53  19:25
 ----tc system level, calling appl main
 
       b(3) is 123, b(1) is 123 
@@ -421,7 +421,7 @@ done
 
 Test 53 done, error=0
 
-TEST 54  18:57
+TEST 54  19:25
 ----tc system level, calling appl main
 ceqn cat cat, then cat dog
  1 0 should be 1 0
@@ -437,16 +437,16 @@ done
 
 Test 54 done, error=0
 
-TEST 55  18:57
+TEST 55  19:25
 ----tc system level, calling appl main
 
-app line 3 (cursor pr[3981])SYMERR, decl needed
+app line 3 (cursor pr[4015])SYMERR, decl needed
     error = on + purpose
         ^
 
 Test 55 done, error=3
 
-TEST 56  18:57
+TEST 56  19:25
 ----tc system level, calling appl main
 test 56: index
 in ->the cat in the hat<- find cat:    5 should be 5
@@ -457,7 +457,7 @@ done
 
 Test 56 done, error=0
 
-TEST 57  18:57
+TEST 57  19:25
 ----tc system level, calling appl main
 cat in the hat .......
 cat in the hat ..cat..
@@ -466,7 +466,7 @@ done
 
 Test 57 done, error=0
 
-TEST 58  18:57
+TEST 58  19:25
 ----tc system level, calling appl main
 
 health(2) should be 2, is 2
@@ -475,7 +475,7 @@ done
 
 Test 58 done, error=0
 
-TEST 59  18:57
+TEST 59  19:25
 ----tc system level, calling appl main
 
 numread 490
@@ -495,7 +495,7 @@ done
 
 Test 59 done, error=0
 
-TEST 60  18:57
+TEST 60  19:25
 ----tc system level, calling appl main
 
 abcdefg 7
@@ -504,7 +504,7 @@ done
 
 Test 60 done, error=0
 
-TEST 61  18:57
+TEST 61  19:25
 ----tc system level, calling appl main
 
 try i = p; good, now p = i; almost there; 
@@ -515,7 +515,7 @@ done
 
 Test 61 done, error=0
 
-TEST 62  18:57
+TEST 62  19:25
 ----tc system level, calling appl main
 before: The cat in the the hat? or the cathouse?
 after: The cat in the the hat? or the cathouse?
@@ -523,3 +523,53 @@ after: The cat in the the hat? or the cathouse?
 done
 
 Test 62 done, error=0
+
+TEST 63  19:25
+----tc system level, calling appl main
+
+double.tg - lrb - 2/5/18
+linux eol's
+hello
+hello 1
+world
+----tc system level, back from main
+done
+
+Test 63 done, error=0
+
+TEST 64  19:25
+----tc system level, calling appl main
+
+double.tg - lrb - 2/5/18
+windows eol's
+hello
+hello 1
+world
+----tc system level, back from main
+done
+
+Test 64 done, error=0
+
+TEST 65  19:25
+----tc system level, calling appl main
+
+double.tg - lrb - 2/5/18
+mac eol's
+hello
+hello 1
+world
+----tc system level, back from main
+done
+
+Test 65 done, error=0
+
+TEST 66  19:25
+----tc system level, calling appl main
+writing to test64tempfile: This is test 64, fwrite and fread
+reading test64tempfile: 
+amount read:  33
+content read: This is test 64, fwrite and fread
+----tc system level, back from main
+done
+
+Test 66 done, error=0

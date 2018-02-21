@@ -1305,7 +1305,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 	if(argc-optcount==2){
 		/* sys */
 		char* sysfile = "/usr/local/share/tinyC/library.tc";
-		nread = FileRead(sysfile,epr,EPR-epr);
+		nread = fileRead(sysfile,epr,EPR-epr);
 		if(nread == -1) {
 			fprintf(stderr,"tc: file read error: %s",sysfile);
 			exit(1);
@@ -1316,7 +1316,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 		}
 		apr = epr += nread;
 		/* app */
-		nread = FileRead( argv[optcount+1],epr,EPR-epr);
+		nread = fileRead( argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
 			fprintf(stderr,"tc: file read error: %s\n",argv[optcount+1]);
 			exit(1);
@@ -1330,7 +1330,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 	}
 	else if(argc-optcount==3){
 		/* sys, e.g. lib */
-		nread = FileRead(argv[optcount+1],epr,EPR-epr);
+		nread = fileRead(argv[optcount+1],epr,EPR-epr);
 		if(nread == -1) {
 			fprintf(stderr,"file read error: %s\n",argv[optcount+1]);
 			exit(1);
@@ -1341,7 +1341,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
 		}
 		apr = epr += nread;
 		/* app */
-		nread = FileRead(argv[optcount+2],epr,EPR-epr);
+		nread = fileRead(argv[optcount+2],epr,EPR-epr);
 		if(nread == -1) {
 			fprintf(stderr,"file read error: %s\n",argv[optcount+2]);
 			exit(1);
