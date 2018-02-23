@@ -150,106 +150,11 @@ int eq() {
 	popst();popst();  
 }
 
-/************ derived convenient pushers and poppers ************/
-
-int topdiff() {
-	int b = toptoi();
-	int a = toptoi();
-	return ( a-b );
-}
-
-/* pop the stack returning its int value, pointer 
-	resolved and cast to int if necessary. */
-int toptoi() {
-	int datum;
-	union stuff *ptr;
-	if(verbose[VS]){
-		fprintf(stderr,"\ntoptoi pop: ");
-		dumpStackEntry(nxtstack-1);
-	}
-
-	struct stackentry *top = &stack[--nxtstack];
-	if( (*top).class==1 ) {
-		if((*top).lvalue == 'L') {
-			ptr = (union stuff *)((*top).value.up);
-			datum=(int)((*ptr).up);
-		}
-		else datum=(int)((*top).value.up);
-	}
-	else if((*top).lvalue == 'L') {
-		if((*top).type==Int ) datum = *((int*)((*top).value.up));
-		else if((*top).type==Char) datum = *((char*)((*top).value.up));
-		else eset(TYPEERR);
-	}
-	else if((*top).lvalue == 'A') {
-		if((*top).type==Char) datum  = (char)((*top).value.uc);
-		else if((*top).type==Int) datum  = ((*top).value.ui);
-		else eset(TYPEERR);
-	}
-	else { eset(LVALERR); }
-	return datum;
-}
-/* basic popper, entry stays accessible until pushed over */
-struct stackentry* popst() {
-	if( nxtstack-1 < 0 ) { error = POPERR; return; }
-	if(verbose[VS]){
-		fprintf(stderr,"\nstack pop: ");
-		dumpStackEntry(nxtstack-1);
-	}
-	--nxtstack;
-	return &stack[nxtstack];
-}
-
-void stuffCopy( union stuff *to, union stuff *from ) {
-	memcpy( to, from, sizeof(to));
-}
-
-/* basic pusher */
-void pushst( int class, int lvalue, Type type, union stuff *value ) {
-	if( nxtstack > STACKLEN) { error = PUSHERR; return; }
-	stack[nxtstack].class = class;
-	stack[nxtstack].lvalue = lvalue;
-	stack[nxtstack].type = type;
-	stuffCopy( &stack[nxtstack].value, value);
-	++nxtstack;
-	if(verbose[VS]){
-		fprintf(stderr,"\nstack push: ");
-		dumpStackEntry(nxtstack-1);
-	}
-}
-
-/* push an int */
-void pushk(int datum) {
-	union stuff d;
-	d.ui = datum;
-	pushst( 0, 'A', Int, &d );
-}
-
-/* push an int as a class 1 */
-void pushPtr(int datum) {
-	union stuff d;
-	d.up = (void*)datum;
-	pushst( 1, 'A', Int, &d );
-}
-
-/* these two used by RELN */
-void pushone() {
-	pushk(1);
-}
-void pushzero() {
-	pushk(0);
-}
 /******* set error unless already set, capture cursor in errat *******/
 int eset( int err ){
 	if(!error){error=err;errat=cursor;}
 	return error;
 }
-/************ simple prints ******************/
-void ps(char* s) {printf("%s",s);}
-void pl(char* s) {printf("\n%s",s);}
-int  pn(int n)   {printf("%d", n);return n;}
-void pc(char c)  {printf("%c", c);}
-
 /* chunk 3: lit, skip, alnum, alpha, symname, konst, rem
  */
 
@@ -414,141 +319,6 @@ void rem() {
 
 /* chunk 4: newfun, fundone, newvar, addrval, canon
  */
-
-/* SITUATION: Function call parsed. 
-	Open new var and value frames for the functions locals.
- */
-void newfun() {
-	if(++curfun>efun){
-		eset(TMFUERR);
-	} 
-	else {
-		(*curfun).fvar = (*curfun).lvar = nxtvar;
-		(*curfun).prused = prused;
-	}
-}
-
-/* SITUATION: function is completed. 
- *	Close its var and value frames.
- */
-void fundone() {
-	nxtvar=(*curfun).fvar;
-	prused=(*curfun).prused;
-	--curfun;
-}
-
-/*********** var tools ****************/
-
-/* SITUATION: Declaration is parsed, and its descriptive data known.
- * 	Fill in the var with this data. Allocate value storage unless already
- *	allocated, i.e. pointer to passed data. Copy passed data into allocation.
- *	NOTE: signifantly refactored.
- */
-void newvar( int class, Type type, int len, union stuff *passed ) {
-	struct var *v = &vartab[nxtvar];
-	canon(v);    /* sets the canon'd name into v */
-	(*v).class = class;
-	(*v).type = type;
-	(*v).len = len;
-	(*v).brkpt = 0;
-	int obsize = typeToSize(class,type);
-	if(allocSpace(v,len*obsize)) return;  /* true is bad, eset done */
-	if(passed) copyArgValue( v, class, type, passed);
-	if(curfun>=fun) (*curfun).lvar = nxtvar;
-	if( ++nxtvar>VTABLEN )eset(TMVRERR);
-	return;
-}
-
-/* allocates memory for value of v, return 0 on success, else !0
- */
-int allocSpace(struct var *v, int amount){
-	char* kf;
-	kf = prused+1;
-	(*v).value.up = prused+1;
-	prused += amount;
-	if( prused-EPR >=0 ) {
-		eset(TMVLERR);
-		return TMVLERR;
-	}
-	memset( kf, 0, prused-kf+1 ); /* zero the reserved space */
-	return 0;
-}
-
-/*	copy the argument value into the new local place.
- */
-int copyArgValue(struct var *v, int class, Type type, union stuff *passed ) {
-	if(passed && class){   					/* passed pointer */
-		(*v).value.up = (*passed).up;
-	} else if( passed && !class ) {			/* passed datum */
-		switch(type){
-		case Int:
-			put_int( (*v).value.up, (*passed).ui );
-			break;
-		case Char:
-			put_char( (*v).value.up, (*passed).uc );
-			break;
-		default:
-			eset(TYPEERR);
-			return TYPEERR;
-		}
-	}
-}
-
-/* 	looks up a symbol at one level
- */
-struct var* _addrval(char *sym, struct funentry *level) {
-	int first = (*level).fvar;
-	int last  = (*level).lvar;
-	int pvar;
-	for(pvar=first; pvar<=last; ++pvar) {
-		if( !strcmp(vartab[pvar].name, sym) ) {
-			if( debug && (vartab[pvar]).brkpt==1 )br_hit(&vartab[pvar]);
-			return &vartab[pvar];
-		}
-	}
-	return 0;
-}
-
-/* 	looks up a symbol at three levels
- */
-struct var* addrval_all(char *sym) {
-	struct var *v;
-	v = _addrval( sym, curfun );
-	if(!v) v = _addrval( sym, curglbl );
-	if(!v) v = _addrval( sym, fun ); 
-	if(v)return v;
-	return 0;	
-}
-
-/* 	looks up a symbol pointed to by fname,lname: 
- *	locals, globals, library levels in that order. First hit wins.
- */
-struct var* addrval() {
-	struct var sym;
-	canon( &sym );
-	return addrval_all(sym.name);
-}
-
-/* 	fname..lname is full name. Puts canonicalized name into v. If short
- *	enough same as name. If longer first VLEN-1 characters + last character.
- *	The last char has more info than middle chars.
- */
-void canon(struct var *v) {
-	char* n=(*v).name;
-	while( n < ((*v).name)+VLEN ) *n++ = 0;
-	int len = lname-fname+1;
-	len = len>VLEN ? VLEN : len;
-	/* zap name field of v */
-	strncpy( (*v).name, fname, len );  /* pads with nulls if short */
-	(*v).name[8] = 0;     /* so long name canonicalized as a string */
-	int length = lname-fname+1;
-	if(length>VLEN) {
-
-		(*v).name[VLEN-1] = *lname; 
-/*		*((*v).name+VLEN-1) = *lname;  */
-/* above 2 lines are equivalent!! But which is more readable? */
-	} 
-}
 
 
 /* chunk 5: asgn, .., factor. Classical LR1 grammer.
@@ -976,15 +746,6 @@ int decl() {
  *  This chunk is replaced by command line args, see tcMain.c. 
   *	logo() remains here, though.
  */
-void logo() {
-	printf(
-"***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***\n"
-		);
-	printf(
-"        This C version copyright 2017, T A Gibson\n"
-		);
-}
-
 /* chunk 8: enter, setarg, link
  */
 
@@ -1097,40 +858,6 @@ void checkBrackets() {
 	if(skip('[',']'))eset(RBRCERR);
 }
 
-/*
- *	Saves and (and later restores) cursor, then
- *	scans program from pr to progend and allocates all externals 
- * 	in next fctn layer. An "endlibrary" line causes a new fctn layer
- * 	to be opened and globals done there.
- */
-void tclink() {
-	char* x;
-	char* problemCursor=cursor;
-	checkBrackets();
-	if(error)return;
-	cursor=pr;
-	newfun();
-	while(cursor<epr && !error){
-		char* lastcur = cursor;
-		rem();
-		if(lit(xlb)) skip('[',']');
-		else if(decl()) ;
-		else if(lit(xendlib))newfun();
-		else if(symname()) {     /* fctn decl */
-			union stuff kursor;
-			kursor.up = cursor = lname+1;
-			newvar('E',2,1,&kursor);
-			if(x=mustfind(cursor, epr, '[',LBRCERR)) {
-				cursor=x+1;
-				skip('[',']');
-			}
-		}
-		if(cursor==lastcur)eset(LINKERR);
-	}
-	cursor = problemCursor;
-	if(verbose[VL])dumpVarTab();
-}
-
 /* chunk 11: MC's. 
  *	A handful of very primitive machine (and compiler) dependant functions.
  *	This is the portability layer. 
@@ -1167,28 +894,6 @@ void dumpLine() {
 	}
 }
 
-/*	prints a value given its description taken from a struct stackEntry */
-void dumpVal(Type t, int class, union stuff *val, char lval){
-	fprintf(stderr,"pr[%d]",(*val).up-(int)pr);
-	if(class==1 && t==Char ){
-		char sval[30];
-		strncpy(sval, (char*)((*val).up), 30);
-		fprintf(stderr,"->%s<-", sval);
-	}
-	else if(class==0 && lval!='A'){ 
-		if(t==Char){
-			char x = *(char*)((*val).up);
-			if(x)fprintf(stderr,"->%c<-", x );
-			else fprintf(stderr,"->NULL<-");
-		}
-		else fprintf(stderr,"->%d<-", *(int*)((*val).up) );
-	}
-/*
-	else if(t==Char) fprintf(stderr,"%c",(*val).uc);
-	else fprintf(stderr,"%d",(*val).ui);
-*/
-}
-
 void dumpStackEntry(int e){
 	if( 0<=e && e<=nxtstack ) {
 		fprintf(stderr,"\n stack entry at %d: %d %c %d ", e, stack[e].class, 
@@ -1216,40 +921,6 @@ void dumpPopTop() {
 /* dumps the top stack entry */
 void dumpTop() {
 	dumpStackEntry(nxtstack-1);
-}
-
-void dumpFunEntry( int e ) {
-	fprintf(stderr,"\n fun entry at %d:  %d %d %d", e,
-		fun[e].fvar, fun[e].lvar, fun[e].prused-pr );
-}
-
-void dumpFun() {
-	fprintf(stderr,"\nfun table: fvar, lvar, prused");
-	int i;
-	int num = curfun-fun;
-	for(i=0;i<=num;++i) {
-		dumpFunEntry(i);
-	}
-}
-
-void dumpVar(struct var *v) {
-	fprintf(stderr,"\n var %d: %s %d %s %d ", v-vartab,
-		(*v).name, (*v).class, typeToWord((*v).type), (*v).len );
-/*	if((*v).value.up) 
-		fprintf(stderr," ref to pr[%d]", (char*)((*v).value.up)-pr);
-*/
-		dumpVal( (*v).type, (*v).class, &((*v).value), 0 );
-}
-
-void dumpVarTab() {
-	int pos = 0;
-	fprintf(stderr,"\nVar Table: name class type len (type)value");
-	struct var *v = vartab-1;
-	while(++v < &vartab[nxtvar]) {
-		dumpVar(v);
-		++pos;
-	};
-	if( !pos )fprintf(stderr," empty");
 }
 
 void dumpHex( void* where, int len ) {
@@ -1367,6 +1038,40 @@ void readTheFiles(int argc, char *argv[], int optind) {
 	}
 }
 
+/*
+ *	Saves and (and later restores) cursor, then
+ *	scans program from pr to progend and allocates all externals 
+ * 	in next fctn layer. An "endlibrary" line causes a new fctn layer
+ * 	to be opened and globals done there.
+ */
+void tclink() {
+	char* x;
+	char* problemCursor=cursor;
+	checkBrackets();
+	if(error)return;
+	cursor=pr;
+	newfun();
+	while(cursor<epr && !error){
+		char* lastcur = cursor;
+		rem();
+		if(lit(xlb)) skip('[',']');
+		else if(decl()) ;
+		else if(lit(xendlib))newfun();
+		else if(symname()) {     /* fctn decl */
+			union stuff kursor;
+			kursor.up = cursor = lname+1;
+			newvar('E',2,1,&kursor);
+			if(x=mustfind(cursor, epr, '[',LBRCERR)) {
+				cursor=x+1;
+				skip('[',']');
+			}
+		}
+		if(cursor==lastcur)eset(LINKERR);
+	}
+	cursor = problemCursor;
+	if(verbose[VL])dumpVarTab();
+}
+
 /* returns pointer to first character of the current line
  */
 char* fchar(char* k){
@@ -1384,82 +1089,3 @@ char* lchar(char* k){
 	return k-1;
 }
 
-int countch(char *f, char *t, char c){
-	int k=1;   /* start on line 1 */
-	while( f++ <= t) if(*f==c) ++k;
-	return k;
-}
-/*	Prints end of program message, "done" if no error, else code and 
- *	line with error and carot under.
- */
-void whatHappened() {
-	if(error==KILL) errToWords();
-	else if(error){
-		char *fc, *lc;
-		int firstSignif=0, blanks, lineno;
-		if(*errat==0x0a||*errat==0x0d)--errat;
-		if(errat<apr){
-			lineno = countch(pr,errat,0x0a);
-			if(!lineno)lineno = countch(pr,errat,0x0d);
-			printf("\nlib ");
-		}
-		else {
-			lineno = countch(apr,errat,0x0a);
-			if(!lineno)lineno = countch(apr,errat,0x0d);
-			printf("\napp ");
-		}
-		printf("line %d (cursor pr[%d])", lineno,errat-pr); errToWords();
-		fc=fchar(errat);
-		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
-			 ++firstSignif;
-		lc=lchar(errat);
-/*		fc=fc-1;
-*/
-		pft(fc,lc);
-		printf("\n");
-		pft(fc,fc+firstSignif-1);        /* leading whitespace */
-		blanks=errat-fc-firstSignif-1;   /* blanks to carot */
-		while(--blanks >= 0) printf(" ");
-		printf("^\n");
-	}
-	else {
-		printf("\ndone\n");
-	}
-}
-
-void showLine(char *line) {
-		char *fc, *lc;
-		fc=fchar(line);
-		lc=lchar(line);
-		pft(fc,lc);
-}
-
-void errToWords(){
-	char *x;
-	switch(error){
-		case 2: x="CURSERR, cursor out of range"; break;
-		case 3: x="SYMERR, decl needed"; break;
-		case 1: x="STATERR"; break;
-		case 5: x="RPARERR, ) missing"; break;
-		case 6: x="RANGERR, subscript out of range"; break;
-		case 7: x="CLASERR"; break;
-		case 8: x="TYPEERR"; break;
-		case 9: x="SYNXERR"; break;
-		case 14: x="LVALERR, not assignable"; break;
-		case 15: x="POPERR, nothing to pop"; break;
-		case 16: x="PUSHERR, overlowed stack area"; break;
-		case 17: x="TMFUERR, overflowed function table"; break;
-		case 18: x="TMVRERR, overflowed variable table"; break;
-		case 19: x="TMVLERR, overflowed available space for values"; break;
-		case 20: x="LINKERR"; break;
-		case 21: x="ARGSERR, args don't match"; break;
-		case 22: x="LBRCERR, [ required"; break;
-		case 23: x="RBRCERR, ] required somewhere"; break;
-		case 24: x="MCERR, no such MC"; break;
-		case 26: x="SYMERRA, decl needed"; break;
-		case 27: x="EQERR, illegal assign"; break;
-		case 28: x="PTRERR"; break;
-		case 99: x="KILL, stopped by user"; break;
-	}
-	printf("%s\n",x);
-}

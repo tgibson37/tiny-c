@@ -18,16 +18,16 @@ INSTALLTC = /usr/local/bin/tinyc
 INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
 
-OBJALL = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o test.o tcTestMain.o
+OBJALL = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o test.o var.o stack.o dialog.o tcTestMain.o
 
 # The tc object files
-OBJTC = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o
+OBJTC = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o var.o stack.o dialog.o tcMain.o
 
 # The test object files
-OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcTestMain.o
+OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o var.o stack.o dialog.o tcTestMain.o
 
 # All the header and c files gcc-able with CFLAGS
-SRCS = test.c tc.c machineCall.c tcTestMain.c tcMain.c 
+SRCS = test.c tc.c machineCall.c var.c stack.c tcTestMain.c tcMain.c  dialog.c
 HDRS = tc.h
 
 # Add -I to the dir the include files are in
