@@ -1,0 +1,1 @@
+// test 67, end of statement (haveArgs) in enter().foo[]sak [pl "calling foo "; foo /* comment  pl "back from foo"  return "bar"]main [ int x; x=sak(); pl"foo returns "; ps x; pl""; ] 

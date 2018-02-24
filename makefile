@@ -18,23 +18,26 @@ INSTALLTC = /usr/local/bin/tinyc
 INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
 
-OBJALL = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o tcMain.o test.o var.o stack.o dialog.o tcTestMain.o
+OBJMOST = tc.o FileRead.o debug.o machineCall.o platform.o var.o stack.o dialog.o
+
+OBJALL = $(OBJMOST) tcTestMain.o tcMain.o test.o
 
 # The tc object files
-OBJTC = tc.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o var.o stack.o dialog.o tcMain.o
+OBJTC = $(OBJMOST) tcMain.o
 
 # The test object files
-OBJTEST = tc.o test.o FileRead.o time.o getch.o kbhit.o debug.o machineCall.o var.o stack.o dialog.o tcTestMain.o
+OBJTEST = $(OBJMOST) test.o tcTestMain.o
 
-# All the header and c files gcc-able with CFLAGS
-SRCS = test.c tc.c machineCall.c var.c stack.c tcTestMain.c tcMain.c  dialog.c
+# All the header and c files
+SRCS = test.c tc.c machineCall.c var.c stack.c tcTestMain.c tcMain.c \
+platform.c dialog.c
 HDRS = tc.h
 
 # Add -I to the dir the include files are in
-#CFLAGS = -w -g -ansi -I /usr/lib/syslinux/com32/include/
-#CFLAGS = -Wall -m32 -g        #<< still a flood
+#CFLAGS = -Wall -g        #<< still a flood
 CFLAGS = -w -g
 
+.PHONY: all run difft diffd keep dotest install latest
 all: $(TC) $(TEST)
 
 run:
@@ -69,31 +72,12 @@ $(TC): $(OBJTC)
 $(TEST): $(OBJTEST)
 	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST)
 
-# Seperately compile each .c file
-test.o: test.c tc.h
-	$(CC) $(CFLAGS) -c test.c
+.PHONY: clean cleanobj cleanexe
+clean : cleanobj
+	rm -fv test_results dump_results tc.h.gch
 
-tc.o: tc.c tc.h
-	$(CC) $(CFLAGS) -c tc.c
+cleanobj :
+	rm -fv *.o
 
-# Clean up
-clean:
-	rm -fv core* $(TC) $(TEST) $(OBJALL) tc.h.gch
-
-# separately: gcc -c FileRead.c,...  WITHOUT cflags
-
-debug.o: debug.c tc.h
-	$(CC) -c -w -g debug.c
-
-FileRead.o: FileRead.c tc.h
-	$(CC) -c -w FileRead.c
-
-getch.o: getch.c tc.h
-	$(CC) -c -w getch.c tc.h
-
-kbhit.o: kbhit.c tc.h
-	$(CC) -c -w kbhit.c tc.h
-
-time.o: time.c tc.h
-	$(CC) -c -w time.c tc.h
-
+cleanexe :
+	rm -fv tc test

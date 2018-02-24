@@ -4,6 +4,16 @@
 
 char timeStamp[40];
 extern struct stackentry poptop;
+
+void time_now(char *buff) {
+  time_t curtime;
+  struct tm *loctime;
+  curtime = time (NULL);
+  loctime = localtime (&curtime);
+  strcpy(buff,asctime (loctime));
+  strftime (buff, 40, " %R", loctime);
+}
+
 /* setup tools used by some of the tests */
 void testWhole(char* filename){
 	char *argv[3];

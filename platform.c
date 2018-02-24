@@ -1,11 +1,47 @@
-#include <termios.h>
 #include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
 
+/*************  Platform stuff ************/
+/* INSTALLERS/PORTERS may need to redefine these functions.
+	As defined here they work on mint linux.
+ */
+
+/*	Detect a key hit is waiting in its buffer, return the char,
+ *	leaving it in the buffer to be read. Used to detect ESC character
+ *	to force a quit.
+ */
+int kbhit(void)
+{
+	struct termios oldt, newt;
+	int ch;
+	int oldf;
+
+	tcgetattr(STDIN_FILENO, &oldt);
+	newt = oldt;
+	newt.c_lflag &= ~(ICANON | ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+	oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+	fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+	ch = getchar();
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+	fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+	if(ch != EOF)
+	{
+		ungetc(ch, stdin);
+		return ch;
+	}
+
+	return 0;
+}
 /* ref:
  * https://stackoverflow.com/questions/7469139/what-is-equivalent-to-getch-getche-in-linux
    Returns 0x1b (esc) followed by two characters for keys such as up arrow.
  */
-
 
 static struct termios old, new;
 
@@ -25,7 +61,7 @@ void resetTermios(void)
   tcsetattr(0, TCSANOW, &old);
 }
 
-/* Read 1 character - echo defines echo mode */
+/* Non blocking read 1 character. echo defines echo mode. */
 char getch_(int echo) 
 {
   char ch;

@@ -4000,5 +4000,67 @@ Test 92, the arrow keys use ESC [ <code>
 	A	up,	B	down,	C	right,	D	left	
 BUT the esc sets a kill! 
 MC2 (test 91) doesn't do that. Must be in the lib code.
-	Is this an ISSUE ???
+	Is this an ISSUE ???  
+		YES, the arrow keys become accidental ESC's
+		Test 92 shows this
 	macnine call ~125; also tc.c ~840
+--------------------
+
+Thur, Feb 22
+REFACTOR...
+	Step 1: survey the code and identify
+		all functions, where they should go in new/revised files
+		all globals, ditto
+	Method: 
+		list the functions. 
+			Maybe tidy their comment definitions to make that clear
+			List obvious "classes" and assign these
+			Less obvious will emerge from this exercise
+		Assign the globals from tc.h
+			A global moved to a dot-c file is a state variable for that object
+			A global left behind is a super-global
+				e.g. debug, verbose, etc
+		Make the moves: 
+			Code to their files
+			Globals to sections of tc.h
+				Maybe thats all
+				Maybe some will move to special headers
+	How to list the functions
+x		cp'd all to Study/name.s including c and h files
+x		for each erase all code lines, keep just decls
+	Already OK (dot-c)
+		fileread
+		debug
+		machine call
+		test
+		tcmain
+		testmain
+	Need a home
+		getch
+		kbhit
+		time
+	header
+		tc.h
+	That leaves just
+		tc
+--------------------
+
+Fri, Feb 23
+DO HEADER LATER
+	Get the fcn's moved and compile/test. Header later.
+x		var.c
+x		stack.c
+x		dialog.c
+	Header
+		Separate privates from publics
+			Only publics in header
+			Make ALL privates begin with _
+
+time_stamp (only thing in time.c) sole use is in test.c
+
+Why linking test cannot find getch_ and kbhit ???
+
+
+
+
+
