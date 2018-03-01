@@ -4059,6 +4059,111 @@ x		dialog.c
 time_stamp (only thing in time.c) sole use is in test.c
 
 Why linking test cannot find getch_ and kbhit ???
+--------------------
+
+Sat, Feb 24
+Committed and Pushed file restructure, plus tests 67,68
+	debug.c   FileRead.c     platform.c  tc.c      tcTestMain.c  var.c
+	dialog.c  machineCall.c  stack.c     tcMain.c  test.c
+
+FIXED: Test 94, cString comes up empty. cString never used.
+NXT Challenge: Which fcn's in tc.h are in fact locals, privates.
+--------------------
+
+Sun, Feb 25
+If a function is local EXCEPT for test, is it global???  Thoughts...
+	Locals need unit testing. They should still be local.
+	Global is a Q&D way to give testing access.
+	Testing a class should be done entirely via its publics.
+	Change g to lt where this is the case.
+	Possible compromise: Use _ private name AND test.h declares it anyway.
+Also some g's (eg ) are proveded by var and used only by tc.
+	Should these have a unique access instead of full global?
+	If so how to implement?
+	Is this overkill?  PROBABLY.
+If expression is pulled out of tc then asgn is its global.
+	What about factor???
+How big is tc without -g symbols???  SMALL, about 50K
+git diff: Just the tiny bug fix in testFiles/94.
+Done with scan of fcnUsage. Saved as fcnUsageSummary. Editing that...
+x	removing grep lines
+x	sorted: Study/fcnSorted
+	57 publics (g's)
+	23 locals
+		9 of these need access by test.c
+	6 mysteries (?)
+Next: 
+	resolve mysteries. 
+	Rename locals with leading _
+		Remove from tc.h
+		New test.h has lt's
+Both shells now compile, tcc has warnings. Work on those LATER
+Passing argc,argv to tc.c's ~1036 readTheFiles is awkward. 
+	tcUsage() belongs in tcMain.c. 
+--------------------
+
+Wed, Feb 28
+The compromise (~4079 above) wins.
+	for each private
+		grep the existing name *.[ch]
+			valid Hits should be ONE .c file and usually the .h
+		make the changes guided by the grep
+		assure definition preceeds usage
+		make
+		comment out in tc.h
+x	l	------------------- allocSpace --------------
+x	l	------------------- ATOI --------------
+x	l	------------------- copyArgValue --------------
+x	l	------------------- db_cmds --------------
+x	l	------------------- eq --------------
+x	l	------------------- errToWords --------------
+x	lt  ------------------- factor -------------
+x	l	------------------- term --------------
+x	l	------------------- expr --------------
+x	l	------------------- reln --------------
+x	lt	------------------- asgn --------------
+x	l	------------------- findEOS --------------
+x	l	------------------- mustfind --------------
+x	l	------------------- setarg --------------
+x	l	------------------- skipst --------------
+x	l	------------------- symnameis --------------
+x	lt	------------------- decl --------------
+x	lt	------------------- enter --------------
+x	lt	------------------- konst --------------ditto
+x	lt	------------------- lit --------------
+x	lt	------------------- rem --------------
+x	lt	------------------- skip --------------  ditto
+x	lt	------------------- symname --------------  ditto
+x	lt	------------------- vAlloc --------------
+--------------------
+
+Thur, Mar 1
+Renaming locals is complete. Doing full regression and manual tests.
+ISSUES...
+x	dumps should be moved to their appropriate file.
+x	dump of stack entry is not printing values, but Should have's show values.
+		For some reason if(verbose(SV)) turns this off.
+	dump stack is double spacing
+	test 12 may need work
+	test 13, cursor -> D instead of end of line
+	test 15, konst returns different (2,3,1 instead of 1,2,3)
+	test 23, what's printed very diff from shouldHave, but functionally ok?
+	ditto 24
+	31 don't get the 0
+	55: wha'happ'n carot ^ off by one?
+	57 line missing, possibly a temp printf
+	92 Still does ESC
+	93 Don't have to hit <enter> except for gn test (the last)
+x	pf.tc OK
+CONCLUSIONS: 
+	we are functionally OK, but the test comments can be misleading.
+	Needs work!!!
+
+
+Other todo's
+	merge Ed Davis's windows stuff into Platform.c and readTheFiles.
+	Java style comments, use dOxygen.
+x	write somewhere the use of leading _'s, and locals vs globals, and test usage.
 
 
 

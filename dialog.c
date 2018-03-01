@@ -5,52 +5,8 @@ int countch(char *f, char *t, char c){
 	while( f++ <= t) if(*f==c) ++k;
 	return k;
 }
-/*	Prints end of program message, "done" if no error, else code and 
- *	line with error and carot under.
- */
-void whatHappened() {
-	if(error==KILL) errToWords();
-	else if(error){
-		char *fc, *lc;
-		int firstSignif=0, blanks, lineno;
-		if(*errat==0x0a||*errat==0x0d)--errat;
-		if(errat<apr){
-			lineno = countch(pr,errat,0x0a);
-			if(!lineno)lineno = countch(pr,errat,0x0d);
-			printf("\nlib ");
-		}
-		else {
-			lineno = countch(apr,errat,0x0a);
-			if(!lineno)lineno = countch(apr,errat,0x0d);
-			printf("\napp ");
-		}
-		printf("line %d (cursor pr[%d])", lineno,errat-pr); errToWords();
-		fc=fchar(errat);
-		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
-			 ++firstSignif;
-		lc=lchar(errat);
-/*		fc=fc-1;
-*/
-		pft(fc,lc);
-		printf("\n");
-		pft(fc,fc+firstSignif-1);        /* leading whitespace */
-		blanks=errat-fc-firstSignif-1;   /* blanks to carot */
-		while(--blanks >= 0) printf(" ");
-		printf("^\n");
-	}
-	else {
-		printf("\ndone\n");
-	}
-}
 
-void showLine(char *line) {
-		char *fc, *lc;
-		fc=fchar(line);
-		lc=lchar(line);
-		pft(fc,lc);
-}
-
-void errToWords(){
+void _errToWords(){
 	char *x;
 	switch(error){
 		case 2: x="CURSERR, cursor out of range"; break;
@@ -78,6 +34,51 @@ void errToWords(){
 		case 99: x="KILL, stopped by user"; break;
 	}
 	printf("%s\n",x);
+}
+
+/*	Prints end of program message, "done" if no error, else code and 
+ *	line with error and carot under.
+ */
+void whatHappened() {
+	if(error==KILL) _errToWords();
+	else if(error){
+		char *fc, *lc;
+		int firstSignif=0, blanks, lineno;
+		if(*errat==0x0a||*errat==0x0d)--errat;
+		if(errat<apr){
+			lineno = countch(pr,errat,0x0a);
+			if(!lineno)lineno = countch(pr,errat,0x0d);
+			printf("\nlib ");
+		}
+		else {
+			lineno = countch(apr,errat,0x0a);
+			if(!lineno)lineno = countch(apr,errat,0x0d);
+			printf("\napp ");
+		}
+		printf("line %d (cursor pr[%d])", lineno,errat-pr); _errToWords();
+		fc=fchar(errat);
+		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
+			 ++firstSignif;
+		lc=lchar(errat);
+/*		fc=fc-1;
+*/
+		pft(fc,lc);
+		printf("\n");
+		pft(fc,fc+firstSignif-1);        /* leading whitespace */
+		blanks=errat-fc-firstSignif-1;   /* blanks to carot */
+		while(--blanks >= 0) printf(" ");
+		printf("^\n");
+	}
+	else {
+		printf("\ndone\n");
+	}
+}
+
+void showLine(char *line) {
+		char *fc, *lc;
+		fc=fchar(line);
+		lc=lchar(line);
+		pft(fc,lc);
 }
 
 /************ simple prints ******************/

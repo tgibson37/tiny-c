@@ -13,7 +13,6 @@ void stbegin() {};
  /* debugging aid, see ~177 for sample use */
  int watchme=0;
 
-/* chunk 1: literals
 /************** literals **************/
 char* xif = "if";
 char* xelse = "else";
@@ -48,10 +47,7 @@ char* xge = ">=";
 char* xle = "<=";
 char* xnl = "\n";
 
-/* chunk 2: eq, topdiff, toptoi, pop, pone, pzero, pushk, pushst, eset, ps(etc)
- */
-
-/* stored size */
+/* stored size of one datum */
 int typeToSize( int class, Type type ) {
 	if(type==Char)return 1;
 	else if(type==Int)return sizeof(int);
@@ -62,7 +58,7 @@ int typeToSize( int class, Type type ) {
 /* SITUATION: Parsed an assignment expression. Two stack entries, lvalue, datam.
  *	Effects the assignment. 
  */
-int eq() {
+int _eq() {
 	int  iDatum;  /* memcpy into these from pr using val.stuff */
 	char cDatum;  /*  and val.size, giving needed cast */
 	void* pDatum;
@@ -155,13 +151,11 @@ int eset( int err ){
 	if(!error){error=err;errat=cursor;}
 	return error;
 }
-/* chunk 3: lit, skip, alnum, alpha, symname, konst, rem
- */
 
 /* Bump cursor over whitespace. Then return true on match and advance
    cursor beyond the literal else false and do not advance cursor
  */
-int lit(char *s){
+int _lit(char *s){
 	while( *cursor == ' ' 
 		|| *cursor == '\t' ) ++cursor;
 	int match = !strncmp(s,cursor, strlen(s));
@@ -175,7 +169,7 @@ int lit(char *s){
 /* skips balance l-r assuming left is matched. 
  *	Returns 0 on OK, else curserr.
  */
-int skip(char l, char r) {
+int _skip(char l, char r) {
 	int counter = 1;
 	 while( counter>0 && cursor<epr ) {
 		if(*cursor==l)++counter;
@@ -186,11 +180,10 @@ int skip(char l, char r) {
 	return 0;
 }
 
-
 /* Parse a symbol defining fname, lname. ret: true if symbol.
  *	Advances the cursor to but not over the symbol,
  */
-int symname() {
+int _symName() {
 	char* temp;
 	while( *cursor == ' ' || *cursor == '\t' ) ++cursor;
 	temp=cursor;
@@ -209,9 +202,10 @@ int symname() {
 	return lname-fname+1;  /* good, fname and lname defined */
 }
 
-/* some C helper functions */
-/* return true if symname matches arg, no state change (new) */
-int symnameis(char* name){
+/****************** some C helper functions **************/
+
+/* return true if symname matches arg, no state change */
+int _symNameIs(char* name){
 	int x = strncmp(fname, name, lname-fname+1);
 	return( !x );
 }
@@ -225,14 +219,14 @@ char* find( char* from, char* upto, char c) {
 	return x<upto ? x : 0;
 }
 /* same as find but sets err on no match */
-char* mustfind( char *from, char *upto, char c, int err ) {
+char* _mustFind( char *from, char *upto, char c, int err ) {
 	char* x = find(from, upto, c);
 	if( x ) return x;
 	else { eset(err); return 0; }
 }
 
 /* special find for end of string */
-char* findEOS( char* x ) {
+char* _findEOS( char* x ) {
 	while( x<epr) {
 		if( *x==0 || *x==0x22 ) return x;
 		++x;
@@ -241,10 +235,166 @@ char* findEOS( char* x ) {
 	return 0;
 }
 
+/* skip over comments and/or empty lines in any order, new version
+	tolerates 0x0d's, and implements // as well as old /* comments.
+ */
+void _rem() {
+	for(;;) {
+		while(    *cursor==0x0a
+				||*cursor==0x0d
+				||*cursor==' '
+				||*cursor=='\t'
+			  )++cursor;
+		if( !(_lit(xcmnt)||_lit(xcmnt2)) ) return;
+		while( *cursor != 0x0a && *cursor != 0x0d && cursor<epr )
+			++cursor;
+	}
+}
+
+/* 	SITUATION: int or char is parsed.
+ *	Parses one variable. Makes allocation and symbol entry.
+ */
+void _varAlloc(Type type, union stuff *vpassed) {
+	if( !_symName() ) {		/*defines fname,lname. True is match.*/
+		eset(SYMERR);
+		return;
+	}
+	cursor=lname+1;
+	if( _lit("(") ){
+		vclass = 1;		/* array or pointer */
+		char* fn=fname; /* localize globals that _asgn() may change */
+		char* ln=lname;
+		if( _asgn() ) alen=toptoi()+1;  /* dimension */
+		fname=fn; 		/* restore the globals */
+		lname=ln;
+		char* x = _mustFind(cursor,cursor+5,')',RPARERR);
+		if(x)cursor = x+1;
+	} else {
+		vclass = 0;
+		alen = 1;
+	}
+	newvar(vclass, type, alen, vpassed);
+}
+
+/* Situation: parsing argument declarations, passed values are on the stack.
+ * arg points into stack to an argument of type. 
+ * Gets actual value of arg, calls valloc which parses and sets
+ * up local with the passed value.
+ */ 
+void _setArg( Type type, struct stackentry *arg ) {
+	union stuff vpassed  = (*arg).value;
+	char* where;
+	int class = (*arg).class;
+	int lvalue = (*arg).lvalue;
+	int stacktype = (*arg).type;
+	if( lvalue=='L') {
+		where = (char*)vpassed.up;
+		if( class==1 ) { 
+			vpassed.up = *((char**)(*arg).value.up);
+		}
+		else if( stacktype==Int ) vpassed.ui = get_int(where);
+		else if( stacktype==Char) vpassed.ui = get_char(where);
+			/* ui to clear high order byte */
+	}
+	_varAlloc( type, &vpassed);
+}
+
+/*	SITUATION: Just parsed symbol with class 'E', or special symbol MC.
+ *	Parses the args putting values are on the stack, arg pointing to the first 
+ *	of them.
+ *	Sets the cursor to the called function's 'where'. Parses arg decl's
+ *	giving them values from the stack. Executes the function body.
+ *	Pops the locals (vars and values). Restores the caller's stcurs and 
+ *	cursor.
+ */
+void _enter( char* where) {
+	int arg=nxtstack, nargs=0;
+
+	_lit(xlpar); /* optional (   */
+	int haveArgs = ! (  _lit(xrpar)
+					 || *cursor==*xlb
+					 || *cursor==*xrb
+					 || *cursor==*xsemi
+					 || *cursor==*xnl
+					 || *cursor==0x0d
+					 || *cursor==*xslash
+					);
+	if ( haveArgs ) {
+		do {
+			if(error)return;
+			if( _asgn()) ++nargs;
+			else break;  /* break on error */
+		} while( _lit(xcomma) );
+	}
+	if(error)return;
+	_lit(xrpar);   /* optional )   */
+	_rem();
+	if(!where) {
+		if(nxtstack) machinecall( nargs );
+		else eset(MCERR);
+		return;
+	}
+	else {   /* ABOVE parses the call args, BELOW parses the called's arg decls */
+		char *localstcurs=stcurs, *localcurs=cursor;
+		cursor = where;
+		newfun();  
+		for(;;) {	  
+			_rem();
+			if(_lit(xint)) { 
+				do {
+					_setArg(Int, &stack[arg]);
+					arg++;
+				} while(_lit(xcomma));
+				_lit(xsemi); /* optional */
+			} 
+			else if ( _lit(xchar)) {
+				do {
+					_setArg(Char, &stack[arg]);
+					arg++;
+				} while(_lit(xcomma));
+				_lit(xsemi);
+			}
+			else {
+				break;		/* and the only way outa here */
+			}
+		}
+		if(arg != nxtstack) {
+			cursor=localcurs;
+			stcurs=localstcurs;
+			eset(ARGSERR);
+		}
+		while(nargs>0){
+			popst();
+			--nargs;
+		}
+		if(!error)st();     /*  <<-- HERE is where we do it */
+		if(!leave)pushzero();
+		leave=0;
+		cursor=localcurs;
+		stcurs=localstcurs;
+		fundone();
+	}
+}
+
+/********** expression parser *****************/
+
+/* converts fname..lname inclusive to integer
+ */
+int _atoi() {
+	char* x = fname;
+	int val = 0;
+	int sign = *x=='-' ? -1 : 1;
+	if( *x=='-' || *x=='+' ) ++x;
+	do{ 
+		val = 10*val+*x-'0'; 
+	} while( ++x <= lname );
+	return sign*val;
+}
+
 /*	parses constant defining fname..lname which brackets trimmed constant. 
  *	Cursor moved just beyond constant. Returns Type: 
  */
-Type konst() {
+Type _konst() {
 	char* x;
 	while(*cursor==' ')++cursor;
 	char c = *cursor;
@@ -260,10 +410,10 @@ Type konst() {
 		}
 		return Int;
 
-	} else if(lit("\"")) {
+	} else if(_lit("\"")) {
 		fname=cursor;
 		/* set lname = last char, cursor = lname+2 (past the quote) */
-		if( x = findEOS(fname) ) {
+		if( x = _findEOS(fname) ) {
 			lname = x-1; /*before the quote */
 			cursor = x+1; /*after the quote */
 			*x = 0;
@@ -275,10 +425,10 @@ Type konst() {
 		}
 		return CharStar;
 
-	} else if(lit("\'")) {
+	} else if(_lit("\'")) {
 		fname=cursor;
 		/* lname = last char, cursor = lname+2 (past the quote) */
-		if( x=mustfind(fname+1,fname+2,'\'',CURSERR) ) {
+		if( x=_mustFind(fname+1,fname+2,'\'',CURSERR) ) {
 			lname = x-1; 
 			cursor = x+1;
 		}
@@ -292,178 +442,26 @@ Type konst() {
 	} else return Err;  /* no match, Err==0 */
 }
 
-/* skip over comments and/or empty lines in any order, new version
-	tolerates 0x0d's, and implements // as well as old /* comments.
- */
-void rem() {
-	for(;;) {
-		while(    *cursor==0x0a
-				||*cursor==0x0d
-				||*cursor==' '
-				||*cursor=='\t'
-			  )++cursor;
-		if( !(lit(xcmnt)||lit(xcmnt2)) ) return;
-		while( *cursor != 0x0a && *cursor != 0x0d && cursor<epr )
-			++cursor;
-	}
-}
-
-/*void rem() {
-	for(;;) {
-		while(lit(xnl));
-		if( !lit(xcmnt) ) return;
-		while( *cursor != '\n' && cursor<epr ) ++cursor;
-		++cursor;
-	}
-}*/
-
-/* chunk 4: newfun, fundone, newvar, addrval, canon
- */
-
-
-/* chunk 5: asgn, .., factor. Classical LR1 grammer.
- */
-
-/* SITUATION: Cursor is positioned where an expression must exist. It may or 
- *	may not be an assignment. 
- *	Classical LR parsing is used to parse the full expression, evaluating as 
- *	it is parsed, and leaving one value on the stack. Returns true on success.
- * (This comment applies to functions asgn,reln...,factor and konst).
- */
-int asgn(){ 
-	if(reln()){
-		if(lit(xeq)){
-			asgn();
-			if(!error)eq();
-		}
-	}
-	return error? 0: 1;
-}
-
-int reln(){
-	if(expr()){
-		if(lit(xle)){
-			if(expr()){
-				if(topdiff()<=0)pushone();
-				else pushzero();
-			}
-		}
-		else if(lit(xge)){
-			if(expr()){
-				if(topdiff()>=0)pushone();
-				else pushzero();
-			}
-		}
-		else if(lit(xeqeq)){
-			if(expr()){
-				if(topdiff()==0)pushone();
-				else pushzero();
-			}
-		}
-		else if(lit(xnoteq)){
-			if(expr()){
-				if(topdiff()!=0)pushone();
-				else pushzero();
-			}
-		}
-		else if(lit(xgt)){
-			if(expr()){
-				if(topdiff()>0)pushone();
-				else pushzero();
-			}
-		}
-		else if(lit(xlt)){
-			if(expr()){
-				if(topdiff()<0)pushone();
-				else pushzero();
-			}
-		}
-		else return 1;  /* just expr is a reln */
-	}
-	return 0;   /* not an expr is not a reln */
-}
-int expr(){
-	if(lit(xminus)){    /* unary minus */
-		term();
-		pushk(-toptoi());
-	}
-	else if(lit(xplus)){
-		term();
-		pushk(toptoi());
-	}
-	else term();
-	while(!error){    /* rest of the terms */
-		int leftclass = stack[nxtstack-1].class;
-		int rightclass;
-		if(lit(xminus)){
-			term();
-			rightclass = stack[nxtstack-1].class;
-			int b=toptoi();
-			int a=toptoi();
-			if( rightclass || leftclass) pushPtr(a-b);
-			else pushk(a-b);
-		}
-		else if(lit(xplus)){
-			term();
-			rightclass = stack[nxtstack-1].class;
-			int b=toptoi();
-			int a=toptoi();
-			if( rightclass || leftclass) pushPtr(a+b);
-			else pushk(a+b);
-		}
-		else return 1;   /* is expression, all terms done */
-	}
-	return 0;   /* error, set down deep */
-}
-
-int term() {
-	factor();
-	if(error)return 0;
-	if(lit(xstar)){
-		factor();
-		if(!error)pushk(toptoi()*toptoi());
-	}
-	else if(lit(xslash)){
-		if(*cursor=='*') {
-			--cursor;    /* opps, its a comment */
-			return 1;
-		}
-		factor();
-		int denom = toptoi();
-		int numer = toptoi();
-		int div = numer/denom;
-		if(!error)pushk(div);
-	}
-	else if(lit(xpcnt)){
-		factor();
-		int b=toptoi();
-		int a=toptoi();
-		int pct = a%b;
-		if(!error)pushk(pct);
-	}
-	return 1;  /* factor is a term */
-}
-
 /*	a FACTOR is a ( asgn ), or a constant, or a variable
  *	reference, or a function reference.
 */
-void factor() {
+void _factor() {
 	union stuff foo;
 	Type type;
 	char* x;
-	if(lit(xlpar)) {
-		asgn();
-		if( x=mustfind( cursor, cursor+5, ')' , RPARERR ) ) {
+	if(_lit(xlpar)) {
+		_asgn();
+		if( x=_mustFind( cursor, cursor+5, ')' , RPARERR ) ) {
 			cursor = x+1; /*after the paren */
 		}
 	} 
-	else if( type=konst() ) {
+	else if( type=_konst() ) {
 	/* Defines fname,lname. Returns Type. 
 	   void pushst( int class, int lvalue, Type type, void* stuff );
 	*/
 		switch(type){
 		case Int: 
-			pushk( ATOI() );  /* integer, use our ATOI */
+			pushk( _atoi() );  /* integer, use private _atoi */
 			break;
 		case Char:
 			foo.uc = *fname;
@@ -476,11 +474,11 @@ void factor() {
 			return;
 		}
 	}
-	else if( symname() ) {
+	else if( _symName() ) {
 		cursor = lname+1;
 		int where, len, class, obsize, stuff;
-		if( symnameis("MC") ) { 
-			enter(0); return;
+		if( _symNameIs("MC") ) { 
+			_enter(0); return;
 		} else {
 			struct var *v = addrval();  /* looks up symbol */
 			if( !v ){ eset(SYMERR); return; } /* no decl */
@@ -491,17 +489,17 @@ void factor() {
 	  		int type=(*v).type; 
 	  		int obsize = typeToSize(class,type);
 	  		int len=(*v).len;
-		  	if( class=='E' ) enter(where);  /* fcn call */
+		  	if( class=='E' ) _enter(where);  /* fcn call */
 			else {   /* is var name */
-				if( lit(xlpar) ) {		       /* is dimensioned */
+				if( _lit(xlpar) ) {		       /* is dimensioned */
 			  		if( !class ) {   /* must be class>0 */
 						eset(CLASERR);
 			  		} else {  /* dereference the lvalue */
 			  			/* reduce the class and recompute obsize */
 	  					obsize = typeToSize(--class,type);
 			  			/* increment where by subscript*obsize */
-		        		asgn(); if( error )return;
-		        		lit(xrpar);
+		        		_asgn(); if( error )return;
+		        		_lit(xrpar);
 			      		int subscript = toptoi();
 						if(len-1)if( subscript<0 || subscript>=len )eset(RANGERR); 
 						where += subscript * obsize;
@@ -527,41 +525,147 @@ void factor() {
 	}
 }
 
-/* converts fname..lname inclusive to integer
- */
-int ATOI() {
-	char* x = fname;
-	int val = 0;
-	int sign = *x=='-' ? -1 : 1;
-	if( *x=='-' || *x=='+' ) ++x;
-	do{ 
-		val = 10*val+*x-'0'; 
-	} while( ++x <= lname );
-	return sign*val;
+int _term() {
+	_factor();
+	if(error)return 0;
+	if(_lit(xstar)){
+		_factor();
+		if(!error)pushk(toptoi()*toptoi());
+	}
+	else if(_lit(xslash)){
+		if(*cursor=='*') {
+			--cursor;    /* opps, its a comment */
+			return 1;
+		}
+		_factor();
+		int denom = toptoi();
+		int numer = toptoi();
+		int div = numer/denom;
+		if(!error)pushk(div);
+	}
+	else if(_lit(xpcnt)){
+		_factor();
+		int b=toptoi();
+		int a=toptoi();
+		int pct = a%b;
+		if(!error)pushk(pct);
+	}
+	return 1;  /* a lonely factor is a term */
 }
 
-/* chunk 6:  skipst, vAlloc
+int _expr(){
+	if(_lit(xminus)){    /* unary minus */
+		_term();
+		pushk(-toptoi());
+	}
+	else if(_lit(xplus)){
+		_term();
+		pushk(toptoi());
+	}
+	else _term();
+	while(!error){    /* rest of the terms */
+		int leftclass = stack[nxtstack-1].class;
+		int rightclass;
+		if(_lit(xminus)){
+			_term();
+			rightclass = stack[nxtstack-1].class;
+			int b=toptoi();
+			int a=toptoi();
+			if( rightclass || leftclass) pushPtr(a-b);
+			else pushk(a-b);
+		}
+		else if(_lit(xplus)){
+			_term();
+			rightclass = stack[nxtstack-1].class;
+			int b=toptoi();
+			int a=toptoi();
+			if( rightclass || leftclass) pushPtr(a+b);
+			else pushk(a+b);
+		}
+		else return 1;   /* is expression, all terms done */
+	}
+	return 0;   /* error, set down deep */
+}
+
+
+int _reln(){
+	if(_expr()){
+		if(_lit(xle)){
+			if(_expr()){
+				if(topdiff()<=0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xge)){
+			if(_expr()){
+				if(topdiff()>=0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xeqeq)){
+			if(_expr()){
+				if(topdiff()==0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xnoteq)){
+			if(_expr()){
+				if(topdiff()!=0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xgt)){
+			if(_expr()){
+				if(topdiff()>0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xlt)){
+			if(_expr()){
+				if(topdiff()<0)pushone();
+				else pushzero();
+			}
+		}
+		else return 1;  /* just expr is a reln */
+	}
+	return 0;   /* not an expr is not a reln */
+}
+
+/* SITUATION: Cursor is positioned where an expression must exist. It may or 
+ *	may not be an assignment. 
+ *	Classical LR parsing is used to parse the full expression, evaluating as 
+ *	it is parsed, and leaving one value on the stack. Returns true on success.
+ * (This comment applies to functions asgn,reln...,factor and konst).
  */
+int _asgn(){ 
+	if(_reln()){
+		if(_lit(xeq)){
+			_asgn();
+			if(!error)_eq();
+		}
+	}
+	return error? 0: 1;
+}
 
 /************ scan tools ******************/
 
 /*	skip a possibly compound statement. Shortcoming is brackets
  *	in comments, they must be balanced.
  */
-void skipst() {
-	rem();
-	if( lit(xlb) ) {		/* compound */
-		skip('[',']');
-		rem();
+void _skipSt() {
+	_rem();
+	if( _lit(xlb) ) {		/* compound */
+		_skip('[',']');
+		_rem();
 		return;
 	}
-	else if( lit(xif)||lit(xwhile) ) {
-		lit(xlpar);			/* optional left paren */
-		skip('(',')');
-		skipst();
-		rem();
-		if(lit(xelse))skipst();
-		rem();
+	else if( _lit(xif)||_lit(xwhile) ) {
+		_lit(xlpar);			/* optional left paren */
+		_skip('(',')');
+		_skipSt();
+		_rem();
+		if(_lit(xelse))_skipSt();
+		_rem();
 		return;
 	}
 	else {					/* simple statement, eol or semi ends */
@@ -569,37 +673,9 @@ void skipst() {
 			if( (*cursor==0x0d)||(*cursor=='\n')||(*cursor==';') )break;
 		}
 		++cursor;
-		rem();
+		_rem();
 	}
 }
-
-/* 	SITUATION: int or char is parsed.
- *	Parses one variable. Makes allocation and symbol entry.
- */
-void vAlloc(Type type, union stuff *vpassed) {
-	if( !symname() ) {		/*defines fname,lname. True is match.*/
-		eset(SYMERR);
-		return;
-	}
-	cursor=lname+1;
-	if( lit("(") ){
-		vclass = 1;		/* array or pointer */
-		char* fn=fname; /* localize globals that asgn() may change */
-		char* ln=lname;
-		if( asgn() ) alen=toptoi()+1;  /* dimension */
-		fname=fn; 		/* restore the globals */
-		lname=ln;
-		char* x = mustfind(cursor,cursor+5,')',RPARERR);
-		if(x)cursor = x+1;
-	} else {
-		vclass = 0;
-		alen = 1;
-	}
-	newvar(vclass, type, alen, vpassed);
-}
-
-/* chunk 7: st, decl, quit
- */
 
 /* Returns true if user signals quit, or any other error.
  *	NOTE: MC 2 esets KILL on ESC, but test here for hard loop
@@ -614,6 +690,29 @@ int quit() {
 	return 0; 
 }
 
+/* Match char or int, else do nothing. If match parse
+ *  all comma separated declarations of that particular type
+ *	making var table entries and allocating value storage. Returns false
+ *	if not a declaration statement, true if it is. Leaves cursor just past
+ *  optional semi. 
+ */
+int _decl() { 
+	Type t;
+	if( _lit(xchar) ) {
+		do {
+			_varAlloc( Char, 0 );  /* 2nd arg is vpassed */
+		} while( _lit(xcomma) );
+	} else if( _lit(xint) ) {
+		do {
+			_varAlloc( Int, 0 );  /* 2nd arg is vpassed */
+		} while( _lit(xcomma) );
+	} else {
+		return 0;  /* not decl */
+	}
+	_lit(xsemi);    /* is decl */
+	return 1;
+}
+
 /* st(): interprets a possibly compound statement
  */
 void st() {
@@ -621,46 +720,46 @@ void st() {
 	brake=0;
 
 	if(quit())return;
-	rem();
+	_rem();
 	stbegin();
 	stcurs = cursor;
-	if(decl()){
-		rem();
+	if(_decl()){
+		_rem();
 		return;
 	}
-	else if( lit(xlb) ){     /* compound statement */
+	else if( _lit(xlb) ){     /* compound statement */
 		for(;;){
-			rem();
+			_rem();
 			if(leave||brake||error)return;
-			if(lit(xrb)){
-				rem();
+			if(_lit(xrb)){
+				_rem();
 				return;
 			}
 			st();
 		}
 	}
-	else if(lit(xif)) {
-		if(asgn()) {
+	else if(_lit(xif)) {
+		if(_asgn()) {
 			if(toptoi()) {
 				st();
-				if(lit(xelse)) {
-					skipst();
+				if(_lit(xelse)) {
+					_skipSt();
 				}
 			} 
 			else {
-				skipst();
-				if(lit(xelse)) {
+				_skipSt();
+				if(_lit(xelse)) {
 					st();
 				}
 			}
-			rem();
+			_rem();
 			return;
 		}
 	}
-	else if(lit(xwhile)) {
-		lit(xlpar);    /* optional left paren */
-		if( !asgn() )return;   /* error */
-		lit(xrpar);
+	else if(_lit(xwhile)) {
+		_lit(xlpar);    /* optional left paren */
+		if( !_asgn() )return;   /* error */
+		_lit(xrpar);
 		int condition = toptoi();
 		if( condition ) {
 /* prepare for repeating/skipping while (stcurs) 
@@ -671,7 +770,7 @@ void st() {
 
 			if(brake) {
 				cursor = objt;	/* break: done with the while */
-				skipst();		/* skip over the object */
+				_skipSt();		/* skip over the object */
 				brake = 0;
 				return;
 			}
@@ -681,14 +780,14 @@ void st() {
 			}
 		}
 		else {
-			skipst();
+			_skipSt();
 		}
 	}
-	else if(lit(xsemi)) {
-		rem();
+	else if(_lit(xsemi)) {
+		_rem();
 	}
-	else if(lit(xreturn)) {
-		int eos = ( lit(xrpar)
+	else if(_lit(xreturn)) {
+		int eos = ( _lit(xrpar)
 					 || *cursor==*xlb
 					 || *cursor==*xrb
 					 || *cursor==*xsemi
@@ -700,153 +799,23 @@ void st() {
 			pushzero(); /* default return value */
 		}
 		else {
-			asgn();  /* specified return value */
+			_asgn();  /* specified return value */
 		}
 		leave=1;		/* signal st() to leave the compound 
 						statement containing this return */
 		return;
 	}
-	else if(lit(xbreak)) {
+	else if(_lit(xbreak)) {
 		brake=1;
 		return;
 	}
-	else if( asgn() ) {      /* if expression discard its value */
+	else if( _asgn() ) {      /* if expression discard its value */
 		toptoi();
-        lit(xsemi);
+        _lit(xsemi);
 	}
 	else {
 		eset(STATERR);
 	}
-}
-
-/* Match char or int, else do nothing. If match parse
- *  all comma separated declarations of that particular type
- *	making var table entries and allocating value storage. Returns false
- *	if not a declaration statement, true if it is. Leaves cursor just past
- *  optional semi. 
- */
-int decl() { 
-	Type t;
-	if( lit(xchar) ) {
-		do {
-			vAlloc( Char, 0 );  /* 2nd arg is vpassed */
-		} while( lit(xcomma) );
-	} else if( lit(xint) ) {
-		do {
-			vAlloc( Int, 0 );  /* 2nd arg is vpassed */
-		} while( lit(xcomma) );
-	} else {
-		return 0;  /* not decl */
-	}
-	lit(xsemi);    /* is decl */
-	return 1;
-}
-
-/* chunk 9: cold, warm, hot, loader, logo
- *  This chunk is replaced by command line args, see tcMain.c. 
-  *	logo() remains here, though.
- */
-/* chunk 8: enter, setarg, link
- */
-
-/*	SITUATION: Just parsed symbol with class 'E', or special symbol MC.
- *	Parses the args putting values are on the stack, arg pointing to the first 
- *	of them.
- *	Sets the cursor to the called function's 'where'. Parses arg decl's
- *	giving them values from the stack. Executes the function body.
- *	Pops the locals (vars and values). Restores the caller's stcurs and 
- *	cursor.
- */
-void enter( char* where) {
-	int arg=nxtstack, nargs=0;
-
-	lit(xlpar); /* optional (   */
-	int haveArgs = ! (  lit(xrpar)
-					 || *cursor==*xlb
-					 || *cursor==*xrb
-					 || *cursor==*xsemi
-					 || *cursor==*xnl
-					 || *cursor==0x0d
-					 || *cursor==*xslash
-					);
-	if ( haveArgs ) {
-		do {
-			if(error)return;
-			if( asgn()) ++nargs;
-			else break;  /* break on error */
-		} while( lit(xcomma) );
-	}
-	if(error)return;
-	lit(xrpar);   /* optional )   */
-	rem();
-	if(!where) {
-		if(nxtstack) machinecall( nargs );
-		else eset(MCERR);
-		return;
-	}
-	else {   /* ABOVE parses the call args, BELOW parses the called's arg decls */
-		char *localstcurs=stcurs, *localcurs=cursor;
-		cursor = where;
-		newfun();  
-		for(;;) {	  
-			rem();
-			if(lit(xint)) { 
-				do {
-					setarg(Int, &stack[arg]);
-					arg++;
-				} while(lit(xcomma));
-				lit(xsemi); /* optional */
-			} 
-			else if ( lit(xchar)) {
-				do {
-					setarg(Char, &stack[arg]);
-					arg++;
-				} while(lit(xcomma));
-				lit(xsemi);
-			}
-			else {
-				break;		/* and the only way outa here */
-			}
-		}
-		if(arg != nxtstack) {
-			cursor=localcurs;
-			stcurs=localstcurs;
-			eset(ARGSERR);
-		}
-		while(nargs>0){
-			popst();
-			--nargs;
-		}
-		if(!error)st();     /*  <<-- HERE is where we do it */
-		if(!leave)pushzero();
-		leave=0;
-		cursor=localcurs;
-		stcurs=localstcurs;
-		fundone();
-	}
-}
-
-/* Situation: parsing argument declarations, passed values are on the stack.
- * arg points into stack to an argument of type. 
- * Gets actual value of arg, calls valloc which parses and sets
- * up local with the passed value.
- */ 
-void setarg( Type type, struct stackentry *arg ) {
-	union stuff vpassed  = (*arg).value;
-	char* where;
-	int class = (*arg).class;
-	int lvalue = (*arg).lvalue;
-	int stacktype = (*arg).type;
-	if( lvalue=='L') {
-		where = (char*)vpassed.up;
-		if( class==1 ) { 
-			vpassed.up = *((char**)(*arg).value.up);
-		}
-		else if( stacktype==Int ) vpassed.ui = get_int(where);
-		else if( stacktype==Char) vpassed.ui = get_char(where);
-			/* ui to clear high order byte */
-	}
-	vAlloc( type, &vpassed);
 }
 
 /*
@@ -855,17 +824,8 @@ void setarg( Type type, struct stackentry *arg ) {
 void checkBrackets() {
 	int count;
 	while(*(cursor++) != '[' && cursor<=epr) ;
-	if(skip('[',']'))eset(RBRCERR);
+	if(_skip('[',']'))eset(RBRCERR);
 }
-
-/* chunk 11: MC's. 
- *	A handful of very primitive machine (and compiler) dependant functions.
- *	This is the portability layer. 
- * 	Moved to machineCall.c
- */
-
-/* chunk 12(new): dumps
- */
 
 /*********** a variety of dumps for debugging **********/
 char* typeToWord(Type t){
@@ -876,13 +836,23 @@ char* typeToWord(Type t){
 	}
 }
 
+void dumpHex( void* where, int len ) {
+	char* w=where;
+	fflush(stdout);
+	fprintf(stderr,"\n%x: ",w);
+	int i;
+	for( i=0; i<len; ++i )fprintf(stderr," %x",w[i]);
+}
+
 /* dump from..to inclusive  */
 void dumpft(char *from, char *to ) {
+	fflush(stdout);
 	while(from <= to) fprintf(stderr,"%c",*(from++));
 }
 
 /* dump the line cursor is in from cursor to nl */
 void dumpLine() {
+	fflush(stdout);
 	char* begin = cursor;
 	char* end = cursor;
 	while (*end!=0x0a && *end!=0x0d && end<epr){  /* find end of line */
@@ -894,44 +864,9 @@ void dumpLine() {
 	}
 }
 
-void dumpStackEntry(int e){
-	if( 0<=e && e<=nxtstack ) {
-		fprintf(stderr,"\n stack entry at %d: %d %c %d ", e, stack[e].class, 
-			stack[e].lvalue, stack[e].type );
-		if(verbose[VS])dumpVal(stack[e].type, stack[e].class, 
-				&stack[e].value,stack[e].lvalue);
-	}
-	else {
-		fprintf(stderr,"no stack entry at %d", e);
-	}
-}
-void dumpStack(){
-	int e;
-	fprintf(stderr,"\nStack (from top) class lvalue type stuff");
-	for( e=nxtstack-1; e>=0; --e) {
-		dumpStackEntry(e); 
-	}
-	fprintf(stderr,"\n");
-}
-/* dumps the just popped stack entry */
-void dumpPopTop() {
-	dumpStackEntry(nxtstack);
-	}
-
-/* dumps the top stack entry */
-void dumpTop() {
-	dumpStackEntry(nxtstack-1);
-}
-
-void dumpHex( void* where, int len ) {
-	char* w=where;
-	fprintf(stderr,"\n%x: ",w);
-	int i;
-	for( i=0; i<len; ++i )fprintf(stderr," %x",w[i]);
-}
-
 int stateCallNumber=0;
 void dumpState() {
+	fflush(stdout);
 	if(stateCallNumber==0){
 		fprintf(stderr,"\nADDRESSES (hex)");
 		fprintf(stderr,"\npr:     %x",pr);
@@ -948,6 +883,7 @@ void dumpState() {
 
 /* dump a just parsed piece of pr, typically a name */
 void dumpName() {
+	fflush(stdout);
 	char *c = fname;
 	while( c <= lname ) { 
 			pc(*(c++));
@@ -1053,17 +989,17 @@ void tclink() {
 	newfun();
 	while(cursor<epr && !error){
 		char* lastcur = cursor;
-		rem();
-		if(lit(xlb)) skip('[',']');
-		else if(decl()) ;
-		else if(lit(xendlib))newfun();
-		else if(symname()) {     /* fctn decl */
+		_rem();
+		if(_lit(xlb)) _skip('[',']');
+		else if(_decl()) ;
+		else if(_lit(xendlib))newfun();
+		else if(_symName()) {     /* fctn decl */
 			union stuff kursor;
 			kursor.up = cursor = lname+1;
 			newvar('E',2,1,&kursor);
-			if(x=mustfind(cursor, epr, '[',LBRCERR)) {
+			if(x=_mustFind(cursor, epr, '[',LBRCERR)) {
 				cursor=x+1;
-				skip('[',']');
+				_skip('[',']');
 			}
 		}
 		if(cursor==lastcur)eset(LINKERR);
@@ -1088,4 +1024,3 @@ char* lchar(char* k){
 	} while( ++k < epr);
 	return k-1;
 }
-

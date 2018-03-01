@@ -3,6 +3,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 
 #define ECHO 1
 #define VLEN 8
@@ -100,10 +101,7 @@ int obsize, vclass, alen;
 int traceMode;
 
 void stbegin();
-void tcDebug();
-struct var* hit();
 int typeToSize( int class, Type type );
-int eq();
 int topdiff();
 int toptoi();
 struct stackentry* popst();
@@ -111,40 +109,24 @@ void pushst( int class, int lvalue, Type type, union stuff *value );
 void pushk(int datum);
 void pushone();
 void pushzero();
+void pushPtr(int datum);
 int eset( int err );
 void ps(char* s);
 void pl(char* s);
 int  pn(int n);
 void pc(char c);
-int lit(char *s);
-int skip(char l, char r);
-int symname();
-int symnameis(char* name);
+/*int _lit(char *s);
+int _skip(char l, char r);*/
 char* find( char *from, char *upto, char c);
-char* mustfind( char *from, char *upto, char c, int err );
-char* findEOS( char* x );
-Type konst();
-void rem();
+/*void _rem();*/
+void newfun();
+void fundone();
 void newvar( int class, Type type, int len, union stuff *passed );
-int allocSpace(struct var *v, int amount);
-int copyArgValue(struct var *v, 
-		int class, Type type, union stuff *passed );
 struct var* addrval();
-struct var* _addrval();
 void canon(struct var *v);
-int asgn();
-int reln();
-int expr();
-int term();
-void factor();
-int ATOI();
-void skipst();
-void vAlloc(Type type, union stuff *vpassed);
+int _asgn();
 int quit();
 void st();
-int decl();
-void enter();
-void setarg( Type type, struct stackentry *arg );
 void machinecall();
 char* typeToWord(Type t);
 void dumpVal(Type t, int class, union stuff *val, char lval);
@@ -164,12 +146,11 @@ void put_int(char *where, int datum);
 int  get_int(char *where);
 void put_char(char *where, char datum);
 char get_char(char *where);
-void put_ptr(char *where, void* datum);
-char* get_ptr(char *where);
-int FileRead(char*filename, char* buffer, int bufflen);
+int fileRead(char*filename, char* buffer, int bufflen);
+int fileWrite(char*filename, char* buffer, int bufflen);
 void readTheFiles(int argc, char *argv[], int optind);
-void db_cmds();
 int countch(char*,char*,char);
+char* fchar(char*);
 char* lchar(char*);
 struct var* addrval_all(char*);
 void showLine(char*);
@@ -180,13 +161,9 @@ void tclink();
 void prbegin();
 void prdone();
 void whatHappened();
-void errToWords();
 void tcUsage();
 struct var* br_hit(struct var *v);
 void pft(char *from, char *to );
-  /* unfortunately #include ctypes.h causes gcc link problems, so... */
-int isalpha(int);
-int isalnum(int);  
   /* All these two do is prevent warnings for tcc compile */
 int Mchrdy();
 int Mgch(int,int*);

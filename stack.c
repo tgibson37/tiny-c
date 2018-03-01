@@ -1,5 +1,39 @@
 #include "tc.h"
 
+void dumpStackEntry(int e){
+	fflush(stdout);
+	if( 0<=e && e<=nxtstack ) {
+		fprintf(stderr,"\n stack entry at %d: %d %c %d ", e, stack[e].class, 
+			stack[e].lvalue, stack[e].type );
+		if(verbose[VS])dumpVal(stack[e].type, stack[e].class, 
+				&stack[e].value,stack[e].lvalue);
+	}
+	else {
+		fprintf(stderr,"no stack entry at %d", e);
+	}
+}
+void dumpStack(){
+	int e;
+	fflush(stdout);
+	fprintf(stderr,"\nStack (from top) class lvalue type stuff");
+	for( e=nxtstack-1; e>=0; --e) {
+		dumpStackEntry(e); 
+	}
+	fprintf(stderr,"\n");
+}
+/* dumps the just popped stack entry */
+void dumpPopTop() {
+	dumpStackEntry(nxtstack);
+}
+/* dumps the top stack entry */
+void dumpTop() {
+	dumpStackEntry(nxtstack-1);
+}
+
+void stuffCopy( union stuff *to, union stuff *from ) {
+	memcpy( to, from, sizeof(to));
+}
+
 /* basic pusher */
 void pushst( int class, int lvalue, Type type, union stuff *value ) {
 	if( nxtstack > STACKLEN) { error = PUSHERR; return; }
@@ -63,10 +97,6 @@ int toptoi() {
 	}
 	else { eset(LVALERR); }
 	return datum;
-}
-
-void stuffCopy( union stuff *to, union stuff *from ) {
-	memcpy( to, from, sizeof(to));
 }
 
 /* push an int */

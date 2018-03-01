@@ -24,44 +24,9 @@ void fundone() {
 
 /*********** var tools ****************/
 
-/* SITUATION: Declaration is parsed, and its descriptive data known.
- * 	Fill in the var with this data. Allocate value storage unless already
- *	allocated, i.e. pointer to passed data. Copy passed data into allocation.
- *	NOTE: signifantly refactored.
- */
-void newvar( int class, Type type, int len, union stuff *passed ) {
-	struct var *v = &vartab[nxtvar];
-	canon(v);    /* sets the canon'd name into v */
-	(*v).class = class;
-	(*v).type = type;
-	(*v).len = len;
-	(*v).brkpt = 0;
-	int obsize = typeToSize(class,type);
-	if(allocSpace(v,len*obsize)) return;  /* true is bad, eset done */
-	if(passed) copyArgValue( v, class, type, passed);
-	if(curfun>=fun) (*curfun).lvar = nxtvar;
-	if( ++nxtvar>VTABLEN )eset(TMVRERR);
-	return;
-}
-
-/* allocates memory for value of v, return 0 on success, else !0
- */
-int allocSpace(struct var *v, int amount){
-	char* kf;
-	kf = prused+1;
-	(*v).value.up = prused+1;
-	prused += amount;
-	if( prused-EPR >=0 ) {
-		eset(TMVLERR);
-		return TMVLERR;
-	}
-	memset( kf, 0, prused-kf+1 ); /* zero the reserved space */
-	return 0;
-}
-
 /*	copy the argument value into the new local place.
  */
-int copyArgValue(struct var *v, int class, Type type, union stuff *passed ) {
+int _copyArgValue(struct var *v, int class, Type type, union stuff *passed ) {
 	if(passed && class){   					/* passed pointer */
 		(*v).value.up = (*passed).up;
 	} else if( passed && !class ) {			/* passed datum */
@@ -77,6 +42,41 @@ int copyArgValue(struct var *v, int class, Type type, union stuff *passed ) {
 			return TYPEERR;
 		}
 	}
+}
+
+/* allocates memory for value of v, return 0 on success, else !0
+ */
+int _allocSpace(struct var *v, int amount){
+	char* kf;
+	kf = prused+1;
+	(*v).value.up = prused+1;
+	prused += amount;
+	if( prused-EPR >=0 ) {
+		eset(TMVLERR);
+		return TMVLERR;
+	}
+	memset( kf, 0, prused-kf+1 ); /* zero the reserved space */
+	return 0;
+}
+
+/* SITUATION: Declaration is parsed, and its descriptive data known.
+ * 	Fill in the var with this data. Allocate value storage unless already
+ *	allocated, i.e. pointer to passed data. Copy passed data into allocation.
+ *	NOTE: signifantly refactored.
+ */
+void newvar( int class, Type type, int len, union stuff *passed ) {
+	struct var *v = &vartab[nxtvar];
+	canon(v);    /* sets the canon'd name into v */
+	(*v).class = class;
+	(*v).type = type;
+	(*v).len = len;
+	(*v).brkpt = 0;
+	int obsize = typeToSize(class,type);
+	if(_allocSpace(v,len*obsize)) return;  /* true is bad, eset done */
+	if(passed) _copyArgValue( v, class, type, passed);
+	if(curfun>=fun) (*curfun).lvar = nxtvar;
+	if( ++nxtvar>VTABLEN )eset(TMVRERR);
+	return;
 }
 
 /* 	fname..lname is full name. Puts canonicalized name into v. If short

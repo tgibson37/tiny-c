@@ -4,6 +4,18 @@
  * 	loads a set regression tests which can be run individually or collectively.
  */
 extern int optind;
+
+void tcUsage() {
+	printf("Usage: tc [-d] [libfile] appfile");
+	printf("\n  no args prints this usage");
+	printf("\n  one arg loads the standard library, and the appfile");
+	printf("\n  two args loads your library, and the appfile");
+	printf("\nThe tinyC app will be started at its main() function");
+	printf("\n  (no arguments to this main()");
+	printf("\n -d enables the debugger");
+	printf("\n");
+}
+
 int main(int argc, char *argv[]) {
 	int opt;
     while ((opt = getopt(argc, argv, "dv")) != -1) {
@@ -35,16 +47,5 @@ int main(int argc, char *argv[]) {
 	st();   /* <<<== executes statement above, line 19 */
 	prdone();
 	whatHappened();
-}
-
-void tcUsage() {
-	printf("Usage: tc [-d] [libfile] appfile");
-	printf("\n  no args prints this usage");
-	printf("\n  one arg loads the standard library, and the appfile");
-	printf("\n  two args loads your library, and the appfile");
-	printf("\nThe tinyC app will be started at its main() function");
-	printf("\n  (no arguments to this main()");
-	printf("\n -d enables the debugger");
-	printf("\n");
 }
 

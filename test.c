@@ -82,6 +82,7 @@ void testing(int argc, char *argv[]) {
 		for( t=1; t<argc; ++t ) {
 			testcase = atoi(argv[t]);
 			printf("\n------------\nBEGIN TEST %d %s", testcase, timeStamp);
+			fflush(stdout);
 			doTest(testcase);
 		}
 		printf("\n");
@@ -189,12 +190,12 @@ void doTest(int testcase) {
 			strcpy(pr,"char symbol, more stuff"); 
 			prused = pr+100;
 			cursor = pr+5;
-			symname();
+			_symName();
 			cursor = lname+1;
 			pl("");dumpName();
 			printf("\nfname,lname,cursor= %d %d %d",fname-pr,lname-pr,cursor-pr);
 			break;
-/* symname() defines fname, lname, and advances cursor. 
+/* _symName() defines fname, lname, and advances cursor. 
 	Should get...
 			symbol
 			fname,lname,cursor= 5 10 11
@@ -204,7 +205,7 @@ void doTest(int testcase) {
 			strcpy(pr,"char symbol, 34567890123456789012345"); 
 			prused = pr+20;
 			cursor = pr+5;
-        	vAlloc(Char,0);
+        	_varAlloc(Char,0);
         	dumpVarTab();
 			printf("\npr ->%s<-",pr);		/* stops at the NULL */
 			printf("\npr ->%s<-",pr+22);	/* resumes after the NULL */
@@ -220,19 +221,19 @@ void doTest(int testcase) {
 			strcpy(pr,"char symbol, more stuff"); 
 			prused = pr+100;
 			cursor = pr;
-			/* calling lit(xchar) twice */
+			/* calling _lit(xchar) twice */
 			pl("cursor->");ps(cursor);
 			/* first, match true, cursor -> space after char */
-			int match = lit("char");  /* lit should match */
+			int match = _lit("char");  /* lit should match */
 			printf("\nmatch,cursor= %d %d",match,cursor-pr);
 			/* again, no match this time */
 			pl("cursor->");ps(cursor);
-			match = lit("char");
+			match = _lit("char");
 			printf("\nmatch,cursor= %d %d",match,cursor-pr);
 			/* cursor -> s of symbol */
 			pl("cursor->");ps(cursor);
 			break;
-/* lit(). Must match char. Two calls. First succeeds, 
+/* _lit(). Must match char. Two calls. First succeeds, 
 	second fails returning 0, cursor advanced
 	over white space. 	
 	Should get...
@@ -251,11 +252,11 @@ void doTest(int testcase) {
 			prused = pr+100;
 			epr = prused+100;
 			/* 2 decl's push 6 vars into vartable */
-			decl();   /*does the char */
-			decl();   /*does the int  */
+			_decl();   /*does the char */
+			_decl();   /*does the int  */
 			dumpVarTab();
 			break;
-/*	decl(). Parses entire char int declarations. Six calls cover all cases.
+/*	_decl(). Parses entire char int declarations. Six calls cover all cases.
 	Should get...
 			Var Table: name class obsize len (type)stuff
 				 var 0: a 0 Char 1  ref to pr[101]
@@ -381,13 +382,13 @@ void doTest(int testcase) {
 			pl("4 skips: ");
 			/* 4 calls to skip, 
 			the last should fail with error,cursor= 2 D */
-			lit("{");skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
-			lit("{");skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
-			lit("{");skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
-			lit("{");skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
+			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
+			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
+			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
+			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
 			break;
 /* 
-	skip() over nested braces.
+	_skip() over nested braces.
 	Should get...
 				at start cursor,epr,error = 1 35 0
 				cursor->}   {}   {{}{{}}}   {    STRING-END
@@ -402,20 +403,20 @@ void doTest(int testcase) {
 			strcpy(pr, "   \n\n  /* a tiny-c style comment   \nnext-line  string-end");
 			epr = pr + strlen(pr) -1;
 			cursor = pr;
-			printf("\nBEFORE rem()");
+			printf("\nBEFORE _rem()");
 			printf("\ncursor %d-->%s", cursor-pr, cursor );
-			rem();
-			printf("\nAFTER rem()");
+			_rem();
+			printf("\nAFTER _rem()");
 			printf("\ncursor %d-->%s", cursor-pr, cursor );
 			break;
 /* 
-	rem(). Should get...
-				BEFORE rem()
+	_rem(). Should get...
+				BEFORE _rem()
 				cursor 0-->   
 
 				  /* a tiny-c style comment   
 				next-line  string-end
-				AFTER rem()
+				AFTER _rem()
 				cursor 36-->next-line  string-end
 */
 		case 15:
@@ -423,17 +424,17 @@ void doTest(int testcase) {
 			cursor = pr;
 			epr = pr + strlen(pr) -1;
 			printf("\n1 cursor->%s<-",cursor);
-			printf("\nkonst returns %d ",konst()); dumpName();
+			printf("\nkonst returns %d ",_konst()); dumpName();
 			printf("\n2 cursor->%s<-",cursor);
-			printf("\nkonst returns %d ",konst()); dumpName();
+			printf("\nkonst returns %d ",_konst()); dumpName();
 			printf("\n3 cursor->%s<-",cursor);
-			printf("\nkonst returns %d ",konst()); dumpName();
+			printf("\nkonst returns %d ",_konst()); dumpName();
 			printf("\n4 cursor->%s<-",cursor);
-			printf("\nkonst returns %d ",konst()); /*name unchanged*/
+			printf("\nkonst returns %d ",_konst()); /*name unchanged*/
 			printf("\n5 cursor->%s<-",cursor);  /*cursor to STRING-END */
 			break;
 /* 
-	konst() (8080 name: const()). 4 cases.
+	_konst() (8080 name: const()). 4 cases.
 	Should get...
 				1 cursor->   17  "hello"  'c'  STRING-END<-
 				konst returns 1 17
@@ -449,10 +450,10 @@ void doTest(int testcase) {
 		case 16:
 			testSetup("   17  \"hello\"  \'c\'  STRING-END");
 			printf("\npr->%s", pr);
-			pl("3 factor()'s");
-			factor(); 
-			factor(); 
-			factor(); 
+			pl("3 _factor()'s");
+			_factor(); 
+			_factor(); 
+			_factor(); 
 			dumpStack();
 			pl("3 popst()'s");
 			popst();  /* char */
@@ -463,9 +464,9 @@ void doTest(int testcase) {
 			printf("\n int %d", stack[nxtstack].value );
 			break;
 /* 
-	factor(). Three cases. Should get...
+	_factor(). Three cases. Should get...
 				pr->   17  "hello"  'c'  STRING-END
-				3 factor()'s
+				3 _factor()'s
 				Stack (from top) class lvalue type stuff
 				 stack entry at 2: 0 A 1 
 				 stack entry at 1: 1 A 1 
@@ -551,16 +552,16 @@ void doTest(int testcase) {
 */
 		case 18:
 			testSetup("1+2");
-			int x = asgn();
+			int x = _asgn();
 			printf("\nasgn returned %d, %s is %d", x, pr, toptoi());
 			testSetup("1+2+3");
-			x = asgn();
+			x = _asgn();
 			printf("\nasgn returned %d, %s is %d", x, pr, toptoi());
 			testSetup("1*2");
-			x = asgn();
+			x = _asgn();
 			printf("\nasgn returned %d, %s is %d", x, pr, toptoi());
 			testSetup("(1+2)*3");
-			x = asgn();
+			x = _asgn();
 			printf("\nasgn returned %d, %s is %d", x, pr, toptoi());
 			break;
 /* 
@@ -573,7 +574,7 @@ void doTest(int testcase) {
 		case 19:
 			for(i=0; i<rel_cases; ++i) {
 				testSetup( rel_case[i] );
-				asgn(); 
+				_asgn(); 
 				printf("\n%s is %d ", pr, toptoi());
 			}
 			break;
@@ -602,7 +603,7 @@ void doTest(int testcase) {
 		case 20:
 			for(i=0; i<ops_cases; ++i) {
 				testSetup( ops_case[i] );
-				asgn(); 
+				_asgn(); 
 				printf("\n%s is %d ", pr, toptoi());
 			}
 			break;
@@ -640,23 +641,23 @@ void doTest(int testcase) {
 			len = strlen(pr); /* capture this now, before 0's go in there */
 
 			printf("\ndecl char a");
-			decl();
+			_decl();
 			printf("\nprused,obsize %d %d \n",prused-pr,obsize);
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 
 			printf("\ndecl int x");
-			decl();
+			_decl();
 			printf("\nprused,obsize %d %d \n",prused-pr,obsize);
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 
 			printf("\ndecl char p(7)");
-			decl();
+			_decl();
 			printf("\nprused,obsize %d %d \n",prused-pr,obsize);
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 
 			printf("\nprused,obsize %d %d ",prused-pr,obsize);
 			break;
-/* 	vAlloc(), newvar(), does newvar zero the allocated space properly.
+/* 	_varAlloc(), newvar(), does newvar zero the allocated space properly.
 	And does put|get_int|char use allocated space properly.
 	Should get... 
 		prused,obsize 6316529 1 78 58 0 58 58 58 58 58 58 58 58 58 58 78 
@@ -1070,7 +1071,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			break;
 /* 	Should get for each: 63,64,65... 
  *				double.tg - lrb - 2/5/18
- *				Enter phrase : 
+ *				<type of eol's>
  *				hello
  *				hello 1
  *				world
@@ -1203,7 +1204,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/99");
 			break;
 /* 	Should get... 
- *	
+ *			no such file: ./testFiles/99
  */
 
 		default:

@@ -279,7 +279,7 @@ int db_cmd() {
 
 /********* Command Loop *****************/
 /* Does commands until either x (exit) or r,c,n (resume processing) */
-void db_cmds() {
+void _dbCommands() {
 	while(1) {
 		db_next=0;
 		printf("(tc-db) ");
@@ -298,7 +298,7 @@ void db_cmds() {
 /* after link, before interpreter loop */
 void prbegin(){
 	if(debug) {
-		db_cmds();
+		_dbCommands();
 	}
 }
 
@@ -321,7 +321,7 @@ void stbegin() {
 		char* lc = lchar(cursor);
 		printf("line %d cursor(pr[%d])->%.10s\n", lineno,cursor,cursor);
 		--db_next;
-		db_cmds();
+		_dbCommands();
 	}
 }
 
@@ -333,7 +333,7 @@ struct var* br_hit(struct var *v) {
 		printf("\nbreak at line %d cursor pr[%d]: %s\n",lineno,cursor-pr,(*v).name);
 		showLine(cursor);
 		printf("\n");
-		db_cmds();
+		_dbCommands();
 	}
 }
 
