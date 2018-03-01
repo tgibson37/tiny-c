@@ -919,7 +919,11 @@ void readTheFiles(int argc, char *argv[], int optind) {
 	int optcount = optind-1;
 	if(argc-optcount==2){
 		/* sys */
-		char* sysfile = "/usr/local/share/tinyC/library.tc";
+#if defined(_WIN32)
+        char* sysfile = "pps\\library.tc";
+#else
+        char* sysfile = "/usr/local/share/tinyC/library.tc";
+#endif
 		nread = fileRead(sysfile,epr,EPR-epr);
 		if(nread == -1) {
 			fprintf(stderr,"tc: file read error: %s",sysfile);

@@ -8,6 +8,18 @@
 	As defined here they work on mint linux.
  */
 
+#if defined(_WIN32)
+
+#include <conio.h>
+
+void initTermios(int echo) {}
+void resetTermios(void) {}
+char getch_(int echo) {
+    return (echo) ? getche() : getch();
+}
+
+#else
+
 /*	Detect a key hit is waiting in its buffer, return the char,
  *	leaving it in the buffer to be read. Used to detect ESC character
  *	to force a quit.
@@ -97,3 +109,5 @@ int main(void) {
   return 0;
 } 
  */
+
+#endif

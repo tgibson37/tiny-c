@@ -1,5 +1,7 @@
 # Compiler
 CC = /usr/bin/gcc
+# alternative for _WIN32
+#CC = /usr/bin/gcc.exe
 
 # Name of development files/targets
 TC = tc
