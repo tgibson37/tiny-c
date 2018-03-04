@@ -1,24 +1,27 @@
-Issues.txt
----
-Collected Dec 2
+736:	8 pm:	 read section 2.10 of owners manual, private MC's. Interesting. ISSUE:	 it describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
+	ACTION: 
 
-Dec 19 update:
-	- tidy (low priority)
-	x done
-	d documentation
+3135:	Writing debug.txt. Here are ISSUEs uncovered by the writing...
+	debug r should offer restart
+	debug d and e
+	debug i v (variables) (non lib, in scope)
+	debug i V (just lib)
+	prbegin never called, should be AFTER link, so can set brkpts
+		goaround: do one n. That lets interp run until it has to parse a statement, which is the MAIN_. By then link is done and you can enter bkpt's.
+	debug b, sym must be canonical form
+		canonical not called
+		adding long sym using long name fails. Adding using canon'd result (mentally achieved) works.
+	ACTION: 
 
-notes.txt...
--	502 findEOS() and several other ways: find one way to test EOS.
--	517 : Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
--	697 ISSUE better names for globals.
-x	709 Subordinate ISSUE is be sure brake and leave are zeroed back appropriatly.
-d	726 : it describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
--	772 : index base shift, BADDD!, machine call ~110. fix later.
-x	2664 MAJOR ISSUE: bombs due to forgotten ] means inclomplete link. Need to diagnose that situation and give intelligence that is helpful.
-x	2944 debug ISSUE: Need to print array elements.
+3883:	ISSUE:	 in gdb caught in the (tc-db) command loop. Not getting prompt, cannot g or c or anything.
+	ACTION: 
 
-tc.c...
-x	754 quit() /* Returns true if user signals quit.
-x	 *	STUBBED for now. ISSUE how to set the quit flag from keyboard.
-x	 */
+Is this an ISSUE ???  YES, the arrow keys become accidental ESC's
+	Test 92 shows this
+	macnine call ~125; also tc.c ~840
+	Test 92, the arrow keys use ESC [ <code> 
+	A	up,	B	down,	C	right,	D	left	
+	BUT the esc sets a kill! 
+	MC2 (test 91) doesn't do that. Must be in the lib code.
 
+4142:	ISSUES...

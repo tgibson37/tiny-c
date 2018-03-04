@@ -442,9 +442,137 @@ Type _konst() {
 	} else return Err;  /* no match, Err==0 */
 }
 
-/*	a FACTOR is a ( asgn ), or a constant, or a variable
- *	reference, or a function reference.
-*/
+/* An asgn is a reln or an lvalue = asgn. Note that
+   reln can match an lvalue.
+ */
+int _asgn(){ 
+	if(_reln()){
+		if(_lit(xeq)){
+			_asgn();
+			if(!error)_eq();
+		}
+	}
+	return error? 0: 1;
+}
+
+/* a RELN is an expr or a comparison of exprs
+ */
+int _reln(){
+	if(_expr()){
+		if(_lit(xle)){
+			if(_expr()){
+				if(topdiff()<=0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xge)){
+			if(_expr()){
+				if(topdiff()>=0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xeqeq)){
+			if(_expr()){
+				if(topdiff()==0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xnoteq)){
+			if(_expr()){
+				if(topdiff()!=0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xgt)){
+			if(_expr()){
+				if(topdiff()>0)pushone();
+				else pushzero();
+			}
+		}
+		else if(_lit(xlt)){
+			if(_expr()){
+				if(topdiff()<0)pushone();
+				else pushzero();
+			}
+		}
+		else return 1;  /* just expr is a reln */
+	}
+	return 0;   /* not an expr is not a reln */
+}
+
+/* ;an EXPR is a term or sum (diff) of terms.
+ */
+int _expr(){
+	if(_lit(xminus)){    /* unary minus */
+		_term();
+		pushk(-toptoi());
+	}
+	else if(_lit(xplus)){
+		_term();
+		pushk(toptoi());
+	}
+	else _term();
+	while(!error){    /* rest of the terms */
+		int leftclass = stack[nxtstack-1].class;
+		int rightclass;
+		if(_lit(xminus)){
+			_term();
+			rightclass = stack[nxtstack-1].class;
+			int b=toptoi();
+			int a=toptoi();
+			if( rightclass || leftclass) pushPtr(a-b);
+			else pushk(a-b);
+		}
+		else if(_lit(xplus)){
+			_term();
+			rightclass = stack[nxtstack-1].class;
+			int b=toptoi();
+			int a=toptoi();
+			if( rightclass || leftclass) pushPtr(a+b);
+			else pushk(a+b);
+		}
+		else return 1;   /* is expression, all terms done */
+	}
+	return 0;   /* error, set down deep */
+}
+
+/* ;a term is a factor or a product of factors.
+ */
+int _term() {
+	_factor();
+	while(!error) {
+		if(_lit(xstar)){
+			_factor();
+			if(!error)pushk(toptoi()*toptoi());
+		}
+		else if(_lit(xslash)){
+			if(*cursor=='*') {
+				--cursor;    /* opps, its a comment */
+				return 1;
+			}
+			_factor();
+			int denom = toptoi();
+			int numer = toptoi();
+			int div = numer/denom;
+			if(!error)pushk(div);
+		}
+		else if(_lit(xpcnt)){
+			_factor();
+			int b=toptoi();
+			int a=toptoi();
+			int pct = a%b;
+			if(!error)pushk(pct);
+		}
+		else return 1;  /* no more factors */
+	}
+	return 0;
+}
+
+/* a FACTOR is a ( asgn ), or a constant, or a variable reference, or a function
+    reference. NOTE: factor must succeed or it esets SYNXERR. Callers test error
+    instead of a returned true/false. This varies from the rest of the expression 
+    stack.
+ */
 void _factor() {
 	union stuff foo;
 	Type type;
@@ -523,128 +651,6 @@ void _factor() {
 	else {
 		eset(SYNXERR);
 	}
-}
-
-int _term() {
-	_factor();
-	if(error)return 0;
-	if(_lit(xstar)){
-		_factor();
-		if(!error)pushk(toptoi()*toptoi());
-	}
-	else if(_lit(xslash)){
-		if(*cursor=='*') {
-			--cursor;    /* opps, its a comment */
-			return 1;
-		}
-		_factor();
-		int denom = toptoi();
-		int numer = toptoi();
-		int div = numer/denom;
-		if(!error)pushk(div);
-	}
-	else if(_lit(xpcnt)){
-		_factor();
-		int b=toptoi();
-		int a=toptoi();
-		int pct = a%b;
-		if(!error)pushk(pct);
-	}
-	return 1;  /* a lonely factor is a term */
-}
-
-int _expr(){
-	if(_lit(xminus)){    /* unary minus */
-		_term();
-		pushk(-toptoi());
-	}
-	else if(_lit(xplus)){
-		_term();
-		pushk(toptoi());
-	}
-	else _term();
-	while(!error){    /* rest of the terms */
-		int leftclass = stack[nxtstack-1].class;
-		int rightclass;
-		if(_lit(xminus)){
-			_term();
-			rightclass = stack[nxtstack-1].class;
-			int b=toptoi();
-			int a=toptoi();
-			if( rightclass || leftclass) pushPtr(a-b);
-			else pushk(a-b);
-		}
-		else if(_lit(xplus)){
-			_term();
-			rightclass = stack[nxtstack-1].class;
-			int b=toptoi();
-			int a=toptoi();
-			if( rightclass || leftclass) pushPtr(a+b);
-			else pushk(a+b);
-		}
-		else return 1;   /* is expression, all terms done */
-	}
-	return 0;   /* error, set down deep */
-}
-
-
-int _reln(){
-	if(_expr()){
-		if(_lit(xle)){
-			if(_expr()){
-				if(topdiff()<=0)pushone();
-				else pushzero();
-			}
-		}
-		else if(_lit(xge)){
-			if(_expr()){
-				if(topdiff()>=0)pushone();
-				else pushzero();
-			}
-		}
-		else if(_lit(xeqeq)){
-			if(_expr()){
-				if(topdiff()==0)pushone();
-				else pushzero();
-			}
-		}
-		else if(_lit(xnoteq)){
-			if(_expr()){
-				if(topdiff()!=0)pushone();
-				else pushzero();
-			}
-		}
-		else if(_lit(xgt)){
-			if(_expr()){
-				if(topdiff()>0)pushone();
-				else pushzero();
-			}
-		}
-		else if(_lit(xlt)){
-			if(_expr()){
-				if(topdiff()<0)pushone();
-				else pushzero();
-			}
-		}
-		else return 1;  /* just expr is a reln */
-	}
-	return 0;   /* not an expr is not a reln */
-}
-
-/* SITUATION: Cursor is positioned where an expression must exist. It may or 
- *	may not be an assignment. 
- *	Classical LR parsing is used to parse the full expression, evaluating as 
- *	it is parsed, and leaving one value on the stack. Returns true on success.
- * (This comment applies to functions asgn,reln...,factor and konst).
- */
-int _asgn(){ 
-	if(_reln()){
-		if(_lit(xeq)){
-			_asgn();
-			if(!error)_eq();
-		}
-	}
-	return error? 0: 1;
 }
 
 /************ scan tools ******************/

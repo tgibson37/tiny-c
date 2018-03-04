@@ -509,7 +509,7 @@ parsing x(1) by factor, does it push the right stuff???
 ~527 what is the type? It should be the type of the array, which is the lvalue type, which is type ~510. Should be ok.
 Stack ends up empty, should be one entry, the pushed value. pushk is called. What happens? AHAH! st discards it. ALL IS KOOL.
 
-ISSUE findEOS() and several other ways: find one way to test EOS.
+IS SUE findEOS() and several other ways: find one way to test EOS.
 
 DONE Next goal: MC(1,'x');
 TOMORROW why nothing from test 26 ??? Good night!
@@ -524,7 +524,7 @@ Been struggling long time  with the rats nest of goto's in ASM code for newvar. 
 
 Test 32 awaits use. First tests 22, 23, 24.
 
-ISSUE: Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
+IS SUE: Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
 The overflow test is if(++nxtWEver > eWEver){eset(TMWE);return;}
 
 22 ok, 23,24 fail to put data. 24 fails to allocate int x(3). ~359 if is wrong. We need to allocate this array. class==1 (correct). passed==0x0, pointer to stuff (correct), this is not a function call. 
@@ -704,7 +704,7 @@ BUT why does newvar have that arg at all; both vartab and nxtvar are global, and
 Test 12 may have problems. Look it over tomorrow.  --  Good Night!
 
 Sept 19 AM, FIXED.
-ISSUE better names for globals.
+IS SUE better names for globals.
 git checkin DONE
 Link is next. Written, test 34, too. Compiles. Tests GOOD.
 git checkin DONE
@@ -716,7 +716,7 @@ PM: Compiles. To test it must run standalone without test.c. Need alternative ma
 Evening: Cold,warm,hot done. New main done, and old commented out.
 IS SUE: where is link called? Should be just before st() ~872. FIXED
 IS SUE: brake is a local in st but a global in ASM. Is local ok?
-	NO. at ~762 brake=1;return and the parent recurse sees the old brake. It won't know to break out of the compound. Fix needed at ~708 and maybe 721. Subordinate ISSUE is be sure brake and leave are zeroed back appropriatly.
+	NO. at ~762 brake=1;return and the parent recurse sees the old brake. It won't know to break out of the compound. Fix needed at ~708 and maybe 721. Subordinate IS SUE is be sure brake and leave are zeroed back appropriatly.
 Compiles (8:53pm) but doesn't link. NEED logo, prbegin, prdone.
 
 Thur, Sept 21
@@ -779,7 +779,7 @@ Need thorough test of pFmt.
 	testSetup("[ MC("hello printf MC",101) ]  ");st();
 Should go to machinecall, newMC, Mprf which currently prints the format arg.
 Args mixup is the issue. new test setup to be easier to follow args.
-ISSUE: index base shift, BADDD!, machine call ~110. fix later.
+IS SUE: index base shift, BADDD!, machine call ~110. fix later.
 Followed args carefully all way thru & into MpFmt, they travel properly.
 Tommorow: change the 1st arg to a string, and debug why it segs.
 
@@ -2673,7 +2673,7 @@ debugs p is misleading...
 	move 1 means move is a class 1, not the value is 1. Its a char(4) (five items) array starting at pr[9960] and value is not shown. should be 1 0 0 0 0. 
 MAJOR IS SUE: Bombs in the lib need intelligent wha-happn'd.
 
-MAJOR ISSUE: bombs due to forgotten ] means inclomplete link. Need to diagnose that situation and give intelligence that is helpful.
+MAJOR IS SUE: bombs due to forgotten ] means inclomplete link. Need to diagnose that situation and give intelligence that is helpful.
 ------------
 
 Sat, Nov 25
@@ -2955,7 +2955,7 @@ Browsing a bit...
 First full game of piranha fish using new C implementaion of tiny-c. 
 	But there is a bug: the score should be 700, not 900.
 	And a flaw, excessive move prompts, getchar returns newlines.
-debug ISSUE: Need to print array elements.
+debug IS SUE: Need to print array elements.
 ---------------------
 
 Fri, Dec 1
@@ -2978,16 +2978,16 @@ THE WHOLE LIST...
 notes.txt...
 	502 findEOS() and several other ways: find one way to test EOS.
 	517 : Can't we use the same management technique for each stack? nxtvar vs curfun, etc. nxt is the better choice, nxtWEver = wEver; eWEver = wEver+WELEN;
-	697 ISSUE better names for globals.
-x	709 Subordinate ISSUE is be sure brake and leave are zeroed back appropriately.
+	697 IS SUE better names for globals.
+x	709 Subordinate IS SUE is be sure brake and leave are zeroed back appropriately.
 	726 : it (77 OM) describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
 	772 : index base shift, BADDD!, machine call ~110. fix later.
-x	2664 MAJOR ISSUE: bombs due to forgotten ] means incomplete link. Need to diagnose that situation and give intelligence that is helpful.
-x	2944 debug ISSUE: Need to print array elements.
+x	2664 MAJOR IS SUE: bombs due to forgotten ] means incomplete link. Need to diagnose that situation and give intelligence that is helpful.
+x	2944 debug IS SUE: Need to print array elements.
 
 tc.c...
 x	754 quit() /* Returns true if user signals quit.
-	 *	STUBBED for now. ISSUE how to set the quit flag from keyboard.
+	 *	STUBBED for now. IS SUE how to set the quit flag from keyboard.
 	 */
 -----
 PRIORITIES
@@ -3011,7 +3011,7 @@ Today's goal: function items (754, 2944)
 754, quit()
 		ESC key hit esets KILL, quit tests for that and returns true/false which causes st() to tunnel to the top. 
 		Will it end up in whatHappened? YES, special treatment added.
-ISSUE	Or debug? No, but that is probably ok. debug runs UNDER st(). Once st is dead, so is debug. COULD restart by calling the apps main(). OR doing 6 lines from tcMain.c, ~'s 25,33..37
+IS SUE	Or debug? No, but that is probably ok. debug runs UNDER st(). Once st is dead, so is debug. COULD restart by calling the apps main(). OR doing 6 lines from tcMain.c, ~'s 25,33..37
 
 DONE 2944	debug needs to print array elements
 ---------------------
@@ -3135,7 +3135,8 @@ Wed, Dec 20
 Writing debug.txt. Here are ISSUEs uncovered by the writing...
 	debug r should offer restart
 	debug d and e
-	debug i v (variables)
+	debug i v (variables) (non lib, in scope)
+	debug i V (just lib)
 	prbegin never called, should be AFTER link, so can set brkpts
 		goaround: do one n. That lets interp run until it has to parse a statement, which is the MAIN_. By then link is done and you can enter bkpt's.
 	debug b, sym must be canonical form
@@ -3396,7 +3397,7 @@ ls	after tcc -o tc *.c
 	-rwxr-xr-x 1 tom tom   68524 Jan 22 13:32 tc
 But the latter has a gdb symbol table. 
 
-ISSUE: regression has lots of differences: 34,43,44,45,50&up
+IS SUE: regression has lots of differences: 34,43,44,45,50&up
 
 Executable tc is on github, compiled with tcc.
 Here is how to compile:
@@ -3613,7 +3614,7 @@ ABANDON, see next...
 ---------------------
 
 Thur, Feb 8
-ISSUE with alternative. When the tc code under test calls ps,pl, or the test case code calls whatHappened, it goes to stdout. So we still have need of two files.
+IS SUE with alternative. When the tc code under test calls ps,pl, or the test case code calls whatHappened, it goes to stdout. So we still have need of two files.
 Go with plan A, two files, test.c writes to stdout.
 Status, 
 x	Producing 2 files. 
@@ -3860,7 +3861,7 @@ Sat, Feb 17
 		Put only publics in tc.h
 		Tools is the base class
 		Should Refactor be a git branch?
-ISSUE: void enter() ~995, haveArgs logic needs 0x0d tolerance
+IS SUE: void enter() ~995, haveArgs logic needs 0x0d tolerance
 	SYMERR at tc.c ~716 factor, ~811 addrval
 	SYNXERR at ~756 factor
 	WHAT SHOULD HAPPEN   return getchar ]   ...
@@ -3996,69 +3997,68 @@ All above is ok, the last did require eos fix.
 Goal list...
 	LATER refactor source files (not code)
 	LATER unify makefile treatment of source (FileRead,gech,kbhit)
-Test 92, the arrow keys use ESC [ <code> 
-	A	up,	B	down,	C	right,	D	left	
-BUT the esc sets a kill! 
-MC2 (test 91) doesn't do that. Must be in the lib code.
-	Is this an ISSUE ???  
-		YES, the arrow keys become accidental ESC's
-		Test 92 shows this
+Is this an ISSUE ???  YES, the arrow keys become accidental ESC's
+	Test 92 shows this
 	macnine call ~125; also tc.c ~840
+	Test 92, the arrow keys use ESC [ <code> 
+	A	up,	B	down,	C	right,	D	left	
+	BUT the esc sets a kill! 
+	MC2 (test 91) doesn't do that. Must be in the lib code.
 --------------------
 
 Thur, Feb 22
 REFACTOR...
-	Step 1: survey the code and identify
-		all functions, where they should go in new/revised files
-		all globals, ditto
-	Method: 
-		list the functions. 
+X	Step 1: survey the code and identify
+x		all functions, where they should go in new/revised files
+x		all globals, ditto
+x	Method: 
+x		list the functions. 
 			Maybe tidy their comment definitions to make that clear
-			List obvious "classes" and assign these
-			Less obvious will emerge from this exercise
-		Assign the globals from tc.h
-			A global moved to a dot-c file is a state variable for that object
-			A global left behind is a super-global
-				e.g. debug, verbose, etc
-		Make the moves: 
-			Code to their files
-			Globals to sections of tc.h
-				Maybe thats all
-				Maybe some will move to special headers
-	How to list the functions
+x			List obvious "classes" and assign these
+x			Less obvious will emerge from this exercise
+x		Assign the globals from tc.h
+x			A global moved to a dot-c file is a state variable for that object
+x			A global left behind is a super-global
+x				e.g. debug, verbose, etc
+x		Make the moves: 
+x			Code to their files
+x			Globals to sections of tc.h
+x				Maybe thats all
+x				Maybe some will move to special headers
+x	How to list the functions
 x		cp'd all to Study/name.s including c and h files
 x		for each erase all code lines, keep just decls
-	Already OK (dot-c)
-		fileread
-		debug
-		machine call
-		test
-		tcmain
-		testmain
-	Need a home
-		getch
-		kbhit
-		time
-	header
-		tc.h
-	That leaves just
-		tc
+x	Already OK (dot-c)
+x		fileread
+x		debug
+x		machine call
+x		test
+x		tcmain
+x		testmain
+x	Need a home
+x		getch
+x		kbhit
+x		time
+x	header
+x		tc.h
+x	That leaves just
+x		tc
 --------------------
 
 Fri, Feb 23
 DO HEADER LATER
-	Get the fcn's moved and compile/test. Header later.
+x	Get the fcn's moved and compile/test. Header later.
 x		var.c
 x		stack.c
 x		dialog.c
-	Header
-		Separate privates from publics
-			Only publics in header
-			Make ALL privates begin with _
-
-time_stamp (only thing in time.c) sole use is in test.c
-
-Why linking test cannot find getch_ and kbhit ???
+x	Header
+x		Separate privates from publics
+x			Only publics in header
+x			Make ALL privates begin with _
+	Reality: some privates need prototype to avoid warnings, e.g. _asgn()
+	Reality-2: to make REALLY private, C uses static. Decided not to do that.
+		The _ notation is adequate flag, real privacy not really needed.
+x	MOVE it: time_stamp (only thing in time.c) sole use is in test.c
 --------------------
 
 Sat, Feb 24
@@ -4161,11 +4161,32 @@ CONCLUSIONS:
 COMMIT, PUSH
 
 Other todo's
-	merge Ed Davis's windows stuff into Platform.c and readTheFiles.
+x	merge Ed Davis's windows stuff into Platform.c and readTheFiles.
 	Java style comments, use dOxygen.
 x	write somewhere the use of leading _'s, and locals vs globals, and test usage.
+--------------------
 
+Fri, Mar 2
+From Ed Davis...
+// Bug 3/3/18 from ED
+main [
+	int m, a
+	m = 17
+	pn m
+	m = m - m / 10 * 10
+	pn m
+//	a = 
+//	pn a
+//	a = ((i > 0) * (i < 9) * (j > 0) * (j < 9)
+//	pn a
+]
+ 17
+RESULTS:
+app line 6 (cursor pr[4054])SYNXERR
+	m = m - m / 10 * 10
+	              ^
+8pm: FIX is coded: term didn't loop, but in 8080 it did.
+make turns up BAD usage: _asgn is void, but 3 places call it in if(_asgn). 
+12:01am Fix is fixed and finally works,  testFiles/ed-3-3-18.tc.
 
-
-
-
+tomorrow commit/push.

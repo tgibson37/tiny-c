@@ -124,7 +124,6 @@ void fundone();
 void newvar( int class, Type type, int len, union stuff *passed );
 struct var* addrval();
 void canon(struct var *v);
-int _asgn();
 int quit();
 void st();
 void machinecall();
@@ -164,7 +163,12 @@ void whatHappened();
 void tcUsage();
 struct var* br_hit(struct var *v);
 void pft(char *from, char *to );
-  /* All these two do is prevent warnings for tcc compile */
+  /* All these two do is prevent warnings from compiler */
 int Mchrdy();
 int Mgch(int,int*);
+int _asgn();
+int _reln();
+int _expr();
+int _term();
+void _factor();
 
