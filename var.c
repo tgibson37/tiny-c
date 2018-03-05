@@ -11,6 +11,10 @@ void newfun() {
 		(*curfun).fvar = (*curfun).lvar = nxtvar;
 		(*curfun).prused = prused;
 	}
+	if(verbose[VV]){
+		fflush(stdout);
+		fprintf(stderr,"\nnewfun %s",fcnName);
+	}
 }
 
 /* SITUATION: function is completed. 
@@ -20,6 +24,10 @@ void fundone() {
 	nxtvar=(*curfun).fvar;
 	prused=(*curfun).prused;
 	--curfun;
+	if(verbose[VV]){
+		fflush(stdout);
+		fprintf(stderr,"\nfundone %s",fcnName);
+	}
 }
 
 /*********** var tools ****************/
@@ -76,6 +84,7 @@ void newvar( int class, Type type, int len, union stuff *passed ) {
 	if(passed) _copyArgValue( v, class, type, passed);
 	if(curfun>=fun) (*curfun).lvar = nxtvar;
 	if( ++nxtvar>VTABLEN )eset(TMVRERR);
+	if(verbose[VV])dumpVar(v);
 	return;
 }
 

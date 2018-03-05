@@ -17,6 +17,7 @@
 #define VL 1
 #define VS 2
 #define VP 3
+#define VV 4
 char verbose[8];
 int debug;
 
@@ -77,6 +78,10 @@ struct var {
 /* variable table */
 struct var vartab[VTABLEN];
 int nxtvar;
+
+/* most recent function entered */
+char fcnName[VLEN+1];
+void saveName();
 
 /* program space */
 char pr[PRLEN];

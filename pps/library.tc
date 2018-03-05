@@ -46,7 +46,6 @@ ps char b(0)[
 
 /* put a null terminated string as a new line
 pl char b(0)[
-	
 	MC "%c%s", 10, b, 101
 ]
 

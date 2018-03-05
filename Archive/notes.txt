@@ -4185,8 +4185,153 @@ RESULTS:
 app line 6 (cursor pr[4054])SYNXERR
 	m = m - m / 10 * 10
 	              ^
-8pm: FIX is coded: term didn't loop, but in 8080 it did.
-make turns up BAD usage: _asgn is void, but 3 places call it in if(_asgn). 
-12:01am Fix is fixed and finally works,  testFiles/ed-3-3-18.tc.
+--------------------
 
-tomorrow commit/push.
+Sat, Mar 3
+8pm: FIX is coded: term didn't loop, but in 8080 it did.
+12:01am Fix is fixed and finally works,  testFiles/ed-3-3-18.tc.
+COMMIT/PUSH
+tomorrow 
+	ADD to regression.
+	look over ed's trek.tc.
+--------------------
+
+Sun, Mar 4
+trek.tc   issue...
+	$ ./tc Sa*/trek* -d
+	***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+	        This C version copyright 2017, T A Gibson
+	(tc-db) n
+	----tc system level, calling appl main
+	line 700 cursor(pr[6346188])->[
+	 int cc
+	(tc-db) t status_t
+	...
+	break at line 743 cursor pr[16057]: status_t
+	   else if (cc == 'r') status_report()
+	(tc-db) t b
+	4~88
+	 var 34: b 0 Int 1  2
+	(tc-db) n
+	line 473 cursor(pr[6342688])->[
+	 pr("St
+	(tc-db) tb
+	4~88
+	 var 34: b 0 Int 1  2
+	(tc-db) n
+	line 474 cursor(pr[6342692])->pr("Status
+	(tc-db) tb
+	4~88
+	 var 34: b 0 Int 1  2
+	(tc-db) b pnf
+	(tc-db) r
+	Status report:
+	stardate 
+	break at line 475 cursor pr[11599]: pnf
+	 ps("stardate ); pnf(3230 - d, 10); pr("")
+	(tc-db) tb
+	4~88
+	 var 100: b 1 Char 1  stardate 
+	(tc-db) 
+---
+It happens on line 475 after ps("sta...") is parsed and before pnf.
+WHAT DOES PS DO???
+Setup on paper pad to line 475, g enters gdb
+(tc-db) g
+	Breakpoint 1, gdb_b () at debug.c:214
+	214	void gdb_b() {}
+	(gdb) p cursor
+	$1 = 0x60c83b <pr+11579> "ps(\"stardate \"); pnf(3230 - d, 10); ...
+	(gdb) p nxtvar
+	$2 = 100
+	(gdb) watch nxtvar
+	Hardware watchpoint 2: nxtvar
+	(gdb) c
+	Continuing.
+	(tc-db) c
+	Hardware watchpoint 2: nxtvar
+		Old value = 100
+		New value = 101
+	(gdb) bt
+	#0  0x0000000000405021 in newvar (class=1, type=Char, len=1, 
+	    passed=0x7fffffffd7f0) at var.c:78
+	#1  0x000000000040185c in _varAlloc (type=Char, vpassed=0x7fffffffd7f0)
+	    at tc.c:276
+	#2  0x00000000004018fb in _setArg (type=Char, arg=0x60e980 <stack>)
+	    at tc.c:299
+	#3  0x0000000000401b3c in _enter (
+	    where=0x609da1 <pr+673> " char b(0)[\n\tMC \"%s") at tc.c:352
+	#4  0x0000000000402673 in _factor () at tc.c:620
+	#5  0x0000000000402346 in _term () at tc.c:542
+The cursor -> [\n\tMC \"%s  
+(gdb) x /33c pr+683
+0x609dab <pr+683>:	[\n\tMC "%s\0, b, 101\n]\n   <<== The body of ps
+	so arg is on stack, A ui=6342719. IT SHOULD BE 2!
+	When did it go on the stack? SETARG. Setarg is putting a value into char b(0)
+	why is it putting 6.34M on the stack. Because it is a pointer to "stardate" ~475
+	NO PROB. 
+	This ps returns, and its b(0) gets popped. Then in status_t. 
+	Starbases reported at ~490, not 475. 
+--------------
+	(tc-db) n
+	line 492 cursor(pr[6343146])->ps("Starba
+	(tc-db) tb
+	 var 35: b 0 Int 1  2
+	(tc-db) n
+	Starbases line 492 cursor(pr[6343164])->pnf(b, 6);
+	(tc-db) tb
+	 var 101: b 1 Char 1  Starbases 
+	(tc-db)
+Planted foo() at ~490. above shows var 101 for the ps. 
+BUT cursor is in status_t pointing to pnf(b,6), not yet parsed. 
+b SHOULD BE THE GLOBAL, but evidently is the left over b from ps's arg.
+Why is this b a local in status??? The prob is in newfun/fundone???
+We need to see...
+x	calls&returns from newfun/fundone	VV
+x	newvars                          	VV
+	in the interval for the whole line 492.
+	Current verbose is parse,stack,eq,link
+		tc.c:198:	if(verbose[VP]){		symname
+		tc.c:407:		if(verbose[VP]){	konst
+		tc.c:422:		if(verbose[VP]){	konst
+		tc.c:436:		if(verbose[VP]){	konst
+	VV would verbose vars, and dump above.
+We have a strategy for tomorrow.
+--------------------
+also todo:
+	newvar -> newVar
+		tc.h
+		tc.c
+		test.c
+
+--------------------
+
+Mon, Mar 5
+x	header
+x	debug
+x	var
+$ ./tc Sa*/tr* -d
+...
+newfun foo
+fundone foo
+newfun ps
+ var 101: b 1 Char 1 pr[12014]->Starbases <-      Starbases <<==
+fundone ps
+newfun pnf
+ var 101: num 0 Int 1 pr[17519]->6343182<-
+ var 102: width 0 Int 1 pr[17523]->6<-
+ var 103: buf 1 Char 21 pr[17527]-><-
+ var 104: len 0 Int 1 pr[17548]->0<-
+ var 105: p 0 Int 1 pr[17552]->0<-
+newfun itoa
+ var 106: buf 1 Char 1 pr[17527]-><-
+ var 107: width 0 Int 1 pr[17557]->20<-
+ var 108: num 0 Int 1 pr[17561]->6343182<-
+ var 109: sign 0 Int 1 pr[17565]->0<-
+ var 110: len 0 Int 1 pr[17569]->0<-
+fundone itoa
+newfun ps
+ var 106: b 1 Char 1 pr[17541]->343182<-             343182 <<==
+fundone ps
+
+getting trapped dumping var's...

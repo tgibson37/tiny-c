@@ -4,16 +4,30 @@ scan of last 1/3 of notes.txt, looking for ideas over the last 10 weeks.
 Collected here those ideas still alive, plus items worth covering in a writing.
 ---
 
-	never did file i/o in lib
+x	never did file i/o in lib
 	Classical branches still exist
 	gedit as wysiwig cannot do dialog (^T)
 		does append work? (^R)
 	varargs ~2146
 	malloc's
+	settings
 x	what does verbose do?
 x	better understanding of gcc's -I
 	726 : it (77 OM) describes MC calling in detail, specifically MCESET and USERMC stubs. Need to do those. ASM ~2198,2232.
-	---
+	debug needs improvements
+        Writing debug.txt. Here are ISSUEs uncovered by the writing (issues.txt)...
+        debug r should offer restart
+        debug d and e
+        debug i v (variables) (non lib, in scope)
+        debug i V (just lib)
+        prbegin never called, should be AFTER link, so can set brkpts
+                goaround: do one n. That lets interp run until it has to parse a statement, which is the MAIN_. By then link is done and you can enter bkpt's.
+        debug b, sym must be canonical form
+                canonical not called
+                adding long sym using long name fails. Adding using canon'd result (mentally achieved) works.
+        other stuff, see Usage notes in debug.txt
+        	up arrow to previous command
+ 	---
 	WRITING
 	seed,random now in classical lib (77 was in OM example)
 	debug, incl hookup to gdb ~2681, also ~2760
@@ -27,4 +41,4 @@ x	better understanding of gcc's -I
 		broken IS SUE
 		90's tests, unit vs whole code, no file vs file
 		MC story, how to add your own ~2983
-
+	Another gathering of writings into tc.DOC.

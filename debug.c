@@ -165,10 +165,10 @@ void dbUsage() {
 	printf("	p <symbol>    print the value of symbol\n");
 	printf("	t <symbol>    print the type of symbol\n");
 	printf("	g             enter your C debugger (see setup notes)\n");
-	printf("	v [e|p|s]     toggle verbose mode for one of:\n");
+	printf("	v [e|p|s|v]     toggle verbose mode for one of:\n");
 	printf("	                e assignment, p parsed symbol,\n");
-	printf("	                s stack push/pops (VERY verbose)\n");
-	printf("	?             print this usage (default)\n");
+	printf("	                s stack push/pops, v variables\n");
+	printf("	default         print this usage\n");
 	printf("	x,q           exit tiny-C\n");
 }
 
@@ -195,12 +195,15 @@ void verbose_toggle(char* param) {
 	int bit;
 	int kase=*param;
 	switch(kase) {
-	case '-': verbose_clear; return;
+	case '-': verbose_clear(); return;
+	case 'V': dumpVarTab(); return;
+	case 'F': dumpFun(); return;
 	case 'e': bit=VE; break;
 	case 'l': bit=VL; break;
 	case 's': bit=VS; break;
 	case 'p': bit=VP; break;
-	default: printf("v needs e, l, s or t"); return;
+	case 'v': bit=VV; break;
+	default: printf("v needs e, l, s, p, or v parameter"); return;
 	}
 	verbose[bit] = 1-verbose[bit];
 }

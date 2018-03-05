@@ -307,9 +307,17 @@ void _setArg( Type type, struct stackentry *arg ) {
  *	Pops the locals (vars and values). Restores the caller's stcurs and 
  *	cursor.
  */
+
+void saveName() {
+	int j=0;
+	char* i;
+	for(i=fname;i<=lname;++i) fcnName[j++] = *i;
+	fcnName[j]=0;
+}
 void _enter( char* where) {
 	int arg=nxtstack, nargs=0;
 
+	if(where)saveName();
 	_lit(xlpar); /* optional (   */
 	int haveArgs = ! (  _lit(xrpar)
 					 || *cursor==*xlb
