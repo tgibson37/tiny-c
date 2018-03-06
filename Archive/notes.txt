@@ -4303,7 +4303,6 @@ also todo:
 		tc.h
 		tc.c
 		test.c
-
 --------------------
 
 Mon, Mar 5
@@ -4312,26 +4311,97 @@ x	debug
 x	var
 $ ./tc Sa*/tr* -d
 ...
-newfun foo
-fundone foo
-newfun ps
- var 101: b 1 Char 1 pr[12014]->Starbases <-      Starbases <<==
-fundone ps
-newfun pnf
- var 101: num 0 Int 1 pr[17519]->6343182<-
- var 102: width 0 Int 1 pr[17523]->6<-
- var 103: buf 1 Char 21 pr[17527]-><-
- var 104: len 0 Int 1 pr[17548]->0<-
- var 105: p 0 Int 1 pr[17552]->0<-
-newfun itoa
- var 106: buf 1 Char 1 pr[17527]-><-
- var 107: width 0 Int 1 pr[17557]->20<-
- var 108: num 0 Int 1 pr[17561]->6343182<-
- var 109: sign 0 Int 1 pr[17565]->0<-
- var 110: len 0 Int 1 pr[17569]->0<-
-fundone itoa
-newfun ps
- var 106: b 1 Char 1 pr[17541]->343182<-             343182 <<==
-fundone ps
+	break at line 491 cursor pr[12003]: foo
+	 foo()
+	(tc-db) vv			<<== new. Verbose var 
+	(tc-db) pb
+														b:  2  <<== GOOD b
+	(tc-db) b j
+	(tc-db) c    
+	newfun foo			<<==vv produced next 30 lines
+	fundone foo
+	newfun ps
+	 var 101: b 1 Char 1 pr[12012]->Starbases <-		Starbases   <<== GOOD ps
+	fundone ps
+	newfun pnf
+	 var 101: num 0 Int 1 pr[17517]->6343180<-
+	 var 102: width 0 Int 1 pr[17521]->6<-
+	 var 103: buf 1 Char 21 pr[17525]-><-
+	 var 104: len 0 Int 1 pr[17546]->0<-
+	 var 105: p 0 Int 1 pr[17550]->0<-
+	newfun itoa
+	 var 106: buf 1 Char 1 pr[17525]-><-
+	 var 107: width 0 Int 1 pr[17555]->20<-
+	 var 108: num 0 Int 1 pr[17559]->6343180<-
+	 var 109: sign 0 Int 1 pr[17563]->0<-
+	 var 110: len 0 Int 1 pr[17567]->0<-
+	fundone itoa
+	newfun ps
+	 var 106: b 1 Char 1 pr[17539]->343180<-			343180  <<== GOOD b, ps arg
+	fundone ps
+	fundone ps			<<== actually pnf, but one fcnName mem cell not stack yet
+	newfun pr
+	 var 101: q 1 Char 1 pr[12041]-><-
+	newfun ps
+	 var 102: b 1 Char 1 pr[12041]-><-
+	fundone ps
 
-getting trapped dumping var's...
+	fundone ps				<<== actually pr
+	break at line 493 cursor pr[12047]: j
+	 j = 1
+So actually var frames of varTable seem ok. The second b is arg to ps just incidentally the same name. It is ok, too, but is probably the source of the problem. pnf somehow prints the pointer b instead of the passed in int b. HOW?
+--------------------
+
+Tue, Mar 6
+Theory: _addrval is looking at one too many vars, and picks up the ps local b and returns that as the arg to pnf. That b is char*, hence a pointer, hence garbage.
+ACTION plan: break BETWEEN ps and pnf and look at var tables. Check the code.
+
+	break at line 493 cursor pr[12038]: bar
+	 ps("Starbases ); bar=1; pnf(b, 6); pr("")
+	(tc-db) vV  also vF
+
+	 ps("Starbases "); bar=1; pnf(b, 6); pr("")
+	 var 29: seed 0 Int 1 pr[16545]->0<-
+	 var 30: last 0 Int 1 pr[16549]->0<-
+	 var 31: random 69 Int 1 pr[3687]
+	 var 32: _MAIN 69 Int 1 pr[3876]
+	 var 33: foo 69 Int 1 pr[3986]
+	 var 34: a 0 Int 1 pr[16565]->78<-
+	 var 35: b 0 Int 1 pr[16569]->2<-
+	 var 36: c 0 Int 1 pr[16573]->0<-
+
+	...
+	 var 97: hit_star 69 Int 1 pr[14219]
+	 var 98: torpedos 69 Int 1 pr[14351]
+	 var 99: main 69 Int 1 pr[15080]
+	 var 100: cc 0 Int 1 pr[17529]->114<-
+	 var 101: bar 0 Int 1 pr[17533]->0<-(tc-db) vF
+
+	fun table: fvar, lvar, prused
+	 fun entry at 0:  0 31 16428   lib putchar..random  0..31 inclusive
+	 fun entry at 1:  32 99 16556  globals _MAIN..main 32..99 inclusive
+	 fun entry at 2:  100 100 17528    fcn main
+	 fun entry at 3:  100 100 17528    fcn status_t   bar HIDING THE BUG
+	 fun entry at 4:  101 101 17532    fcn status_t   leftover b from ps
+	 (tc-db) 
+Another detail: running with no break set but bar is between ps,pnf and the report prints Starbases 2, i.e. the bug is eclipsed! UGH.
+Also the inclusive range looks good, and var.c~118 is
+		for(pvar=first; pvar<=last; ++pvar) {
+so no prob there. ITS DEEPER, more subtle.
+Another detail, main calls status_t ~746, which calls ps;bar=;pnf ~493. Hence the ?'s on fun entry's above. NEED more info from vF. Basically that can serve as gdb's backtrace.
+newfun var.c~6 sets an fvar=lvar=nxtvar. Inclusive means one empty cell already there. lvar should be nxtvar-1, hence the for loop does ZERO passes if no locals. IS THAT THE PROBLEM? 
+Yes. newvar populates nxtvar, then fun.lvar=nxtvar (which it already is!) THEN bumps nxtvar. So every fcn has ONE local which if there really is none is the first of the nxt frame, either garbage or the first var of the most recently called.
+Two possible fixes...
+	lvar starts at nxtvar-1 (easy)
+	is inclusive range good. Its not the std C way. for(i=f;i<l;++i) is encouraged.
+		Probably lots of code changes, much testing.
+	$ grep -n lvar *.c
+		test.c:507:			fun[0].lvar = 3;
+		test.c:849:				fun table: fvar, lvar, prused
+		var.c:11:		(*curfun).fvar = (*curfun).lvar = nxtvar;
+		var.c:85:	if(curfun>=fun) (*curfun).lvar = nxtvar;
+		var.c:116:	int last  = (*level).lvar;
+		var.c:171:		fun[e].fvar, fun[e].lvar, fun[e].prused-pr );
+		var.c:175:	fprintf(stderr,"\nfun table: fvar, lvar, prused");
+
+

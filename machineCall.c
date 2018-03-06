@@ -236,7 +236,7 @@ void origMC(int mcno, int nargs, int *args) {
 }
 
 void newMC(int mcno, int nargs, int *args) {
-	if(mcno<1 || mcno>(sizeof(newList)/8)) {
+	if(mcno<1 || mcno>(sizeof(newList)/sizeof(void*))) {
 		pushk(0); eset(MCERR);
 	}
 	else {

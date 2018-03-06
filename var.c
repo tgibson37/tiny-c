@@ -8,7 +8,8 @@ void newfun() {
 		eset(TMFUERR);
 	} 
 	else {
-		(*curfun).fvar = (*curfun).lvar = nxtvar;
+		(*curfun).fvar = nxtvar;
+		(*curfun).lvar = nxtvar-1;
 		(*curfun).prused = prused;
 	}
 	if(verbose[VV]){
