@@ -119,9 +119,20 @@ int Mpn(int nargs, int *args)
     printf("%d", *args);
 }
 
+/* MC1 (Mgch) has input an ESC key (via getch_), process that key */ 
+char escKey() {
+	if( kbhit()=='[' ){
+		getch_(0);   /* toss the [ */
+		int code = getch_(0);
+		if( 'A'<= code <= 'D' )return -code;
+	}
+	eset(KILL);
+}
+
 int Mgch(int nargs, int *args)
 {
 	int x = getch_(ECHO);
+	if(x==0x1b)return escKey();
 	if(x==0x1b)eset(KILL);
 	if(x==0x03)exit(0);
 	return x;

@@ -6,6 +6,11 @@
 #include <ctype.h>
 
 #define ECHO 1
+#define UPARROW -65
+#define DOWNARROW -66
+#define RIGHTARROW -67
+#define LEFTARROW -68
+
 #define VLEN 8
 #define VTABLEN 200
 #define PRLEN 20000

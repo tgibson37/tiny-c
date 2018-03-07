@@ -19,7 +19,7 @@ void _errToWords(){
 		case 9: x="SYNXERR"; break;
 		case 14: x="LVALERR, not assignable"; break;
 		case 15: x="POPERR, nothing to pop"; break;
-		case 16: x="PUSHERR, overlowed stack area"; break;
+		case 16: x="PUSHERR, overflowed stack area"; break;
 		case 17: x="TMFUERR, overflowed function table"; break;
 		case 18: x="TMVRERR, overflowed variable table"; break;
 		case 19: x="TMVLERR, overflowed available space for values"; break;

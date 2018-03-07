@@ -22,7 +22,7 @@ char getch_(int echo) {
 
 /*	Detect a key hit is waiting in its buffer, return the char,
  *	leaving it in the buffer to be read. Used to detect ESC character
- *	to force a quit.
+ *	to force a quit. Return 0 if no character waiting.
  */
 int kbhit(void)
 {
