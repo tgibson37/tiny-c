@@ -140,10 +140,9 @@ void inf_b() {
 /* p <sym>  */
 void print_b(char* param) {
 	if(*param) {
-		struct var sym;
 		struct var *found;
-		canonThis( param, param+strlen(param)-1, &sym );
-		found = addrval_nohit(sym.name);
+		_canon( param, param+strlen(param)-1, buf );
+		found = addrval_nohit(buf);
 		if(!found) printf("no such symbol\n");
 		else{
 			printf("%s: ",param);
@@ -174,10 +173,9 @@ void dbUsage() {
 
 /* t <sym> */
 void type_b(char* param) {
-	struct var sym;
 	struct var *found;
-	canonThis( param, param+strlen(param)-1, &sym );
-	found = addrval_nohit(sym.name);
+	_canon( param, param+strlen(param)-1, buf );
+	found = addrval_nohit(buf);
 	if(!found) printf("no such symbol\n");
 	else {
 		printVar(found);

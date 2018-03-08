@@ -89,11 +89,27 @@ void newvar( int class, Type type, int len, union stuff *passed ) {
 	return;
 }
 
+/* Canonicalizes the name bracket by f,l inclusive into buff, and returns buff.
+	sizeOf buff must be at least VLEN+1.
+ */
+
+char* _canon(char* first, char* l, char* buff) {
+	int i=0; 
+	char* f=first;
+	while(f<=l && i<VLEN-1) buff[i++]=*(f++);
+	if(i==VLEN-1)buff[i++]=*l;
+	buff[i]=0;
+	return buff;
+}
+
 /* 	fname..lname is full name. Puts canonicalized name into v. If short
  *	enough same as name. If longer first VLEN-1 characters + last character.
  *	The last char has more info than middle chars.
  */
 void canon(struct var *v) {
+	_canon(fname,lname,(*v).name);
+}
+#if 0
 	char* n=(*v).name;
 	while( n < ((*v).name)+VLEN ) *n++ = 0;
 	int len = lname-fname+1;
@@ -103,12 +119,10 @@ void canon(struct var *v) {
 	(*v).name[8] = 0;     /* so long name canonicalized as a string */
 	int length = lname-fname+1;
 	if(length>VLEN) {
-
 		(*v).name[VLEN-1] = *lname; 
-/*		*((*v).name+VLEN-1) = *lname;  */
-/* above 2 lines are equivalent!! But which is more readable? */
 	} 
-}
+#endif
+
 
 /* 	looks up a symbol at one level
  */

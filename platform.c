@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -19,6 +18,7 @@ char getch_(int echo) {
 }
 
 #else
+#include <termios.h>
 
 /*	Detect a key hit is waiting in its buffer, return the char,
  *	leaving it in the buffer to be read. Used to detect ESC character
