@@ -237,7 +237,7 @@ McList userList[] =
  */
 
 void origMC(int mcno, int nargs, int *args) {
-	if(mcno<1 || mcno>(sizeof(origList)/8)) {
+	if(mcno<1 || mcno>(sizeof(origList)/sizeof(void*))) {
 		pushk(0); eset(MCERR);
 	}
 	else {
