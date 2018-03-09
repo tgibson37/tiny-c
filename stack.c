@@ -31,7 +31,7 @@ void dumpTop() {
 }
 
 void stuffCopy( union stuff *to, union stuff *from ) {
-	memcpy( to, from, sizeof(to));
+	memcpy( to, from, sizeof(*to));
 }
 
 /* basic pusher */
