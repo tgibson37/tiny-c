@@ -699,11 +699,10 @@ void _skipSt() {
  */
 int quit() {
 	int foo[]={0};  /* to avoid tcc error */
-	if(Mchrdy()==0x1b){
-		eset(KILL);
-		Mgch(0,foo);
+	if(kbhit()==0x1b){
+		getch_(0);
+		return escKey();
 	}
-	if(error)return 1;
 	return 0; 
 }
 

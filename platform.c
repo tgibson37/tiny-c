@@ -4,13 +4,12 @@
 
 /*************  Platform stuff ************/
 /* INSTALLERS/PORTERS may need to redefine these functions.
-	As defined here they work on mint linux.
+	Current choices: Windows, else linux.
  */
 
 #if defined(_WIN32)
-
+// WINDOWS, uses its lib code except getch_
 #include <conio.h>
-
 void initTermios(int echo) {}
 void resetTermios(void) {}
 char getch_(int echo) {
@@ -18,8 +17,8 @@ char getch_(int echo) {
 }
 
 #else
+//LINUX (works on mint linux, a derivitave of ubuntu)
 #include <termios.h>
-
 /*	Detect a key hit is waiting in its buffer, return the char,
  *	leaving it in the buffer to be read. Used to detect ESC character
  *	to force a quit. Return 0 if no character waiting.
