@@ -1,5 +1,11 @@
 #include "tc.h"
 
+#if defined(_WIN32)
+        char* defaultLibrary = "pps\\library.tc";
+#else
+        char* defaultLibrary = "/usr/local/share/tinyC/library.tc";
+#endif
+
 /*	BUGOUTS: Use these to gather stats, debug, whatever.
 	prbegin/prdone called just before/after application level.
 	tcexit called before exiting the interpreter.
@@ -1002,7 +1008,7 @@ void readTheFiles(int argc, char *argv[], int optind) {
  */
 void tclink() {
 	char* x;
-	char* problemCursor=cursor;
+	char* savedCursor=cursor;
 	checkBrackets();
 	if(error)return;
 	cursor=pr;
@@ -1012,7 +1018,10 @@ void tclink() {
 		_rem();
 		if(_lit(xlb)) _skip('[',']');
 		else if(_decl()) ;
-		else if(_lit(xendlib))newfun();
+		else if(_lit(xendlib)){
+			newfun();
+			curglbl=curfun;
+		}
 		else if(_symName()) {     /* fctn decl */
 			union stuff kursor;
 			kursor.up = cursor = lname+1;
@@ -1024,7 +1033,7 @@ void tclink() {
 		}
 		if(cursor==lastcur)eset(LINKERR);
 	}
-	cursor = problemCursor;
+	cursor = savedCursor;
 	if(verbose[VL])dumpVarTab();
 }
 

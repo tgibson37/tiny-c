@@ -209,8 +209,6 @@ random int little,big [
   return little + (last/8)%range
 ]
 
-endlibrary
-
 /* system entry */
 _MAIN [
 	pl "----tc system level, calling appl main"

@@ -4,6 +4,8 @@
 
 char timeStamp[40];
 extern struct stackentry poptop;
+extern char* defaultLibrary;
+extern char* xendlib;
 
 void time_now(char *buff) {
   time_t curtime;
@@ -14,17 +16,40 @@ void time_now(char *buff) {
   strftime (buff, 40, " %R", loctime);
 }
 
+int loadCode(char* file) {
+	int nread = fileRead(file, epr, EPR-epr);
+	if(nread==0){
+		fprintf(stderr,"No such file: %s",file);
+		exit(1);
+	}
+	if(nread<0){
+		fprintf(stderr,"Err reading file: %s",file);
+		exit(1);
+	}
+	epr += nread;
+	return nread;
+}
+
+void markEndlibrary() {
+	strcpy(epr,xendlib);
+	epr+=10;
+	apr=epr;
+}
+
 /* setup tools used by some of the tests */
 void testWhole(char* filename){
-	char *argv[3];
-	argv[1]=filename;
 /* modified clone of tcMain.c code...
  */
 	strcpy(pr,"[_MAIN();]");  /* required sys main */
 	epr = prused = pr+10;
 	cursor = pr;
 	curglbl = fun;
-	readTheFiles(2,argv,1);  /* sets epr, curglbl */
+
+	/* load the test subject code */
+	loadCode(defaultLibrary);
+	markEndlibrary();
+	loadCode(filename);
+
 	error=0;
 	prused = epr+10;  /* a little slack */
 	nxtvar = 0;
