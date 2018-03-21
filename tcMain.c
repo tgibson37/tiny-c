@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 	curglbl = fun;
 
 	/* load default or specified libraries, epr has been set above */
-	if(optind<=argc){
+	if(optind>=argc){
 		tcUsage();
 		exit(1);
 	}

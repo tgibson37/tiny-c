@@ -1019,8 +1019,15 @@ void tclink() {
 		if(_lit(xlb)) _skip('[',']');
 		else if(_decl()) ;
 		else if(_lit(xendlib)){
-			newfun();
-			curglbl=curfun;
+			if(curfun==fun) {   /* 1st endlib, assume globals follow */
+				newfun();
+				curglbl=curfun;
+			}
+			else {        /* subsequent endlib, 
+			                 move assummed globals to frame 0 */
+				fun[0].lvar = nxtvar-1;     /* moved */
+				fun[1].fvar = nxtvar;      /* globals now empty */
+			}
 		}
 		else if(_symName()) {     /* fctn decl */
 			union stuff kursor;
