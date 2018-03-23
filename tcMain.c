@@ -5,19 +5,23 @@
  */
 extern char* defaultLibrary;
 extern int optind;
+extern char* optarg;
 extern char* xendlib;
+char* defaultStart="main";
 
 void tcUsage() {
-	printf("Usage: tc [-d] [libfile...] appfile");
+	printf("Usage: tc [-d] [-r code] [libfile...] appfile");
 	printf("\n  No args prints this usage.");
 	printf("\n  One arg loads the standard library, and the appfile.");
 	printf("\n  Two or more args load libraries, then the appfile.");
 	printf("\n  In that case the standard library is not included by");
 	printf("\n  default but must be explicitly included in the list ");
 	printf("\n  if required by the app.");
-	printf("\nThe tinyC app will be started at its main() function");
-	printf("\n  (no arguments to this main()");
-	printf("\n -d enables the debugger");
+	printf("\nThe default start of the tinyC app is a main() function,");
+	printf("\n  with no arguments. -r changes this default to code, which ");
+	printf("\n  can be any function, args permitted, or even a compound");
+	printf("\n  statement.");
+	printf("\n -d enables the debugger, which has its own usage print.");
 	printf("\n");
 }
 
@@ -43,18 +47,36 @@ void markEndlibrary() {
 
 int main(int argc, char *argv[]) {
 	int opt;
-    while ((opt = getopt(argc, argv, "dv")) != -1) {
+	strcpy(pr,defaultStart);
+	epr = prused = pr+strlen(defaultStart);
+    while ((opt = getopt(argc, argv, "dvr:")) != -1) {
         switch (opt) {
-        case 'd': debug=1; break;
-        case 'v': verbose[VL]=1; break;
+        case 'd': 
+        	debug=1; 
+        	break;
+        case 'v': 
+        	verbose[VL]=1; 
+        	break;
+        case 'r': 
+        	strcpy(pr,optarg);
+        	epr = prused = pr+strlen(optarg);
+        	break;
+	    case '?':
+	        if (optopt == 'r')
+	          fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+	        else if (isprint (optopt))
+	          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+	        else
+	          fprintf (stderr,
+	                   "Unknown option character `\\x%x'.\n",
+	                   optopt);
+	        return 1;
         default:
             fprintf(stderr, "Usage: %s [-d] [-v] [file...]\n", argv[0]);
             exit(1);
         }
     }
 
-	strcpy(pr,"[_MAIN();]");  /* very first statement */
-	epr = prused = pr+10;     /* prereq's to readTheFiles */
 	cursor = pr;
 	curglbl = fun;
 
