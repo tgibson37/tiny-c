@@ -1,4 +1,4 @@
-/* test 34, link
+/* test 34, link, must set lpr=2, apr-->line 28, epr=nread 
 
 /* put a single character
 putchar char c [

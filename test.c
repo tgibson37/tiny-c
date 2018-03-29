@@ -41,7 +41,7 @@ void testWhole(char* filename){
 /* modified clone of tcMain.c code...
  */
 	strcpy(pr,"[_MAIN();]");  /* required sys main */
-	epr = prused = pr+10;
+	lpr = epr = prused = pr+10;
 	cursor = pr;
 	curglbl = fun;
 
@@ -72,16 +72,20 @@ void testSetup(char* code) {
 	curfun = fun-1;
 	efun = fun+FUNLEN;
 }
+
 int testSetupFile(char* filename, int lib) {
 	int len=0;
-	cursor = pr;
 	curglbl = fun;
+	strcpy(pr,"[]");
+	lpr = pr+2;
+	cursor = pr+2;
 	if(lib) {
-		len = fileRead("pps/library.tc",pr,PRLEN);
+		len = fileRead("pps/library.tc",lpr,PRLEN);
 		cursor += len; 	/*  cursor->app */
 		curglbl = fun+1;
 	}
-	len += fileRead(filename,pr+len,PRLEN-len);
+	apr = cursor;
+	len += fileRead(filename,lpr+len,PRLEN-len);
 	error=0;
 	epr = pr+len;
 	prused = epr+10;  /* a little slack */
@@ -172,18 +176,22 @@ void doTest(int testcase) {
  *	The data is fake. Check the canonicalized name is proper. 
  *	Should get: foobaaaz
  */
-		case 2: strcpy(pr,"foob5678"); 
-			fname = &pr[0];	lname = &pr[strlen(pr)-1];
+		case 2: strcpy(pr,"foob5678x"); 
+			fname = &pr[0];	
+			lname = &pr[strlen(pr)-1];
 			nxtvar = 0;
 			prused = pr+20;
 			newvar(0,Int,1,0);
+			--lname;
 			newvar(0,2,1,0);
+			--lname;
 			newvar(0,2,1,0);
+			--lname;
 			newvar(0,2,1,0);
-			pl("name in pr ->");ps(pr);ps("<-");
+			pl("name in pr ->");ps(pr);ps("<-");fflush(stdout);
 			dumpVarTab();
 			break;
-/*	Should get: foob5678  */
+/*	Should get: foob567x, foob5678, f00b567, foob56  */
 
 		case 3: strcpy(pr,"foob"); 
 			fname = &pr[0];	lname = &pr[strlen(pr)-1];
@@ -398,6 +406,7 @@ void doTest(int testcase) {
 				Test 12 done, error=15  <<-- intentional
 */
 		case 13: nxtvar=0;
+			int err;
 			strcpy(pr, "{}   {}   {{}{{}}}   {    STRING-END");
 			epr = pr + strlen(pr) -1;
 		/*prused = pr+100;*/
@@ -407,22 +416,23 @@ void doTest(int testcase) {
 			pl("4 skips: ");
 			/* 4 calls to skip, 
 			the last should fail with error,cursor= 2 D */
-			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
-			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
-			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
-			_lit("{");_skip('{','}'); printf("\nerror,cursor = %d %s", error, cursor);
+			_lit("{");err=_skip('{','}'); printf("\nerr,cursor = %d %s", err, cursor);
+			_lit("{");err=_skip('{','}'); printf("\nerr,cursor = %d %s", err, cursor);
+			_lit("{");err=_skip('{','}'); printf("\nerr,cursor = %d %s", err, cursor);
+			_lit("{");err=_skip('{','}'); printf("\nerr,cursor = %d %s", err, cursor);
 			break;
-/* 
+/* NOTE(3/28/2017) _skip no longer sets an error, but returns the 
+	count of unmatched ['s. Calling routine decides the treatment.
 	_skip() over nested braces.
 	Should get...
 				at start cursor,epr,error = 1 35 0
 				cursor->}   {}   {{}{{}}}   {    STRING-END
 				4 skips: 
-				error,cursor = 0    {}   {{}{{}}}   {    STRING-END
-				error,cursor = 0    {{}{{}}}   {    STRING-END
-				error,cursor = 0    {    STRING-END
-				error,cursor = 2 
-				Test 13 done, error=2    <<-- intentional
+				err,cursor = 0    {}   {{}{{}}}   {    STRING-END
+				err,cursor = 0    {{}{{}}}   {    STRING-END
+				err,cursor = 0    {    STRING-END
+				err,cursor = 1 D 
+				Test 13 done, error=0    <<-- intentional
 */
 		case 14: 
 			strcpy(pr, "   \n\n  /* a tiny-c style comment   \nnext-line  string-end");
@@ -797,8 +807,8 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			st();
 			break;
 /* 	Should get...
-				Test 30:
-				/* test 30
+				Test 30 (99):
+				[]/* test 30
 				[
 				MC...  <NOTE: 3 lines of MC's
 				]
@@ -810,7 +820,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			len = strlen(pr);
 			printf("\nTest 31 (%d):\n%s",len,pr);
 			printf("\napplying st()...\n");
-			st();
+			st(); fflush(stdout);
 			dumpVarTab();
 			break;
 /* 	Should get...
@@ -819,7 +829,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				applying st()... 
 				321F0 
 				Var Table: name class type len (type)value
- 				var 0: i 0 Int 1  ref to pr[135]
+ 				var 0: i 0 Int 1  ref to pr[136]
 */
 		case 32:
 		/*             01234567890123456789012345678901234567890
@@ -862,9 +872,12 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				 var 5: f 0 Char 1 pr[71]-><-
  */
 		case 34:
+/* test 34, link, must set lpr=2, apr-->pr+366, epr=nread */
 			len=testSetupFile("./testFiles/34", 0);
 			printf("\nTest 34 (%d):\n%s",len,pr);
 			printf("\napplying link()...\n");
+			lpr=pr+2;
+			apr=pr+366;
 			tclink();
 			dumpFun();
 			dumpVarTab();
@@ -940,7 +953,9 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			pl(" empty case");
 			break;
 		case 43:
-			testSetupFile("./testFiles/43",1);
+/* test 43 -- compound statment WITH lib calls 
+	 link, must set lpr=pr+2, apr-->line 28, epr=nread */	
+	 		testSetupFile("./testFiles/43",1);
 			tclink();
 			curglbl = fun;  /* */
 			st();

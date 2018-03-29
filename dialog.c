@@ -32,6 +32,9 @@ void _errToWords(){
 		case 27: x="EQERR, illegal assign"; break;
 		case 28: x="PTRERR"; break;
 		case 99: x="KILL, stopped by user"; break;
+		case 1023: x="RBRCERR, ] required in -r "; break;
+		case 2023: x="RBRCERR, ] required in library"; break;
+		case 3023: x="RBRCERR, ] required in app code"; break;
 	}
 	printf("%s\n",x);
 }

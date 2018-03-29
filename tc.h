@@ -90,14 +90,15 @@ void saveName();
 
 /* program space */
 char pr[PRLEN];
-char *apr, *epr, *prused;
+char *lpr, *apr, *epr, *prused;
 #define EPR (pr+PRLEN-1)
 /* EPR is end of program SPACE. 
- *	pr+10 is start of system program.
- *	apr is start of application program text, 
- *	epr is end of ALL program text, 
- *	prused includes value space.
- *	EPR is pointer to last byte of pr array.
+ *	pr is starts with startSeed
+ *	lpr is start of libraries
+ *	apr is start of application program
+ *	epr is end of ALL program text, start of value space
+ *	prused includes values, moves up/down with fcn entry/leaving
+ *	EPR is pointer to last byte of pr array
  */
 
 /************ Globals **************/

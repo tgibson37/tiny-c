@@ -173,16 +173,21 @@ int _lit(char *s){
 }
 
 /* skips balance l-r assuming left is matched. 
- *	Returns 0 on OK, else curserr.
+ *	Returns 0 on OK, else count of missing ]'s.
  */
 int _skip(char l, char r) {
+/*if(cursor>pr+3850){
+printf("\n~180 CURSOR %d epr %d ERROR %d",cursor-pr, epr-pr,error);
+pft(cursor-1,epr);
+}
+*/
 	int counter = 1;
 	 while( counter>0 && cursor<epr ) {
 		if(*cursor==l)++counter;
 		if(*cursor==r)--counter;
 		++cursor;
 	};
-	if( counter ) { eset(CURSERR); return error; }
+	if( counter )return counter;
 	return 0;
 }
 
@@ -840,13 +845,29 @@ void st() {
 	}
 }
 
-/*
- *	Checks for balanced brackets, cursor to epr inclusive. 
- */
+/*     Checks for balanced brackets, cursor to epr inclusive. 
 void checkBrackets() {
-	int count;
-	while(*(cursor++) != '[' && cursor<=epr) ;
-	if(_skip('[',']'))eset(RBRCERR);
+   int count;
+   while(*(cursor++) != '[' && cursor<=epr) ;
+   if(_skip('[',']'))eset(RBRCERR);
+}
+ */
+
+/*
+ *	Checks for balanced brackets, cursor to stop.
+ */
+int checkBrackets(char* stop) {
+	int err;
+	char* save=epr;  /* _skip uses epr as limit */
+	epr=stop;
+	while(cursor<stop) {
+		while(*(cursor++) != '[' && cursor<stop) ;
+		if(cursor<stop) {
+			if(err = _skip('[',']'))return err;
+		}
+	}
+	epr=save;
+	return 0;
 }
 
 /*********** a variety of dumps for debugging **********/
@@ -913,91 +934,21 @@ void dumpName() {
 }
 
 /****  C tools to deal with typeless storage ****/
-
-	void put_int(char *where, int datum) {
-		memcpy( where, &datum, sizeof(datum) );
-	}
-	int get_int(char *where) {
-		int datum;
-		memcpy( &datum, where, sizeof(datum));
-		return datum;
-	}
-	void put_char(char *where, char datum) {
-		memcpy(where, &datum, sizeof(datum));
-	}
-	char get_char(char *where) {
-		char datum;
-		memcpy( &datum, where, sizeof(datum));
-		return datum;
-	}
-
-/*	reads two files using command line args for one or both.
- *		./tc                      Usage
- *		./tc [libfile] appfile    Load and go
- *	  Default libfile is /usr/local/share/tinyC/library.tc
- */
-void readTheFiles(int argc, char *argv[], int optind) {
-	int nread;
-	int optcount = optind-1;
-	if(argc-optcount==2){
-		/* sys */
-#if defined(_WIN32)
-        char* sysfile = "pps\\library.tc";
-#else
-        char* sysfile = "/usr/local/share/tinyC/library.tc";
-#endif
-		nread = fileRead(sysfile,epr,EPR-epr);
-		if(nread == -1) {
-			fprintf(stderr,"tc: file read error: %s",sysfile);
-			exit(1);
-		}
-		else if(nread == 0) {
-			fprintf(stderr,"tc-lib: no such file: %s\n",sysfile);
-			exit(1);
-		}
-		apr = epr += nread;
-		/* app */
-		nread = fileRead( argv[optcount+1],epr,EPR-epr);
-		if(nread == -1) {
-			fprintf(stderr,"tc: file read error: %s\n",argv[optcount+1]);
-			exit(1);
-		}
-		else if(nread == 0) {
-			fprintf(stderr,"tc-app: no such file: %s\n",argv[optcount+1]);
-			exit(1);
-		}
-		epr += nread;
-		curglbl = fun+1;
-	}
-	else if(argc-optcount==3){
-		/* sys, e.g. lib */
-		nread = fileRead(argv[optcount+1],epr,EPR-epr);
-		if(nread == -1) {
-			fprintf(stderr,"file read error: %s\n",argv[optcount+1]);
-			exit(1);
-		}
-		else if(nread == 0) {
-			fprintf(stderr,"no such lib file: %s\n",argv[optcount+1]);
-			exit(1);
-		}
-		apr = epr += nread;
-		/* app */
-		nread = fileRead(argv[optcount+2],epr,EPR-epr);
-		if(nread == -1) {
-			fprintf(stderr,"file read error: %s\n",argv[optcount+2]);
-			exit(1);
-		}
-		else if(nread == 0) {
-			fprintf(stderr,"no such app file: %s\n",argv[optcount+2]);
-			exit(1);
-		}
-		epr += nread;
-		curglbl = fun+1;
-	}
-	else {
-		tcUsage();
-		exit(1);
-	}
+void put_int(char *where, int datum) {
+	memcpy( where, &datum, sizeof(datum) );
+}
+int get_int(char *where) {
+	int datum;
+	memcpy( &datum, where, sizeof(datum));
+	return datum;
+}
+void put_char(char *where, char datum) {
+	memcpy(where, &datum, sizeof(datum));
+}
+char get_char(char *where) {
+	char datum;
+	memcpy( &datum, where, sizeof(datum));
+	return datum;
 }
 
 /*
@@ -1009,9 +960,13 @@ void readTheFiles(int argc, char *argv[], int optind) {
 void tclink() {
 	char* x;
 	char* savedCursor=cursor;
-	checkBrackets();
-	if(error)return;
+/*	check Brackets from cursor to limit*/
 	cursor=pr;
+	if(checkBrackets(lpr))eset(RBRCERR+1000);
+	if(checkBrackets(apr))eset(RBRCERR+2000);
+	if(checkBrackets(epr))eset(RBRCERR+3000);
+	if(error)whatHappened();
+	cursor=lpr;
 	newfun();
 	while(cursor<epr && !error){
 		char* lastcur = cursor;

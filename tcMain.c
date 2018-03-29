@@ -7,7 +7,7 @@ extern char* defaultLibrary;
 extern int optind;
 extern char* optarg;
 extern char* xendlib;
-char* defaultStart="main";
+char* startSeed="main";
 
 void tcUsage() {
 	printf("Usage: tc [-d] [-r code] [libfile...] appfile");
@@ -47,8 +47,8 @@ void markEndlibrary() {
 
 int main(int argc, char *argv[]) {
 	int opt;
-	strcpy(pr,defaultStart);
-	epr = prused = pr+strlen(defaultStart);
+	strcpy(pr,startSeed);
+	lpr = epr = prused = pr+strlen(startSeed);
     while ((opt = getopt(argc, argv, "dvr:")) != -1) {
         switch (opt) {
         case 'd': 
@@ -58,8 +58,10 @@ int main(int argc, char *argv[]) {
         	verbose[VL]=1; 
         	break;
         case 'r': 
+        	*pr = '[';
         	strcpy(pr,optarg);
-        	epr = prused = pr+strlen(optarg);
+        	lpr = epr = prused = pr+strlen(optarg)+2;
+        	*(epr-1) = ']';
         	break;
 	    case '?':
 	        if (optopt == 'r')

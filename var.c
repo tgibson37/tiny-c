@@ -97,7 +97,7 @@ char* _canon(char* first, char* l, char* buff) {
 	int i=0; 
 	char* f=first;
 	while(f<=l && i<VLEN-1) buff[i++]=*(f++);
-	if(i==VLEN-1)buff[i++]=*l;
+	if(f<=l)buff[i++]=*l;
 	buff[i]=0;
 	return buff;
 }
