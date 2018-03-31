@@ -1,0 +1,10 @@
+//whileTest.tc
+printMe int number [
+	pn number
+]
+
+main [
+	int k, MAXK
+	MAXK=10; k=0;
+	while( (k=(k+1))<MAXK ) [printMe k]
+]

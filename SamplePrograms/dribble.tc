@@ -1,0 +1,34 @@
+
+/* this was motivated by a chocolate bar problem
+
+/* you've got $15
+/* you get another chocolate bar if you have 3 wrappers
+/* how many chocolate bars can you get?
+
+/* 1 dribble costs 1 drabble
+/* b is what you have in drabbles
+/* w is number of dribble wrappers you need
+/* to get another dribble
+
+dribble int  b,w [
+ /* pl "dribble.tc - lrb - 3/24/18";pl ""
+ int ws;ws=b/w
+ pl "The number of dribbles you can buy is"
+ pn b+ws+ws/w+(ws%w==w-1)
+ putchar '.';pl ""
+ ]
+
+main [
+ int b,w
+ /* pl "enter b, your drabbles  : ";b=gn
+ /*  pl "enter w, wrappers to get a dribble : ";w=gn
+ /* dribble b,w
+
+b=15
+while b<40 [
+ pl "";pn b;pn 3
+ dribble b,3
+ b=b+1
+ ]
+
+ ]

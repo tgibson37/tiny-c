@@ -148,7 +148,7 @@ int Mpft(int nargs, int *args) {
 
 int bar(int nargs, int *args)
 {
-	printf("\nPhantom MC");
+	fprintf(stderr,"\nPhantom MC");
     return 2;
 }
 
