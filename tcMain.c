@@ -7,7 +7,7 @@ extern char* defaultLibrary;
 extern int optind;
 extern char* optarg;
 extern char* xendlib;
-char* startSeed="main";
+char* startSeed="[main]";
 
 void tcUsage() {
 	printf("Usage: tc [-d] [-r code] [libfile...] appfile");

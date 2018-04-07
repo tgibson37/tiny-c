@@ -2,9 +2,9 @@
 initial state before any tests
 
 ADDRESSES (hex)
-pr:     60cb40
-stack:  6119c0
-vartab: 612360
+pr:     60db60
+stack:  6150e0
+vartab: 615a80
 ----
 STATE 0
 parsing: <--end of line--
@@ -12,43 +12,43 @@ Var Table: name class type len (type)value empty
 Stack (from top) class lvalue type stuff
 
 
-TEST 1  20:33
+TEST 1  09:03
 Var Table: name class type len (type)value
  var 0: foobaaaz 0 Int 1 pr[51]->0<-
  var 1: foobaaaz 0 Int 1 pr[55]->0<-
  var 2: foobaaaz 0 Int 1 pr[59]->0<-
  var 3: foobaaaz 0 Int 1 pr[63]->0<-
 
-TEST 2  20:33
+TEST 2  09:03
 Var Table: name class type len (type)value
  var 0: foob567x 0 Int 1 pr[21]->0<-
  var 1: foob5678 0 Int 1 pr[25]->0<-
  var 2: foob567 0 Int 1 pr[29]->0<-
  var 3: foob56 0 Int 1 pr[33]->0<-
 
-TEST 3  20:33
+TEST 3  09:03
 Var Table: name class type len (type)value
  var 0: foob 0 Int 1 pr[21]->0<-
  var 1: foob 0 Int 1 pr[25]->0<-
  var 2: foob 0 Int 1 pr[29]->0<-
  var 3: foob 0 Int 1 pr[33]->0<-
 
-TEST 4  20:33
+TEST 4  09:03
 Var Table: name class type len (type)value
  var 0: foo 0 Int 1 pr[21]->0<-
  var 1: foo 0 Int 1 pr[25]->0<-
  var 2: foo 0 Int 1 pr[29]->0<-
  var 3: foo 0 Int 1 pr[33]->0<-
 
-TEST 5  20:33
+TEST 5  09:03
 
-TEST 6  20:33
+TEST 6  09:03
 Var Table: name class type len (type)value
  var 0: symbol 0 Char 1 pr[21]->NULL<-
 
-TEST 7  20:33
+TEST 7  09:03
 
-TEST 8  20:33
+TEST 8  09:03
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[101]->NULL<-
  var 1: b 1 Char 10 pr[102]-><-
@@ -57,16 +57,16 @@ Var Table: name class type len (type)value
  var 4: e 1 Int 10 pr[117]
  var 5: f 0 Int 1 pr[157]->0<-
 
-TEST 9  20:33
+TEST 9  09:03
 
-TEST 10  20:33
+TEST 10  09:03
 
-TEST 11  20:33
+TEST 11  09:03
 Stack (from top) class lvalue type stuff
  stack entry at 0: 0 A 2 
 
 
-TEST 12  20:33
+TEST 12  09:03
 Stack (from top) class lvalue type stuff
  stack entry at 3: 1 A 2 
  stack entry at 2: 0 A 2 
@@ -81,20 +81,20 @@ Stack (from top) class lvalue type stuff
 Stack (from top) class lvalue type stuff
 
 
-TEST 13  20:33
+TEST 13  09:03
 
-TEST 14  20:33
+TEST 14  09:03
 
-TEST 15  20:33
+TEST 15  09:03
 
-TEST 16  20:33
+TEST 16  09:03
 Stack (from top) class lvalue type stuff
  stack entry at 2: 0 A 1 
  stack entry at 1: 1 A 1 
  stack entry at 0: 0 A 2 
 
 
-TEST 17  20:33
+TEST 17  09:03
 Var Table: name class type len (type)value
  var 0: foobaaaz 11 Char 13 pr[10]
  var 1: foob5678 21 Int 23 pr[23]
@@ -104,53 +104,53 @@ Var Table: name class type len (type)value
  var 1: foob5678 21 Int 23 pr[23]
  var 0: foobaaaz 11 Char 13 pr[10]
 
-TEST 18  20:33
+TEST 18  09:03
 
-TEST 19  20:33
+TEST 19  09:03
 
-TEST 20  20:33
+TEST 20  09:03
 
-TEST 21  20:33
+TEST 21  09:03
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->NULL<-
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->A<-
 
-TEST 22  20:33
+TEST 22  09:03
 
-TEST 23  20:33
+TEST 23  09:03
 Var Table: name class type len (type)value
  var 0: x 0 Int 1 pr[18]->0<-
 Stack (from top) class lvalue type stuff
 
 
-TEST 24  20:33
+TEST 24  09:03
 Var Table: name class type len (type)value
  var 0: x 1 Int 3 pr[26]
 
-TEST 25  20:33
+TEST 25  09:03
 Stack (from top) class lvalue type stuff
 
 
-TEST 26  20:33
+TEST 26  09:03
 
-TEST 27  20:33
+TEST 27  09:03
 
-TEST 28  20:33
+TEST 28  09:03
 
-TEST 29  20:33
+TEST 29  09:03
 
-TEST 30  20:33
+TEST 30  09:03
 
-TEST 31  20:33
+TEST 31  09:03
 Var Table: name class type len (type)value
  var 0: i 0 Int 1 pr[136]->0<-
 
-TEST 32  20:33
+TEST 32  09:03
 Var Table: name class type len (type)value
  var 0: foo 69 Int 1 pr[6]
 
-TEST 33  20:33
+TEST 33  09:03
 Var Table: name class type len (type)value
  var 0: a 0 Int 1 pr[57]->0<-
  var 1: b 1 Int 1 pr[61]
@@ -159,88 +159,88 @@ Var Table: name class type len (type)value
  var 4: e 1 Char 1 pr[70]-><-
  var 5: f 0 Char 1 pr[71]->NULL<-
 
-TEST 34  20:33
+TEST 34  09:03
 fun table: fvar, lvar, prused
- fun entry at 0:  0 3 443
- fun entry at 1:  4 11 459
+ fun entry at 0:  0 3 439
+ fun entry at 1:  4 11 455
 Var Table: name class type len (type)value
- var 0: putchar 69 Int 1 pr[100]
- var 1: pft 69 Int 1 pr[185]
- var 2: ps 69 Int 1 pr[250]
- var 3: scann 69 Int 1 pr[324]
- var 4: a 0 Int 1 pr[460]->0<-
- var 5: b 1 Int 1 pr[464]
- var 6: c 0 Int 1 pr[468]->0<-
- var 7: d 0 Char 1 pr[472]->NULL<-
- var 8: e 1 Char 1 pr[473]-><-
- var 9: f 0 Char 1 pr[474]->NULL<-
- var 10: main 69 Int 1 pr[418]
- var 11: foobar 69 Int 1 pr[430]
+ var 0: putchar 69 Int 1 pr[96]
+ var 1: pft 69 Int 1 pr[181]
+ var 2: ps 69 Int 1 pr[246]
+ var 3: scann 69 Int 1 pr[320]
+ var 4: a 0 Int 1 pr[456]->0<-
+ var 5: b 1 Int 1 pr[460]
+ var 6: c 0 Int 1 pr[464]->0<-
+ var 7: d 0 Char 1 pr[468]->NULL<-
+ var 8: e 1 Char 1 pr[469]-><-
+ var 9: f 0 Char 1 pr[470]->NULL<-
+ var 10: main 69 Int 1 pr[414]
+ var 11: foobar 69 Int 1 pr[426]
 
-TEST 35  20:33
+TEST 35  09:03
 
-TEST 36  20:33
+TEST 36  09:03
 
-TEST 37  20:33
+TEST 37  09:03
 
-TEST 38  20:33
+TEST 38  09:03
 
-TEST 39  20:33
+TEST 39  09:03
 
-TEST 40  20:33
+TEST 40  09:03
 
-TEST 41  20:33
+TEST 41  09:03
 
-TEST 42  20:33
+TEST 42  09:03
 
-TEST 43  20:33
+TEST 43  09:03
 
-TEST 44  20:33
+TEST 44  09:03
 
-TEST 45  20:33
+TEST 45  09:03
 
-TEST 46  20:33
+TEST 46  09:03
 
-TEST 47  20:33
+TEST 47  09:03
 
-TEST 48  20:33
+TEST 48  09:03
 
-TEST 49  20:33
+TEST 49  09:03
 
-TEST 50  20:33
+TEST 50  09:03
 
-TEST 51  20:33
+TEST 51  09:03
 
-TEST 52  20:33
+TEST 52  09:03
 
-TEST 53  20:33
+TEST 53  09:03
 
-TEST 54  20:33
+TEST 54  09:03
 
-TEST 55  20:33
+TEST 55  09:03
 
-TEST 56  20:33
+TEST 56  09:03
 
-TEST 57  20:33
+TEST 57  09:03
 
-TEST 58  20:33
+TEST 58  09:03
 
-TEST 59  20:33
+TEST 59  09:03
 
-TEST 60  20:33
+TEST 60  09:03
 
-TEST 61  20:33
+TEST 61  09:03
 
-TEST 62  20:33
+TEST 62  09:03
 
-TEST 63  20:33
+TEST 63  09:03
 
-TEST 64  20:33
+TEST 64  09:03
 
-TEST 65  20:33
+TEST 65  09:03
 
-TEST 66  20:33
+TEST 66  09:03
 
-TEST 67  20:33
+TEST 67  09:03
 
-TEST 68  20:33
+TEST 68  09:03

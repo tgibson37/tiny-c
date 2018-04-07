@@ -984,6 +984,10 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 						  Kcount = 30;   /* <<== tab-tab-space-space K...
  */
 		case 46:
+			testWhole("./testFiles/46");
+			break;
+/* 	Should get...
+ */
 		case 47:
 		case 48:
 		case 49:

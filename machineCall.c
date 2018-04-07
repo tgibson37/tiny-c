@@ -213,6 +213,32 @@ int Mstrcpy(int nargs, int *argsv) {
 	return (int)strcpy(a,b);
 }
 
+int Mfopen(int nargs, int *args) {
+	char *filename = (char*)args[0];
+	char *mode   = (char*)args[1];
+	return tcFopen(filename,mode);
+}
+int Mfgets(int nargs, int *args) {
+	char* buff = (char*)args[0];
+	int len = args[1];
+	int unit = args[2];
+	return tcFgets(buff,len,unit);
+}
+int Mfputs(int nargs, int *args) {
+	char* str = (char*)args[0];
+	int unit = args[1];
+	return tcFputs(str,unit);
+}
+int Mfputc(int nargs, int *args) {
+	char c = (char)args[0];
+	int unit = args[1];
+	return tcFputc(c,unit);
+}
+int Mfclose(int nargs, int *args) {
+	int unit = args[0];
+	return tcFclose(unit);
+}
+
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
@@ -223,7 +249,7 @@ McList origList[] =
 McList newList[] = 
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &bar, &bar, &bar
-	, &bar, &bar, &bar, &bar, &bar
+	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
 };
 /* first in this list is MC 201 */
 McList userList[] = 

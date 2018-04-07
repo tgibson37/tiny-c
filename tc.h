@@ -12,10 +12,11 @@
 #define LEFTARROW -68
 
 #define VLEN 8
-#define VTABLEN 200
-#define PRLEN 20000
+#define VTABLEN 300
+#define PRLEN 30000
 #define STACKLEN 100
 #define FUNLEN 100
+#define MAX_UNIT 10
 
 /* debug and verbosity tags */
 #define VE 0
@@ -111,6 +112,12 @@ char* errat;
 int obsize, vclass, alen;
 int traceMode;
 
+FILE* fileUnit[MAX_UNIT];
+int tcFopen(char* name, char* mode);
+int tcFputs(char* str, int unit);
+int tcFputc(char c, int unit);
+int tcFgets(char* buff, int len, int unit);
+int tcFclose();
 void stbegin();
 int typeToSize( int class, Type type );
 int topdiff();

@@ -1,5 +1,7 @@
 STATUS.txt (latest on top, future at bottom)
 
+March 31, 2018 - updated Documents/the_new_classical_tiny-C.doc describes new features of the -d debug option, gives a walkthrough of its use, new command line syntax loads multiple libraries, keyboard arrow keys enabled. Most important: lots of use has made this release pretty solid. 
+
 Feb 2, 2018 - ESC now kills hard loop.
 
 Jan 9, 2018 - BUG in library's random(little,big). Returns -1 often. Flaw is arithmetic. Big positive (110M+) pushed. % operator pops -20.

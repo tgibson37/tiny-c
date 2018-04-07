@@ -179,24 +179,52 @@ writefile char name(0), buff(0); int len [
 	return MC name, buff, len, 107
 ]
 
-/* 
-fopen int m; char n(0); int s,u [
+fopen char name(0), mode(0); [
+	int unit
+	unit=MC name,mode,111
+	if(unit<0)[
+		ps"fopen err "; pn unit
+	]
+	return unit;
 ]
 
-/* 
-fread char a(0); int u [
+fputs char str(0); int unit[
+	int code;
+	code=MC str,unit,112
+	if(code<0)[
+		ps"fputs err "; pn code
+	]
+	return code;
 ]
 
-/* 
+fputc char c; int unit[
+	int code;
+	code=MC c,unit,113
+	if(code<0)[
+		ps"fputc err "; pn code
+	]
+	return code;
+]
+
+fgets char buff(0); int len, unit[
+	int code;
+	code=MC buff,len,unit,114
+	if(code<0)[
+		ps"fgets err "; pn code
+	]
+	return code;
+]
+fclose int unit[
+	int code;
+	code=MC unit,115
+	if(code<0)[
+		ps"fclose err "; pn code
+	]
+	return code;
+]
+
 strlen char s(0) [
 	return MC s,104
-]
-/* 
-fwrite char f(0), t(0); int u [
-]
-
-/* 
-fclose int u [
 ]
 
 int seed,last
