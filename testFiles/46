@@ -1,0 +1,39 @@
+// file i/o, test 46
+
+fputline char line(0), unit [
+	int err
+	err = fputs line, unit
+	pl "fputs returned"
+	pn err
+	err = fputc 10, unit
+	pl "fputc returned"
+	pn err
+]
+
+main [
+	char buf(99)
+	int unit, err
+	unit = fopen "test46", "w"
+	ps "fopen returned"
+	pn err
+	fputline "line 1", unit
+	fputline "line 2", unit
+	fputline "line 3 and last", unit
+	err = fclose unit
+	pl "fclose returned"
+	pn err
+	pl "READ TEST"
+	unit = fopen "test46", "r"
+	int k
+	k=0
+	while( k<3 )[
+		pl "fopen returned"
+		pn unit
+		err = fgets(buf,99,unit)
+		pl "fgets returned"
+		pn err
+		pl buf
+		k = k+1
+	]
+	pl "the blank lines are the newlines fputc put in the file"
+]

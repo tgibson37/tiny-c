@@ -1,0 +1,4 @@
+//multiLibTest.tc
+main [
+	echo3
+]

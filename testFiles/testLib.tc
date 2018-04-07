@@ -1,0 +1,25 @@
+//testLib.tc
+echo [
+	char buf(8)
+	int i
+	i=0
+	while(i<9)[
+		buf(i) = 'a'+i
+		i=i+1
+	]
+	ps"initial buf:    "
+	ps buf
+	pl"type a short line... "
+	gs buf
+	ps"after gs buf:   "
+	ps buf
+	pl""
+]
+
+echo3 [
+	pl"Doing 3 echos..."
+	echo;echo;echo
+	pl"Notice that gl puts a null at end of string"
+	pl"Thats why the buf seems truncated after typing"
+	pl""
+]

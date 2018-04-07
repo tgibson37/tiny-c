@@ -1,0 +1,22 @@
+// Bug 3/3/18 from ED
+main [
+	int m, a
+	m = 17
+	pn m
+	m = m - m / 10 * 10
+	pn m
+	pl"Should be 17 7"
+	int i,j
+	i=5
+	j=5
+	a = ((i > 0) * (i < 9) * (j > 0) * (j < 9))
+	pl""
+	pn a
+	pl"Should be 1"
+	j=55
+	a = ((i > 0) * (i < 9) * (j > 0) * (j < 9))
+	pl""
+	pn a
+	pl"Should be 0"
+	pl""
+]
