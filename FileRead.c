@@ -120,7 +120,7 @@ int iProperty(char* file, char* name, int *val, int _default) {
 		}
 	}
 	fclose(fp);
-	return next;
+	return 0;
 }
 
 /*	set *val to default unless optionally overridden in property file.
