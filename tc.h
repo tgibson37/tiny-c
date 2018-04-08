@@ -90,11 +90,11 @@ char fcnName[VLEN+1];
 void saveName();
 
 /* program space */
-char pr[PRLEN];
-char *lpr, *apr, *epr, *prused;
-#define EPR (pr+PRLEN-1)
+char* pr;
+char *lpr, *apr, *epr, *prused, *EPR;
+
 /* EPR is end of program SPACE. 
- *	pr is starts with startSeed
+ *	pr starts with startSeed, then libs, then app, then values
  *	lpr is start of libraries
  *	apr is start of application program
  *	epr is end of ALL program text, start of value space

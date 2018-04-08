@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
 		++optind;
 		testing(--argc, argv+1);
 	} else {
+		pr=malloc(PRLEN);
+		EPR=pr+PRLEN;
 		testing(argc,argv);
 	}
 	return 0;

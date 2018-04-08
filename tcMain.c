@@ -47,6 +47,15 @@ void markEndlibrary() {
 
 int main(int argc, char *argv[]) {
 	int opt;
+
+    int prlen=PRLEN;
+    int err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
+    }
+    pr = malloc(prlen);
+    EPR=pr+prlen;
+
 	strcpy(pr,startSeed);
 	lpr = epr = prused = pr+strlen(startSeed);
     while ((opt = getopt(argc, argv, "dvr:")) != -1) {
