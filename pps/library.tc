@@ -179,7 +179,7 @@ writefile char name(0), buff(0); int len [
 	return MC name, buff, len, 107
 ]
 
-fopen char name(0), mode(0); [
+fopen char name(0), mode(0) [
 	int unit
 	unit=MC name,mode,111
 	if(unit<0)[

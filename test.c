@@ -987,6 +987,28 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/46");
 			break;
 /* 	Should get...
+		fopen returned 0
+		fputs returned 6
+		fputc returned 1
+		fputs returned 6
+		fputc returned 1
+		fputs returned 15
+		fputc returned 1
+		fclose returned 0
+		READ TEST
+		fopen returned 1
+		fgets returned 7
+		line 1
+
+		fopen returned 1
+		fgets returned 7
+		line 2
+
+		fopen returned 1
+		fgets returned 16
+		line 3 and last
+
+		the blank lines are the newlines fputc put in the file
  */
 		case 47:
 		case 48:

@@ -24,11 +24,11 @@ main [
 	pn err
 	pl "READ TEST"
 	unit = fopen "test46", "r"
+	pl "fopen returned"
+	pn unit
 	int k
 	k=0
 	while( k<3 )[
-		pl "fopen returned"
-		pn unit
 		err = fgets(buf,99,unit)
 		pl "fgets returned"
 		pn err
