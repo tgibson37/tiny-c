@@ -1,0 +1,802 @@
+/*
+/* This Tiny-C program is based on a Tiny Basic version of
+/* StarTrek, dated in the mid-seventies.  Here is some of the
+/* original documentation:
+/*
+/* StarTrek, by Bruce Sherry.
+/*
+/* This is a modified version of Lynn Cochran's StarTrek
+/* (published in the June 1976 issue of SCSS Interface).  It is
+/* coded in Tiny Basic (palo alto version) and thus takes less
+/* memory (8k instead of 12k) and is faster (4 seconds to set up
+/* the galaxy most of the time, instead of 10 seconds).  It is a
+/* little different from lynn's version:
+/*
+/* (1) Commands are given in words instead of numbers.
+/*
+/*     w or warp for warp engine
+/*     t or torpedo for photon torpedo
+/*     p or phaser for phasers
+/*     s or short for short range scan
+/*     l or long for long range scan
+/*     g or galaxy for galaxy map
+/*
+/* (2) There is one more command: 'report' or 'r' which prints out
+/* pertinent information (including damages).
+/*
+/* (3) Direction (or course) is given in degrees (0 for north, 90
+/* for east, 180 for south, and 270 for west), and distance (or
+/* warps) is given in units of sectors.  Both must be integers.
+/*
+/* (4) The warp engine has better controls now.  You can move
+/* precisly to where you want to go, even after crossing the
+/* quadrant boundary. It still takes 1 stardate to make a move, but
+/* for long distance moves you will burn a disproportionally large
+/* amount of energy.
+/*
+/* (5) When Klingons fire at you, you could get hurt now.  (In
+/* Lynn's version, they cannot damage you, and they deplete their
+/* own energy more than yours.)  So, don't try to sit there and
+/* wear them out.
+/*
+/* (6) If you hit a Klingon with yout photon torpedo, the Klingon
+/* might not get totally destroyed.  Also, if you hit a star, it
+/* might not get effected at all.  When a star is destroyed, it
+/* might nova and the radiation will hurt you.
+/*
+/* (7) On the positive side, you get more energy (4000 units) at
+/* each docking, and you are well protected by your shiield.  You
+/* never get hurt unless the shield is damaged.
+/*
+/* The galaxy consists of 64 quadrants in an 8 by 8 array.  Each
+/* quadrant consists of 64 sectors in an 8 by 8 array.  When you
+/* move you give the number of sectors you wish to move.  That is,
+/* 3 quadrants would be 24 sectors (8 sectors x 3 quadrants).
+/*
+/*                                ,------------------,
+/*              ,---------------   '---  -----------'
+/*               '-------- ----'     /  /
+/*                   ,---' '--------/  /--,
+/*                    '------------------'
+/*
+/*                The USS Enterprise -- NCC-1701
+/*
+
+int a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y
+int z(175)
+int seed
+
+/* Prints a string followed by a newline
+pr char q(0) [
+ ps q
+ MC 13,1;MC 10,1
+]
+
+/* Read a line from the terminal into buffer as a string
+gs char q(0) [
+ int x
+ x=0
+ while((q(x)=MC(2))!=10) [
+  if (q(x)==13) break
+  if(q(x)==24) [x=0; pl("")]
+  else if(q(x)==127) [if(x>0)x=x-1]
+  else x=x+1
+ ]
+ q(x)=0
+ pl ""
+ return x
+]
+
+abs int nn [
+ if (nn >= 0)
+  return nn
+ return -nn
+]
+
+/* int to ascii, in buf (right justified), width of buf, num to convert, return len of numeric part
+itoa char buf(0); int width, num [
+ int sign, len
+ len = width
+ if (num < 0) [
+  num = -num
+ ]
+ buf(width) = 0
+ while (num >= 10) [
+  width = width - 1
+  buf(width) = (num % 10) + '0'
+  num = num / 10
+ ]
+ width = width - 1
+ buf(width) = num + '0'
+
+ if (sign < 0) [
+  width = width - 1
+  buf(width) = '-'
+ ]
+
+ len = len - width
+
+ while (width != 0) [
+  width = width - 1
+  buf(width) = ' '
+ ]
+]
+
+/* print num right justified, in a field of width
+pnf int num, width [
+ char buf(20)
+ int len, p
+
+ len = itoa(buf, 20, num)
+ p = 20 - width
+ ps(buf + p)
+]
+
+getcmd char prompt(0) [
+ char reply(5)
+ int ll
+
+ while (1) [
+  ps(prompt)
+  ll = gs(reply)
+  if (ll > 0)
+   return reply(0)
+ ]
+]
+
+getnum char prompt(0) [
+ ps(prompt)
+ return gn
+]
+
+show_cmds [
+ pr ""
+ pr "r=Report       s=SR. sensor   l=LR. sensor"
+ pr "g=Galaxy map   p=Phaser       t=Torpedo"
+ pr "w=Warp engine  h=Help         q=Quit"
+ pr ""
+]
+
+get_course [
+ i = getnum("course (0-360):")
+ if ((i > 360) + (i < 0)) [
+  r = 0
+  return
+ ]
+ s = (i + 45) / 90
+ i = i - s * 90
+ r = (45 + i * i) / 110 + 45
+ if (s == 1) [
+  s = i
+  t = 45
+ ] else if (s == 2) [
+  s = 45
+  t = -i
+ ] else if (s == 3) [
+  s = -i
+  t = -45
+ ] else [
+  s = -45
+  t = i
+ ]
+]
+
+docked [
+ e = 4000
+ f = 10
+ o = 1
+ i = 64
+ while (i <= 70) [
+  z(i) = 0
+  i = i + 1
+ ]
+]
+
+L165 [
+ while (1) [
+  s = random(1, 8)
+  t = random(1, 8)
+  a = 8 * s + t + 62
+  if (z(a) == 0) break
+ ]
+ z(a) = i
+]
+
+show_pos [
+ ps("Enterprise in q-"); pnf(u, 1); pnf(v, 1); ps(" s-"); pnf(x, 1); pnf(y, 1); pr("")
+]
+
+klngn_hit [
+ ps("Klingon at s-"); pnf(z(m + 6), 1); pnf(z(m + 12), 1)
+ z(m) = z(m) - s
+ if (z(m) > 0) [
+  pr(" **damaged**")
+  return
+ ]
+ z(m) = 0
+ i = 8 * u + v - 9
+ j = z(i) / abs(z(i))
+ z(i) = z(i) - 100 * j
+ k = k - 1
+ i = 8 * z(m + 6) + z(m + 12) + 62
+ z(i) = 0
+ n = n - 1
+ pr(" ***destroyed***")
+]
+
+chk_damage [
+ i = z(j + 63)
+ if      (j == 1) ps("Short range sensor")
+ else if (j == 2) ps("Computer display")
+ else if (j == 3) ps("Long range sensor")
+ else if (j == 4) ps("Phaser")
+ else if (j == 5) ps("Warp engine")
+ else if (j == 6) ps("Photon torpedo tubes")
+ else if (j == 7) ps("Shield")
+ if (i) [
+  ps(" damaged, "); pn(i); pr(" stardates estimated for repair")
+ ]
+]
+
+chk_docked [
+ i = x - (x > 1)
+ while (i <= x + (x < 8)) [
+  j = y - (y > 1)
+  while (j <= y + (y < 8)) [
+   if (z(8 * i + j + 62) == 2) [
+    if (o == 0)
+     pr("Sulu: 'Captain, we are docked at Starbase.'")
+    docked()
+    return
+   ]
+   j = j + 1
+  ]
+  i = i + 1
+ ]
+ o = 0
+]
+
+lr_sensor [
+ show_pos()
+ j = 3
+ chk_damage()
+ if (i) return
+ pr("")
+ i = u - 1
+ while (i <= u + 1) [
+  j = v - 1
+  while (j <= v + 1) [
+   m = 8 * i + j - 9
+   a = 0
+   if ((i > 0) * (i < 9) * (j > 0) * (j < 9)) [
+    a = abs(z(m))
+    z(m) = a
+   ]
+   pnf(a, 4);
+   j = j + 1
+  ]
+  pr("")
+  i = i + 1
+ ]
+]
+
+chk_overload [
+ if (a > 1090) [
+  pr("...overloaded..")
+  j = 4
+  z(67) = 1
+  a = 9
+  chk_damage()
+ ]
+ i = z(m + 6) - x
+ j = z(m + 12) - y
+ s = a * 30 / (30 + i * i + j * j) + 1
+]
+
+damaged [
+ if (z(70) == 0) [
+  z(70) = random(1, t / 50 + 1)
+  j = 7
+  chk_damage()
+  return
+ ]
+ j = random(1, 6)
+ z(j + 63) = random(1, t / 99 + 1) + z(j + 63)
+ i = random(1, 8) + 1
+ c = c + i
+ ps("McCoy: 'Sickbay to bridge, we suffered "); pn(i); pr(" casualties.'")
+ chk_damage()
+]
+
+klngn_attact [
+ if (n==0)
+  return
+ pr("Klingon attack")
+ if (o) [
+  pr("Starbase protects Enterprise")
+  return
+ ]
+ t = 0
+ m = 135
+ while (m <= 140) [
+  if (z(m)) [
+   a = (z(m) + random(1, z(m))) / 2
+   chk_overload()
+   t = t + s
+   i = z(m + 6)
+   j = z(m + 12)
+   pnf(s, 3); ps(" units hit from Klingon at s-"); pnf(i, 1); pnf(j, 1); pr("");
+  ]
+  m = m + 1
+ ]
+
+ e = e - t
+ if (e <= 0) [
+  pr("*** bang ***")
+  return
+ ]
+ pn(e); pr(" units of energy left.")
+ if (random(1, e / 4) > t)
+  return
+ damaged()
+]
+
+chk_game_over [
+ chk_docked()
+ klngn_attact()
+ if (k==0) [
+  pr(""); pr("Mission accomplished.")
+  if (d < 3)
+   pr("Boy, you barely made it.")
+  if (d > 5) [
+   pr("Good work...")
+   if (d > 9) [
+    pr("Fantastic!")
+    if (d > 13)
+     pr("Unbelievable!")
+   ]
+  ]
+  d = 30 - d
+  i = h * 100 / d * 10
+  pn(h); ps(" Klingons in "); pn(d); ps(" stardates. ("); pn(i); pr(")");
+  j = 100 * (c == 0) - 5 * c
+  pn(c); ps(" casualties incurred. ("); pn(j); pr(")");
+  ps("Your score: "); pn(i + j); pr("");
+ ] else if (d < 0)
+  pr("It's too late, the federation has been conquered.")
+]
+
+L45 [
+ i = 71
+ while i <= 152) [
+  z(i) = 0
+  i = i + 1
+ ]
+ z(8 * x + y + 62) = 4
+ m = abs(z(8 * u + v - 9))
+ n = m / 100
+ i = 1
+ if (n) [
+  j = 1;
+  while (j <= n) [
+   L165()
+   z(j + 134) = 300
+   z(j + 140) = s
+   z(j + 146) = t
+   j = j + 1
+  ]
+ ]
+
+ show_pos()
+ m = m - 100 * n
+ i = 2
+ if (m / 10)
+  L165()
+ m = m - (m / 10) * 10
+ i = 3
+ if (m) [
+  j = 1
+  while (j <= m) [
+   L165()
+   j = j + 1
+  ]
+ ]
+ chk_game_over()
+]
+
+L40 [
+ u = random(1, 8)
+ v = random(1, 8)
+ x = random(1, 8)
+ y = random(1, 8)
+ L45()
+]
+
+galaxy_map [
+ show_pos()
+ j = 2
+ chk_damage()
+ if (i)
+  return
+ pr(" of galaxy map")
+ i = 0
+ while (i <= 7) [
+  pr(""); pnf(i + 1, 1); ps(":")
+  j = 0
+  while (j <= 7) [
+   m = z(8 * i + j)
+   pnf((m > 0) * m, 4)
+   j = j + 1
+  ]
+  pr("")
+  i = i + 1
+ ]
+ ps("  ")
+ i = 0
+ while (i <= 7) [
+  ps("  ..")
+  i = i + 1
+ ]
+ pl("  ")
+ i = 1
+ while (i <= 8) [
+  pnf(i, 4);
+  i = i + 1
+ ]
+ pr(""); pr("");
+]
+
+sr_sensor [
+ show_pos()
+ j = 1
+ chk_damage()
+ if (i)
+  return
+ m = 8 * u + v - 9
+ z(m) = abs(z(m))
+ pr("")
+ i = 1
+ while (i <= 8) [
+  pnf(i, 1);
+  j = 1
+  while (j <= 8) [
+   m = z(8 * i + j + 62)
+   if      (m == 0) ps(" .")
+   else if (m == 1) ps(" K")
+   else if (m == 2) ps(" B")
+   else if (m == 3) ps(" *")
+   else if (m == 4) ps(" E")
+   j = j + 1
+  ]
+  pr("")
+  i = i + 1
+ ]
+ ps(" ")
+ i = 1
+ while (i <= 8) [
+  pnf(i, 2)
+  i = i + 1
+ ]
+ pr("")
+]
+
+phasers [
+ j = 4
+ chk_damage()
+ if (i)
+  return
+ a = getnum(" energized. Units to fire:")
+ if (a < 1)
+  return
+ if (a > e) [
+  ps("Spock: 'We have only "); pn(e); pr(" units.'")
+  return
+ ]
+ e = e - a
+ if (n < 1) [
+  pr("Phaser fired at empty space.")
+  chk_game_over()
+  return
+ ]
+ a = a / n
+ m = 135
+ while (m <= 140) [
+  if (z(m)) [
+   chk_overload()
+   pnf(s, 3); ps(" units hit ")
+   klngn_hit()
+  ]
+  m = m + 1
+ ]
+ chk_game_over()
+]
+
+status_report [
+ pr("Status report:")
+ ps("stardate "); pnf(3230 - d, 10); pr("")
+ ps("time left "); pnf(d, 7); pr("")
+ ps("Condition   ")
+ if (o)
+  pr("Docked")
+ else if (n)
+  pr("Red")
+ else if (e < 999)
+  pr("Yellow")
+ else
+  pr("Green")
+ ps("position    q-"); pnf(u, 1); pnf(v, 1); ps("s-"); pnf(x, 1); pnf(y, 1); pr("");
+ ps("energy "); pnf(e, 12); pr("")
+ ps("torpedoes "); pnf(f, 7); pr("")
+ ps("Klingons left "); pnf(k, 3); pr("")
+ ps("Starbases "); pnf(b, 6); pr("")
+ j = 1
+ while (j <= 7) [
+  if (z(j + 63)) [
+   chk_damage()
+  ]
+  j = j + 1
+ ]
+]
+
+L525 [
+ z(8 * x + y + 62) = 4
+ show_pos()
+ chk_game_over()
+]
+
+L521 [
+ pr("**Emergency stop**")
+ pr("Spock: 'To err is human.'")
+ L525()
+]
+
+L530 [
+ p = u * 72 + p / 5 + w / 5 * s / r - 9
+ u = p / 72
+ g = v * 72 + g / 5 + w / 5 * t / r - 9
+ v = g / 72
+ if (random(1, 9) < 2) [
+  pr("***Space storm***")
+  t = 100
+  damaged()
+ ]
+ if ((u > 0) * (u < 9) * (v > 0) * (v < 9)) [
+  x = (p + 9 - 72 * u) / 9
+  y = (g + 9 - 72 * v) / 9
+  L45()
+  return
+ ]
+ pr("**You wandered outside the galaxy**")
+ pr("On board computer takes over, and saved your life")
+ L40()
+]
+
+warp [
+ j = 5
+ chk_damage()
+ if (i == 0)
+  pr("")
+ while (1) [
+  w = getnum("sector distance:")
+  if (w < 1)
+   return
+  if ((i * (w > 2)) == 0)
+   break
+  pr("Chekov: 'We can try 2 at most, sir.'")
+ ]
+ if (w > 91) [
+  w = 91
+  pr("Spock: 'Are you sure, Captain?'")
+ ]
+ if (e < w * w / 2) [
+  pr("Scotty: 'Sir, we do not have the energy.'")
+  return
+ ]
+ get_course()
+ if (r == 0)
+  return
+ d = d - 1
+ e = e - w * w / 2
+ z(8 * x + y + 62) = 0
+ m = 64
+ while (m <= 70) [
+  z(m) = (z(m) - 1) * (z(m) > 0)
+  m = m + 1
+ ]
+ p = 45 * x + 22
+ g = 45 * y + 22
+ w = 45 * w
+
+ m = 1
+ while (m <= 8) [
+  w = w - r
+  if (w < -22) [
+   L525()
+   return
+  ]
+  p = p + s
+  g = g + t
+  i = p / 45
+  j = g / 45
+  if ((i < 1) + (i > 8) + (j < 1) + (j > 8)) [
+   L530()
+   return
+  ]
+  if (z(8 * i + j + 62)) [
+   L521()
+   return
+  ]
+  x = i
+  y = j
+  m = m + 1
+ ]
+ L521()
+]
+
+L590 [
+ s=random(1, 99)+280
+ m=135
+ while (m <= 140) [
+  if ((z(m+6)==i)*(z(m+12)==j)) [
+   klngn_hit()
+  ]
+  m = m + 1
+ ]
+ chk_game_over()
+]
+
+starbase_dstryd [
+ b=b-1
+ z(l) = 0
+ z(w) = z(w)-10*r
+ pr("Starbase destroyed")
+ pr("Spock: 'I often find human behaviour fascinating.'")
+ chk_game_over()
+]
+
+radiation [
+ t=300
+ pr("It novas    ***Radiation alarm***")
+ damaged()
+ chk_game_over()
+]
+
+star_dstryd [
+ z(l) = 0
+ z(w) = z(w)-r
+ if (random(1, 9)<6) [
+  pr("Star destroyed")
+  chk_game_over()
+  return
+ ]
+ radiation()
+]
+
+hit_star [
+ pr("Hit a star")
+ if (random(1, 9)<3) [
+  pr("Torpedo absorbed")
+  chk_game_over()
+  return
+ ]
+ star_dstryd()
+]
+
+torpedos [
+ j=6
+ chk_damage()
+ if (i)
+  return
+ if (f==0) [
+  pr(" empty")
+  return
+ ]
+ pr(" loaded")
+ get_course()
+ if (r==0)
+  return
+ ps("torpedo track ")
+ f=f-1
+ p=45*x+22
+ g=45*y+22
+
+ m=1
+ while (m <= 8) [
+  p=p+s
+  g=g+t
+  i=p/45
+  j=g/45
+  if ((i<1)+(i>8)+(j<1)+(j>8) == 0) [
+   l=8*i+j+62
+   w=8*u+v-9
+   r=z(w)/abs(z(w))
+   pnf(i, 1); pn(j); ps(" ")
+   if (z(l) == 1) [
+    L590()
+    return
+   ]
+   if (z(l) == 2) [
+    starbase_dstryd()
+    return
+   ]
+   if (z(l) == 3) [
+    hit_star()
+    return
+   ]
+   if (z(l) == 4) [
+    star_dstryd()
+    return
+   ]
+   if (z(l) == 5) [
+    radiation()
+    return
+   ]
+  ]
+  m = m + 1
+ ]
+ pr("...missed")
+ chk_game_over()
+]
+
+main [
+ int cc
+
+ pr("StarTrek")
+
+ while (1) [
+  seed = getnum("Enter seed number [0..100]")
+  if ((seed < 0) + (seed > 100)) seed = 100
+
+  y = 2999
+  if (getcmd("Do you want a difficult game? (y or n):") == 'y')
+   y = 999
+  pl("Stardate 3200:  your mission is ")
+  while (1) [
+   k = b = 0
+   d = 30
+   i = 0
+   while (i <= 63) [
+    j = random(1, 99) < 5
+    b = b + j
+    m = random(1, y)
+    m = (m < 209) + (m < 99) + (m < 49) + (m < 24) + (m < 9) + (m < 2)
+    k = k + m
+    z(i) = -100 * m - 10 * j - random(1, 8)
+    i = i + 1
+   ]
+   if ((b < 2) + (k < 4) == 0) break
+  ]
+
+  ps("to destroy "); pn(k); pr(" Klingons in 30 stardates.")
+  ps("There are "); pn(b); pr(" Starbases."); pr("")
+  docked()
+  c = 0
+  h = k
+  L40()
+
+  show_cmds()
+  while ((e >= 0) * (d >= 0)) [
+   cc = getcmd("Captain? ")
+   if (cc == 'g') galaxy_map()
+   else if (cc == 'l') lr_sensor()
+   else if (cc == 's') sr_sensor()
+   else if (cc == 'p') phasers()
+   else if (cc == 'r') status_report()
+   else if (cc == 'w') warp()
+   else if (cc == 't') torpedos()
+   else if (cc == 'q') break
+   else show_cmds()
+  ]
+
+  if (e <= 0) [
+   pr("Enterprise destroyed")
+   if (h - k > 9)
+    pr("But you were a good man")
+  ]
+  pr("")
+  if (getcmd("Another game? (y or n):") == 'n')
+    break
+ ]
+
+ pr("Good bye.")
+]

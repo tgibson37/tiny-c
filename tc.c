@@ -3,7 +3,7 @@
 #if defined(_WIN32)
         char* defaultLibrary = "pps\\library.tc";
 #else
-        char* defaultLibrary = "/usr/local/share/tinyC/library.tc";
+        char* defaultLibrary = "pps/library.tc";
 #endif
 
 /*	BUGOUTS: Use these to gather stats, debug, whatever.

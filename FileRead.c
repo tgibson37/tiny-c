@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include <stdlib.h>
 #include "tc.h"
 
@@ -96,3 +97,58 @@ int tcFgets(char* buff, int len, int unit) {
  	fclose(fileUnit[unit]);
  	fileUnit[unit]=0;
  }
+
+/*	set *val to default unless optionally overridden in property file.
+ *	Syntax each line: name whiteSpace value newline.
+ */
+int iProperty(char* file, char* name, int *val, int _default) {
+	char buff[256];
+	*val = _default;
+	char* next;
+	int lname = strlen(name);
+	char* endptr;
+	FILE* fp = fopen(file,"r");
+	if(fp==NULL){
+		return -1;
+	}
+	while(1){
+		next=fgets(buff,256,fp);
+		if( next==NULL ) break;
+		if( !strncmp(buff,name,lname)) {
+			*val = strtol(next+lname,&endptr,10);
+			break;
+		}
+	}
+	fclose(fp);
+	return next;
+}
+
+/*	set *val to default unless optionally overridden in property file.
+ *	Syntax each line: name whiteSpace value newline.
+ */
+int sProperty(char* file, char* name, char* val, int vlen, char* _default) {
+	char buff[256];
+	char* next;
+	char* v;
+	int lv;
+	int lname = strlen(name);
+	strncpy(val,_default,vlen);
+	FILE* fp = fopen(file,"r");
+	if(fp==NULL){
+		return -1;
+	}
+	while(1){
+		next=fgets(buff,256,fp);
+		if( next==NULL ) break;
+		if( !strncmp(next,name,lname)) {
+			v = buff+lname;
+			while(*v==' '||*v=='\t') ++v;
+			lv = strlen(v);
+			if(v[lv-1]=='\n')v[lv-1]=0;
+			strncpy(val,v,vlen);
+			break;
+		}
+	}
+	fclose(fp);
+	return next;
+}

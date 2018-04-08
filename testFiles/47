@@ -1,0 +1,6 @@
+//test 47, properties file
+main [
+	int p
+	p = iProperty("testFiles/test.prop", "", 99)
+	// NOT FINISHED, USING C
+]

@@ -147,6 +147,7 @@ void doTest(int testcase) {
 	int ops_cases = 5;
 
 	union stuff Stuff;
+	int err;
 	int isInt; 
 	char isChar; 
 	char* isPtr;
@@ -300,9 +301,37 @@ void doTest(int testcase) {
 				 var 5: f 0 Int 1  ref to pr[157]
 */
 		case 9:
+			err = iProperty("testFiles/test.prop","alpha",&isInt,99);
+			printf("\nalpha is %d",isInt);
+			err = iProperty("testFiles/test.prop","beta",&isInt,99);
+			printf("\nbeta is %d",isInt);
+			err = iProperty("testFiles/test.prop","gamma",&isInt,99);
+			printf("\ngamma is %d",isInt);
+			err = iProperty("testFiles/test.prop","kappa",&isInt,99);
+			printf("\nkappa is %d",isInt);fflush(stdout);
+
+			err = sProperty("testFiles/test.prop","delta",&buff,80,"default");
+			printf("\ndelta is ->%s<-",buff);fflush(stdout);
+			err = sProperty("testFiles/test.prop","epsilon",&buff,80,"default");
+			printf("\nepsilong is ->%s<-",buff);fflush(stdout);
+			err = sProperty("testFiles/test.prop","zeta",&buff,80,"default");
+			printf("\nzeta is ->%s<-",buff);fflush(stdout);
+			err = sProperty("testFiles/test.prop","theta",&buff,80,"default");
+			printf("\ntheta is ->%s<-",buff);fflush(stdout);
+			err = sProperty("testFiles/test.prop","eta",&buff,80,"default");
+			printf("\neta is ->%s<-",buff);fflush(stdout);
+			break;
+/*	property file. Should get...
+				alpha is 10
+				beta is -20
+				gamma is 30
+				epsilon is 99
+ */
 		case 10:
 			pl(" empty case");
 			break;
+/*	Should get...
+ */
 
 /* stack tests */
 		case 11: 

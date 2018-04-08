@@ -237,7 +237,7 @@ random int little,big [
   return little + (last/8)%range
 ]
 
-/* system entry */
+/* test system entry, not used by tc */
 _MAIN [
 	pl "----tc system level, calling appl main"
 	pl""

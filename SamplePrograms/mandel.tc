@@ -1,0 +1,91 @@
+/* http://t3x.org/t3x/exam-mandel.html
+/* Denominator for fixed-point computations
+int SCALE;
+
+/* ASCII renditions of filled rectangles:
+char FULL;   /* completely filled
+char UPPER;  /* upper half filled
+char LOWER;  /* lower half filled
+char EMPTY;  /* empty
+
+/* Compute the color of a point x+yi
+f int x, y [
+    int cr, ci, zr, zi, ir;
+    int i;
+
+    zr = 0;            /* z = 0+0i
+    zi = 0;
+    cr = x*SCALE/25;   /* c = x+yi
+    ci = y*SCALE/20;
+    /* try 100 iterations
+    i = 0;
+    while (i < 100) [
+        /* z = z^2+c
+        ir = zr*zr/SCALE - zi*zi/SCALE;
+        zi = zr*zi/SCALE + zi*zr/SCALE + ci;
+        zr = ir + cr;
+        /* if |z| > 2+2i, x+yi is not a member
+        /* of the Mandelbrot set M
+        if ((zi > 2*SCALE) + (zr > 2*SCALE) + (zi < -2*SCALE) + (zr < -2*SCALE))
+            return 0;
+
+        i = i + 1;
+    ]
+    /* |z| <= 2+2i after 100 iterations,
+    /* so x+yi is probably in M
+    return 1;
+]
+
+main [
+    int x, y, r;    /* coordinates, point color
+    char line(80);  /* line buffer
+    int even;       /* even line flag
+
+    SCALE = 100;
+
+/* ASCII renditions of filled rectangles:
+    FULL    = 'M';   /* M completely filled
+    UPPER   = '"';   /* " upper half filled
+    LOWER   = 'm';   /* m lower half filled
+    EMPTY   = ' ';   /* empty
+
+    even = 0;
+    y = -24;
+    while (y < 25) [      /* lines
+        x = -59;
+        while (x < 20) [  /* columns
+            r = f(x,y);                 /* r = !f(x,y);
+            if (r) r = 0; else r = 1;
+            /* When drawing an even line,
+            /* merge the color of r into the
+            /* current rectangle ...
+            if (even) [
+                if (line(1 + x+59)) [
+                    /* odd point was on
+                    if (r) [
+                        line(1 + x+59) = FULL;
+                    ] else [
+                        line(1 + x+59) = UPPER;
+                    ]
+                    /* odd point was off
+                ] else if (r) [
+                    line(1 + x+59) = LOWER;
+                ] else [
+                    line(1 + x+59) = EMPTY;
+                ]
+
+            /* ... else just memorize the color
+            ] else
+                line(1 + x+59) = r;
+
+            x = x + 1
+        ]
+        /* Even line completed, print it
+        if (even) [
+            line(80) = 0
+            pl line + 1
+        ]
+        if (even) even = 0; else even = 1;  /* even = !even;
+        y = y + 1
+    ]
+]
