@@ -733,8 +733,8 @@ void doTest(int testcase) {
 		/*             012345678901234567890123456789   */
 			testSetup(" int x; x=77;  xXXXXXXXXXXXXXXXXXXXXx");
 			printf("\npr: %s",pr);
-			epr=pr+15;  	/* points to the ; */
-			prused=epr+2;  /* middle of the X's */
+			epr=pr+12;  	/* points to the ; */
+			prused=epr+5;  /* middle of the X's */
 			len = strlen(pr); /* capture this now, before 0's go in there */
 
 			printf("\nparsing int x;\n");
@@ -746,8 +746,6 @@ void doTest(int testcase) {
 			st();
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 			dumpStack();
-			printf("\n x is %d", toptoi());
-
 			break;
 /* 	Should get...
 			parsing int x;
@@ -758,8 +756,6 @@ void doTest(int testcase) {
 			78 58 58 4d 0 0 0 58 58 58 58 58 ... 58 78
 			Stack (from top) class lvalue type stuff
 NOTE:			<blank line, empty stack>
-			 x is 0
-NOTE:		      ^== because st() now pops the stack before returning.
 */
 
 		case 24:
