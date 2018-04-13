@@ -568,7 +568,7 @@ int _term() {
 			if(!error)pushk(toptoi()*toptoi());
 		}
 		else if(_lit(xslash)){
-			if(*cursor=='*') {
+			if(*cursor=='*' || *cursor=='/') {
 				--cursor;    /* opps, its a comment */
 				return 1;
 			}
