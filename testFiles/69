@@ -1,0 +1,10 @@
+//test: runhits and exit in library
+
+main[
+	int k
+	k=0
+	while(k<10)[
+		runlimit(3)
+	]
+	ps"THIS SHOULD NOT PRINT runhits =";pn runhits
+]

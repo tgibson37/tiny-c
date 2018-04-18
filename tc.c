@@ -769,12 +769,14 @@ void st() {
 		if(_asgn()) {
 			if(toptoi()) {
 				st();
+				_rem();
 				if(_lit(xelse)) {
 					_skipSt();
 				}
 			} 
 			else {
 				_skipSt();
+				_rem();
 				if(_lit(xelse)) {
 					st();
 				}

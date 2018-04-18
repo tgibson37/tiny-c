@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 68
+#define testcases 69
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1192,6 +1192,15 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  *			calling foo 
  *				back from foo
  *				foo returns bar
+ */
+		case 69:
+			testWhole("./testFiles/69");
+			break;
+/* 	Should get... 
+ *	lib line 249 (cursor pr[4499])EXIT, stopped by exit call
+ *	] 
+ *	^
+ *	Test 69 done, error=98
  */
 
 /***************  keyboard input tests, run manually *********/

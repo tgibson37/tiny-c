@@ -1,0 +1,18 @@
+tc to C.txt
+---
+One sample program, tctoc.tc, I wrote mainly as a shakedown cruise for the new tiny-C. It leans heavily on pointers, and does a limited amount of parsing. About 250 lines (so far) it exposed 2 bugs, now fixed, and quite a few awkwardnesses in the debugger. That is the real value of this work. 
+
+So far it replaces []'s with {}'s, and for just arrays ()'s with []'s. That second was the challenge. It has to distinguish between arrays and functions. 
+
+This work could be extended, but I am not sure it is worth it. I am not a sed expert, but my infrequent (and trivial) use of sed suggests to me a real utility of this sort may best be done with sed, or some similar tool. Can sed easily implement distinguising arrays from functions? I don't know. Next would be syntax completion:
+		find /* and add */ just before eol if not already there
+		find end of simple statement and add ; if not already there
+
+And the goal needn't be total conversion, just enough to remove most of the labor. Then let your C compiler tell you what needs to be done manually to finish.
+
+I offer this in the SamplePrograms directory. It may not run in that directory, so move it to your working directory, where you run tc programs. Then kick it off with: 
+			tinyc tctoc.tc -r '[main("tctoc")]'
+and it will write tctoc.c file, converting itself. Notice the argument to main is JUST the files name, not its extent. The code adds dot-tc to read, and dot-c to write.
+
+Tom Gibson
+April 18, 2018

@@ -1,0 +1,247 @@
+//conversion aid: tc to (almost) c
+int foo, verbose
+char bb(6000), buff(30)
+int len, err, cursor
+char lb(1), rb(1)
+
+/*** TOOLS ***/
+
+//find eol in current line, returns cur->after last significant of line
+eol int cur [
+	char c
+	while(1) [
+		c = bb(cur)
+		if((c==10) + (c==13)) return cur
+		cur = cur+1
+		if(cur>len)return len
+	]
+]
+
+//returns cur just beyond found, else 0
+findbuff int cur [
+	int rv
+	rv=0
+	int l
+	l = strlen(buff)
+	while( cur=findc(buff(0),cur,len-cur) ) [
+		if( ceqn(buff,bb+cur-1,l) ) rv=cur-1+l; break
+	]
+	return rv
+]
+
+//returns cur just beyond found, else 0
+findc char c; int cur,limit[
+	int rv
+	rv=0
+	int one(0), offset
+	one(0)=1
+	offset = scann bb+cur, bb+limit, c, one 
+	if(one(0)==0)rv=cur+offset+1
+	return rv
+]
+
+// moves name at cur to buff as string, returns cur just beyond name
+nametobuff int cur [
+	int k
+	char c
+	k = 0
+	c = bb(cur)
+	while( ( alpha(c) + ((c>='0')*(c<='9')) + (c=='_')) )[
+		buff(k)=c
+		k=k+1
+		c=bb(cur=cur+1)
+	]
+	buff(k)=0
+	return cur
+]
+
+//returns cur pointing to c
+skipifc char c; int cur[
+	if(bb(cur)==c) cur=cur+1
+	return cur
+]
+
+// returns cur just beyond whitespace
+skipws int cur [
+	while( (bb(cur)==' ') + (bb(cur)==9) ) cur=cur+1
+	return cur
+]
+
+/*** fix array decls and usage, ()->[], avoiding functions ***/
+
+// buff has "name(". 
+// find and fix one array name usage. Scans fixcur to end of line. 
+// Return fixcur just beyond the fixed name, else 0 if nothing to fix.
+// Note that name has the left paren as its last character.
+fixone int fixcur [
+	if(verbose)[pl"fixone";pn cursor]
+	int offset
+	fixcur=findbuff(fixcur)
+	if(fixcur)[
+		bb(fixcur-1) = lb(0)
+		fixcur = findc( ')',fixcur+1,eol(fixcur) )
+		bb(fixcur-1) = rb(0)
+		return fixcur+1
+	]
+	return 0   // none left to fix
+]
+
+// Buff has "name(". Fix all to end (len) and return 0.
+//  else no fixing needed so return 1. LOOP on fixone.
+fixname int namecur [
+	if(verbose)[pl"fixname";pn cursor]
+	while( namecur=fixone(namecur) )[]
+	return namecur
+]
+
+// current decl may declare arrays. Find one, fix that one including
+// all usages, and return true, else return false when none left to do.
+// called 4 times to do this...
+//
+//	char foo, bar(0), foobar(0)
+//	    ^    ^-------^---------^--subsequent declcur
+//	    ^--- initial declcur
+//
+//	last subsequent returns false because no comma
+arrfix int declcur [
+	if(verbose)[pl"arrfix";pn cursor]
+	int f,l,k,limit,parencur
+
+	declcur = skipws(declcur)
+	declcur = skipifc(',',declcur)
+	declcur = skipws(declcur)
+	declcur = nametobuff(declcur)
+	if(buff(0)==0)return 0;         // all done with this decl
+	declcur = skipws(declcur)
+	if( bb(declcur)!='('  ) return declcur;  //not an array
+	bb(declcur)=lb(0)             //is an array, fix ( -> [
+	declcur=declcur+1
+	strcat(buff,"(")
+	limit = eol(declcur)
+	parencur=findc ')',declcur,limit
+	if(parencur) [
+		bb(parencur-1)=rb(0)       //is an array, fix ) -> ]
+		fixname parencur           //fixes all refs
+		return parencur
+	]
+	else[
+		pl"WARNING missing ) at line ="; pn curToLIne
+	]
+	return declcur
+]
+
+// finds one decl of type. Sets cursor to beyond type.  Finds and
+// fixes all instances of one array name and returns true. Returns false
+// if no more fixes of that type are needed.
+decl char type(0) [
+	if(verbose)[pl"decl";pn cursor]
+	int offset
+	int namecur
+	offset = index bb+cursor, len-cursor, type, strlen(type)
+	if(offset)[
+		cursor = cursor + offset          /* points to char, decl loop
+		namecur = cursor + strlen(type)   /* beyond char for the name loop
+		while( namecur=arrfix(namecur) ) []
+		return cursor
+	]
+	return 0     // no more of this type
+]
+
+arrays [
+	if(verbose)[pl"arrays";pn cursor]
+	int more
+	cursor = 0
+	more = 1
+	while(more)[
+		more = decl "char"
+	]
+	cursor = 0
+	more = 1
+	while(more)[
+		more = decl "int"
+	]
+]
+
+change char f(0), t(0) [
+	if(verbose)[pl"change";pn cursor]
+	int flen, tlen, diff, one(0), offset
+	one(0) = 1
+	flen=strlen f
+	tlen=strlen t
+	diff = tlen-flen
+	offset = scann bb+cursor, bb+len, f(0), one
+	if(diff)[
+		// need to use movebl to make space, so do nothing for now
+		exit
+		return
+	]
+	else[
+		cursor = cursor+offset
+		bb(cursor)=t(0)
+		cursor = cursor+1
+	]
+]
+
+braces [
+	if(verbose)[pl"braces";pn cursor]
+	cursor=0
+	while(cursor<=len) [
+		change lb, "{"
+	]
+	cursor=0
+	while(cursor<len) [
+		change rb, "}"
+	]
+]
+
+/* arg is just filename, no extent */
+main char arg(0) [
+	verbose=0
+	lb(0)=91;lb(1)=0
+	rb(0)=93;rb(1)=0
+	  /* decimal values for left/right bracket as strings
+	char name(30)
+	  /* loading arg.tc
+	strcpy name,arg
+	strcat name,".tc"
+	len=readfile name, bb, 20000
+	if(len<=0)[
+		pl"Cannot read "
+		ps name
+		return -1
+	]
+	else [
+		 pl name
+		 ps " loaded, "
+	]
+
+	if(verbose) [
+		pl"BEFORE ";pl""
+		pft bb, bb+230
+		pl"RUNNING"; pl""
+	]
+
+	braces
+	pl "braces done, "
+	arrays
+	pl "arrays done, "
+
+	if(verbose) [
+		pl"AFTER  ";pl""
+		pft bb, bb+230
+	]
+	
+	strcpy name,arg
+	strcat name,".c"
+	err = writefile name, bb, len
+	if(err<0) [
+		ps "  PROBLEM writing "
+		ps name
+	]
+	else [
+		pl name
+		ps " written."
+	] 
+
+]
+

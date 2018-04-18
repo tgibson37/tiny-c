@@ -1,0 +1,15 @@
+//runhits.tc
+
+//to stop infinite loops, exits after 3 calls
+main[
+	pl"Debugging aid. Used to stop loops before they run-away"; 
+	pl"  Should be removed from debugged programs."
+	pl"Will print: <boilerplate>  EXIT, stopped by exit call"
+	pl""
+	int k
+	k=0
+	while(k<10)[
+		runlimit(3)
+	]
+	ps"THIS SHOULD NOT PRINT runhits =";pn runhits
+]

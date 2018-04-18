@@ -50,6 +50,7 @@ int debug;
 #define SYMERRA      26
 #define EQERR		 27
 #define PTRERR		 28
+#define EXIT         98
 #define KILL         99
 
 /*	All tc data are ints or chars. Pointers are an int index into pr. 

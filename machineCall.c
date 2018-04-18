@@ -238,6 +238,9 @@ int Mfclose(int nargs, int *args) {
 	int unit = args[0];
 	return tcFclose(unit);
 }
+int Mexit(int nargs, int *args) {
+	eset(EXIT);
+}
 
 /* first in this list is MC 1 */
 McList origList[] = 
@@ -248,7 +251,7 @@ McList origList[] =
 /* first in this list is MC 101 */
 McList newList[] = 
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
-	, &Mstrcpy, &Mfilwt, &bar, &bar, &bar
+	, &Mstrcpy, &Mfilwt, &Mexit, &bar, &bar
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
 };
 /* first in this list is MC 201 */
@@ -299,5 +302,6 @@ void machinecall( int nargs ) {
 	else if(mcno<200)newMC(mcno-100, nargs, args);
 	else userMC(mcno-200, nargs, args);
 	if(error==KILL)return;
+	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }

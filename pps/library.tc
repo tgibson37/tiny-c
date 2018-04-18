@@ -237,6 +237,17 @@ random int little,big [
   return little + (last/8)%range
 ]
 
+//to stop infinite loops, exits after limit calls
+runlimit int limit[
+	runhits=runhits+1
+	if(running==0)running=runhits=1;
+	else if(runhits>limit)exit
+]
+int runhits, running
+
+// soft exit
+exit [ MC 108 ] 
+
 /* test system entry, not used by tc */
 _MAIN [
 	pl "----tc system level, calling appl main"
