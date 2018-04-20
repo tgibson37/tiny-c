@@ -210,7 +210,8 @@ int Mstrcpy(int nargs, int *argsv) {
 	if(nargs<2){ eset(MCERR); return -1; }
 	char* a=(char*)argsv[0];
 	char* b=(char*)argsv[1];
-	return (int)strcpy(a,b);
+	int x = (int)strcpy(a,b);
+	return x;
 }
 
 int Mfopen(int nargs, int *args) {

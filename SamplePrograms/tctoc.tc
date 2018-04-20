@@ -1,12 +1,22 @@
 //conversion aid: tc to (almost) c
 int foo, verbose
-char bb(6000), buff(30)
+char bb(10000), buff(30)
 int len, err, cursor
 char lb(1), rb(1)
 
 /*** TOOLS ***/
 
-//find eol in current line, returns cur->after last significant of line
+/* memcpy(dest, src, strlen(src)+1);
+memcpy char dest(0), src(0); int n [
+	int k
+	k = -1
+	while( (k=k+1)<n )dest(k)=src(k)
+	return dest
+]
+
+/* find eol 
+/*  in current line, 
+/*  returns cur->\n or ->0x0d or ->last char of file
 eol int cur [
 	char c
 	while(1) [
@@ -38,6 +48,14 @@ findc char c; int cur,limit[
 	offset = scann bb+cur, bb+limit, c, one 
 	if(one(0)==0)rv=cur+offset+1
 	return rv
+]
+
+//returns cur just beyond found, else 0
+findstr char str(0); int cur,limit[
+	int offset
+	offset = index bb+cur, len-cur, str, strlen(str)
+	if(offset)return cur+offset+1
+	return 0
 ]
 
 // moves name at cur to buff as string, returns cur just beyond name
@@ -162,8 +180,10 @@ arrays [
 	]
 ]
 
-change char f(0), t(0) [
-	if(verbose)[pl"change";pn cursor]
+// scan from cursor to len for string f, replace it with string t
+// Return cursor just beyond the replacement, else 0
+fchangec char f(0), t(0) [
+	if(verbose)[pl"fchangec";pn cursor]
 	int flen, tlen, diff, one(0), offset
 	one(0) = 1
 	flen=strlen f
@@ -186,20 +206,16 @@ braces [
 	if(verbose)[pl"braces";pn cursor]
 	cursor=0
 	while(cursor<=len) [
-		change lb, "{"
+		fchangec lb, "{"
 	]
 	cursor=0
 	while(cursor<len) [
-		change rb, "}"
+		fchangec rb, "}"
 	]
 ]
 
 /* arg is just filename, no extent */
-main char arg(0) [
-	verbose=0
-	lb(0)=91;lb(1)=0
-	rb(0)=93;rb(1)=0
-	  /* decimal values for left/right bracket as strings
+load char arg(0) [
 	char name(30)
 	  /* loading arg.tc
 	strcpy name,arg
@@ -214,10 +230,12 @@ main char arg(0) [
 		 pl name
 		 ps " loaded, "
 	]
+]
 
+process [
 	if(verbose) [
 		pl"BEFORE ";pl""
-		pft bb, bb+230
+		pft bb, bb+330
 		pl"RUNNING"; pl""
 	]
 
@@ -225,12 +243,17 @@ main char arg(0) [
 	pl "braces done, "
 	arrays
 	pl "arrays done, "
+	comments
+	pl "comments done"
 
 	if(verbose) [
 		pl"AFTER  ";pl""
-		pft bb, bb+230
+		pft bb, bb+330
 	]
-	
+]
+
+write char arg(0) [
+	char name(30)
 	strcpy name,arg
 	strcat name,".c"
 	err = writefile name, bb, len
@@ -245,3 +268,43 @@ main char arg(0) [
 
 ]
 
+main char arg(0) [
+	verbose=0
+	  /* decimal values for left/right bracket as strings
+	lb(0)=91;lb(1)=0
+	rb(0)=93;rb(1)=0
+
+	load arg
+	process
+	write arg
+]
+
+// insert str at incur
+insertstr char str(0); int incur [
+	int slen
+	slen = strlen str
+	movebl bb+incur,bb+len,slen
+	len = len+slen
+	memcpy bb+incur, str, slen
+]
+
+// find a /* comment, insert */ at eol unless already there.
+// return cmtcur just beyond inserted, else 0 if nothing found
+oneComment int cmtcur[
+	if(verbose)[pl"comment";pn cmtcur]
+	cmtcur = findstr "/*", cmtcur, len
+	if( cmtcur==0 )return 0
+	cmtcur = eol(cmtcur)
+	if(ceqn(bb+cmtcur-2,"*/",2)) return cmtcur
+	insertstr  "*/", cmtcur
+	return cmtcur
+]
+
+// currently does first 4
+comments [
+	cursor=0
+	cursor=oneComment cursor
+	while(cursor>0)[
+		cursor=oneComment cursor
+	]
+]
