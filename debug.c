@@ -7,6 +7,7 @@
 int db_running = 0;
 int db_next = 0;
 int db_skiplib = 1;
+int db_rundepth = 1;
 struct brk {
 	struct var* var;
 	int enabled;
@@ -100,8 +101,10 @@ void printVar(struct var *v) {
 }
 
 /********* command code *****************/
+/* note: one or two liners are implemented in db_cmd */
+
 /* b <sym> */
-void set_b(char *sym) {
+void db_brkset(char *sym) {
 	struct var *v;
 	struct brk *b = find_b(sym);
 	if(b){
@@ -110,9 +113,6 @@ void set_b(char *sym) {
 	else {
 		if(nxtbrk>=BTABSIZE) printf("too many breaks, max BTABSIZE");
 		else {
-/*			v = _addrval(sym,curfun);
-			if(!v)v = _addrval(sym,curglbl);
-			if(!v)v = _addrval(sym,fun);    */
 			v = addrval_nohit(sym);
 			if(!v){
 				printf("%s ? no such symbol\n",sym);
@@ -127,9 +127,24 @@ void set_b(char *sym) {
 	}
 }
 
+/* d */
+void db_dump(char* param) {
+	int kase=*param;
+	switch(kase){
+	case 'f': dumpFun(); printf("\n"); break;
+	case 'v': dumpVarTab(); printf("\n"); break;
+	default: printf("d needs f (fcn table) or v (var table) parameter");
+	break;
+	}
+}
+
 /* i */
-void inf_b() {
+void db_info() {
 	int i;
+	if(nxtbrk<=0){
+		printf("no breakpoints set\n");
+		return;
+	}
 	printf("num sym enabled hits\n");
 	for(i=0;i<nxtbrk;i++){
 		printf("%2d %8s  %c  %d \n",i+1, (*(brktab[i]).var).name, 
@@ -138,7 +153,7 @@ void inf_b() {
 }
 
 /* p <sym>  */
-void print_b(char* param) {
+void db_print(char* param) {
 	if(*param) {
 		struct var *found;
 		_canon( param, param+strlen(param)-1, buf );
@@ -155,24 +170,8 @@ void print_b(char* param) {
 	}
 }
 
-/* default, e.g. ? */
-void dbUsage() {
-	printf("	b <symbol>    set breakpoint\n");
-	printf("	r,c           start or continue run to next breakpoint\n");
-	printf("	i [b]         display breakpoints\n");
-	printf("	n             finish current and display next statement\n");
-	printf("	p <symbol>    print the value of symbol\n");
-	printf("	t <symbol>    print the type of symbol\n");
-	printf("	g             enter your C debugger (see setup notes)\n");
-	printf("	v [e|p|s|v]     toggle verbose mode for one of:\n");
-	printf("	                e assignment, p parsed symbol,\n");
-	printf("	                s stack push/pops, v variables\n");
-	printf("	default         print this usage\n");
-	printf("	x,q           exit tiny-C\n");
-}
-
 /* t <sym> */
-void type_b(char* param) {
+void db_type(char* param) {
 	struct var *found;
 	_canon( param, param+strlen(param)-1, buf );
 	found = addrval_nohit(buf);
@@ -182,20 +181,37 @@ void type_b(char* param) {
 		printf("\n");
 	}
 }
+
+/* <default> e.g. ? */
+void db_usage() {
+	printf("	b <symbol>    set breakpoint\n");
+	printf("	r,c           start or continue run to next breakpoint\n");
+	printf("	i [b]         display breakpoints\n");
+	printf("	n             next statement in this function\n");
+	printf("	s             step into the function\n");
+	printf("	p <symbol>    print the value of symbol\n");
+	printf("	t <symbol>    print the type of symbol\n");
+	printf("	g             enter your C debugger (see setup notes)\n");
+	printf("	v [e|p|s|v]     toggle verbose mode for one of:\n");
+	printf("	                e assignment, p parsed symbol,\n");
+	printf("	                s stack push/pops, v variables\n");
+	printf("	d [f|v]       dump function or variable table\n");
+	printf("	default       print this usage\n");
+	printf("	x,q           exit tiny-C\n");
+}
+
 /* v - */
 void verbose_clear() {
 	int i;
 	for(i=0; i<sizeof(verbose); ++i ) 
 		verbose[i]=0;
 }
-/*  */
-void verbose_toggle(char* param) {
+/* v <param> */
+void db_verbose(char* param) {
 	int bit;
 	int kase=*param;
 	switch(kase) {
 	case '-': verbose_clear(); return;
-	case 'V': dumpVarTab(); return;
-	case 'F': dumpFun(); return;
 	case 'e': bit=VE; break;
 	case 'l': bit=VL; break;
 	case 's': bit=VS; break;
@@ -223,12 +239,17 @@ int db_cmd() {
 	switch(cmd) {
 /* set breakpt */
 	case 'b':
-		set_b(param());
+		db_brkset(param());
 		break;
 /* continue */
 	case 'c':
 		db_next=0;
 		return 'c';
+		break;
+/* dump */
+	case 'd':
+		db_dump(param());
+		return 'd';
 		break;
 /*	back to gdb (or other debugger). To enable this set a gdb breakpoint on 
  *	gdb_b(), a function which does nothing. Typing g<ret> from this 
@@ -240,16 +261,16 @@ int db_cmd() {
 		break;
 /* info, list breakpts */
 	case 'i':
-		inf_b();
+		db_info();
 		break;
 /* next */
 	case 'n':
-		db_next=1;	
+		db_next=db_rundepth;
 		return 'n';
 		break;
 /* print */
 	case 'p':
-		print_b(param());
+		db_print(param());
 		return 'p';
 		break;
 /* run */
@@ -257,14 +278,19 @@ int db_cmd() {
 		db_running = 1;
 		return 'r';
 		break;
+/* step into */
+	case 's':
+		db_next=db_rundepth+1;
+		return 's';
+		break;
 /* symbol type */
 	case 't':
-		type_b(param());
+		db_type(param());
 		return 't';
 		break;
 /* toggle verbosity */
 	case 'v':
-		verbose_toggle(param());
+		db_verbose(param());
 		return 'v';
 		break;
 /* exit */
@@ -273,7 +299,7 @@ int db_cmd() {
 		return 'x';
 		break;
 	default:
-		dbUsage();
+		db_usage();
 		return '?';
 	}
 }
@@ -290,6 +316,7 @@ void _dbCommands() {
 		if(cmd=='r') return;
 		if(cmd=='c') return;
 		if(cmd=='n') return;
+		if(cmd=='s') return;
 	}
 }
 
@@ -310,20 +337,28 @@ void prdone(){}
 void tcexit(){}
 
 /* breakpoint appstbegin to see JUST app statments. */
-void appstbegin(){}
+int firstAppStmt = 1;
+void appstbegin(){
+//printf("\n~326 nx %d lev %d",db_next,db_rundepth);
+	if(firstAppStmt){
+		firstAppStmt = 0;
+		_dbCommands();
+	}
+	if(db_next && (db_next >= db_rundepth) ){
+		int lineno = countch(apr,cursor,'\n');
+		char* lc = lchar(cursor);
+		printf("line %d cursor(pr[%d])->%.10s\n", lineno,cursor-pr,cursor);
+		db_next=0;
+		_dbCommands();
+	}
+}
 
 /* beginning of each statement */
 void stbegin() {
 	if(!debug)return;
 	if(db_skiplib && cursor<apr)return;
+	if(cursor<lpr)return;
 	appstbegin();
-	if(db_next){
-		int lineno = countch(apr,cursor,'\n');
-		char* lc = lchar(cursor);
-		printf("line %d cursor(pr[%d])->%.10s\n", lineno,cursor,cursor);
-		--db_next;
-		_dbCommands();
-	}
 }
 
 /* called from tc.c ~490, symbol lookup if breakpoint set */
@@ -336,5 +371,13 @@ struct var* br_hit(struct var *v) {
 		printf("\n");
 		_dbCommands();
 	}
+}
+
+/* called from enter when entering/leaving functions */
+void fcn_enter() {
+	++db_rundepth;
+}
+void fcn_leave() {
+	--db_rundepth;
 }
 

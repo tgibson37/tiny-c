@@ -104,6 +104,7 @@ int main(int argc, char *argv[]) {
 
 	error=0;
 	prused = epr+10;  /* a little slack */
+//printf("\n~107 lpr,apr,epr  %d %d %d\n",lpr-pr,apr-pr,epr-pr);
 	nxtvar = 0;
 	nxtstack = 0;
 	efun = fun+FUNLEN;

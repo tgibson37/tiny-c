@@ -319,19 +319,10 @@ void _setArg( Type type, struct stackentry *arg ) {
  *	cursor.
  */
 
-void saveName() {
-	_canon(fname,lname,fcnName);
-/*	int j=0;
-	char* i;
-	for(i=fname;i<=lname;++i) fcnName[j++] = *i;
-	fcnName[j]=0;
-*/
-}
-
 void _enter( char* where) {
 	int arg=nxtstack, nargs=0;
 
-	if(where)saveName();
+	if(where)fcn_enter();
 	_lit(xlpar); /* optional (   */
 	int haveArgs = ! (  _lit(xrpar)
 					 || *cursor==*xlb
@@ -395,6 +386,7 @@ void _enter( char* where) {
 		cursor=localcurs;
 		stcurs=localstcurs;
 		fundone();
+		fcn_leave();
 	}
 }
 
