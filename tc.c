@@ -6,20 +6,7 @@
         char* defaultLibrary = "pps/library.tc";
 #endif
 
-/*	BUGOUTS: Use these to gather stats, debug, whatever.
-	prbegin/prdone called just before/after application level.
-	tcexit called before exiting the interpreter.
-	NOTE: moved to debug.c
-void prbegin(){};
-void prdone(){};
-void tcexit(){};
-void stbegin() {};
- */
- 
- /* debugging aid, see ~177 for sample use */
- int watchme=0;
-
-/************** literals **************/
+ /************** literals **************/
 char* xif = "if";
 char* xelse = "else";
 char* xint = "int";
@@ -77,7 +64,6 @@ int _eq() {
 		fprintf(stderr,"\neq: val");
 		dumpStackEntry(nxtstack-1);
 	}
-/*	popst();popst();  */
 	void* where = &((*lval).value.up);
 	int class = (*lval).class;
 	int type = (*lval).type;
@@ -176,11 +162,6 @@ int _lit(char *s){
  *	Returns 0 on OK, else count of missing ]'s.
  */
 int _skip(char l, char r) {
-/*if(cursor>pr+3850){
-printf("\n~180 CURSOR %d epr %d ERROR %d",cursor-pr, epr-pr,error);
-pft(cursor-1,epr);
-}
-*/
 	int counter = 1;
 	 while( counter>0 && cursor<epr ) {
 		if(*cursor==l)++counter;
@@ -380,7 +361,7 @@ void _enter( char* where) {
 			popst();
 			--nargs;
 		}
-		if(!error)st();     /*  <<-- HERE is where we do it */
+		if(!error)st();     /*  <<-- execute fcn's body */
 		if(!leave)pushzero();
 		leave=0;
 		cursor=localcurs;
