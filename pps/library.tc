@@ -1,5 +1,9 @@
 /******* tiny-c library functions, 2017 
 
+printf char fmt(0); ... [
+	MC 101
+]
+
 /* Put a character to the terminal
 putchar char c [
 	if(c==0)c='"'

@@ -6,6 +6,9 @@
         char* defaultLibrary = "pps/library.tc";
 #endif
 
+int varargs = 0;
+int nargs=0;
+
  /************** literals **************/
 char* xif = "if";
 char* xelse = "else";
@@ -39,6 +42,7 @@ char* xeq = "=";
 char* xge = ">=";
 char* xle = "<=";
 char* xnl = "\n";
+char* xvarargs = "...";
 
 /* stored size of one datum */
 int typeToSize( int class, Type type ) {
@@ -301,7 +305,8 @@ void _setArg( Type type, struct stackentry *arg ) {
  */
 
 void _enter( char* where) {
-	int arg=nxtstack, nargs=0;
+	int arg=nxtstack;
+	if(!varargs)nargs=0;
 
 	if(where)fcn_enter();
 	_lit(xlpar); /* optional (   */
@@ -324,7 +329,10 @@ void _enter( char* where) {
 	_lit(xrpar);   /* optional )   */
 	_rem();
 	if(!where) {
-		if(nxtstack) machinecall( nargs );
+		if(nxtstack) {
+			machinecall( nargs );
+			varargs=0;
+		}
 		else eset(MCERR);
 		return;
 	}
@@ -348,18 +356,24 @@ void _enter( char* where) {
 				} while(_lit(xcomma));
 				_lit(xsemi);
 			}
+			else if ( _lit(xvarargs) ){
+				varargs=1;
+				break;
+			}
 			else {
-				break;		/* and the only way outa here */
+				break;
 			}
 		}
-		if(arg != nxtstack) {
-			cursor=localcurs;
-			stcurs=localstcurs;
-			eset(ARGSERR);
-		}
-		while(nargs>0){
-			popst();
-			--nargs;
+		if(!varargs) {
+			if(arg != nxtstack) {
+				cursor=localcurs;
+				stcurs=localstcurs;
+				eset(ARGSERR);
+			}
+			while(nargs>0){
+				popst();
+				--nargs;
+			}
 		}
 		if(!error)st();     /*  <<-- execute fcn's body */
 		if(!leave)pushzero();

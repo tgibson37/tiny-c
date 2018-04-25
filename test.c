@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 69
+#define testcases 70
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1201,6 +1201,18 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  *	] 
  *	^
  *	Test 69 done, error=98
+ */
+		case 70:
+			testWhole("./testFiles/70");
+			break;
+/* 	Should get... 
+ *			YES!!   IT WORKS  x=77 y=88
+ *			Now lets do a newline
+ *			Now lets be sure varargs is false. To do that force an args error.
+ *			good call...
+ *			Arg to foo: BAR, (what did you expect?)
+ *			bad call INTENTIONAL ARGSERR ...
+ *			app line 19 (cursor pr[5060])ARGSERR, args don't match
  */
 
 /***************  keyboard input tests, run manually *********/
