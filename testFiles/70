@@ -4,12 +4,22 @@ main [
 	int x,y
 	x = 77
 	y = 88
-	printf "YES!!   %s  x=%d y=%d", "IT WORKS",x,y
+	char st(0)
+	st = "IT WORKS"
+	printf "YES!!   %s  x=%d y=%d", st,x,y
 	printf "%cNow lets do a newline", 10
+	printf "%cformated stuff, a table...", 10
+	st = "TITLE"
+	printf "%c %20s",10,st
+	printf "%cLabels: %s %10s", 10, "AAA","BBB"
+	printf "%cDatum1: %3d %10d", 10, 11,12
+	printf "%cDatum2: %3d %10d", 10, 21,22
+	printf "%c%cNow some bad stuff, first a too long format%c",10,10,10
+	printf "%c A wrong format %111111s", st
 	printf "%cNow lets be sure varargs is false. ", 10
 	printf "To do that force an args error."
 	pl"good call..."
 	foo "BAR, (what did you expect?)"
-	pl"bad call INTENTIONAL ERROR 21 ..."
+	pl"bad call by design   *************INTENTIONAL ERROR 21 ..."
 	foo 
 ]

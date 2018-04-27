@@ -63,36 +63,34 @@ void pft(char *from, char *to ) {
  *	until whole fmt string consumed.
  */
 void pFmt(char *fmt, int *args) {
-	char *x;
+	char pct[9], *nxtpct;
 	int datum, fmtchar;
 	if(!(*fmt))return;
+//printf("\n~69 %s<<--\n",fmt);
 	if(*fmt=='%'){
-		x = ++fmt;
-		fmtchar=charIn(*x,"dcsx");
-		if(fmtchar){
-			++fmt;
-			datum = *(args++);
+		datum = *(args++);
+		int i=0;
+		while(i<5){
+			pct[i++]=*(fmt++);
+			pct[i]=NULL;
+			if(charIn(*fmt,"dscx")){
+				pct[i++]=*(fmt++);
+				pct[i]=NULL;
+				break;
+			}
+			else if(!isdigit(*fmt))break;
 		}
-		switch(fmtchar) {
-		case 0: printf("format char %c not supported",fmtchar);
-		break;
-		case 1: printf("%d",datum);
-		break;
-		case 2: printf("%c",datum);
-		break;
-		case 3: printf("%s",(char*)datum);
-		break;
-		case 4: printf("%x",datum);
-		break;
-		}
+//printf("\n  ~82 %s<<--\n",pct);
+		if(i>=5)printf("\nBAD FMT, max 3 digits, then one of dscx\n");
+		else printf(pct,datum);
 	}
-	else if( (x=find(fmt,fmt+strlen(fmt),'%')) ) {
-		pft(fmt,x-1);	/* block print */
-		fmt = x;
+	else if( (nxtpct=find(fmt,fmt+strlen(fmt),'%')) ) {
+		pft(fmt,nxtpct-1);	/* block print */
+		fmt = nxtpct;
 	}
 	else {
 		ps(fmt);
-		return;  /* all done */
+		return;      /* one item done */
 	}
 	pFmt(fmt, args); /* do the rest */
 	return;
