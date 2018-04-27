@@ -2,7 +2,7 @@
 initial state before any tests
 
 ADDRESSES (hex)
-pr:     14b3010
+pr:     1b95010
 stack:  60dbe0
 vartab: 60e5e0
 ----
@@ -12,43 +12,43 @@ Var Table: name class type len (type)value empty
 Stack (from top) class lvalue type stuff
 
 
-TEST 1  13:54
+TEST 1  13:55
 Var Table: name class type len (type)value
  var 0: foobaaaz 0 Int 1 pr[51]->0<-
  var 1: foobaaaz 0 Int 1 pr[55]->0<-
  var 2: foobaaaz 0 Int 1 pr[59]->0<-
  var 3: foobaaaz 0 Int 1 pr[63]->0<-
 
-TEST 2  13:54
+TEST 2  13:55
 Var Table: name class type len (type)value
  var 0: foob567x 0 Int 1 pr[21]->0<-
  var 1: foob5678 0 Int 1 pr[25]->0<-
  var 2: foob567 0 Int 1 pr[29]->0<-
  var 3: foob56 0 Int 1 pr[33]->0<-
 
-TEST 3  13:54
+TEST 3  13:55
 Var Table: name class type len (type)value
  var 0: foob 0 Int 1 pr[21]->0<-
  var 1: foob 0 Int 1 pr[25]->0<-
  var 2: foob 0 Int 1 pr[29]->0<-
  var 3: foob 0 Int 1 pr[33]->0<-
 
-TEST 4  13:54
+TEST 4  13:55
 Var Table: name class type len (type)value
  var 0: foo 0 Int 1 pr[21]->0<-
  var 1: foo 0 Int 1 pr[25]->0<-
  var 2: foo 0 Int 1 pr[29]->0<-
  var 3: foo 0 Int 1 pr[33]->0<-
 
-TEST 5  13:54
+TEST 5  13:55
 
-TEST 6  13:54
+TEST 6  13:55
 Var Table: name class type len (type)value
  var 0: symbol 0 Char 1 pr[21]->NULL<-
 
-TEST 7  13:54
+TEST 7  13:55
 
-TEST 8  13:54
+TEST 8  13:55
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[101]->NULL<-
  var 1: b 1 Char 10 pr[102]-><-
@@ -57,16 +57,16 @@ Var Table: name class type len (type)value
  var 4: e 1 Int 10 pr[117]
  var 5: f 0 Int 1 pr[157]->0<-
 
-TEST 9  13:54
+TEST 9  13:55
 
-TEST 10  13:54
+TEST 10  13:55
 
-TEST 11  13:54
+TEST 11  13:55
 Stack (from top) class lvalue type stuff
  stack entry at 0: 0 A 2 
 
 
-TEST 12  13:54
+TEST 12  13:55
 Stack (from top) class lvalue type stuff
  stack entry at 3: 1 A 2 
  stack entry at 2: 0 A 2 
@@ -81,20 +81,20 @@ Stack (from top) class lvalue type stuff
 Stack (from top) class lvalue type stuff
 
 
-TEST 13  13:54
+TEST 13  13:55
 
-TEST 14  13:54
+TEST 14  13:55
 
-TEST 15  13:54
+TEST 15  13:55
 
-TEST 16  13:54
+TEST 16  13:55
 Stack (from top) class lvalue type stuff
  stack entry at 2: 0 A 1 
  stack entry at 1: 1 A 1 
  stack entry at 0: 0 A 2 
 
 
-TEST 17  13:54
+TEST 17  13:55
 Var Table: name class type len (type)value
  var 0: foobaaaz 11 Char 13 pr[10]
  var 1: foob5678 21 Int 23 pr[23]
@@ -104,53 +104,53 @@ Var Table: name class type len (type)value
  var 1: foob5678 21 Int 23 pr[23]
  var 0: foobaaaz 11 Char 13 pr[10]
 
-TEST 18  13:54
+TEST 18  13:55
 
-TEST 19  13:54
+TEST 19  13:55
 
-TEST 20  13:54
+TEST 20  13:55
 
-TEST 21  13:54
+TEST 21  13:55
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->NULL<-
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->A<-
 
-TEST 22  13:54
+TEST 22  13:55
 
-TEST 23  13:54
+TEST 23  13:55
 Var Table: name class type len (type)value
  var 0: x 0 Int 1 pr[18]->0<-
 Stack (from top) class lvalue type stuff
 
 
-TEST 24  13:54
+TEST 24  13:55
 Var Table: name class type len (type)value
  var 0: x 1 Int 3 pr[26]
 
-TEST 25  13:54
+TEST 25  13:55
 Stack (from top) class lvalue type stuff
 
 
-TEST 26  13:54
+TEST 26  13:55
 
-TEST 27  13:54
+TEST 27  13:55
 
-TEST 28  13:54
+TEST 28  13:55
 
-TEST 29  13:54
+TEST 29  13:55
 
-TEST 30  13:54
+TEST 30  13:55
 
-TEST 31  13:54
+TEST 31  13:55
 Var Table: name class type len (type)value
  var 0: i 0 Int 1 pr[136]->0<-
 
-TEST 32  13:54
+TEST 32  13:55
 Var Table: name class type len (type)value
  var 0: foo 69 Int 1 pr[6]
 
-TEST 33  13:54
+TEST 33  13:55
 Var Table: name class type len (type)value
  var 0: a 0 Int 1 pr[57]->0<-
  var 1: b 1 Int 1 pr[61]
@@ -159,7 +159,7 @@ Var Table: name class type len (type)value
  var 4: e 1 Char 1 pr[70]-><-
  var 5: f 0 Char 1 pr[71]->NULL<-
 
-TEST 34  13:54
+TEST 34  13:55
 fun table: fvar, lvar, prused
  fun entry at 0:  0 3 439
  fun entry at 1:  4 11 455
@@ -177,74 +177,74 @@ Var Table: name class type len (type)value
  var 10: main 69 Int 1 pr[414]
  var 11: foobar 69 Int 1 pr[426]
 
-TEST 35  13:54
+TEST 35  13:55
 
-TEST 36  13:54
+TEST 36  13:55
 
-TEST 37  13:54
+TEST 37  13:55
 
-TEST 38  13:54
+TEST 38  13:55
 
-TEST 39  13:54
+TEST 39  13:55
 
-TEST 40  13:54
+TEST 40  13:55
 
-TEST 41  13:54
+TEST 41  13:55
 
-TEST 42  13:54
+TEST 42  13:55
 
-TEST 43  13:54
+TEST 43  13:55
 
-TEST 44  13:54
+TEST 44  13:55
 
-TEST 45  13:54
+TEST 45  13:55
 
-TEST 46  13:54
+TEST 46  13:55
 
-TEST 47  13:54
+TEST 47  13:55
 
-TEST 48  13:54
+TEST 48  13:55
 
-TEST 49  13:54
+TEST 49  13:55
 
-TEST 50  13:54
+TEST 50  13:55
 
-TEST 51  13:54
+TEST 51  13:55
 
-TEST 52  13:54
+TEST 52  13:55
 
-TEST 53  13:54
+TEST 53  13:55
 
-TEST 54  13:54
+TEST 54  13:55
 
-TEST 55  13:54
+TEST 55  13:55
 
-TEST 56  13:54
+TEST 56  13:55
 
-TEST 57  13:54
+TEST 57  13:55
 
-TEST 58  13:54
+TEST 58  13:55
 
-TEST 59  13:54
+TEST 59  13:55
 
-TEST 60  13:54
+TEST 60  13:55
 
-TEST 61  13:54
+TEST 61  13:55
 
-TEST 62  13:54
+TEST 62  13:55
 
-TEST 63  13:54
+TEST 63  13:55
 
-TEST 64  13:54
+TEST 64  13:55
 
-TEST 65  13:54
+TEST 65  13:55
 
-TEST 66  13:54
+TEST 66  13:55
 
-TEST 67  13:54
+TEST 67  13:55
 
-TEST 68  13:54
+TEST 68  13:55
 
-TEST 69  13:54
+TEST 69  13:55
 
-TEST 70  13:54
+TEST 70  13:55

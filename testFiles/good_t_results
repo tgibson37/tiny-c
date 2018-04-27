@@ -1,34 +1,34 @@
- 13:54
+ 13:55
 
 BEGIN TESTING ALL
 
-TEST 1  13:54
+TEST 1  13:55
 name in pr ->foobaaarwxyz<-
 Test 1 done, error=0
 
-TEST 2  13:54
+TEST 2  13:55
 name in pr ->foob5678x<-
 Test 2 done, error=0
 
-TEST 3  13:54
+TEST 3  13:55
 name in pr ->foob<-
 Test 3 done, error=0
 
-TEST 4  13:54
+TEST 4  13:55
 name in pr ->foo(baaarwxyz<-
 Test 4 done, error=0
 
-TEST 5  13:54
+TEST 5  13:55
 symbol
 fname,lname,cursor= 5 10 11
 Test 5 done, error=0
 
-TEST 6  13:54
+TEST 6  13:55
 pr ->char symbol, 34567890<-
 pr ->23456789012345<-
 Test 6 done, error=0
 
-TEST 7  13:54
+TEST 7  13:55
 cursor->char symbol, more stuff
 match,cursor= 1 4
 cursor-> symbol, more stuff
@@ -36,10 +36,10 @@ match,cursor= 0 5
 cursor->symbol, more stuff
 Test 7 done, error=0
 
-TEST 8  13:54
+TEST 8  13:55
 Test 8 done, error=0
 
-TEST 9  13:54
+TEST 9  13:55
 alpha is 10
 beta is -20
 gamma is 30
@@ -51,15 +51,15 @@ theta is ->the cat in the hat<-
 eta is -><-
 Test 9 done, error=0
 
-TEST 10  13:54
+TEST 10  13:55
  empty case
 Test 10 done, error=0
 
-TEST 11  13:54
+TEST 11  13:55
 test 11, stack, popped val is 7
 Test 11 done, error=0
 
-TEST 12  13:54
+TEST 12  13:55
 nxtstack 0
 after 4 pushes nxtstack 4
 begin 5 pops
@@ -74,7 +74,7 @@ nxtstack 0
 after 5th pop err: 15
 Test 12 done, error=15
 
-TEST 13  13:54
+TEST 13  13:55
 at start cursor,epr,error = 1 35 0
 cursor->}   {}   {{}{{}}}   {    STRING-END
 4 skips: 
@@ -84,7 +84,7 @@ err,cursor = 0    {    STRING-END
 err,cursor = 1 D
 Test 13 done, error=0
 
-TEST 14  13:54
+TEST 14  13:55
 BEFORE _rem()
 cursor 0-->   
 
@@ -94,7 +94,7 @@ AFTER _rem()
 cursor 36-->next-line  string-end
 Test 14 done, error=0
 
-TEST 15  13:54
+TEST 15  13:55
 1 cursor->   17  "hello"  'c'  STRING-END<-
 konst returns 2 17
 2 cursor->  "hello"  'c'  STRING-END<-
@@ -106,7 +106,7 @@ konst returns 0
 5 cursor->STRING-END<-
 Test 15 done, error=0
 
-TEST 16  13:54
+TEST 16  13:55
 pr->   17  "hello"  'c'  STRING-END
 3 _factor()'s
 3 popst()'s
@@ -115,7 +115,7 @@ pr->   17  "hello"  'c'  STRING-END
  int 17
 Test 16 done, error=0
 
-TEST 17  13:54
+TEST 17  13:55
 name in pr ->foobaaarwx<-
 name in pr ->foob5678<-
 name in pr ->foob<-
@@ -125,14 +125,14 @@ look up foob5678
 look up foobaaaz
 Test 17 done, error=0
 
-TEST 18  13:54
+TEST 18  13:55
 asgn returned 1, 1+2 is 3
 asgn returned 1, 1+2+3 is 6
 asgn returned 1, 1*2 is 2
 asgn returned 1, (1+2)*3 is 9
 Test 18 done, error=0
 
-TEST 19  13:54
+TEST 19  13:55
 1<2 is 1 
 1>2 is 0 
 1==2 is 0 
@@ -153,7 +153,7 @@ TEST 19  13:54
 2<=1 is 0 
 Test 19 done, error=0
 
-TEST 20  13:54
+TEST 20  13:55
 7+2 is 9 
 7-2 is 5 
 7*2 is 14 
@@ -161,11 +161,11 @@ TEST 20  13:54
 7%2 is 1 
 Test 20 done, error=0
 
-TEST 21  13:54
+TEST 21  13:55
 pr: char a; a='A'; 
 Test 21 done, error=0
 
-TEST 22  13:54
+TEST 22  13:55
 pr:  char a; int x; char p(7); xXXXXXXXXXXXXXXXXXXXXx
 decl char a
 prused,obsize 30 0 
@@ -179,7 +179,7 @@ prused,obsize 42 0
 prused,obsize 42 0 
 Test 22 done, error=0
 
-TEST 23  13:54
+TEST 23  13:55
 pr:  int x; x=77;  xXXXXXXXXXXXXXXXXXXXXx
 parsing int x;
 78 58 58 0 0 0 0 58 58 58 58 58 58 58 58 58 58 58 58 58 58 78 
@@ -187,7 +187,7 @@ parsing x=77
 78 58 58 4d 0 0 0 58 58 58 58 58 58 58 58 58 58 58 58 58 58 78 
 Test 23 done, error=0
 
-TEST 24  13:54
+TEST 24  13:55
 pr:  int x(2); x(1)=77; xXX...XXXXXXXXXXXX...XXXXx
 parsing int x(3);
 78 58 58 2e 2e 2e 0 0 0 0 0 0 0 0 0 0 0 0 2e 2e 2e 58 58 58 58 78 
@@ -195,27 +195,27 @@ parsing x(1)=77;
 78 58 58 2e 2e 2e 0 0 0 0 4d 0 0 0 0 0 0 0 2e 2e 2e 58 58 58 58 78 
 Test 24 done, error=0
 
-TEST 25  13:54
+TEST 25  13:55
 ->M<- Back from MC('M',1);
 Test 25 done, error=0
 
-TEST 26  13:54
+TEST 26  13:55
 TF
 Test 26 done, error=0
 
-TEST 27  13:54
+TEST 27  13:55
  empty case
 Test 27 done, error=0
 
-TEST 28  13:54
+TEST 28  13:55
  empty case
 Test 28 done, error=0
 
-TEST 29  13:54
+TEST 29  13:55
 o
 Test 29 done, error=0
 
-TEST 30  13:54
+TEST 30  13:55
 Test 30 (99):
 []/* test 30
 [
@@ -228,7 +228,7 @@ applying st()...
 hello tc
 Test 30 done, error=0
 
-TEST 31  13:54
+TEST 31  13:55
 Test 31 (127):
 []/* test 31
 [
@@ -249,12 +249,12 @@ applying st()...
 321F0
 Test 31 done, error=0
 
-TEST 32  13:54
+TEST 32  13:55
 parsing foo(77);
 77
 Test 32 done, error=0
 
-TEST 33  13:54
+TEST 33  13:55
 Test 33 (46):
 []/* test 33
 [
@@ -266,7 +266,7 @@ applying st()...
 
 Test 33 done, error=0
 
-TEST 34  13:54
+TEST 34  13:55
 Test 34 (429):
 []/* test 34, link, must set lpr=2, apr-->line 28, epr=nread 
 
@@ -307,44 +307,44 @@ applying link()...
 
 Test 34 done, error=0
 
-TEST 35  13:54
+TEST 35  13:55
 t<--MC 1 echoed, and returns t
 Test 35 done, error=0
 
-TEST 36  13:54
+TEST 36  13:55
 charIn a abc is 1
 charIn b abc is 2
 charIn c abc is 3
 charIn x abc is 0
 Test 36 done, error=0
 
-TEST 37  13:54
+TEST 37  13:55
 Seventy seven 77
 Test 37 done, error=0
 
-TEST 38  13:54
+TEST 38  13:55
 pr: -->[ MC("%d %s %d",11,"abc",33,101) ]  <--
  calling st();
 11 abc 33
 Test 38 done, error=0
 
-TEST 39  13:54
+TEST 39  13:55
 empty case
 Test 39 done, error=0
 
-TEST 40  13:54
+TEST 40  13:55
  empty case
 Test 40 done, error=0
 
-TEST 41  13:54
+TEST 41  13:55
  empty case
 Test 41 done, error=0
 
-TEST 42  13:54
+TEST 42  13:55
  empty case
 Test 42 done, error=0
 
-TEST 43  13:54
+TEST 43  13:55
 Hello, test  43
  testing pl,ps,pn,alpha,num,atoi
  should be 1 1 0 -> 1 1 0
@@ -353,7 +353,7 @@ num 77 has  2 digits
 
 Test 43 done, error=0
 
-TEST 44  13:54
+TEST 44  13:55
 ----tc system level, calling appl main
 
 Hello, test  44
@@ -365,17 +365,17 @@ done
 
 Test 44 done, error=0
 
-TEST 45  13:54
+TEST 45  13:55
 ----tc system level, calling appl main
 
 whatHappened, INTENTIONAL ERROR...
-app line 6 (cursor pr[4781])SYMERR, decl needed
+app line 6 (cursor pr[4818])SYMERR, decl needed
 	  Kcount = 30;   /* <<== tab-tab-space-space K...
 	       ^
 
 Test 45 done, error=3
 
-TEST 46  13:54
+TEST 46  13:55
 ----tc system level, calling appl main
 fopen returned 0
 fputs returned 6
@@ -402,19 +402,19 @@ done
 
 Test 46 done, error=0
 
-TEST 47  13:54
+TEST 47  13:55
  empty case
 Test 47 done, error=0
 
-TEST 48  13:54
+TEST 48  13:55
  empty case
 Test 48 done, error=0
 
-TEST 49  13:54
+TEST 49  13:55
  empty case
 Test 49 done, error=0
 
-TEST 50  13:54
+TEST 50  13:55
 ----tc system level, calling appl main
 
 Hello, Application main
@@ -423,7 +423,7 @@ done
 
 Test 50 done, error=0
 
-TEST 51  13:54
+TEST 51  13:55
 ----tc system level, calling appl main
 hello tc
 hello ps
@@ -433,7 +433,7 @@ done
 
 Test 51 done, error=0
 
-TEST 52  13:54
+TEST 52  13:55
 ----tc system level, calling appl main
 
 23456
@@ -442,7 +442,7 @@ done
 
 Test 52 done, error=0
 
-TEST 53  13:54
+TEST 53  13:55
 ----tc system level, calling appl main
 
       b(3) is 123, b(1) is 123 
@@ -451,7 +451,7 @@ done
 
 Test 53 done, error=0
 
-TEST 54  13:54
+TEST 54  13:55
 ----tc system level, calling appl main
 ceqn cat cat, then cat dog
  1 0 should be 1 0
@@ -467,16 +467,16 @@ done
 
 Test 54 done, error=0
 
-TEST 55  13:54
+TEST 55  13:55
 ----tc system level, calling appl main
 
-app line 3 (cursor pr[4695])SYMERR, decl needed
+app line 3 (cursor pr[4732])SYMERR, decl needed
     error = on + purpose
         ^
 
 Test 55 done, error=3
 
-TEST 56  13:54
+TEST 56  13:55
 ----tc system level, calling appl main
 test 56: index
 in ->the cat in the hat<- find cat:    5 should be 5
@@ -487,7 +487,7 @@ done
 
 Test 56 done, error=0
 
-TEST 57  13:54
+TEST 57  13:55
 ----tc system level, calling appl main
 cat in the hat .......
 cat in the hat ..cat..
@@ -496,7 +496,7 @@ done
 
 Test 57 done, error=0
 
-TEST 58  13:54
+TEST 58  13:55
 ----tc system level, calling appl main
 
 health(2) should be 2, is 2
@@ -505,7 +505,7 @@ done
 
 Test 58 done, error=0
 
-TEST 59  13:54
+TEST 59  13:55
 ----tc system level, calling appl main
 
 numread 490
@@ -525,7 +525,7 @@ done
 
 Test 59 done, error=0
 
-TEST 60  13:54
+TEST 60  13:55
 ----tc system level, calling appl main
 
 abcdefg 7
@@ -534,7 +534,7 @@ done
 
 Test 60 done, error=0
 
-TEST 61  13:54
+TEST 61  13:55
 ----tc system level, calling appl main
 
 try i = p; good, now p = i; almost there; 
@@ -545,7 +545,7 @@ done
 
 Test 61 done, error=0
 
-TEST 62  13:54
+TEST 62  13:55
 ----tc system level, calling appl main
 before: The cat in the the hat? or the cathouse?
 after: The cat in the the hat? or the cathouse?
@@ -554,7 +554,7 @@ done
 
 Test 62 done, error=0
 
-TEST 63  13:54
+TEST 63  13:55
 ----tc system level, calling appl main
 
 double.tg - lrb - 2/5/18
@@ -567,7 +567,7 @@ done
 
 Test 63 done, error=0
 
-TEST 64  13:54
+TEST 64  13:55
 ----tc system level, calling appl main
 
 double.tg - lrb - 2/5/18
@@ -580,7 +580,7 @@ done
 
 Test 64 done, error=0
 
-TEST 65  13:54
+TEST 65  13:55
 ----tc system level, calling appl main
 
 double.tg - lrb - 2/5/18
@@ -593,7 +593,7 @@ done
 
 Test 65 done, error=0
 
-TEST 66  13:54
+TEST 66  13:55
 ----tc system level, calling appl main
 writing to test64tempfile: This is test 64, fwrite and fread
 reading test64tempfile: 
@@ -604,7 +604,7 @@ done
 
 Test 66 done, error=0
 
-TEST 67  13:54
+TEST 67  13:55
 ----tc system level, calling appl main
 
 calling foo 
@@ -616,7 +616,7 @@ done
 
 Test 67 done, error=0
 
-TEST 68  13:54
+TEST 68  13:55
 ----tc system level, calling appl main
 
 calling foo 
@@ -628,24 +628,34 @@ done
 
 Test 68 done, error=0
 
-TEST 69  13:54
+TEST 69  13:55
 ----tc system level, calling appl main
 
-lib line 249 (cursor pr[4499])EXIT, stopped by exit call
+lib line 253 (cursor pr[4536])EXIT, stopped by exit call
 ] 
 ^
 
 Test 69 done, error=98
 
-TEST 70  13:54
+TEST 70  13:55
 ----tc system level, calling appl main
 YES!!   IT WORKS  x=77 y=88
 Now lets do a newline
+formated stuff, a table...
+                TITLE
+Labels: AAA        BBB
+Datum1:  11         12
+Datum2:  21         22
+
+Now some bad stuff, first a too long format
+[ A wrong format 
+BAD FMT, max 3 digits, then one of dscx
+11s
 Now lets be sure varargs is false. To do that force an args error.
 good call...
 Arg to foo: BAR, (what did you expect?)
-bad call INTENTIONAL ERROR 21 ...
-app line 19 (cursor pr[5060])ARGSERR, args don't match
+bad call by design   *************INTENTIONAL ERROR 21 ...
+app line 25 (cursor pr[5422])ARGSERR, args don't match
 ]
 ^
 
