@@ -982,25 +982,15 @@ void tclink() {
 				_skip('[',']');
 			}
 		}
+		else if(*cursor=='#'){
+			while(++cursor<epr) {
+				if( (*cursor==0x0d)||(*cursor=='\n') )break;
+			}
+		}
+//printf("~985 %d %d %d %c\n",lpr-pr,apr-pr,cursor-pr,*cursor);
 		if(cursor==lastcur)eset(LINKERR);
 	}
 	cursor = savedCursor;
 	if(verbose[VL])dumpVarTab();
 }
 
-/* returns pointer to first character of the current line
- */
-char* fchar(char* k){
-	do{
-		if(*k==0x0a||*k==0x0d)break;
-	} while( --k > apr);
-	return k+1;
-}
-/* returns pointer to last character of the current line
- */
-char* lchar(char* k){
-	do{
-		if(*k==0x0a||*k==0x0d)break;
-	} while( ++k < epr);
-	return k-1;
-}

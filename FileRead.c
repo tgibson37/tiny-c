@@ -5,8 +5,8 @@
 
 int nxtUnit=0;
 
-/* read the named file into buffer pr. Return amount read
-	or zero on 'no such file' or -1 on read error. */
+/* read the named file into buffer pr. Return amount read on success,
+	or zero on 'no such file', or -1 on read error. */
 int fileRead(char* name, char* buff, int bufflen){
 	int readlen,err;
 	FILE *fp = fopen( name, "rb");
@@ -78,7 +78,7 @@ int tcFputc(char c, int unit) {
  	}
  	return -3;
  }
-/*	get a line from unit returning its length,
+/*	get a line from unit returning its length including the newline,
  *	else -9 unit not open, -8 bad unit, -4 fgets error
  */
 int tcFgets(char* buff, int len, int unit) {

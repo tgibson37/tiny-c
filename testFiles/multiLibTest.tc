@@ -1,3 +1,6 @@
+#include testFiles/testLib.tc
+#include pps/library.tc
+
 //multiLibTest.tc
 main [
 	echo3

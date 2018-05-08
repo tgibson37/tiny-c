@@ -40,6 +40,23 @@ void _errToWords(){
 	printf("%s\n",x);
 }
 
+/* returns pointer to first character of the current line
+ */
+char* fchar(char* k){
+	do{
+		if(*k==0x0a||*k==0x0d)break;
+	} while( --k >= pr);
+	return k==pr?pr:k+1;
+}
+/* returns pointer to last character of the current line
+ */
+char* lchar(char* k){
+	do{
+		if(*k==0x0a||*k==0x0d)break;
+	} while( ++k < epr);
+	return k-1;
+}
+
 /*	Prints end of program message, "done" if no error, else code and 
  *	line with error and carot under.
  */
@@ -49,8 +66,12 @@ void whatHappened() {
 		char *fc, *lc;
 		int firstSignif=0, blanks, lineno;
 		if(*errat==0x0a||*errat==0x0d)--errat;
-		if(errat<apr){
-			lineno = countch(pr,errat,0x0a);
+		if(errat<lpr){
+			printf("\nseed ");
+			lineno=0;
+		}
+		else if(errat<apr){
+			lineno = countch(lpr,errat,0x0a);
 			if(!lineno)lineno = countch(pr,errat,0x0d);
 			printf("\nlib ");
 		}
@@ -64,8 +85,6 @@ void whatHappened() {
 		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
 			 ++firstSignif;
 		lc=lchar(errat);
-/*		fc=fc-1;
-*/
 		pft(fc,lc);
 		printf("\n");
 		pft(fc,fc+firstSignif-1);        /* leading whitespace */
