@@ -97,6 +97,9 @@ int toptoi() {
 		else eset(TYPEERR);
 	}
 	else { eset(LVALERR); }
+	if(verbose[VS]){
+		fprintf(stderr," -- toptoi %d", datum);
+	}
 	return datum;
 }
 
@@ -105,6 +108,7 @@ void pushk(int datum) {
 	union stuff d;
 	d.ui = datum;
 	pushst( 0, 'A', Int, &d );
+//fprintf(stderr," -- pushk %d",datum);
 }
 
 /* push an int as a class 1 */

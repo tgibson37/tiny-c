@@ -150,16 +150,12 @@ int main(int argc, char *argv[]) {
 	if(numIncs==0)loadCode(defaultLibrary);
 	else if(numIncs<0)exit(numIncs);
 
-//	else while(optind<argc-1)loadCode(argv[optind++]);
-
 	markEndlibrary();
 	/* load the app */
-printf("~154 %s", argv[argc-1]);
 	loadCode(argv[argc-1]);
 
 	error=0;
 	prused = epr+10;  /* a little slack */
-//printf("\n~107 lpr,apr,epr  %d %d %d\n",lpr-pr,apr-pr,epr-pr);
 	nxtvar = 0;
 	nxtstack = 0;
 	efun = fun+FUNLEN;
@@ -168,7 +164,7 @@ printf("~154 %s", argv[argc-1]);
 	tclink();
 	cursor=pr;
 	prbegin();
-	st();   /* <<<== executes statement above, line 19 */
+	st();   /* <<<== executes statement above, line 10 */
 	prdone();
 	whatHappened();
 }

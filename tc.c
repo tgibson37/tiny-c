@@ -7,7 +7,6 @@
 #endif
 
 int varargs = 0;
-int nargs=0;
 
  /************** literals **************/
 char* xif = "if";
@@ -292,6 +291,7 @@ void _setArg( Type type, struct stackentry *arg ) {
 		else if( stacktype==Char) vpassed.ui = get_char(where);
 			/* ui to clear high order byte */
 	}
+//fprintf(stderr,"\n~295SA type %d passed %d", type, vpassed.ui);
 	_varAlloc( type, &vpassed);
 }
 
@@ -306,8 +306,9 @@ void _setArg( Type type, struct stackentry *arg ) {
 
 void _enter( char* where) {
 	int arg=nxtstack;
-	if(!varargs)nargs=0;
-
+	int nargs=0;
+	if(varargs>0) nargs=varargs-1;
+//fprintf(stderr,"\n~311E ABOVE: va %d na %d",varargs,nargs);
 	if(where)fcn_enter();
 	_lit(xlpar); /* optional (   */
 	int haveArgs = ! (  _lit(xrpar)
@@ -332,11 +333,13 @@ void _enter( char* where) {
 		if(nxtstack) {
 			machinecall( nargs );
 			varargs=0;
+//fprintf(stderr,"\n~336E va %d na %d",varargs,nargs);
 		}
 		else eset(MCERR);
 		return;
 	}
 	else {   /* ABOVE parses the call args, BELOW parses the called's arg decls */
+//fprintf(stderr,"\n~342E BELOW: va %d na %d",varargs,nargs);
 		char *localstcurs=stcurs, *localcurs=cursor;
 		cursor = where;
 		newfun();  
@@ -351,13 +354,15 @@ void _enter( char* where) {
 			} 
 			else if ( _lit(xchar)) {
 				do {
+//fprintf(stderr," ~358CHAR ");
 					_setArg(Char, &stack[arg]);
 					arg++;
 				} while(_lit(xcomma));
 				_lit(xsemi);
 			}
 			else if ( _lit(xvarargs) ){
-				varargs=1;
+				varargs=nargs+1;
+//fprintf(stderr,"\n~362E va %d na %d ",varargs,nargs);
 				break;
 			}
 			else {

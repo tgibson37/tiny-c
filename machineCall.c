@@ -252,11 +252,11 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &bar, &bar
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
+	, &bar, &bar, &bar, &bar, &bar
 };
 /* first in this list is MC 201 */
 McList userList[] = 
 	{ &bar, &bar, &bar, &bar, &bar
-	, &bar, &bar, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
 

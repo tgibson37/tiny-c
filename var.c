@@ -173,6 +173,7 @@ void dumpVal(Type t, int class, union stuff *val, char lval){
 			if(x)fprintf(stderr,"->%c<-", x );
 			else fprintf(stderr,"->NULL<-");
 		}
+//		else fprintf(stderr,"->%d<-", (*val).ui );
 		else fprintf(stderr,"->%d<-", *(int*)((*val).up) );
 	}
 /*
@@ -196,6 +197,7 @@ void dumpFun() {
 }
 
 void dumpVar(struct var *v) {
+//fprintf(stderr,"\n~200V");
 	fprintf(stderr,"\n var %d: %s %d %s %d ", v-vartab,
 		(*v).name, (*v).class, typeToWord((*v).type), (*v).len );
 /*	if((*v).value.up) 
@@ -209,6 +211,7 @@ void dumpVarTab() {
 	fprintf(stderr,"\nVar Table: name class type len (type)value");
 	struct var *v = vartab-1;
 	while(++v < &vartab[nxtvar]) {
+//fprintf(stderr,"\n~213V");
 		dumpVar(v);
 		++pos;
 	};
