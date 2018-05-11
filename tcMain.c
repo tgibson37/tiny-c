@@ -88,6 +88,7 @@ int doIncludes(char* fname) {
 		if(len<0)return len;
 		more = doOneInc(buff,++lineno);
 		if(more<0)return more;
+		++count;
 	}
 	tcFclose(unit);
 	return count;
