@@ -1,0 +1,64 @@
+
+// os.tc - lrb - 5/15/18
+
+sbc [
+
+This commands reads the OS= line in pps/tc.prop and tells you what's in
+it.
+
+I:\star\new>tc os.tc -r "[int n;n=os('r',0);pn n]"
+***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+        This C version copyright 2017, T A Gibson
+ 0
+done
+
+This command writes a new value to the OS= line in pps/tc.prop and then
+tells you what's now in it.
+
+I:\star\new>tc os.tc -r "[int n;os('w',1);pn os('r',0)]"
+***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+        This C version copyright 2017, T A Gibson
+ 1
+done
+
+Thie tries to write to pps/tc.prop but does nothing because there's no
+OS= line in it.
+
+I:\star\new>tc os.tc -r "[int n;os('w',1);pn os('r',0)]"
+***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+        This C version copyright 2017, T A Gibson
+ -1
+done
+
+I:\star\new>
+
+]
+
+sbc [
+
+This function is a suggested addition to the standard library
+and allows the user to read and write to a pps/tc.prop file that has
+an OS= line in it.
+
+The value after the = is a single digit number which identifies
+the operating system. 0 is Windows, 1 is Linux, 2 is Macintosh
+
+]
+
+os char rw;int wlm [ // get or set Operating System
+ int kr,l,kw;char buff(200)
+ kr=readfile "pps/tc.prop",buff,200-1
+ if (l=index(buff,99,"OS=",3)) [
+  if rw=='r' [
+   wlm=buff(l+2)-'0'
+   return wlm
+   ]
+  if rw=='w' [
+   buff(l+2)=wlm+'0'
+   kw=writefile "pps/tc.prop",buff,kr
+   return
+   ]
+  ]
+ return -1
+ ]
+
