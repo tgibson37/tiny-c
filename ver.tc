@@ -1,0 +1,40 @@
+#include mylib.tc
+#include pps/library.tc
+
+// ver.tc - lrb - 5/17/18
+
+// sample usage under Linux       ./tc ver.tc -r 'main "yes!!!!!"'
+// sample usage under Windows       tc ver.tc -r "main\"blah\""
+
+main char v(0) [
+ int pi,pin;printf "%cEnter a number : ",10;pi=gn
+ char table(30);strcpy table,"tinyC rocks!"
+ printf "%cYour entry and a message for the day follow.%c%c",10,10,10
+ printf "%15d",pi
+ printf "%c%15s%c",10,table,10
+ pin=pi
+ if pin==31415 [
+  printf "%c%cUsing functions from the libraries%c",10,10,10
+  char u(100)
+  printf "%c%s",10,url(1,u);printf "%c%s%c",10,url(2,u),10
+  mylibver
+  char yellow;yellow='3'
+  if (os('r',0)==1) color yellow         // ANSI escape sequences are supported under Linux
+  printf "%c%chttp://primepuzzle.com/tom-gibson/tiny-c-master/ver.tc%c%c",10,10,10,10
+  char white;white='7'
+  if (os('r',0)==1) color white
+  ]
+ else [printf "%c%cMIGHT WANT TO TRY ENTERING 31415 NEXT TIME ... :-)%c%c",10,10,10,10]
+ pi=3
+ char pie(100);pie="3.1415926535897932384"
+ printf "Your command tail was %s",v
+ if (pi>=3) [
+  printf "%c%s",10,pie
+  printf "%cyummm",10
+  ]
+ else [
+  printf "%cI prefer cheesecake",10
+  ]
+ printf "%c",10
+ ]
+

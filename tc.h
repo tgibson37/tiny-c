@@ -6,6 +6,8 @@
 #include <ctype.h>
 
 #define ECHO 1
+#define ESCAPE 27 // lrb
+#define CTRLC 3 // lrb
 #define UPARROW -65
 #define DOWNARROW -66
 #define RIGHTARROW -67
