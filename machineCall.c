@@ -117,6 +117,7 @@ int Mpn(int nargs, int *args)
     printf("%d", *args);
 }
 
+#if defined(_WIN32)
 int Mgch(int nargs, int *args)  // mod's lrb
 {
  int loop=0;
@@ -133,6 +134,26 @@ int Mgch(int nargs, int *args)  // mod's lrb
  if (x == CTRLC) exit(0);
  return x;
 }
+#else
+/* MC1 (Mgch) has input an ESC key (via getch_), process that key */ 
+char escKey() {
+	if( kbhit()=='[' ){
+		getch_(0);   /* toss the [ */
+		int code = getch_(0);
+		if( 'A'<= code <= 'D' )return -code;
+	}
+	eset(KILL);
+}
+
+int Mgch(int nargs, int *args)
+{
+	int x = getch_(ECHO);
+	if(x==0x1b)return escKey();
+	if(x==0x1b)eset(KILL);
+	if(x==0x03)exit(0);
+	return x;
+}
+#endif
 
 int Mpft(int nargs, int *args) {
 	char *from = (char*)*args;
@@ -248,12 +269,6 @@ int Mexitq (int nargs, int *args) { // lrb
 	exit(0);
 }
 
-int Mversion (void) { // lrb
-// the returned value to be interpreted as 1.0
-// next version would be 11 which would be interpreted as 1.1
-	return 10;
-}
-
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
@@ -270,7 +285,7 @@ McList newList[] =
 
 /* first in this list is MC 201 */
 McList userList[] = 
-	{ &Mversion, &bar, &bar, &bar, &bar  // lrb
+	{ &bar, &bar, &bar, &bar, &bar  // lrb
 	, &bar, &bar, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
