@@ -1290,7 +1290,8 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/94");
 			break;
 /* 			RUN USING ./tc testFiles/94 -d
-			set break on symbol 'brk', then r, then p each...
+			set break on symbol 'brk', then r, c, to the break.
+			Check these data are defined (p each)...
 			   iArray, cArray, cString, iDatum, cDatum
 	Should get... 
 			break at line 24 cursor pr[4369]: brk

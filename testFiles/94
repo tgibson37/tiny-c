@@ -19,7 +19,7 @@ main [
 	iDatum=5; cDatum='E'
 	
 /* test
-	ps "set break on symbol 'brk', then r, then p each..."
+	ps "set break on symbol 'brk', then r,c, then p each..."
 	pl"   iArray, cArray, cString, iDatum, cDatum"
 	pl"";pl"";pl"";pl"";pl"";
 	brk=0

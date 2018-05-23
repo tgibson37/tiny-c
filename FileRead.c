@@ -122,6 +122,8 @@ int iProperty(char* file, char* name, int *val, int _default) {
 	fclose(fp);
 	return 0;
 }
+/***ISSUE 5/22/2018 Above could call sProperty for the search */
+
 
 /*	set *val to default unless optionally overridden in property file.
  *	Syntax each line: name whiteSpace value newline.
@@ -142,7 +144,7 @@ int sProperty(char* file, char* name, char* val, int vlen, char* _default) {
 		if( next==NULL ) break;
 		if( !strncmp(next,name,lname)) {
 			v = buff+lname;
-			while(*v==' '||*v=='\t') ++v;
+			while(*v==' '||*v=='\t'||*v=='=') ++v;
 			lv = strlen(v);
 			if(v[lv-1]=='\n')v[lv-1]=0;
 			strncpy(val,v,vlen);

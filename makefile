@@ -5,6 +5,7 @@ CC = /usr/bin/gcc
 
 # Name of development files/targets
 TC = tc
+VERSIONPROP = version.prop
 LIB = ./pps/library.tc
 TEST = test
 RUN = ./tc
@@ -40,7 +41,7 @@ HDRS = tc.h
 CFLAGS = -w -g
 
 .PHONY: all run difft diffd keep dotest install latest
-all: $(TC) $(TEST)
+all: $(TC) $(TEST) $(VERSIONPROP)
 
 run:
 	$(RUN)
@@ -73,6 +74,9 @@ $(TC): $(OBJTC)
 
 $(TEST): $(OBJTEST)
 	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST)
+
+$(VERSIONPROP): $(TC)
+	./version.sh
 
 .PHONY: clean cleanobj cleanexe
 clean : cleanobj

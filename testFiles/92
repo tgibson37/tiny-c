@@ -12,6 +12,7 @@ main [
       if( count<0 ) return
     ]
     ps("You pressed "); putchar(getchar());
+    ps(" "); pn(getchar());
   ]
 ]
 
