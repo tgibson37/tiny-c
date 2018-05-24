@@ -269,6 +269,17 @@ int Mexitq (int nargs, int *args) { // lrb
 	exit(0);
 }
 
+/*	get value from property file returning in supplied buff.
+ */
+int Mgetprop(int nargs, int *args) {
+	char* file = (char*)args[0];
+	char* name = (char*)args[1];
+	char* buff = (char*)args[2];
+	int bufflen = args[3];
+	char* defawlt = (char*)args[4];
+	return sProperty(file,name,buff,bufflen,defawlt);
+}
+
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
@@ -281,12 +292,12 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &bar
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
+	, &Mgetprop, &bar, &bar, &bar, &bar
 };
 
 /* first in this list is MC 201 */
 McList userList[] = 
 	{ &bar, &bar, &bar, &bar, &bar  // lrb
-	, &bar, &bar, &bar, &bar, &bar
 	, &bar, &bar, &bar, &bar, &bar
 };
 

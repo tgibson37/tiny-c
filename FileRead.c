@@ -136,6 +136,7 @@ int sProperty(char* file, char* name, char* val, int vlen, char* _default) {
 	int lname = strlen(name);
 	strncpy(val,_default,vlen);
 	FILE* fp = fopen(file,"r");
+//fprintf(stderr,"\n~139FR %s %s %d %d",file,name,vlen,fp);
 	if(fp==NULL){
 		return -1;
 	}

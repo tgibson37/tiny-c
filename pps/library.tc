@@ -1,5 +1,15 @@
 /******* tiny-c library functions, 2017 
 
+/* From property file look up name and return value in buff.
+/* blen is the length of buff. Default is returned if file has
+/* no entry for name.
+getproperty char file(0), name(0), buff(0);
+	 int blen; 
+	 char default(0)
+[
+	return MC file,name,buff,blen,default,116
+]
+
 printf char fmt(0); ... [
 	MC 101
 ]
