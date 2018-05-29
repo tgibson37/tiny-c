@@ -84,7 +84,7 @@ void newvar( int class, Type type, int len, union stuff *passed ) {
 	if(_allocSpace(v,len*obsize)) return;  /* true is bad, eset done */
 	if(passed) _copyArgValue( v, class, type, passed);
 	if(curfun>=fun) (*curfun).lvar = nxtvar;
-	if( ++nxtvar>VTABLEN )eset(TMVRERR);
+	if( ++nxtvar>vtablen )eset(TMVRERR);
 	if(verbose[VV])dumpVar(v);
 	return;
 }

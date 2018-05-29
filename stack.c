@@ -36,8 +36,7 @@ void stuffCopy( union stuff *to, union stuff *from ) {
 
 /* basic pusher */
 void pushst( int class, int lvalue, Type type, union stuff *value ) {
-/*if(nxtstack>5)fprintf(stderr,"pushst: %d\n",nxtstack);*/
-	if( nxtstack > STACKLEN) { error = PUSHERR; return; }
+	if( nxtstack > stacklen) { error = PUSHERR; return; }
 	stack[nxtstack].class = class;
 	stack[nxtstack].lvalue = lvalue;
 	stack[nxtstack].type = type;
