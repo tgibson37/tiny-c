@@ -280,6 +280,19 @@ int Mgetprop(int nargs, int *args) {
 	return sProperty(file,name,buff,bufflen,defawlt);
 }
 
+// get current date and time into supplied buff
+void Mcdate(int nargs, int *argsv) { // lrb
+	if(nargs<1){ eset(MCERR); return -1; }
+	char *buff = (char*)argsv[0];
+	time_t rawtime;
+	struct tm *info;
+	time( &rawtime );
+	info = localtime( &rawtime );
+	sprintf(buff,"%04d-%02d-%02d %02d:%02d", \
+		info->tm_year-100+2000,info->tm_mon+1, \
+		info->tm_mday,info->tm_hour,info->tm_min);
+}
+
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
@@ -290,7 +303,7 @@ McList origList[] =
 /* first in this list is MC 101 */
 McList newList[] = 
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
-	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &bar
+	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
 	, &Mgetprop, &bar, &bar, &bar, &bar
 };
