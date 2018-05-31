@@ -15,6 +15,7 @@ void tcUsage() {
 extern int optind;
 int main(int argc, char *argv[])
 {
+	allocStuff();
 	traceMode=0;
 	optind=1;
 	if( argc>1 && !strcmp(argv[1],"-t")) {
@@ -23,8 +24,8 @@ int main(int argc, char *argv[])
 		++optind;
 		testing(--argc, argv+1);
 	} else {
-		pr=malloc(PRLEN);
-		EPR=pr+PRLEN;
+//		pr=malloc(PRLEN);
+//		EPR=pr+PRLEN;
 		testing(argc,argv);
 	}
 	return 0;

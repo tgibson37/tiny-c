@@ -53,7 +53,7 @@ char* fchar(char* k){
 char* lchar(char* k){
 	do{
 		if(*k==0x0a||*k==0x0d)break;
-	} while( ++k < epr);
+	} while( ++k < endapp);
 	return k-1;
 }
 
@@ -93,7 +93,8 @@ void whatHappened() {
 		printf("^\n");
 	}
 	else {
-		printf("\ndone\n");
+		if(!quiet)printf("\ndone");
+		printf("\n");
 	}
 }
 
@@ -111,6 +112,7 @@ int  pn(int n)   {printf("%d", n);return n;}
 void pc(char c)  {printf("%c", c);}
 
 void logo() {
+	if(quiet)return;
 	printf(
 "***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***\n"
 		);

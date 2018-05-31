@@ -10,10 +10,11 @@ extern char* xendlib;
 char* startSeed="[main();]";
 
 void tcUsage() {
-//	printf("Usage: tc [-d] [-r code] [libfile...] appfile");
-	printf("Usage: tc [-d] [-r code] appfile");
-	printf("\nNOTE the changes, May, 2018 ...");
-	printf("\nThe one arg loads the appfile and libraries as follows.");
+	printf("Usage: tc [-q] [-d] [-r seed-code] appfile");
+	printf("\n-q quiet mode (logo and done msg suppressed)");
+	printf("\n-d enables the debugger, which has its own usage print.");
+	printf("\n-r run specific seed-code");
+	printf("\nThe arg loads the appfile and libraries as follows.");
 	printf("\n  If the appfile has NO #include <path to libfile> lines");
 	printf("\n  the standard library is also loaded.");
 	printf("\n  If the appfile has #include <path to libfile> lines");
@@ -24,13 +25,12 @@ void tcUsage() {
 	printf("\n  with no arguments. -r changes this default to code, which ");
 	printf("\n  can be any function, args permitted, or even a compound");
 	printf("\n  statement.");
-	printf("\n-d enables the debugger, which has its own usage print.");
 	printf("\nNo args prints this usage.");
 	printf("\n");
 }
 
 int loadCode(char* file) {
-	int nread = fileRead(file, epr, EPR-epr);
+	int nread = fileRead(file, endapp, EPR-endapp);
 	if(nread==0){
 		fprintf(stderr,"No such file: %s\n",file);
 		exit(1);
@@ -39,14 +39,14 @@ int loadCode(char* file) {
 		fprintf(stderr,"Err reading file: %s\n",file);
 		exit(1);
 	}
-	epr += nread;
+	endapp += nread;
 	return nread;
 }
 
 void markEndlibrary() {
-	strcpy(epr,xendlib);
-	epr+=10;
-	apr=epr;
+	strcpy(endapp,xendlib);
+	endapp+=10;
+	apr=endapp;
 }
 
 /*	Process one one from the top of the app to see if it is a #include,
@@ -97,18 +97,14 @@ int doIncludes(char* fname) {
 int main(int argc, char *argv[]) {
 	int opt,numIncs;
 
-    int prlen=PRLEN;
-    int err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
-    if(err){
-    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
-    }
-    pr = malloc(prlen);
-    EPR=pr+prlen;
-
+	allocStuff();
 	strcpy(pr,startSeed);
-	lpr = epr = prused = pr+strlen(startSeed);
-    while ((opt = getopt(argc, argv, "dvr:")) != -1) {
+	lpr = endapp = prused = pr+strlen(startSeed);
+    while ((opt = getopt(argc, argv, "qdvr:")) != -1) {
         switch (opt) {
+        case 'q':
+        	quiet=1;
+        	break;
         case 'd': 
         	debug=1; 
         	break;
@@ -118,9 +114,9 @@ int main(int argc, char *argv[]) {
         case 'r': 
         	*pr = '[';
         	strcpy(pr+1,optarg);
-        	lpr = epr = prused = pr+strlen(optarg)+3;
-        	*(epr-2) = ']';
-        	*(epr-1)='\n';
+        	lpr = endapp = prused = pr+strlen(optarg)+3;
+        	*(endapp-2) = ']';
+        	*(endapp-1)='\n';
         	break;
 	    case '?':
 	        if (optopt == 'r')
@@ -141,7 +137,7 @@ int main(int argc, char *argv[]) {
 	cursor = pr;
 	curglbl = fun;
 
-/* load app and default or specified libraries, epr has been set above */
+/* load app and default or specified libraries, endapp has been set above */
 	if(optind >= argc){
 		tcUsage();
 		exit(1);
@@ -156,7 +152,7 @@ int main(int argc, char *argv[]) {
 	loadCode(argv[argc-1]);
 
 	error=0;
-	prused = epr+10;  /* a little slack */
+	prused = endapp+10;  /* a little slack */
 	nxtvar = 0;
 	nxtstack = 0;
 	efun = fun+FUNLEN;

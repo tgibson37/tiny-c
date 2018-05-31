@@ -17,7 +17,7 @@ void time_now(char *buff) {
 }
 
 int loadCode(char* file) {
-	int nread = fileRead(file, epr, EPR-epr);
+	int nread = fileRead(file, endapp, EPR-endapp);
 	if(nread==0){
 		fprintf(stderr,"No such file: %s",file);
 		exit(1);
@@ -26,14 +26,14 @@ int loadCode(char* file) {
 		fprintf(stderr,"Err reading file: %s",file);
 		exit(1);
 	}
-	epr += nread;
+	endapp += nread;
 	return nread;
 }
 
 void markEndlibrary() {
-	strcpy(epr,xendlib);
-	epr+=10;
-	apr=epr;
+	strcpy(endapp,xendlib);
+	endapp+=10;
+	apr=endapp;
 }
 
 /* setup tools used by some of the tests */
@@ -41,7 +41,7 @@ void testWhole(char* filename){
 /* modified clone of tcMain.c code...
  */
 	strcpy(pr,"[_MAIN();]");  /* required sys main */
-	lpr = epr = prused = pr+10;
+	lpr = endapp = prused = pr+10;
 	cursor = pr;
 	curglbl = fun;
 
@@ -51,7 +51,7 @@ void testWhole(char* filename){
 	loadCode(filename);
 
 	error=0;
-	prused = epr+10;  /* a little slack */
+	prused = endapp+10;  /* a little slack */
 	nxtvar = 0;
 	nxtstack = 0;
 	efun = fun+FUNLEN;
@@ -65,8 +65,8 @@ void testSetup(char* code) {
 	strcpy( pr, code);
 	error=0;
 	cursor = pr;
-	epr = pr + strlen(pr) -1;
-	prused = epr+10;  /* a little slack */
+	endapp = pr + strlen(pr) -1;
+	prused = endapp+10;  /* a little slack */
 	nxtvar = 0;
 	nxtstack = 0;
 	curfun = fun-1;
@@ -87,8 +87,8 @@ int testSetupFile(char* filename, int lib) {
 	apr = cursor;
 	len += fileRead(filename,lpr+len,PRLEN-len);
 	error=0;
-	epr = pr+len;
-	prused = epr+10;  /* a little slack */
+	endapp = pr+len;
+	prused = endapp+10;  /* a little slack */
 	nxtvar = 0;
 	nxtstack = 0;
 	efun = fun+FUNLEN;
@@ -119,7 +119,7 @@ void testing(int argc, char *argv[]) {
 	else {
 /* do all tests */	
 		nxtstack=nxtvar=0;
-		cursor=prused=epr=pr;
+		cursor=prused=endapp=pr;
 		fprintf(stderr,"\ninitial state before any tests\n");
 		dumpState();
 		pl("\nBEGIN TESTING ALL");
@@ -284,7 +284,7 @@ void doTest(int testcase) {
 			strcpy(pr,"char a,b(9),c; int d,e(9),f;");
 			cursor = pr;
 			prused = pr+100;
-			epr = prused+100;
+			endapp = prused+100;
 			/* 2 decl's push 6 vars into vartable */
 			_decl();   /*does the char */
 			_decl();   /*does the int  */
@@ -437,10 +437,10 @@ void doTest(int testcase) {
 		case 13: nxtvar=0;
 			int err;
 			strcpy(pr, "{}   {}   {{}{{}}}   {    STRING-END");
-			epr = pr + strlen(pr) -1;
+			endapp = pr + strlen(pr) -1;
 		/*prused = pr+100;*/
 			cursor = pr+1; 
-			printf("\nat start cursor,epr,error = %d %d %d",cursor-pr,epr-pr,error);
+			printf("\nat start cursor,endapp,error = %d %d %d",cursor-pr,endapp-pr,error);
 			printf("\ncursor->%s",cursor);
 			pl("4 skips: ");
 			/* 4 calls to skip, 
@@ -454,7 +454,7 @@ void doTest(int testcase) {
 	count of unmatched ['s. Calling routine decides the treatment.
 	_skip() over nested braces.
 	Should get...
-				at start cursor,epr,error = 1 35 0
+				at start cursor,endapp,error = 1 35 0
 				cursor->}   {}   {{}{{}}}   {    STRING-END
 				4 skips: 
 				err,cursor = 0    {}   {{}{{}}}   {    STRING-END
@@ -465,7 +465,7 @@ void doTest(int testcase) {
 */
 		case 14: 
 			strcpy(pr, "   \n\n  /* a tiny-c style comment   \nnext-line  string-end");
-			epr = pr + strlen(pr) -1;
+			endapp = pr + strlen(pr) -1;
 			cursor = pr;
 			printf("\nBEFORE _rem()");
 			printf("\ncursor %d-->%s", cursor-pr, cursor );
@@ -486,7 +486,7 @@ void doTest(int testcase) {
 		case 15:
 			strcpy(pr,"   17  \"hello\"  \'c\'  STRING-END");
 			cursor = pr;
-			epr = pr + strlen(pr) -1;
+			endapp = pr + strlen(pr) -1;
 			printf("\n1 cursor->%s<-",cursor);
 			printf("\nkonst returns %d ",_konst()); dumpName();
 			printf("\n2 cursor->%s<-",cursor);
@@ -700,8 +700,8 @@ void doTest(int testcase) {
 		/*             012345678901234567890123456789   */
 			testSetup(" char a; int x; char p(7); xXXXXXXXXXXXXXXXXXXXXx");
 			printf("\npr: %s",pr);
-			epr=pr+27;  	/* points to the ; */
-			prused=epr+2;  /* middle of the X's */
+			endapp=pr+27;  	/* points to the ; */
+			prused=endapp+2;  /* middle of the X's */
 			len = strlen(pr); /* capture this now, before 0's go in there */
 
 			printf("\ndecl char a");
@@ -733,8 +733,8 @@ void doTest(int testcase) {
 		/*             012345678901234567890123456789   */
 			testSetup(" int x; x=77;  xXXXXXXXXXXXXXXXXXXXXx");
 			printf("\npr: %s",pr);
-			epr=pr+12;  	/* points to the ; */
-			prused=epr+5;  /* middle of the X's */
+			endapp=pr+12;  	/* points to the ; */
+			prused=endapp+5;  /* middle of the X's */
 			len = strlen(pr); /* capture this now, before 0's go in there */
 
 			printf("\nparsing int x;\n");
@@ -762,8 +762,8 @@ NOTE:			<blank line, empty stack>
 		/*             0123456789012345678901234567890123456789   */
 			testSetup(" int x(2); x(1)=77; xXX...XXXXXXXXXXXX...XXXXx");
 			printf("\npr: %s",pr);
-			epr=pr+20;	 	/* points to the ; +1 */
-			prused=epr+5;	/* middle X's */
+			endapp=pr+20;	 	/* points to the ; +1 */
+			prused=endapp+5;	/* middle X's */
 			len = strlen(pr); /* capture this now, before 0's go in there */
 
 			printf("\nparsing int x(3);\n");
@@ -859,7 +859,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 		case 32:
 		/*             01234567890123456789012345678901234567890
 						 | |        cursor---------|        |
-					     v v----fname,lname        v        v--epr=pr+37  */
+					     v v----fname,lname        v        v--endapp=pr+37  */
 			testSetup("[ foo int bar[ MC(bar,14)];  foo(77); ]   4.........5.........");
 
 			cursor = pr + 6;
@@ -897,7 +897,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 				 var 5: f 0 Char 1 pr[71]-><-
  */
 		case 34:
-/* test 34, link, must set lpr=2, apr-->pr+366, epr=nread */
+/* test 34, link, must set lpr=2, apr-->pr+366, endapp=nread */
 			len=testSetupFile("./testFiles/34", 0);
 			printf("\nTest 34 (%d):\n%s",len,pr);
 			printf("\napplying link()...\n");
@@ -979,7 +979,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			break;
 		case 43:
 /* test 43 -- compound statment WITH lib calls 
-	 link, must set lpr=pr+2, apr-->line 28, epr=nread */	
+	 link, must set lpr=pr+2, apr-->line 28, endapp=nread */	
 	 		testSetupFile("./testFiles/43",1);
 			tclink();
 			curglbl = fun;  /* */
