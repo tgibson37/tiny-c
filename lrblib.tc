@@ -1,19 +1,4 @@
 
-// Read a line from the terminal into buffer as a string
-gs char q(0) [ // mod's by Ed Davis
- int x
- x=0
- while( (q(x)=MC(2))!=10 ) [
-  if (q(x)==13) break
-  if(q(x)==24) [x=0; printf "%c",10]
-  else if(q(x)==127) [if(x>0)x=x-1]
-  else x=x+1
-  ]
- q(x)=0
- printf "%c",10
- return x
- ]
-
 // display proper fraction
 dpfx int n,d,p [
  if p [MC 10*n/d,14;dpfx 10*n%d,d,p-1]
@@ -79,33 +64,29 @@ toupper char s(0) [
 // quiet exit
 abort [MC 109]
 
-tcbuilddate char tcdate(0) [ // get tinyC build date
- int l;char buff(200)
- strcpy tcdate,""
- readfile "pps/tc.prop",buff,200-1
- if (l=index(buff,150,"TCV",3)) [
-  while ((buff(l+2)==32)+(buff(l+2)==9)) l=l+1
-  strcpy tcdate,buff+l+2
-  ]
+getprop char file(0),request(0),tcbuff(0);int bufflen;char default(0) [ // returns pointer to text following request
+ return MC file,request,tcbuff,bufflen,default,116
  ]
 
-getos [ // get Operating System
- int kr,l;char buff(200)
- kr=readfile "pps/tc.prop",buff,200-1
- if (l=index(buff,99,"OS",2)) [
-  while ((buff(l+1)==32)+(buff(l+1)==9)) l=l+1
-  return buff(l+1)
+putprop char file(0),request(0),replace(0) [ // replaces text following request
+ int m,rl,bufflen
+ char tcbuff(300)
+ rl=strlen request
+ char buff(5000)
+ char wstripl(5000),wstripm(5000),wstripr(5000)
+ bufflen=readfile file,buff,5000-1
+ if bufflen<=0 [printf "%cfile not found",10;abort]
+ buff(bufflen)=0
+ if (m=index(buff,bufflen,request,rl)) [
+  m=m+rl-1
+  strcpy wstripl,buff;wstripl(m)=0
+  strcpy wstripm,replace
+  while ((buff(m)!=10)) m=m+1
+  strcpy wstripr,buff+m
+  strcpy tcbuff,wstripl;strcat tcbuff,wstripm;strcat tcbuff,wstripr
+  writefile file,tcbuff,strlen(tcbuff)
   ]
- ]
-
-setos char wlm [ // set Operating System
- int kr,l,kw;char buff(200)
- kr=readfile "pps/tc.prop",buff,200-1
- if (l=index(buff,99,"OS",2)) [
-  while ((buff(l+1)==32)+(buff(l+1)==9)) l=l+1
-  buff(l+1)=wlm
-  kw=writefile "pps/tc.prop",buff,kr
-  ]
+  else printf "%cnot found%c",10,10
  ]
 
 help char h(0) [
@@ -116,14 +97,19 @@ help char h(0) [
  printf "%cPlease visit %s",10,url
  ]
 
-lrblibver [printf "%clrblib version 1.5",10]
+lrblibver [
+ printf "%clrblib version 1.10%c",10,10
+ ]
+
+cdate char buff(0) [
+	MC buff,110
+]
 
 url int n; char u(0) [ // returns pointer to url string
  if n==0 strcpy u,"http://tinyurl.com/programmersguide"
- if n==1 strcpy u,"http://primepuzzle.com/tom-gibson/tiny-c-master/lrblib.tc"
- if n==2 strcpy u,"http://primepuzzle.com/tom-gibson/tiny-c-master/pps/library.tc"
+ if n==1 strcpy u,"http://primepuzzle.com/lee-bradley/lrblib.tc"
+ if n==2 strcpy u,"http://primepuzzle.com/lee-bradley/pps/library.tc"
  if n==3 strcpy u,"http://primepuzzle.com/tc"
  if n==4 strcpy u,"https://www.grammarly.com/blog/yea-yeah-yay/"
  return u
  ]
-
