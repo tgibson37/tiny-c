@@ -1,17 +1,17 @@
 #include "tc.h"
 
 /* 	todo: MC's 7,8,9,13
- *	Propose to deprecate 3,4,5,6 and replace with 
+ *	Propose to deprecate 3,4,5,6 and replace with
  *	102,103. readFile,writeFile.
 
 		MC7 ;move a block up or down. Args are first,last,K. If K
 		  negative, block is moved down |k| bytes, if positive
 		  then up K bytes.
-		
+
 		MC8 ;count # instances of character CH in a block. Args are
 		 first,last,CH.
 */
-		
+
 typedef int (*McList)(int,int*);
 
 /*		MC9 ;scan for nth occurance of CH in a block. Args are
@@ -29,6 +29,7 @@ int scann( char *from, char *to, char c, int *n ) {
 	}
 	return f-from;
 }
+
 int Mscann(int nargs, int *args) {
 	char *from = (char*)args[0];
 	char *to   = (char*)args[1];
@@ -39,7 +40,6 @@ int Mscann(int nargs, int *args) {
 	*starN = n;
 	return offset;
 }
-
 
 /*	return true if c exists in choices, false otherwise. AND the true 
  *	value is the integer index plus one of c in choices
@@ -52,13 +52,13 @@ int charIn(char c, char *choices ){
 	return 0;
 }
 
-/* print from..to inclusive 
+/* print from..to inclusive
  */
 void pft(char *from, char *to ) {
 	while(from <= to) printf("%c",*(from++));
 }
 
-/*	used by printf,ps,pl. Prints one token of format string; 
+/*	used by printf,ps,pl. Prints one token of format string;
  *	either a %<char> or a block of chars excluding %. Recursive
  *	until whole fmt string consumed.
  */
@@ -117,6 +117,24 @@ int Mpn(int nargs, int *args)
     printf("%d", *args);
 }
 
+#if defined(_WIN32)
+int Mgch(int nargs, int *args)  // mod's lrb
+{
+ int loop=0;
+ int x;
+ while (!loop) {
+  if (kbhit()) {
+   loop=1;
+   x = getch_(ECHO);
+   if (x == ESCAPE) {
+    eset(KILL);
+    }
+   }
+  }	
+ if (x == CTRLC) exit(0);
+ return x;
+}
+#else
 /* MC1 (Mgch) has input an ESC key (via getch_), process that key */ 
 char escKey() {
 	if( kbhit()=='[' ){
@@ -135,6 +153,7 @@ int Mgch(int nargs, int *args)
 	if(x==0x03)exit(0);
 	return x;
 }
+#endif
 
 int Mpft(int nargs, int *args) {
 	char *from = (char*)*args;
@@ -163,13 +182,13 @@ int MmvBl(int nargs, int *args)
 }
 
 /* test if keyboard char ready, return copy if so, else 0 */
-int Mchrdy() 
+int Mchrdy()
 {
 	return kbhit();
 }
 
 /* sleep for N seconds */
-void Msleep(int nargs, int *argsv) 
+void Msleep(int nargs, int *argsv)
 {
 	int N = *argsv;
 	sleep(N);
@@ -201,7 +220,7 @@ int Mstrcat(int nargs, int *argsv) {
 	if(nargs<2){ eset(MCERR); return -1; }
 	char* a=(char*)argsv[0];
 	char* b=(char*)argsv[1];
-	return (int)strcat(a,b);	
+	return (int)strcat(a,b);
 }
 
 int Mstrcpy(int nargs, int *argsv) {
@@ -217,28 +236,48 @@ int Mfopen(int nargs, int *args) {
 	char *mode   = (char*)args[1];
 	return tcFopen(filename,mode);
 }
+
 int Mfgets(int nargs, int *args) {
 	char* buff = (char*)args[0];
 	int len = args[1];
 	int unit = args[2];
 	return tcFgets(buff,len,unit);
 }
+
 int Mfputs(int nargs, int *args) {
 	char* str = (char*)args[0];
 	int unit = args[1];
 	return tcFputs(str,unit);
 }
+
 int Mfputc(int nargs, int *args) {
 	char c = (char)args[0];
 	int unit = args[1];
 	return tcFputc(c,unit);
 }
+
 int Mfclose(int nargs, int *args) {
 	int unit = args[0];
 	return tcFclose(unit);
 }
+
 int Mexit(int nargs, int *args) {
 	eset(EXIT);
+}
+
+int Mexitq (int nargs, int *args) { // lrb
+	exit(0);
+}
+
+/*	get value from property file returning in supplied buff.
+ */
+int Mgetprop(int nargs, int *args) {
+	char* file = (char*)args[0];
+	char* name = (char*)args[1];
+	char* buff = (char*)args[2];
+	int bufflen = args[3];
+	char* defawlt = (char*)args[4];
+	return sProperty(file,name,buff,bufflen,defawlt);
 }
 
 /* first in this list is MC 1 */
@@ -247,16 +286,18 @@ McList origList[] =
 	, &bar, &MmvBl, &bar, &Mscann, &bar
 	, &bar, &Mchrdy, &Mpft, &Mpn, &bar
 };
+
 /* first in this list is MC 101 */
 McList newList[] = 
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
-	, &Mstrcpy, &Mfilwt, &Mexit, &bar, &bar
+	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &bar
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
-	, &bar, &bar, &bar, &bar, &bar
+	, &Mgetprop, &bar, &bar, &bar, &bar
 };
+
 /* first in this list is MC 201 */
 McList userList[] = 
-	{ &bar, &bar, &bar, &bar, &bar
+	{ &bar, &bar, &bar, &bar, &bar  // lrb
 	, &bar, &bar, &bar, &bar, &bar
 };
 
@@ -284,8 +325,14 @@ void newMC(int mcno, int nargs, int *args) {
 	}
 }
 
-void userMC(int mcno, int nargs, int *args) {
-	pushk(0); eset(MCERR);
+void userMC(int mcno, int nargs, int *args) { // lrb
+	if(mcno<1 || mcno>(sizeof(userList)/sizeof(void*))) {
+		pushk(0); eset(MCERR);
+	}
+	else {
+	    int x = userList[mcno-1](nargs, args);
+	    pushk(x);
+	}
 }
 
 void machinecall( int nargs ) {
@@ -304,3 +351,4 @@ void machinecall( int nargs ) {
 	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }
+

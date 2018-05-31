@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 70
+#define testcases 71
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1214,7 +1214,16 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  *			bad call INTENTIONAL ARGSERR ...
  *			app line 19 (cursor pr[5060])ARGSERR, args don't match
  */
-
+		case 71:
+			testWhole("./testFiles/71");
+			break;
+/* 	Should get... 
+				 -1451820400  -->2018-05-23 14:12<--
+				 -1451820400  -->GNU/Linux<--
+				 0  -->NO foobar found<--
+		The huge negative may vary, its a C pointer.
+		The date-time is compile time for tc, i.e. version.
+ */
 /***************  keyboard input tests, run manually *********/
 /*	Test 90 MUST be run using ./test 90. It is NOT a tc program.
  *	Tests 91 up may be run using ./test 9x, or ./tc testFiles/9x. They
@@ -1290,7 +1299,8 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/94");
 			break;
 /* 			RUN USING ./tc testFiles/94 -d
-			set break on symbol 'brk', then r, then p each...
+			set break on symbol 'brk', then r, c, to the break.
+			Check these data are defined (p each)...
 			   iArray, cArray, cString, iDatum, cDatum
 	Should get... 
 			break at line 24 cursor pr[4369]: brk

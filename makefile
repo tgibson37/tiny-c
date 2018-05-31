@@ -18,6 +18,7 @@ else
 endif
 
 # Name of development files/targets
+
 VERSIONPROP = version.prop
 LIB = ./pps/library.tc
 DOTEST = $(RUNTEST) 2>dump_results >test_results
@@ -92,6 +93,9 @@ $(VERSIONPROP):
 # manually launch the following .bat file
 #	version.bat	
 	
+
+$(VERSIONPROP): $(TC)
+	./version.sh
 
 .PHONY: clean cleanobj cleanexe
 clean : cleanobj

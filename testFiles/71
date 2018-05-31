@@ -1,0 +1,12 @@
+// 71
+main [
+	char buff(100)
+	int lb, err; lb = 100
+
+	err = getproperty "pps/version.prop", "date", buff, lb, "NO version found"
+	printf "%c %d  -->%s<--",10,err,buff
+	err = getproperty "pps/version.prop", "os", buff, lb, "NO os found"
+	printf "%c %d  -->%s<--",10,err,buff
+	err = getproperty "pps/version.prop", "foobar", buff, lb, "NO foobar found"
+	printf "%c %d  -->%s<--",10,err,buff
+]
