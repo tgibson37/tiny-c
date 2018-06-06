@@ -1,22 +1,34 @@
 # Compiler
-CC = /usr/bin/gcc
-# alternative for _WIN32
-#CC = /usr/bin/gcc.exe
+ifeq ($(OS),Windows_NT)
+    CC = gcc.exe
+    TC = tc.exe
+    TEST = test.exe
+    RM = del /q
+    LS = dir /o-d
+    RUN = tc
+    RUNTEST = test
+else
+    CC = /usr/bin/gcc
+    TC = tc
+    TEST = test
+    RM = rm -fv
+    LS = ls -lt
+    RUN = ./tc
+    RUNTEST = ./test
+endif
 
 # Name of development files/targets
-TC = tc
+
 VERSIONPROP = version.prop
 LIB = ./pps/library.tc
-TEST = test
-RUN = ./tc
-DOTEST = ./test 2>dump_results >test_results
+DOTEST = $(RUNTEST) 2>dump_results >test_results
 TEST_RESULTS = test_results
 DIFF1 = diff test_results testFiles/good_t_results
 KEEP1 = cp test_results testFiles/good_t_results
 DIFF2 = diff dump_results testFiles/good_d_results
 KEEP2 = cp dump_results testFiles/good_d_results
 
-# Linix install dirs, note these are file names
+# Linux install dirs, note these are file names
 INSTALLTC = /usr/local/bin/tinyc
 INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
@@ -58,7 +70,7 @@ keep: $(TEST_RESULTS)
 
 dotest:
 	$(DOTEST)
-	ls -lt *_results
+	$(LS) *_results
 
 # Linux only, requires privilage to write install dirs. 
 install: tc
@@ -74,16 +86,23 @@ $(TC): $(OBJTC)
 
 $(TEST): $(OBJTEST)
 	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST)
+	
+$(VERSIONPROP):
+	./version.sh
+# alternative for _WIN32
+# manually launch the following .bat file
+#	version.bat	
+	
 
 $(VERSIONPROP): $(TC)
 	./version.sh
 
 .PHONY: clean cleanobj cleanexe
 clean : cleanobj
-	rm -fv test_results dump_results tc.h.gch
+	$(RM) test_results dump_results tc.h.gch
 
 cleanobj :
-	rm -fv *.o
+	$(RM) *.o
 
 cleanexe :
-	rm -fv tc test
+	$(RM) $(TC) $(TEST)
