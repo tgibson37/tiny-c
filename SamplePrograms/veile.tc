@@ -1,46 +1,19 @@
 #include lrblib.tc
 #include pps/library.tc
 
-// veile.tc - lrb - 10/14/2010 5/17-19/18
-
-// rpb - returns 1 if strings are equal else returns 0
-ceq char s(0),t(0) [
- if (strlen(s)==strlen(t)) [
-  if ceqn(s,t,strlen(s)) [
-   return 1
-   ]
-  ]
- return 0
- ]
-
-echo char m(0) [printf "%c%s",10,m]
+// veile.tc - lrb - 6/1/18
 
 main [veile]
 
 veile [
- char s(100),t(100)
- int n
- printf "%cEnter URL (e.g. http://primepuzzle.com/tc) : ",10;gs t
+ char s(100),t(100);int n
+ printf "%cveile.tc - lrb - 6/1/18%c",10,10
  printf "%cEnter a number (0..4) : ",10;n=gn
- url(n,s)
- if (n==3)*(ceq(s,t)) [echo "Nice!";MC 10,1;MC 10,1]
- if ((n>=0)*(n<=4)) [printf "%c%s",10,url(n,s);MC 10,1;MC 10,1]
- echo "OK"
+ if ((n>=0)*(n<=4)) printf "%c%s",10,url(n,s)
+ else [printf "%cYour bad. You didn't follow directions!%c",10,10;abort]
+ getprop "pps/version.prop","date =",t,100,"..."
+ printf "%c%ctinyC build date is %s",10,10,t
+ getprop "pps/version.prop","os =",t,100,"..."
+ printf"%c%cThe operating system is %s",10,10,t
  printf "%c",10
- char tcdate(30)
- tcbuilddate(tcdate)
- printf "%ctinyC build date is %s",10,tcdate
- int osnames(2)
- osnames(0)="Windows";osnames(1)="Linux";osnames(2)="Macintosh"
- printf "Operating System is %s",osnames(getos())-'0')
- printf "%c%cWant to change Operating System (y/n) ? ",10,10
- char yn;yn=getchar
- if (yn=='y') [
-  char wlm
-  printf "%c%c0, 1, or 2 (for Windows, Linux, Macintosh) ? ",10,10
-  wlm=getchar
-  if ((wlm=='0')+(wlm=='1')+(wlm=='2')) setos(wlm)
-  else printf "%c%cOperating System code not recognized",10,10 
-  ]
  ]
-
