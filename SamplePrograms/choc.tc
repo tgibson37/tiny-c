@@ -1,0 +1,33 @@
+
+// this program tells you how many chocolate bars you can buy if you have
+// b dollars and can get another chocolate bar when you turn in w wrappers 
+
+choc int b,w [
+ pl "choc.tc - lrb - 5/29/18";pl ""
+ int wrappers,tot
+ pl ""
+ pn b
+ if (b>w) [tot=b+b/w;pn tot]
+ wrappers=b/w+b%w
+ while (wrappers>w) [
+  tot=tot+wrappers/w;pn tot
+  wrappers=wrappers/w+wrappers%w
+  ]
+ if (wrappers==w) [
+  tot=tot+1;pn tot;pl " there is 1 leftover wrapper."
+  ]
+ else [
+  pl " there is/are";pn wrappers;ps " leftover wrappers."
+  ]
+ pl""
+ ]
+
+main [
+ int b,w
+ pl ""
+ pl "dollars : ";b=gn
+ pl "number of wrappers to get extra bar : ";w=gn
+ pl ""
+ choc b,w
+ ]
+
