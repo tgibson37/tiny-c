@@ -52,6 +52,7 @@ int debug;
 #define SYMERRA      26
 #define EQERR		 27
 #define PTRERR		 28
+#define APPERR	     29 // lrb
 #define EXIT         98
 #define KILL         99
 
