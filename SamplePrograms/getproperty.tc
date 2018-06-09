@@ -1,0 +1,35 @@
+#include pps/library.tc
+#include lrblib.tc
+
+// getproperty.tc - lrb - 6/1/18
+
+// This program asks for a file name and a search string. If a line in the file
+// is found that starts with the search string, the text that follows the search string
+// is displayed (whitespace between the search string and text is not displayed). 
+
+main [
+ int i;char ic(3),nst(3)
+ printf "%cgetproperty.tc - lrb - 6/1/18%c",10,10
+ char textbuff(5000),search(100),filename(100),dfilename(100)
+ strcpy dfilename,"books-30.htm"
+ printf "%cfile to search? (type . for %cbooks-30.htm%c) ",10,34,34;gs filename
+ if ceqn(filename,".",1) strcpy filename,dfilename
+ printf "%csearch for what? (type * for files whose lines start with 1. 2. etc.) ",10;gs search
+ pl ""
+ if ceqn(search,"*",1) [
+  i=1
+  while i<100 [
+   itoa i,nst;strcpy search,nst;strcat search,". "
+   getprop filename,search,textbuff,5000,"..."
+   if ceqn(textbuff,"...",3) [printf "%c",10;break]
+   printf "%s%c",textbuff,10
+   i=i+1
+   ]
+  ]
+ else [
+  getprop filename,search,textbuff,5000,"..."
+  if ceqn(textbuff,"...",3) printf "%c",10
+  else printf "%s%c",textbuff,10
+  ]
+ ]
+

@@ -1,0 +1,29 @@
+
+/* star.tc - http://primepuzzle.com/tc/tiny-c-programs.html#64 */
+
+main [
+ int ctr,skip,points,n,w,t;char v(0)
+ pl "star.tc - 4/1/18 - lrb"
+ pl "";pl "Count your lucky stars!"
+ ps " How many points does your star have? ";points=gn
+ pl "Press Enter for no details, anything else to see details. Details? "
+ w=gs(v);pl ""
+ skip=1
+ while (skip<=(points-3)/2) [
+  n=1
+  while (n<=points) [
+   t=n*(skip+1)
+   if (t<0) [pl "";pl "";pn t;ps " - can't handle this; aborting!";pl "";exit]
+   if (((t+1)%points)==0) [
+    ctr=ctr+1
+    if (w) [pl "";MC ctr,14;ps ". skip =";pn skip;ps " n =";pn n]
+    sleep 1
+    break
+    ]
+   n=n+1
+   ]
+  skip=skip+1
+  ]
+ if (w) pl ""
+ pl "";MC ctr,14;ps " unique";pn points;ps "-point star(s) found.";pl ""
+ ]

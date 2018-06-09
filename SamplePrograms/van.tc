@@ -1,0 +1,34 @@
+
+// this is a recursive version of choc.tc, a choclate bar/wrapper problem
+// it's called van (for vanilla) because choc (chocolate) was taken
+
+main [
+ int tot(0),b,w
+ pl "van.tc - lrb - 5/29/18"
+ pl""
+ pl "dollars : ";b=gn
+ pl "number of wrappers to get extra bar : ";w=gn;pl ""
+ tot(0)=b
+ pn tot(0)
+ do(b,w,tot)
+ pl ""
+ ]
+
+do int b,w,tot(0) [
+ if (b>=w) [
+  tot(0)=tot(0)+b/w
+  pn tot(0)
+  do(b/w+b%w,w,tot)
+  ]
+ else [
+  if(b<w) [
+   ps " wrappers left =";pn b
+   return
+   ]
+  else [
+   pn tot(0)+1;ps " wrappers left = 1"
+   return
+   ]
+  ]
+ ]
+
