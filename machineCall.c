@@ -280,6 +280,20 @@ int Mgetprop(int nargs, int *args) {
 	return sProperty(file,name,buff,bufflen,defawlt);
 }
 
+// load get current date and time into supplied buff
+int Mcdate(int nargs, int *argsv) {
+	if(nargs<1){ eset(MCERR); return -1; }
+	char *buff = (char*)argsv[0];
+	time_t rawtime;
+	struct tm *info;
+	time( &rawtime );
+	info = localtime( &rawtime );
+	sprintf(buff,"%04d-%02d-%02d %02d:%02d", \
+		info->tm_year-100+2000,info->tm_mon+1, \
+		info->tm_mday,info->tm_hour,info->tm_min);
+	return buff;
+}
+
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
@@ -290,7 +304,7 @@ McList origList[] =
 /* first in this list is MC 101 */
 McList newList[] = 
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
-	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &bar
+	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
 	, &Mgetprop, &bar, &bar, &bar, &bar
 };
@@ -337,7 +351,8 @@ void userMC(int mcno, int nargs, int *args) { // lrb
 
 void machinecall( int nargs ) {
 /*printf("\nMC ~211, nargs %d",nargs);*/
-	int i, args[nargs-1];
+//	int i, args[nargs-1];
+	int i, args[10]; // lrb tcc complains ... wants a constant expression
 	int mcno = toptoi();
 	--nargs;
 	for(i=0; i<nargs; ++i){
@@ -351,4 +366,3 @@ void machinecall( int nargs ) {
 	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }
-

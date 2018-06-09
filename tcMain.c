@@ -77,7 +77,8 @@ int doIncludes(char* fname) {
 	int unit,len,more,lineno,count=0;
 	char buff[200];
 	unit = tcFopen(fname,"r");
-	if(unit<0)return unit;
+//	if(unit<0)return unit;
+	if(unit<0){eset(APPERR);_errToWords();exit(unit);} // lrb
 	more=1;
 	while(more){
 		len = tcFgets(buff,sizeof(buff),unit);
@@ -145,7 +146,7 @@ int main(int argc, char *argv[]) {
 
 	numIncs = doIncludes(argv[argc-1]);
 	if(numIncs==0)loadCode(defaultLibrary);
-	else if(numIncs<0)exit(numIncs);
+//	else if(numIncs<0)exit(numIncs);
 
 	markEndlibrary();
 	/* load the app */
