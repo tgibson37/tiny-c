@@ -17,3 +17,4 @@ veile [
  printf"%c%cThe operating system is %s",10,10,t
  printf "%c",10
  ]
+
