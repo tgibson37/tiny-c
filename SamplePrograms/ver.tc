@@ -1,12 +1,38 @@
 #include lrblib.tc
 #include pps/library.tc
 
-// ver.tc - lrb - 5/17,19/18
+// ver.tc - lrb - 6/1/18
 
 // sample usage under Linux       ./tc ver.tc -r 'main "yes!!!!!"'
 // sample usage under Windows       tc ver.tc -r "main\"blah\""
 
 main char v(0) [
+ char tcbuff(40)
+ int DEBUG;DEBUG=1
+ printf "%cThe tinyC build date is ",10
+ getprop "pps/version.prop","date =",tcbuff,40,"..."
+ printf "%s",tcbuff
+ printf "%cThe operating system is ",10
+ getprop "pps/version.prop","os =",tcbuff,40,"..."
+ printf "%s",tcbuff
+ char os(30);strcpy os,tcbuff
+ printf "%cThe program length is ",10
+ getprop "pps/tc.prop","PRLEN",tcbuff,40,"..."
+ printf "%s",tcbuff
+ if DEBUG [
+ putprop "pps/tc.prop","AUTHOR1","    T A Gibson"
+ putprop "pps/tc.prop","AUTHOR2","    Ed Davis"
+ putprop "pps/tc.prop","AUTHOR3","    Lee R Bradley"
+ ]
+ printf "%ctinyC authors ",10
+ getprop "pps/tc.prop","AUTHOR1",tcbuff,40,"..."
+ printf "%s",tcbuff
+ getprop "pps/tc.prop","AUTHOR2",tcbuff,40,"..."
+ printf ",%s",tcbuff
+ getprop "pps/tc.prop","AUTHOR3",tcbuff,40,"..."
+ printf ",%s",tcbuff
+ char mydate(16);cdate mydate
+ printf "%cThe current date and time is %s",10,mydate,10
  int pi,pin;printf "%cEnter a number : ",10;pi=gn
  char table(30);strcpy table,"tinyC rocks!"
  printf "%cYour entry and a message for the day follow.%c%c",10,10,10
@@ -19,10 +45,11 @@ main char v(0) [
   printf "%c%s",10,url(1,u);printf "%c%s%c",10,url(2,u),10
   lrblibver
   char yellow;yellow='3'
-  if (getos()=='1') color yellow         // ANSI escape sequences are supported under Linux
-  printf "%c%chttp://primepuzzle.com/tom-gibson/tiny-c-master/ver.tc%c%c",10,10,10,10
+  // ANSI escape sequences are supported under Linux
+  if (index(os,strlen(os),"Linux",5)) color yellow
+  printf "%c%chttp://primepuzzle.com/lee-bradley/ver.tc%c%c",10,10,10,10
   char white;white='7'
-  if (getos()=='1') color white
+  if (index(os,strlen(os),"Linux",5)) color white
   ]
  else [printf "%c%cMIGHT WANT TO TRY ENTERING 31415 NEXT TIME ... :-)%c%c",10,10,10,10]
  pi=3
@@ -37,4 +64,3 @@ main char v(0) [
   ]
  printf "%c",10
  ]
-

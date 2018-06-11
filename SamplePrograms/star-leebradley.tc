@@ -24,4 +24,3 @@ main [
  if (w) pl ""
  pl "";MC ctr,14;ps " unique";pn points;ps "-point star(s) found."
  ]
-
