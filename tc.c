@@ -700,6 +700,20 @@ void _skipSt() {
 /* Returns true if user signals quit, or any other error.
  *	NOTE: MC 2 esets KILL on ESC, but test here for hard loop
  */
+
+#if defined(_WIN32)
+int quit() {    // mod's lrb
+ int x;
+ if (kbhit()) {
+  x = getch_(ECHO);
+  if (x == ESCAPE) {
+   eset(KILL);
+   return 1;
+   }
+  }
+ return 0;
+}
+#else
 int quit() {
 	int foo[]={0};  /* to avoid tcc error */
 	if(kbhit()==0x1b){
@@ -708,6 +722,7 @@ int quit() {
 	}
 	return 0; 
 }
+#endif
 
 /* Match char or int, else do nothing. If match parse
  *  all comma separated declarations of that particular type
