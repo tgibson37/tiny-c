@@ -1032,6 +1032,6 @@ int allocStuff() {
     	fprintf(stderr,"pps/tc.prop err, running var[%d]",VTABLEN);
     }
     vartab = malloc(vtablen*sizeof(struct var));
-fprintf(stderr,"~1035TC: sizes of pr %d fun %d stack %d var %d\n", 
-    			prlen, funlen, stacklen, vtablen);
+//fprintf(stderr,"~1035TC: sizes of pr %d fun %d stack %d var %d\n", 
+//    			prlen, funlen, stacklen, vtablen);
 }
