@@ -351,7 +351,8 @@ void userMC(int mcno, int nargs, int *args) { // lrb
 
 void machinecall( int nargs ) {
 /*printf("\nMC ~211, nargs %d",nargs);*/
-	int i, args[nargs-1];
+//	int i, args[nargs-1];
+	int i, args[10]; // lrb tcc complains ... wants a constant expression
 	int mcno = toptoi();
 	--nargs;
 	for(i=0; i<nargs; ++i){
@@ -365,4 +366,3 @@ void machinecall( int nargs ) {
 	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }
-
