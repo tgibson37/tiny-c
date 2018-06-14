@@ -1,0 +1,131 @@
+trek source study
+Tom Gibson, winter 2018
+seeking clues as to the variables a..z
+	Guess: The Lxxx routines were basic subroutines at line xxx
+---
+~160	get_course  parameters ???
+	Queries for course, 0..360.
+	defines r,s,t
+		s is 0,1,2,3,4 for course closest to N,E,W,S
+		i is +- degrees from that ordinal
+		r is parabolic in i (-45,+45) from min 45 to max 64
+			or 0 for out of range, used in L530
+		s,t together define the course through the cells of a sector
+~184	docked parameters 
+	e is energy
+	f is torpedoes
+	z is probably damage to 70 things, all set to 0
+	i is set to 64
+~195	L165 parameter i
+	places one object of type i in current sector avoiding overlap
+~205	show_pos parameters u,v,x,y
+	report E's position
+~209	klngn_hit parameters ???
+	???
+~227	chk_damage parameters j
+	z(j+63) j=1,7 are components of Enterprise
+	~229..236 define which components
+	damage to j is reported
+~241	chk_docked parameters ???
+	 i = x - (x > 1)
+	 while (i <= x + (x < 8)) [
+	  j = y - (y > 1)
+	  while (j <= y + (y < 8)) [
+	   if (z(8 * i + j + 62) == 2) [
+	x,y must be E's sector coords
+	i=x-1 unless x==1 already
+	ditto j and y
+	the nested whiles seem to scan points adjacent to x,y
+		without going outside the quadrant
+	z(62+sector position)==2 means adjacent to starbase
+	if(o==0 )  tests not already docked
+		if so report, dock() which sets o=1, return 
+	if not adjacent set o=0, return
+~259	lr_sensor parameters ???
+	reports objects in adjacent quads
+~283	chk_overload parameters  a, m, z(67), x, y
+	a is the load, >1090 is overload
+	m is a specific klingon
+~296	damaged parameters z(70), t
+	if shield deployed then give it a random bit of damage
+	else report hurt crew and check other damage
+~311	klngn_attact parameters n, o, t, s, i, j 
+	Check there are klingons (n, set by L45) and E is not docked.
+	for m 135,140 (each klingon) 
+~344	chk_game_over parameters ???
+	???
+~369	L45 parameters E's position
+	inits (zero all) current sector and klingon data z(71..152)
+		place E at x,y
+		retrieves abs(m) from galaxy map
+		third digit = number of klingons
+		second digit>0 for one base
+		third digit is number of stars
+		places klingons include 3 data for each...
+			for j=1,n { L165 z(j+134)=300, +140=s, +146=t }
+			so max 6 klingons in a sector
+		shows position
+		places base and stars
+~407	L40 parameters ???
+	???
+~415	galaxy_map parameters ???
+	???
+~514	status_report parameters ???
+	???
+~541	L525 parameters ???
+	???
+~547	L521 parameters ???
+	???
+~553	L530 parameters ???
+	???
+~574	warp parameters ???
+	???
+~636	L590 parameters ???
+	???
+~648	starbase_dstryd parameters ???
+	???
+~657	radiation parameters ???
+	???
+~664	star_dstryd parameters ???
+	???
+~675	hit_star parameters ???
+	???
+~685	torpedos parameters ???
+	???
+~741	main parameters ???
+	???
+
+
+
+
+
+
+Data:
+	i,j,m,s,t, and maybe r are used as args, locals, results.
+		They are therefore not state.
+	u,v,x,y are E's position, quad up over, sect up over
+	o true means docked
+	z array
+		z(0..63) is galaxy map, 
+			value = 3 digit code for objects in each sector,
+				klingons,base,stars
+		z(63+j) j=1..7 are components of Enterprise
+			 1 -- Short range sensor
+			 2 -- Computer display
+			 3 -- Long range sensor
+			 4 -- Phaser
+			 5 -- Warp engine
+			 6 -- Photon torpedo tubes
+			 7 -- Shield
+		z(71..134) current sector. Value is object code
+		object codes: 0 .  1 K   2 B   3 *   4 E
+			(nothing,klingon,base,star,Enterprise)
+		z(135..152)  data for 6 klingons in current sector
+			z(m) value is a particular klingon with encoded
+			location (presumably 4 digits)
+			damage codes (probably one)
+		z(153..175)  17 other items???
+		Some codes use the sign bit for an extra state
+
+
+
