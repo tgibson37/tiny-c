@@ -1,0 +1,29 @@
+#include pps/library.tc
+#include lrblib.tc
+#include double.tc
+
+// cmbyn.tc - lrb - 5/31/18
+
+bar char x(0) [return ceqn(x,"call ",4)]
+
+main [
+ char cmbyn(100),t(5000)
+ int k,p
+ strcpy cmbyn,"Call Me By Your Name"
+ printf "%c%s%c",10,cmbyn,10
+ toupper cmbyn
+ lrblibver
+ printf "%c%c%s",10,10,cmbyn
+ tolower cmbyn
+ printf "%c%s%c",10,cmbyn,10
+ printf("%clength is %d",10,k=strlen(cmbyn))
+ printf("%cmatched is true (1) false (0) %d",10,bar(cmbyn))
+ printf "%c%cType a character: ",10,10
+ if 'c'==MC 2 printf "%c",10
+ else printf "%cYour character wasn't a 'c'",10)
+ while (p=index(cmbyn,k," ",1)) cmbyn(p-1)='.'
+ strcat cmbyn,".txt"
+ if ((k=readfile(cmbyn,t,5000-1))<=0) [ pl "error reading file";pl ""]
+ else [pft t,t+k;double cmbyn,1]
+ ]
+

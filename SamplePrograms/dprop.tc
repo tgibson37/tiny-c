@@ -1,0 +1,64 @@
+#include lrblib.tc
+#include pps/library.tc
+
+// dprop.tc - lrb - 6/7/18
+
+[
+This program displays the lines in files that start w/ "properties" (see
+below for what I mean by this). It "knows" 3 "hardcoded" files. It can
+also handle files (like books-30.htm) that have lines that start w/ 1.
+2. 3. etc.
+
+The idea for this program came from my interest in displaying the
+"properties" of programs, i.e. the names of the functions they use
+followed by the arguments they require.
+
+It then occurred to me that it could also be used to display the
+"properties" of "numbered" files. books-30.htm for example has lines
+like
+
+46. Half Broke Horses - Jeannette Walls (Lori loan) 3/1/18
+
+The "property" in this case is 46. and the value of the property is title,
+author etc.
+]
+
+main [dprop]
+
+dprop [
+ char f(300),t(300),s(2000);int sar(99),i,si
+ printf "%cdprop - lrb - 6/7/18%c",10,10
+ printf "%cCurrent date and time : %s",10,cdate(f)
+ getprop "pps/version.prop","date = ",f,40,"..."
+ printf "%ctinyC build date : %s%c",10,f,10
+ printf "%cname of file to process (e.g. tbn.tc) : ",10;gs f
+ if fopen(f,"rb")==-1 abort
+ if (ceqn(f,"lrblib.tc",strlen(f))) [
+  strcat s,"dpfx dpf color pos posc hilo oo on off sak "
+  strcat s,"tolower toupper abort getprop "
+  strcat s,"help lrblibver cdate url split "
+  ]
+ else if (ceqn(f,"pps/library.tc",strlen(f))) [
+  strcat s,"getproperty printf putchar "
+  strcat s,"getchar chrdy sleep pft gs ps pl alpha num "
+  strcat s,"atoi pn gn ceqn strcat strcpy index move "
+  strcat s,"gc movebl countch scann readfile writefile "
+  strcat s,"fopen fputs fputc fgets fclose strlen random "
+  strcat s,"runlimit exit "
+  ]
+ else if (ceqn(f,"tbn.tc",strlen(f))) [
+  strcat s,"foo main bar dproplib "
+  ]
+ else [
+  i=1;char a(5)
+  while i<=100 [itoa i,a;strcat a,". ";strcat s,a;i=i+1]
+  ]
+ si=split sar,s," ";printf "%c",10;i=0
+ while i<si [
+  getproperty f,sar(i),t,300,"..."
+  if ceqn(t,"...",3) break
+  printf "%s %s%c",sar(i),t,10
+  i=i+1
+  ]
+ ]
+
