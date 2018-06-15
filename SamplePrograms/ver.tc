@@ -28,9 +28,9 @@ main char v(0) [
  getprop "pps/tc.prop","AUTHOR1",tcbuff,40,"..."
  printf "%s",tcbuff
  getprop "pps/tc.prop","AUTHOR2",tcbuff,40,"..."
- printf ", %s",tcbuff
+ printf ",%s",tcbuff
  getprop "pps/tc.prop","AUTHOR3",tcbuff,40,"..."
- printf ", %s",tcbuff
+ printf ",%s",tcbuff
  char mydate(16);cdate mydate
  printf "%cThe current date and time is %s",10,mydate,10
  int pi,pin;printf "%cEnter a number : ",10;pi=gn
@@ -64,4 +64,3 @@ main char v(0) [
   ]
  printf "%c",10
  ]
-
