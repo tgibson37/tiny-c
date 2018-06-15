@@ -21,7 +21,7 @@ foo char word(0) [
 // if verbose is 1 all words are displayed
  
 double char fi(0);int verbose [
- int i,j,k,n,count,worda(1000),sl,newlines;char t(12000),lfs(1)
+ int i,j,k,n,count,worda(2000),sl,newlines;char t(12000),lfs(1)
  lfs(0)=10
  k=readfile(fi,t,12000-1)
  pl ""
@@ -41,11 +41,10 @@ double char fi(0);int verbose [
  ]
 
 main [
- pl "double.tc - lrb - 5/29/18";pl ""
+ pl "double.tc - lrb - 6/12/18";pl ""
  lrblibver;pl ""
  char fi(40)
  pl "file to process? ";gs fi
  double fi,1
  pl ""
  ]
-
