@@ -28,6 +28,7 @@
 #define VV 4
 char verbose[8];
 int debug;
+int quiet;
 
 /* error tags */
 #define STATERR      1
@@ -69,8 +70,8 @@ struct stackentry {
 	union stuff value; 
 };
 /* the stack */
-struct stackentry stack[STACKLEN];
-int nxtstack;
+struct stackentry *stack;
+int nxtstack, stacklen;
 
 /* a fun entry */
 struct funentry { 
@@ -78,7 +79,7 @@ struct funentry {
 	char* prused;
 };
 /* fun table */
-struct funentry fun[FUNLEN];
+struct funentry *fun;
 struct funentry *curglbl, *curfun, *efun;
 
 struct var { 
@@ -86,8 +87,8 @@ struct var {
 	union stuff value; 
 };
 /* variable table */
-struct var vartab[VTABLEN];
-int nxtvar;
+struct var *vartab;
+int nxtvar, vtablen;
 
 /* most recent function entered */
 char fcnName[VLEN+1];
@@ -95,13 +96,14 @@ void saveName();
 
 /* program space */
 char* pr;
-char *lpr, *apr, *epr, *prused, *EPR;
+char *lpr, *apr, *endapp, *prused, *EPR;
 
 /* EPR is end of program SPACE. 
  *	pr starts with startSeed, then libs, then app, then values
  *	lpr is start of libraries
  *	apr is start of application program
- *	epr is end of ALL program text, start of value space
+ *	endapp is end of ALL program text, 
+ *	endapp+10 start of value space
  *	prused includes values, moves up/down with fcn entry/leaving
  *	EPR is pointer to last byte of pr array
  */

@@ -1,0 +1,15 @@
+foo char f(0) [printf "%cArg to foo: %s",10,f]
+
+main [
+	int x, y
+	x = 77
+	y = 88
+	printf "YES!!   %s  x=%d y=%d", "IT WORKS",x,y
+	printf "%cNow lets do a newline", 10
+	printf "%cNow lets be sure varargs is false. ", 10
+	printf "To do that force an args error."
+	pl"good call..."
+	foo "BAR, (what did you expect?)"
+	pl"bad call..."
+	foo 
+]

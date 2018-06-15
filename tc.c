@@ -166,7 +166,7 @@ int _lit(char *s){
  */
 int _skip(char l, char r) {
 	int counter = 1;
-	 while( counter>0 && cursor<epr ) {
+	 while( counter>0 && cursor<endapp ) {
 		if(*cursor==l)++counter;
 		if(*cursor==r)--counter;
 		++cursor;
@@ -222,7 +222,7 @@ char* _mustFind( char *from, char *upto, char c, int err ) {
 
 /* special find for end of string */
 char* _findEOS( char* x ) {
-	while( x<epr) {
+	while( x<endapp) {
 		if( *x==0 || *x==0x22 ) return x;
 		++x;
 	}
@@ -241,7 +241,7 @@ void _rem() {
 				||*cursor=='\t'
 			  )++cursor;
 		if( !(_lit(xcmnt)||_lit(xcmnt2)) ) return;
-		while( *cursor != 0x0a && *cursor != 0x0d && cursor<epr )
+		while( *cursor != 0x0a && *cursor != 0x0d && cursor<endapp )
 			++cursor;
 	}
 }
@@ -689,7 +689,7 @@ void _skipSt() {
 		return;
 	}
 	else {					/* simple statement, eol or semi ends */
-		while(++cursor<epr) {
+		while(++cursor<endapp) {
 			if( (*cursor==0x0d)||(*cursor=='\n')||(*cursor==';') )break;
 		}
 		++cursor;
@@ -854,10 +854,10 @@ void st() {
 	}
 }
 
-/*     Checks for balanced brackets, cursor to epr inclusive. 
+/*     Checks for balanced brackets, cursor to endapp inclusive. 
 void checkBrackets() {
    int count;
-   while(*(cursor++) != '[' && cursor<=epr) ;
+   while(*(cursor++) != '[' && cursor<=endapp) ;
    if(_skip('[',']'))eset(RBRCERR);
 }
  */
@@ -867,15 +867,15 @@ void checkBrackets() {
  */
 int checkBrackets(char* stop) {
 	int err;
-	char* save=epr;  /* _skip uses epr as limit */
-	epr=stop;
+	char* save=endapp;  /* _skip uses endapp as limit */
+	endapp=stop;
 	while(cursor<stop) {
 		while(*(cursor++) != '[' && cursor<stop) ;
 		if(cursor<stop) {
 			if(err = _skip('[',']'))return err;
 		}
 	}
-	epr=save;
+	endapp=save;
 	return 0;
 }
 
@@ -907,7 +907,7 @@ void dumpLine() {
 	fflush(stdout);
 	char* begin = cursor;
 	char* end = cursor;
-	while (*end!=0x0a && *end!=0x0d && end<epr){  /* find end of line */
+	while (*end!=0x0a && *end!=0x0d && end<endapp){  /* find end of line */
 		++end;
 	}
 	while(begin<end){
@@ -973,11 +973,11 @@ void tclink() {
 	cursor=pr;
 	if(checkBrackets(lpr))eset(RBRCERR+1000);
 	if(checkBrackets(apr))eset(RBRCERR+2000);
-	if(checkBrackets(epr))eset(RBRCERR+3000);
+	if(checkBrackets(endapp))eset(RBRCERR+3000);
 	if(error)whatHappened();
 	cursor=lpr;
 	newfun();
-	while(cursor<epr && !error){
+	while(cursor<endapp && !error){
 		char* lastcur = cursor;
 		_rem();
 		if(_lit(xlb)) _skip('[',']');
@@ -997,13 +997,13 @@ void tclink() {
 			union stuff kursor;
 			kursor.up = cursor = lname+1;
 			newvar('E',2,1,&kursor);
-			if(x=_mustFind(cursor, epr, '[',LBRCERR)) {
+			if(x=_mustFind(cursor, endapp, '[',LBRCERR)) {
 				cursor=x+1;
 				_skip('[',']');
 			}
 		}
 		else if(*cursor=='#'){
-			while(++cursor<epr) {
+			while(++cursor<endapp) {
 				if( (*cursor==0x0d)||(*cursor=='\n') )break;
 			}
 		}
@@ -1014,3 +1014,39 @@ void tclink() {
 	if(verbose[VL])dumpVarTab();
 }
 
+/*	allocate four major areas
+ */
+int allocStuff() {
+    int prlen=PRLEN, err;
+    err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
+    }
+    pr = malloc(prlen);
+    EPR=pr+prlen;
+
+    int funlen=FUNLEN,size;
+    err = iProperty("pps/tc.prop", "FUNLEN", &funlen, FUNLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running fun[%d]",FUNLEN);
+    }
+    size = sizeof(struct funentry);
+    fun = malloc(funlen*size);
+    efun=fun+funlen*size;
+
+    stacklen=STACKLEN;
+    err = iProperty("pps/tc.prop", "STACKLEN", &stacklen, STACKLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running stack[%d]",STACKLEN);
+    }
+    stack = malloc(stacklen*sizeof(struct stackentry));
+
+    vtablen=VTABLEN;
+    err = iProperty("pps/tc.prop", "VTABLEN", &vtablen, VTABLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running var[%d]",VTABLEN);
+    }
+    vartab = malloc(vtablen*sizeof(struct var));
+//fprintf(stderr,"~1035TC: sizes of pr %d fun %d stack %d var %d\n", 
+//    			prlen, funlen, stacklen, vtablen);
+}

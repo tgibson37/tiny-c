@@ -1,10 +1,11 @@
+~1035TC: sizes of pr 40000 fun 100 stack 100 var 300
 
 initial state before any tests
 
 ADDRESSES (hex)
-pr:     948010
-stack:  60dbe0
-vartab: 60e5e0
+pr:     13d4010
+stack:  13de2b0
+vartab: 13dec20
 ----
 STATE 0
 parsing: <--end of line--
@@ -12,43 +13,43 @@ Var Table: name class type len (type)value empty
 Stack (from top) class lvalue type stuff
 
 
-TEST 1  12:14
+TEST 1  10:23
 Var Table: name class type len (type)value
  var 0: foobaaaz 0 Int 1 pr[51]->0<-
  var 1: foobaaaz 0 Int 1 pr[55]->0<-
  var 2: foobaaaz 0 Int 1 pr[59]->0<-
  var 3: foobaaaz 0 Int 1 pr[63]->0<-
 
-TEST 2  12:14
+TEST 2  10:23
 Var Table: name class type len (type)value
  var 0: foob567x 0 Int 1 pr[21]->0<-
  var 1: foob5678 0 Int 1 pr[25]->0<-
  var 2: foob567 0 Int 1 pr[29]->0<-
  var 3: foob56 0 Int 1 pr[33]->0<-
 
-TEST 3  12:14
+TEST 3  10:23
 Var Table: name class type len (type)value
  var 0: foob 0 Int 1 pr[21]->0<-
  var 1: foob 0 Int 1 pr[25]->0<-
  var 2: foob 0 Int 1 pr[29]->0<-
  var 3: foob 0 Int 1 pr[33]->0<-
 
-TEST 4  12:14
+TEST 4  10:23
 Var Table: name class type len (type)value
  var 0: foo 0 Int 1 pr[21]->0<-
  var 1: foo 0 Int 1 pr[25]->0<-
  var 2: foo 0 Int 1 pr[29]->0<-
  var 3: foo 0 Int 1 pr[33]->0<-
 
-TEST 5  12:14
+TEST 5  10:23
 
-TEST 6  12:14
+TEST 6  10:23
 Var Table: name class type len (type)value
  var 0: symbol 0 Char 1 pr[21]->NULL<-
 
-TEST 7  12:14
+TEST 7  10:23
 
-TEST 8  12:14
+TEST 8  10:23
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[101]->NULL<-
  var 1: b 1 Char 10 pr[102]-><-
@@ -57,16 +58,16 @@ Var Table: name class type len (type)value
  var 4: e 1 Int 10 pr[117]
  var 5: f 0 Int 1 pr[157]->0<-
 
-TEST 9  12:14
+TEST 9  10:23
 
-TEST 10  12:14
+TEST 10  10:23
 
-TEST 11  12:14
+TEST 11  10:23
 Stack (from top) class lvalue type stuff
  stack entry at 0: 0 A 2 
 
 
-TEST 12  12:14
+TEST 12  10:23
 Stack (from top) class lvalue type stuff
  stack entry at 3: 1 A 2 
  stack entry at 2: 0 A 2 
@@ -81,20 +82,20 @@ Stack (from top) class lvalue type stuff
 Stack (from top) class lvalue type stuff
 
 
-TEST 13  12:14
+TEST 13  10:23
 
-TEST 14  12:14
+TEST 14  10:23
 
-TEST 15  12:14
+TEST 15  10:23
 
-TEST 16  12:14
+TEST 16  10:23
 Stack (from top) class lvalue type stuff
  stack entry at 2: 0 A 1 
  stack entry at 1: 1 A 1 
  stack entry at 0: 0 A 2 
 
 
-TEST 17  12:14
+TEST 17  10:23
 Var Table: name class type len (type)value
  var 0: foobaaaz 11 Char 13 pr[10]
  var 1: foob5678 21 Int 23 pr[23]
@@ -104,53 +105,53 @@ Var Table: name class type len (type)value
  var 1: foob5678 21 Int 23 pr[23]
  var 0: foobaaaz 11 Char 13 pr[10]
 
-TEST 18  12:14
+TEST 18  10:23
 
-TEST 19  12:14
+TEST 19  10:23
 
-TEST 20  12:14
+TEST 20  10:23
 
-TEST 21  12:14
+TEST 21  10:23
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->NULL<-
 Var Table: name class type len (type)value
  var 0: a 0 Char 1 pr[25]->A<-
 
-TEST 22  12:14
+TEST 22  10:23
 
-TEST 23  12:14
+TEST 23  10:23
 Var Table: name class type len (type)value
  var 0: x 0 Int 1 pr[18]->0<-
 Stack (from top) class lvalue type stuff
 
 
-TEST 24  12:14
+TEST 24  10:23
 Var Table: name class type len (type)value
  var 0: x 1 Int 3 pr[26]
 
-TEST 25  12:14
+TEST 25  10:23
 Stack (from top) class lvalue type stuff
 
 
-TEST 26  12:14
+TEST 26  10:23
 
-TEST 27  12:14
+TEST 27  10:23
 
-TEST 28  12:14
+TEST 28  10:23
 
-TEST 29  12:14
+TEST 29  10:23
 
-TEST 30  12:14
+TEST 30  10:23
 
-TEST 31  12:14
+TEST 31  10:23
 Var Table: name class type len (type)value
  var 0: i 0 Int 1 pr[136]->0<-
 
-TEST 32  12:14
+TEST 32  10:23
 Var Table: name class type len (type)value
  var 0: foo 69 Int 1 pr[6]
 
-TEST 33  12:14
+TEST 33  10:23
 Var Table: name class type len (type)value
  var 0: a 0 Int 1 pr[57]->0<-
  var 1: b 1 Int 1 pr[61]
@@ -159,7 +160,7 @@ Var Table: name class type len (type)value
  var 4: e 1 Char 1 pr[70]-><-
  var 5: f 0 Char 1 pr[71]->NULL<-
 
-TEST 34  12:14
+TEST 34  10:23
 fun table: fvar, lvar, prused
  fun entry at 0:  0 3 439
  fun entry at 1:  4 11 455
@@ -177,74 +178,76 @@ Var Table: name class type len (type)value
  var 10: main 69 Int 1 pr[414]
  var 11: foobar 69 Int 1 pr[426]
 
-TEST 35  12:14
+TEST 35  10:23
 
-TEST 36  12:14
+TEST 36  10:23
 
-TEST 37  12:14
+TEST 37  10:23
 
-TEST 38  12:14
+TEST 38  10:23
 
-TEST 39  12:14
+TEST 39  10:23
 
-TEST 40  12:14
+TEST 40  10:23
 
-TEST 41  12:14
+TEST 41  10:23
 
-TEST 42  12:14
+TEST 42  10:23
 
-TEST 43  12:14
+TEST 43  10:23
 
-TEST 44  12:14
+TEST 44  10:23
 
-TEST 45  12:14
+TEST 45  10:23
 
-TEST 46  12:14
+TEST 46  10:23
 
-TEST 47  12:14
+TEST 47  10:23
 
-TEST 48  12:14
+TEST 48  10:23
 
-TEST 49  12:14
+TEST 49  10:23
 
-TEST 50  12:14
+TEST 50  10:23
 
-TEST 51  12:14
+TEST 51  10:23
 
-TEST 52  12:14
+TEST 52  10:23
 
-TEST 53  12:14
+TEST 53  10:23
 
-TEST 54  12:14
+TEST 54  10:23
 
-TEST 55  12:14
+TEST 55  10:23
 
-TEST 56  12:14
+TEST 56  10:23
 
-TEST 57  12:14
+TEST 57  10:23
 
-TEST 58  12:14
+TEST 58  10:23
 
-TEST 59  12:14
+TEST 59  10:23
 
-TEST 60  12:14
+TEST 60  10:23
 
-TEST 61  12:14
+TEST 61  10:23
 
-TEST 62  12:14
+TEST 62  10:23
 
-TEST 63  12:14
+TEST 63  10:23
 
-TEST 64  12:14
+TEST 64  10:23
 
-TEST 65  12:14
+TEST 65  10:23
 
-TEST 66  12:14
+TEST 66  10:23
 
-TEST 67  12:14
+TEST 67  10:23
 
-TEST 68  12:14
+TEST 68  10:23
 
-TEST 69  12:14
+TEST 69  10:23
 
-TEST 70  12:14
+TEST 70  10:23
+
+TEST 71  10:23

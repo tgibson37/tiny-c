@@ -1,14 +1,14 @@
 #include lrblib.tc
 #include pps/library.tc
 
-// ver.tc - lrb - 6/1/18
+// ver.tc - lrb - 6/6/18
 
 // sample usage under Linux       ./tc ver.tc -r 'main "yes!!!!!"'
 // sample usage under Windows       tc ver.tc -r "main\"blah\""
 
 main char v(0) [
  char tcbuff(40)
- int DEBUG;DEBUG=1
+ int DEBUG;DEBUG=0
  printf "%cThe tinyC build date is ",10
  getprop "pps/version.prop","date =",tcbuff,40,"..."
  printf "%s",tcbuff
