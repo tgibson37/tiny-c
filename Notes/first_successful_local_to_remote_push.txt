@@ -1,0 +1,52 @@
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (pending)
+$ git add SamplePrograms/try.tc
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (pending)
+$ git status
+On branch pending
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+        new file:   SamplePrograms/try.tc
+
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (pending)
+$ git commit -m "added try.tc"
+[pending 800061a] added try.tc
+ 1 file changed, 5 insertions(+)
+ create mode 100644 SamplePrograms/try.tc
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (pending)
+$ git status
+On branch pending
+nothing to commit, working tree clean
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (pending)
+$ git checkout master
+Switched to branch 'master'
+Your branch is up to date with 'origin/master'.
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (master)
+$ git merge pending
+Updating 0eacacc..800061a
+Fast-forward
+ SamplePrograms/try.tc | 5 +++++
+ 1 file changed, 5 insertions(+)
+ create mode 100644 SamplePrograms/try.tc
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (master)
+$ git push origin master
+Username for 'https://github.com': tinyCtim
+Counting objects: 4, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (3/3), done.
+Writing objects: 100% (4/4), 357 bytes | 4.00 KiB/s, done.
+Total 4 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 2 local objects.
+To https://github.com/tinyCtim/tiny-c.git
+   0eacacc..800061a  master -> master
+
+Lee@Lee-PC MINGW32 /i/my-git-repo/tiny-c (master)
+$
+
