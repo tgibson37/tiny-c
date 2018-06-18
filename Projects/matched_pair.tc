@@ -1,0 +1,52 @@
+#include pps/library.tc
+#include lrblib.tc
+
+// matched_pair.tc - tct - 6/17-18/18
+
+int verbose
+
+givehelp char h(0) [
+ help h
+ ]
+
+mainv [
+ verbose=1
+ main
+ ]
+
+main [ // matched_pair
+ int obctr,cursor_offset,filelen,cursor,work,works
+ char buffer(5000),obracket,cbracket,obrstr(1),file(20)
+ obracket=91;cbracket=93;obrstr(0)=obracket
+ printf "%cmatched_pair.tc - tct - 6/17-18/18%c",10,10
+ printf "%cfile to read? ",10;gs file
+ givehelp "matched_pair"
+ printf "%c",10
+ filelen=readfile file,buffer,5000-1
+ if filelen<=0 [printf "%cerror on file",10;abort]
+ buffer(filelen)=0
+ while 1 [
+  cursor_offset=index(buffer+cursor,filelen-cursor,obrstr,1)
+  if cursor_offset==0 abort
+// back up to beg'g of line then print to end of line
+  work=cursor+cursor_offset-1
+  while ((buffer(work)!=10)*(work!=0)) work=work-1
+  works=work
+  work=cursor+cursor_offset-1
+  while buffer(work)!=10 work=work+1
+  work=work-1
+  pft buffer+works,buffer+work
+  printf "%c",10
+  obctr=1
+  cursor=cursor+cursor_offset
+  if verbose printf "%c%d ",10,obctr
+  while (obctr) [
+   cursor=cursor+1
+   if buffer(cursor)==obracket [obctr=obctr+1;if verbose printf "%d ",obctr]
+   if buffer(cursor)==cbracket [obctr=obctr-1;if verbose printf "%d ",obctr]
+   ]
+  if verbose printf "%c",10
+  ]
+ printf "%c",10
+ ]
+
