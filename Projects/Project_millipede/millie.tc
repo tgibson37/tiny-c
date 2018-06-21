@@ -1,0 +1,46 @@
+#include pps/library.tc
+#include lrblib.tc
+
+// millie.tc - tct - 6/20/18
+
+givehelp char h(0) [ help h ]
+
+main [
+ char buffer(1500),file(20),nls(1),foo(1500)
+ int tibs(40),ix,i,fl,fast,slow,fastl,slowl,pace,slf,v(0),tibi(40),spcnt
+ nls(0)=10
+ printf "%cmillie.tc - tct - 6/20/18%c",10,10
+ printf "%cfile? ",10;gs file
+ givehelp "millie"
+ fl=readfile file,buffer,1500
+ if fl<=0 [printf "%cerror on file",10;abort]
+ buffer(fl)=0
+ ix=index buffer,fl,"1,",2
+// replace nl's w/ commas
+ strcpy foo,buffer+ix-1
+ slf=strlen(foo)
+ while (ix=index(foo,slf,nls,1)) foo(ix-1)=','
+ spcnt=split tibs,foo,","
+ printf "%c%c%d legs were read.%c",10,10,spcnt/2,10
+ i=1
+ while i<spcnt [
+  num tibs(i),v
+  tibi(i/2)=v(0)
+  printf "%cmib %d accumulated tibs %d",10,i/2+1,v(0)
+  i=i+2
+  ]
+ printf "%c%cAverage pace: %d",10,10,tibi(spcnt/2-1)/(spcnt/2)
+ dpf tibi(spcnt/2-1)%(spcnt/2),spcnt/2,1
+ i=0
+ fast=99;slow=0
+ while i<spcnt/2-1 [
+  pace=tibi(i+1)-tibi(i)
+  if pace<fast [fast=pace;fastl=i+2]
+  if pace>slow [slow=pace;slowl=i+2]
+  i=i+1
+  ]
+ printf "%cQuickest leg was %d. Pace was %d tibs/mib.",10,fastl,fast
+ printf "%cSlowest leg was %d. Pace was %d tibs/mib.",10,slowl,slow
+ printf "%c",10
+ ]
+
