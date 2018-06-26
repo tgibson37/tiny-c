@@ -11,32 +11,46 @@ Programming Exercise for June '18
 
 Write a program in C that reads a file like
 
-foo args [ text
-st
-st [
-]
-]
+// mpfile.txt - 6/22/18 - tct
 
-bar args [ text
-st [
-]
-]
+st [MC 314,14;pl ""]
 
-baz args [ text
-st [
-st
-st [ ]
-st
-]
-]
+foo char args [ // text f
+ int st1
+ if st1 [
+  ]
+ ]
+
+bar int args1 [ // text b
+ int v1;v1=71
+ if v1 [
+  ]
+ ]
+
+baz int args [ // text z
+ while args > 0 [
+  args=args-5
+  st
+  if args==1 [MC 217,14;pl ""]
+  st
+  ]
+ ]
+
+main [
+ printf "%cmpfile.txt%c%c",10,10,10
+ baz 6
+ ]
 
 and outputs
 
-foo args [ text
-bar args [ text
-baz args [ text
+foo args [ text f
+bar args [ text b
+baz args [ text z
+main [
+
+<a href=http://primepuzzle.com/lee-bradley/Projects/Project_matched_pair/matched-pair.html><img border=5 src=http://primepuzzle.com/lee-bradley/Projects/Project_matched_pair/matched-pair.jpg></a>
+
+<a style=text-decoration:none href=http://primepuzzle.com/lee-bradley/Projects/Project_matched_pair/matched_pair.c>.</a>
 
 </pre>
-
-<img src=http://primepuzzle.com/lee-bradley/Projects/matched-pair.jpg>
 
