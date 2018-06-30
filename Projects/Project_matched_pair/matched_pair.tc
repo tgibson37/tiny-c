@@ -1,7 +1,7 @@
 #include pps/library.tc
 #include lrblib.tc
 
-// matched_pair.tc - tct - 6/21/18
+// matched_pair.tc - tct - 6/29/18
 
 int verbose
 
@@ -10,10 +10,26 @@ givehelp char h(0) [ help h ]
 mainv [ verbose=1;main ]
 
 main [
+
+ char tcbuff(10),yrs(4),mns(2),dys(2);int yr,mn,dy,v(0)
+ 
+ getprop "pps/version.prop","date =",tcbuff,10,"..."
+ 
+ strcpy yrs,tcbuff;yrs(4)=0;strcpy mns,tcbuff+5;mns(2)=0
+ strcpy dys,tcbuff+8;dys(2)=0
+ 
+ atoi yrs,v;yr=v(0);atoi mns,v;mn=v(0);atoi dys,v;dy=v(0)
+
+ if (yr>=2018)*(mn>=6)*(dy>=29) []
+ else [printf "a later version of the interpreter is needed";abort]
+
  int obctr,cursor_offset,filelen,cursor,work,works
  char buffer(6000),obracket,cbracket,obrstr(1),file(20)
+ int ob_count,cb_count
+
  obracket=91;cbracket=93;obrstr(0)=obracket
- printf "%cmatched_pair.tc - tct - 6/21/18%c",10,10
+
+ printf "%cmatched_pair.tc - tct - 6/29/18%c",10,10
  printf "%cfile to read? ",10;gs file
  givehelp "matched_pair"
  printf "%c",10
@@ -21,7 +37,16 @@ main [
  if filelen<=0 [printf "%cerror on file",10;abort]
  if filelen>6000-1 [printf "%cfile size too large",10;abort]
  buffer(filelen)=0
+
+ ob_count=countch buffer,buffer+filelen,obracket
+ cb_count=countch buffer,buffer+filelen,cbracket
+ 
+ if ob_count!=cb_count [open and closed bracket counts differ;abort]
+ 
+ printf "%c%d open and %d closed brackets found%c",10,ob_count,cb_count,10
+ 
  while 1 [
+
   cursor_offset=index(buffer+cursor,filelen-cursor,obrstr,1)
   if cursor_offset==0 abort
 // back up to beg'g of line then print to end of line
@@ -32,17 +57,25 @@ main [
   while buffer(work)!=10 work=work+1
   work=work-1
   pft buffer+works,buffer+work
+
   printf "%c",10
   obctr=1
   cursor=cursor+cursor_offset
   if verbose printf "%c%d ",10,obctr
+
   while (obctr) [
+
    cursor=cursor+1
    if buffer(cursor)==obracket [obctr=obctr+1;if verbose printf "%d ",obctr]
    if buffer(cursor)==cbracket [obctr=obctr-1;if verbose printf "%d ",obctr]
+
    ]
+
   if verbose printf "%c",10
+  
   ]
+  
  printf "%c",10
+
  ]
 
