@@ -181,6 +181,17 @@ int MmvBl(int nargs, int *args)
 
 }
 
+int Mcountch(int nargs, int *args) // lrb
+{
+	char *from, *to; int ch;
+	char *c;
+    from=(char*)args[0];to=(char*)args[1];ch=args[2];
+	int i;
+	for (i=0,c = from; c <= to; c++)
+		i += (*c == ch);
+	return i;
+}
+
 /* test if keyboard char ready, return copy if so, else 0 */
 int Mchrdy()
 {
@@ -297,7 +308,7 @@ int Mcdate(int nargs, int *argsv) {
 /* first in this list is MC 1 */
 McList origList[] = 
 	{ &Mpc, &Mgch, &bar, &bar, &bar
-	, &bar, &MmvBl, &bar, &Mscann, &bar
+	, &bar, &MmvBl, &Mcountch, &Mscann, &bar // lrb
 	, &bar, &Mchrdy, &Mpft, &Mpn, &bar
 };
 
@@ -366,3 +377,4 @@ void machinecall( int nargs ) {
 	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }
+
