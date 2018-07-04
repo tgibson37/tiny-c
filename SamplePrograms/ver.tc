@@ -1,15 +1,14 @@
 #include lrblib.tc
 #include pps/library.tc
 
-// ver.tc - lrb - 6/6/18
+// ver.tc - lrb - 7/2/18
 
 // sample usage under Linux       ./tc ver.tc -r 'main "yes!!!!!"'
 // sample usage under Windows       tc ver.tc -r "main\"blah\""
 
 main char v(0) [
  char tcbuff(40)
- int DEBUG;DEBUG=0
- printf "%cThe tinyC build date is ",10
+ printf "%cThe tiny-C build date is ",10
  getprop "pps/version.prop","date =",tcbuff,40,"..."
  printf "%s",tcbuff
  printf "%cThe operating system is ",10
@@ -19,22 +18,17 @@ main char v(0) [
  printf "%cThe program length is ",10
  getprop "pps/tc.prop","PRLEN",tcbuff,40,"..."
  printf "%s",tcbuff
- if DEBUG [
- putprop "pps/tc.prop","AUTHOR1","    T A Gibson"
- putprop "pps/tc.prop","AUTHOR2","    Ed Davis"
- putprop "pps/tc.prop","AUTHOR3","    Lee R Bradley"
- ]
- printf "%ctinyC authors ",10
+ printf "%ctiny-C authors ",10
  getprop "pps/tc.prop","AUTHOR1",tcbuff,40,"..."
  printf "%s",tcbuff
  getprop "pps/tc.prop","AUTHOR2",tcbuff,40,"..."
- printf ",%s",tcbuff
+ printf ", %s",tcbuff
  getprop "pps/tc.prop","AUTHOR3",tcbuff,40,"..."
- printf ",%s",tcbuff
+ printf ", %s",tcbuff
  char mydate(16);cdate mydate
  printf "%cThe current date and time is %s",10,mydate,10
  int pi,pin;printf "%cEnter a number : ",10;pi=gn
- char table(30);strcpy table,"tinyC rocks!"
+ char table(30);strcpy table,"tiny-C rocks!"
  printf "%cYour entry and a message for the day follow.%c%c",10,10,10
  printf "%15d",pi
  printf "%c%15s%c",10,table,10
@@ -64,3 +58,4 @@ main char v(0) [
   ]
  printf "%c",10
  ]
+
