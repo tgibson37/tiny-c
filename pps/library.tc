@@ -1,12 +1,9 @@
-/******* tiny-c library functions, 2017 
+/******* tiny-c library functions, 2017
 
 /* From property file look up name and return value in buff.
 /* blen is the length of buff. Default is returned if file has
 /* no entry for name.
-getproperty char file(0), name(0), buff(0);
-	 int blen; 
-	 char default(0)
-[
+getproperty char file(0), name(0), buff(0); int blen; char default(0) [
 	return MC file,name,buff,blen,default,116
 ]
 
@@ -36,30 +33,32 @@ sleep int n [
 ]
 
 /* put a block of chars from f to l inclusive
-pft char from(0),to(0)[
+pft char from(0),to(0) [
 	MC from,to,13
 ]
 
-/* Read a line from the terminal into buffer as a string
-gs char b(0) [
-	int x
-	x=0
-	while( (b(x)=MC(2))!=10 ) [
-		if(b(x)==24) [x=0; pl("")]
-		else if(b(x)==127) [if(x>0)x=x-1]
-		else x=x+1
-	]
-	b(x)=0
-	return x
+// Read a line from the terminal into buffer as a string
+gs char q(0) [ // mod's by Ed Davis
+ int x
+ x=0
+ while( (q(x)=MC(2))!=10 ) [
+        if (q(x)==13) break
+  if(q(x)==24) [x=0; pl("")]
+  else if(q(x)==127) [if(x>0)x=x-1]
+  else x=x+1
+ ]
+ q(x)=0
+    pl ""
+ return x
 ]
 
 /* put a null terminated string
-ps char b(0)[
+ps char b(0) [
 	MC "%s", b, 101
 ]
 
 /* put a null terminated string as a new line
-pl char b(0)[
+pl char b(0) [
 	MC "%c%s", 10, b, 101
 ]
 
@@ -115,10 +114,9 @@ gn [
 	]
 ]
 
-/* compare two strings for equality, returning true if equal, else false. 
+/* compare two strings for equality, returning true if equal, else false.
 /* Only the first n characters are considered.
-ceqn char a(0), b(0); int n
-[
+ceqn char a(0), b(0); int n [
 	int k
 	k = -1
 	while((k=k+1)<n)[
@@ -183,7 +181,7 @@ scann char from(0), to(0), c; int n(0) [
 	return MC(from, to, c, n, 9)
 ]
 
-/* Read file name into buff of length len returning number of bytes read. 
+/* Read file name into buff of length len returning number of bytes read.
 readfile char name(0), buff(0); int len [
 	return MC name, buff, len, 103
 ]
@@ -202,7 +200,7 @@ fopen char name(0), mode(0) [
 	return unit;
 ]
 
-fputs char str(0); int unit[
+fputs char str(0); int unit [
 	int code;
 	code=MC str,unit,112
 	if(code<0)[
@@ -211,7 +209,7 @@ fputs char str(0); int unit[
 	return code;
 ]
 
-fputc char c; int unit[
+fputc char c; int unit [
 	int code;
 	code=MC c,unit,113
 	if(code<0)[
@@ -220,7 +218,7 @@ fputc char c; int unit[
 	return code;
 ]
 
-fgets char buff(0); int len, unit[
+fgets char buff(0); int len, unit [
 	int code;
 	code=MC buff,len,unit,114
 	if(code<0)[
@@ -228,7 +226,7 @@ fgets char buff(0); int len, unit[
 	]
 	return code;
 ]
-fclose int unit[
+fclose int unit [
 	int code;
 	code=MC unit,115
 	if(code<0)[
@@ -252,7 +250,7 @@ random int little,big [
 ]
 
 //to stop infinite loops, exits after limit calls
-runlimit int limit[
+runlimit int limit [
 	runhits=runhits+1
 	if(running==0)running=runhits=1;
 	else if(runhits>limit)exit
@@ -260,7 +258,14 @@ runlimit int limit[
 int runhits, running
 
 // soft exit
-exit [ MC 108 ] 
+exit [ MC 108 ]
+
+// quiet exit
+abort [MC 109]
+
+cdate char buff(0) [
+	return MC buff,110
+]
 
 /* test system entry, not used by tc */
 _MAIN [
@@ -269,3 +274,4 @@ _MAIN [
 	main();
 	pl "----tc system level, back from main"
 ]
+

@@ -1,0 +1,19 @@
+
+Billy
+
+leg (mibs covered),time (tibs on watch at end of leg)
+
+1,10
+2,22
+3,36
+4,51
+5,64
+6,79
+7,93
+8,98
+9,112
+10,125
+11,146
+12,162
+13,177
+
