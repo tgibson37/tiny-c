@@ -1,10 +1,46 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <libgen.h>
 #include "tc.h"
 
-int nxtUnit=0;
+#if defined(_WIN32)
+#else
+#include <limits.h>
+int getInstallPath(char* buf, size_t len2){
+	int len = readlink("/proc/self/exe", buf, len2 - 1);
+	if(len <0) return -2;
+	if(len >= (len2-1)) return -3;
+	buf[len]=0;
+	return len;
+}
 
+/*	sets global ppsPath to <installPath>/pps. Returns 0 on success,
+ *	else negative error code.
+ */
+int setPPSpath() {
+	if(ppsPath)return 0;  // set by compiler
+	char buf[PATH_MAX], buf2[PATH_MAX];
+	int psize = getInstallPath(buf,PATH_MAX);
+	if(psize<0)return psize;
+	strcpy(buf2, dirname(buf));
+	strcat(buf2,"/pps");
+	ppsPath = malloc(strlen(buf2)+1);  //Keeper, never freed.
+	strcpy(ppsPath,buf2);
+	return 0;
+}
+
+/*	
+int main(char* argv[], int argc) {
+	int err = setPPSpath();
+	if(err)fprintf(stderr,"setPPSpath failed %d\n",err);
+	else printf("%s\n", ppsPath);
+}
+ */
+
+#endif
+
+int nxtUnit=0;
 /* read the named file into buffer pr. Return amount read on success,
 	or zero on 'no such file', or -1 on read error. */
 int fileRead(char* name, char* buff, int bufflen){
@@ -62,7 +98,7 @@ int tcFopen(char* name, char* mode){
 int tcFputs(char* str, int unit) {
 	if(unit<0 + unit>MAX_UNIT)return -8;
 	if(fileUnit[unit]==NULL)return -9;
- 	if( fputs(str,fileUnit[unit]) != NULL){
+ 	if( fputs(str,fileUnit[unit]) != 0){
  		return strlen(str);
  	}
  	return -2;
@@ -73,7 +109,7 @@ int tcFputs(char* str, int unit) {
 int tcFputc(char c, int unit) {
 	if(unit<0 + unit>MAX_UNIT)return -8;
 	if(fileUnit[unit]==NULL)return -9;
- 	if( fputc(c,fileUnit[unit]) != NULL){
+ 	if( fputc(c,fileUnit[unit]) != 0){
  		return 1;
  	}
  	return -3;
@@ -126,7 +162,8 @@ int iProperty(char* file, char* name, int *val, int _default) {
 
 
 /*	set *val to default unless optionally overridden in property file.
- *	Syntax each line: name whiteSpace value newline.
+ *	Syntax each line: name whiteSpace value newline. return -1 for no file,
+ *	0 for default being returned, 1 for non-default. 
  */
 int sProperty(char* file, char* name, char* val, int vlen, char* _default) {
 	char buff[256];
@@ -153,5 +190,6 @@ int sProperty(char* file, char* name, char* val, int vlen, char* _default) {
 		}
 	}
 	fclose(fp);
-	return next;
+	return next!=NULL;
 }
+
