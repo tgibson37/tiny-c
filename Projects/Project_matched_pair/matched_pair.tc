@@ -28,7 +28,7 @@ main [
 
  // see if interpreter is recent enough
  char tcbuff(10),yrs(4),mns(2),dys(2);int yr,mn,dy,v(0)
- getprop "pps/version.prop","date =",tcbuff,10,"..."
+ getproperty "pps/version.prop","date =",tcbuff,10,"..."
  strcpy yrs,tcbuff;yrs(4)=0;strcpy mns,tcbuff+5;mns(2)=0
  strcpy dys,tcbuff+8;dys(2)=0
  atoi yrs,v;yr=v(0);atoi mns,v;mn=v(0);atoi dys,v;dy=v(0)

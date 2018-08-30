@@ -41,7 +41,7 @@ int Mscann(int nargs, int *args) {
 	return offset;
 }
 
-/*	return true if c exists in choices, false otherwise. AND the true 
+/*	return true if c exists in choices, false otherwise. AND the true
  *	value is the integer index plus one of c in choices
  */
 int charIn(char c, char *choices ){
@@ -130,12 +130,12 @@ int Mgch(int nargs, int *args)  // mod's lrb
     eset(KILL);
     }
    }
-  }	
+  }
  if (x == CTRLC) exit(0);
  return x;
 }
 #else
-/* MC1 (Mgch) has input an ESC key (via getch_), process that key */ 
+/* MC1 (Mgch) has input an ESC key (via getch_), process that key */
 char escKey() {
 	if( kbhit()=='[' ){
 		getch_(0);   /* toss the [ */
@@ -170,7 +170,7 @@ int bar(int nargs, int *args)
 }
 
 /* args: a,b,dist. Block is [a..b] inclusive, distance is [+|-]dist */
-int MmvBl(int nargs, int *args) 
+int MmvBl(int nargs, int *args)
 {
 	char *a, *b; int dist;
 	a=(char*)args[0]; b=(char*)args[1]; dist=args[2];
@@ -291,7 +291,7 @@ int Mgetprop(int nargs, int *args) {
 	return sProperty(file,name,buff,bufflen,defawlt);
 }
 
-// load get current date and time into supplied buff
+// load current date and time into supplied buff
 int Mcdate(int nargs, int *argsv) {
 	if(nargs<1){ eset(MCERR); return -1; }
 	char *buff = (char*)argsv[0];
@@ -299,21 +299,22 @@ int Mcdate(int nargs, int *argsv) {
 	struct tm *info;
 	time( &rawtime );
 	info = localtime( &rawtime );
-	sprintf(buff,"%04d-%02d-%02d %02d:%02d", \
+	sprintf(buff,"%04d-%02d-%02d %02d:%02d:%02d", \
 		info->tm_year-100+2000,info->tm_mon+1, \
-		info->tm_mday,info->tm_hour,info->tm_min);
+		info->tm_mday,info->tm_hour,info->tm_min, \
+		info->tm_sec);
 	return buff;
 }
 
 /* first in this list is MC 1 */
-McList origList[] = 
+McList origList[] =
 	{ &Mpc, &Mgch, &bar, &bar, &bar
 	, &bar, &MmvBl, &Mcountch, &Mscann, &bar // lrb
 	, &bar, &Mchrdy, &Mpft, &Mpn, &bar
 };
 
 /* first in this list is MC 101 */
-McList newList[] = 
+McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
@@ -321,7 +322,7 @@ McList newList[] =
 };
 
 /* first in this list is MC 201 */
-McList userList[] = 
+McList userList[] =
 	{ &bar, &bar, &bar, &bar, &bar  // lrb
 	, &bar, &bar, &bar, &bar, &bar
 };
@@ -377,4 +378,3 @@ void machinecall( int nargs ) {
 	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
 }
-
