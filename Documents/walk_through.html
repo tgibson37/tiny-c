@@ -1,0 +1,2034 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Code walk through: expression parser</title>
+<meta name="generator" content="Bluefish 2.2.5" >
+<meta name="author" content="Tom" >
+<meta name="date" content="2018-09-25T12:42:08-0400" >
+<meta name="copyright" content="Thomas A Gibson">
+<meta name="keywords" content="">
+<meta name="description" content="Walkthrough of tiny-c expression parser">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+<meta http-equiv="content-style-type" content="text/css">
+<meta http-equiv="expires" content="0">
+
+<style type="text/css">
+p.title{
+	font-weight: bold;
+	text-align: center;
+	margin-top: 0ex;
+	font-size: 200%
+}
+
+p.toc{	
+	font-weight: bold;
+	margin-left: 5em;
+	margin-bottom: 2%
+}
+p.toc-item{	
+	font-size: 90%;
+	margin-left: 3em;
+	margin-bottom: 2%
+}
+p.h1{
+	font-size: 150%;
+	font-weight: bold;
+}
+p.h2{
+	font-size: 120%;
+	font-weight: bold;
+}
+
+</style>
+
+</head>
+<body>
+<p class="title">Tiny-C Interpreter Internals</class>
+</p>
+
+<p class="toc">Table of Contents
+</p><p class="toc-item"><a href="#intro">Introduction</a>
+</p><p class="toc-item"><a href="#frequ">Frequently encountered code</a>
+</p><p class="toc-item"><a href="#token">Token matching</a>
+</p><p class="toc-item"><a href="#expre">The expression stack</a>
+</p><p class="toc-item"><a href="#varia">The variable table</a>
+</p><p class="toc-item"><a href="#typel">Typeless data access</a>
+</p><p class="toc-item"><a href="#funct">Function calls</a>
+</p><p class="toc-item"><a href="#gramm">Expression grammar</a>
+</p><p class="toc-item"><a href="#parsi">Expression parsing</a>
+</p><p class="toc-item"><a href="#fullw">A full walkthrough of one expression</a>
+</p><p class="toc-item"><a href="#postl">Postlogue</a>
+</p><p class="toc-item"><a href="#appen">Appendix - Listing of tc.c</a>
+<a name="intro"></a>
+</p><p class="h1">Introduction
+</p><p>
+I have no intention to write a walkthrough of the entire 11 files of C source code for this project, but I thought it would be fun and perhaps useful to some students to walk through the heart of the system, the parser and actions of the expression evaluator. Bear in mind this code is a C clone of 8080 assembly code written in 1977. One would probably change the architecture several ways on modern computers. We visit that issue latter.
+</p><p>
+Several issues before we dive in:
+</p>
+<ul>
+<li>
+I make extensive use of what I call the "twiddle notation." Example: tc.c ~94 means file tc.c, line 94.
+</li><li>
+In the html version of this writing the twiddles into the file tc.c are links, and the file tc.c is an appendix. All one document. Click the link to see the code, and click the browsers "back" arrow to return to the walkthrough text.
+</li><li>
+The link is typically to a few lines above the referenced line to show some context.
+</li><li>
+There are twiddles to other files, stack.c and tc.h for example. These are not 
+links, and the text explains their role usually sufficiently to read on. But the 
+twiddles are there for those who wish to dig a bit deeper.
+</li><li>
+The appendix has only the one file, tc.c, with line numbers. Future work on any 
+program makes line numbers drift, so capturing this walkthrough's line numbers is 
+done in the appendix for referential integrity.
+</li><li>
+The full source is available: https://github.com/tgibson37/tiny-c. 
+It is GPL'd, so download it and play with the source.
+</li>
+</ul>
+<p>
+We begin...
+<!--Frequently encountered code-->
+<a name="frequ"></a>
+</p><p class="h1">Frequently encountered code
+</p><p class="h2">cursor, stcurs
+</p><p>There are two cursors.
+</p>
+<pre>
+	char* cursor;
+	char* stcurs;
+</pre>
+<p>The important one is cursor. All parsing functions examine the next significant
+ text from the cursor on. And when they get a match, they advance cursor beyond 
+ the matched text. Stcurs points to the beginning of the current statement. 
+
+</p><p class="h2">lit, the x words
+
+</p>
+
+<pre>
+	int _lit(char *s)
+</pre>
+
+<p>Lit matches an exact string, returning true on match, else false. It advances 
+the cursor over spaces and tabs, but does not go to the next line. If the cursor 
+then points to an exact copy of the string s, it advances the cursor beyond that 
+copy and returns true. Otherwise it returns false. This is used to match 
+operators, punctuation, and keywords. Almost always it is embedded in an if 
+statement:
+
+</p>
+
+<pre>
+	if(_lit(xwhile)) {...
+</pre>
+
+<p>The exception is optional punctuation where it matters not if the match was 
+true or false. The word xwhile is defined in tc.c <a href="#16">~16</a> as “while”. All keywords, 
+punctuations, and operators are defined in similar x words. The list starts at 
+<a href="#12">~12</a>. So
+
+</p>
+
+<pre>
+	if(_lit(xsemi)) {…
+</pre>
+
+<p>is testing for a semicolon.
+</p><p>It is not a error for a _lit call to return false. As we will see parsing
+ is mostly code asking, “are you this?, no, well are you that?,...”. Look for 
+ chains of else-if's doing just such a search.
+
+</p><p class="h2">eset, error
+</p><p>But errors do occur. When a parsing error occurs, perhaps an undeclared or 
+misspelled variable, or weird syntax the function eset sets the variable error to 
+a code. 
+
+</p>
+
+<pre>
+	eset(STATERR);
+</pre>
+
+<p>The codes are defined in tc.h ~33. The variable error is frequently tested, for
+ example at the beginning of each statement. Eventually the interpreter grinds to 
+ a halt, and issues a message.
+
+</p><p class="h2">rem
+
+</p>
+
+<pre>
+	void _rem() 
+</pre>
+
+<p>_rem skips whitespace and remarks. It keeps skipping until the cursor is on 
+significant program text. _rem is the only way the cursor advances to the next 
+line. 
+
+</p><p class="h2">verbose
+
+</p><p>The array verbose has switches that turn on debugging reports. Ignore
+an if(verbose[XX])… you encounter. Or use them to see the parsing in action.
+The list of XX's to plug in are documented in “the new tiny-c.doc” debug
+section, the v command. You can turn individual reports on and off.
+
+<!--Token matching-->
+<a name="token"></a>
+</p><p class="h1">Token matching
+</p><p>A program is a string of "tokens."  For tiny-c the tokens are:
+<ul>
+<li>symbols: keywords, function, variable names
+</li><li>	constants: numbers, character, strings
+</li><li>	punctuation: operators, structure definers ([], ())
+</li><li>	end-of-line (including a remark if present)
+</li>
+
+</ul><p>Those tokens are the object of the "Are you this?" logic. The function
+ _lit is used to ask this question for keywords and punctuation, _rem does
+end-of-line. We defined those in the Frequent..code section above.  Constants
+are handled by _konst, and functions and variable names, collectively called 
+symbols by _symName.
+
+</p><p class="h2">symName	
+</p><p>Consider this code with the cursor at or just before the x:
+</p>
+
+<pre>
+	         x = 1
+	cursor--^
+</pre>
+
+<p>As the parser grinds away it eventually asks, "Are you a symbol?" 
+An example is <a href="#253">~253</a> in tc.c:
+</p>
+
+<pre>
+	if( !_symName() ) {    /*defines fname,lname. True is match.*/
+</pre>
+
+<p>_symname() examines the next significant text after the cursor, but on the 
+same line. If it is a symbol it defines two global char* pointers to the first
+and last characters of the symbol, fname and lname, and returns the length of
+the symbol, which also serves as a TRUE. If it is not a symbol it returns 0,
+FALSE. In either case the cursor is left at the first significant
+non-whitespace character. Here is the code, tc.c <a href="#181">~181</a>:
+
+<pre>
+	0181	int _symName() {
+	0182		char* temp;
+	0183		while( *cursor == ' ' || *cursor == '\t' ) ++cursor;
+	0184		temp=cursor;
+	0185		if( isalpha(*temp) || *temp=='_') {
+	0186			fname = temp;
+	0187		}
+	0188		else return 0;  /* not a symbol */
+	0189		while( isalnum(*temp) || *temp=='_'){
+	0190			++temp; 
+	0191		}
+	0192		lname = temp-1;
+	0193		if(verbose[VP]){
+	0194			fprintf(stderr,"\nparsed ");
+	0195			dumpft(fname,lname);
+	0196		}
+	0197		return lname-fname+1;  /* good, fname and lname defined */
+	0198	}
+</pre>
+
+<p>At <a href="#183">~183</a> the cursor is advanced over whitespace. At <a href="#185">~185</a> the first character 
+is tested for alphabetic or underscore. If true this is a symbol and fname 
+is defined. Otherwise it is not a symbol. The code at <a href="#189">~189</a>..192 defines lname. 
+And at <a href="#197">~197</a> the length is returned.
+</p><p>Another part of the pattern is changing state. _symname does a trivial 
+state change, the cursor over whitespace. Often when the answer is YES the 
+state change is more significant.
+
+</p><p class="h2">konst
+</p><p>Highlights of the code in tc.c:
+
+</p>
+
+<pre>
+	0411	Type _konst() {
+	0412		char* x;
+	0413		while(*cursor==' ')++cursor;
+	0414		char c = *cursor;
+	0415		if( c=='+' || c=='-' || (c>='0'&amp;&amp;c&le;'9') ) {
+				...
+	0425			return Int;
+	0427		} else if(_lit("\"")) {
+	0428			fname=cursor;
+				...
+	0440			return CharStar;
+	0442		} else if(_lit("\'")) {
+				...
+	0454			return Char;
+	0456		} else return Err;  /* no match, Err==0 */
+	0457	}
+</pre>
+
+<p>And in tc.h is:
+
+</p>
+
+<pre>
+	typedef enum type {Err,Char,Int,CharStar} Type;
+</pre>
+
+<p>The ellipses have code that finds and sets lname and advances the 
+cursor, different in detail, but similar to code in _symname. From the 
+code shown we see that_konst() not only sets fname and lname, it returns 
+the Type, defined in the typedef. And Err is 0, i.e. FALSE, so it 
+serves as a boolean: "Are you a constant?" 
+</p><p>
+Type Err by the way is a misnomer. It is not an error. Rather it an answer "NO" to the question: "Are you a constant?" 
+
+<!--The expression stack-->
+<a name="expre"></a>
+</p><p class="h1">The expression stack
+</p><p>tiny-c's stack holds not just the datum but also information about 
+the datum. So what is pushed is a struct:
+</p>
+
+<pre>
+	/* a stack entry */
+	struct stackentry { 
+		int class; int lvalue; Type type; 
+		union stuff value; 
+	};
+</pre>
+
+<p>class is an integer, 0 for actual datum, or 1 for pointer reference to 
+the datum. If we ever implement pointers to pointers (2 and higher dimension 
+arrays) larger values would happen, it is conceptually the distance from 
+the pointer to the datum..
+</p><p>lvalue is true if the data is a valid lvalue, a reference to the 
+value's storage, false otherwise. Thus function _eq (tc.c <a href="#57">~57</a>) which affects 
+an assignment has the address it needs to do so. Normally data is stored in 
+the array pr (tc.h ~98) which also has all the code being interpreted. After 
+all the code, libraries and application, are loaded into pr (the program 
+array) the rest of pr is data values.
+</p><p>How an array name is parsed is interesting. It is both a class 1, and 
+an lvalue. Its value can be changed by a simple assignment. For example:
+
+</p>
+
+<pre>
+	char buff(100), bp(0); bp = buff;   …;  bp = bp+1;
+</pre>
+
+<p>declares a buff and a “pointer” bp. It is a pointer ONLY because of the 
+way it is used in subsequent code, first to set its value to the same as 
+buff's, second to increment that pointer. The value of bp is in vartab. 
+When bp is parsed it goes into the stack with stuff.value.up pointing into 
+vartab, not pr.
+</p><p>The type is an enum, tc.h ~65:
+
+</p>
+
+<pre>
+	typedef enum type {Err,Char,Int,CharStar} Type;
+</pre>
+
+<p>The union stuff has the value, tc.h ~63:
+
+</p>
+
+<pre>
+	union stuff { char uc; int ui; void* up; };
+</pre>
+
+<p>If class is 1 or if lvalue is true the value is referenced via stuff.up 
+which points to the value. Some values are in the variable table, vartab, 
+and some in program space, pr, as described above. Hence stuff.up must be 
+a void*, i.e. typeless. More on typeless coming up.
+tiny-c's stack is declared in tc.h ~72:
+
+</p>
+
+<pre>
+	/* the stack */
+	struct stackentry *stack;
+	int nxtstack, stacklen;
+</pre>
+
+<p>nxtstack starts out 0 and is incremented by each push, and decremented by 
+pops. stacklen is the size.
+</p><p>The stack code is in stack.c. It is short and reasonably readable, 
+so an actual walkthrough is not needed.
+
+<!--The variable table-->
+<a name="varia"></a>
+</p><p class="h1">The variable table
+</p><p>The file var.c defines actions on the variable table. All symbols, 
+both variables and functions, are placed in this table when they are 
+declared. The table is a stack of frames. Frame 0 has all the globals in 
+all the libraries. Frame 1 has all the globals for the application. Frames 
+2 and up have locals. Opening a new frame is done by newfun, var.c ~6, 
+closing by fundone, ~24. tc.h ~76..91 define the arrays used for defining 
+frames (fun) and the frames themselves (vartab), plus various pointers 
+into them. The arrays are malloc'd, hence they are defined in tc.h as 
+pointers, ~82 and ~90.
+</p><p>Read newfun and fundone, they are both straightforward to the 
+push/pop task as functions are entered, or returned. But vartab needs 
+a bit of explanation.
+</p><p>At tc.h ~85 is the declaration of an entry in this table:
+
+</p>
+
+<pre>
+	struct var { 
+		char name[VLEN+1]; int class; Type type; int len; int brkpt;
+		union stuff value; 
+	};
+</pre>
+
+<p>When a function or variable is declared newvar (var.c ~76) adds a struct var
+describing that variable into the current frame: name, class, type, length. 
+And brkpt (used only by the debugger) is zero. Var.c ~83 returns the object 
+size, 4 for ints and 1 for chars in this implementation, used by _allocSpace 
+~83 to allocate space for the actual data. Length is 1 except for arrays 
+when it is the declared dimension plus 1.
+</p><p>Class is 0 for datum, 1 for array, 'E' for function. 
+</p><p>The value is the address where the value is stored for a datum or array 
+(value.up, a void *, tc.h ~63). For a function value.up is the entry point 
+of the function's definition, which is just after the function's name. So 
+it points to either the first argument declaration for the function, or the 
+[ of its compound statement body if there are no arguments. 
+
+<!--Typeless data access-->
+<a name="typel"></a>
+</p><p class="h1">Typeless data access
+</p><p>The original tiny-c code was 8080 assembler. The 8080 platform is 
+typeless. The closest it got to types beyond bytes was a few instructions 
+that were 2 bytes. This implementation is reverse coded from my 1977 8080 
+code listing. To do it that way needed tools to handle data in a typeless 
+fashion. The struct stuff is an example. It can be passed through many 
+levels of calls, and only the ultimate receiving code need determine its 
+actual type. But stuff is never passed without its descriptive information. 
+Problem solved. Intermediate passing is typeless, but end receiver has 
+the data to do the proper thing. 
+</p><p>But storage needed to be typeless, too. I toyed with using two 
+arrays, char* and int*. But settled on using C's typeless memcpy function. 
+So read the code at tc.c <a href="#945">~945</a>, get_int, put_int, etc. This turned memory 
+into pure ram, just like the 8080.
+
+<!--Function calls-->
+<a name="funct"></a>
+</p><p class="h1">Function calls
+</p><p>When a symbol is recognized with the special class 'E' that is a 
+function. It will be in _factor that recognition happens, tc.c <a href="#634">~634</a>. 
+Upon recognition only the function name is parsed, but it may have 
+arguments not yet parsed. _factor calls _enter which:
+</p><ol>
+<li>completes the parsing
+</li><li>moves the cursor to the entry point of the function
+</li><li>parses the argument declarations assigning them values from the stack
+</li><li>executes the function body
+</li><li>moves the cursor back to just after the totally parsed call
+</li><li>returns with the global flag 'leave' set true if a return value 
+is stacked, else false.
+</li>
+</ol>
+<p>Upon _enter returning, _factor is done also, and returns. So the net 
+effect of the six steps above is the pushed value, plus advancing the 
+cursor past the call.<p>Notice how this fits into the pattern of anything 
+_factor recognizes. Whether it is a variable, a constant, a parenthesis 
+expression or a function call the net effect is the same: a pushed value 
+and an advanced cursor.
+</p><p>_enter, <a href="#307">~307</a>, takes one argument, char* where. A special case is 
+where==0, which is a machine call. If not 0 it is a pointer to the entry 
+point of the function definition, somewhere in array pr. This walkthrough 
+will cover that latter case.
+</p><p>The code is divided into two sections, called in the comments 
+ABOVE and BELOW.  That boundary separates the parsing of  call data 
+from function defined arguments. Above, <a href="#308">~308..340</a>, 
+completes the call parsing stacking the argument values, and handles 
+the special case of machine call. 
+That is the first of the above 5 steps. Below, <a href="#343">~343..389</a>, 
+handles the usual case of calling a tiny-c function, the remaining five steps.
+</p><p>At <a href="#312">~312</a> advise the debugger a function call is in progress. At <a href="#313">~313</a> 
+skip the optional left paren, if present. Then real work begins:
+</p><p>	<a href="#314">~314</a>: Look for all punctuation that means there are no arguments.
+</p><p>	<a href="#323">~323</a>..327: parse all the args. Note that commas are required to 
+keep this loop going.
+</p><p>	<a href="#330">~330</a>: skip optional right paren.
+</p><p>	<a href="#331">~331</a>: advance cursor over remark and/or newline if present.
+</p><p>	<a href="#332">~332</a>..340: test for and handle machine call special case. (There 
+must be at least one argument, the MC number. <a href="#333">~333</a> nextstack seems a poor 
+choice to test, 0 means empty stack. A better test would be nargs. I document 
+here the code the way it is, not the way it could be.)
+</p><p>	<a href="#339">~339</a>: return for this case. Machine calls do not do BELOW code.
+</p><p>	<a href="#341">~341</a>..391: The fun stuff begins!
+</p><p>	<a href="#343">~343</a>: save the cursors.
+</p><p>	<a href="#345">~345</a>: open a new stack frame for locals.
+</p><p>	<a href="#346">~346</a>..~371 parse the declarations creating locals in the new stack frame. Initialize them with the values stacked ABOVE. _setArg does that. Down count for each arg, and the loop ends when there are no more declarations.
+</p><p>Assume for now a fixed number of arguments. The varargs case is treated later.
+</p><p>	<a href="#383">~383</a>: if no error execute the body. It is a compound statement, therefore a call to st suffices.
+</p><p>	<a href="#384">~384</a>: st() may or may not push a resulting value. leave is true if it did. Otherwise push a zero. We need that because _enter must always return a pushed value.
+</p><p>	<a href="#386">~386</a>..389 cleanup: restore the cursors, pop the locals variable frame (fundone), advise the debugger we are leaving a function.
+
+</p><p class="h2">Variable number of arguments
+</p><p>One of the x words is xvarargs defined as a 3 dot ellipsis, tc.c <a href="#44">~44</a>. 
+It is used in BELOW in parsing the argument declarations, <a href="#363">~363</a>, and, like C,
+ specifies a variable number of arguments, from zero up. Its only use so far 
+ is for the printf function in pps/library.tc ~10. This is a new feature in 
+ this implementation of tiny-c, it did not exist in the 1977 versions. And 
+ it was amazingly easy to implement because a machine call, MC, has always 
+ had a variable number of arguments. So most of the work was already done ABOVE. 
+</p><p>All the parser does is set a global flag, varargs. It is initially zero, and after every machine call, 
+at <a href="#335">~335</a> it is set back to zero just in case it was used. So going into BELOW we assured it is zero.
+At <a href="#364">~364</a> to the number of arguments plus one, the latter to make it 
+flag true if there are zero arguments. And at <a href="#372">~372</a>..381 a portion of the 
+cleanup to assure the number of arguments parsed equals the number declared 
+is made conditional on the fixed argument case. That is still a valid test 
+for that case.
+</p><p>In _enter <a href="#310">~310</a> with varargs true the correct number of arguments is 
+recovered. And that is all! Why this works is magic. But it does. I get 
+confused every time I try to figure it out again. But here goes.
+</p><p>The whole varargs thing begins BELOW, then completes on another call 
+to _enter ABOVE. It's topsy-turvey. When a function is called its supplied 
+arguments are parsed, evaluated, and pushed, counting the pushes in nargs. 
+All that happens ABOVE with no knowledge of being fixed or variable number 
+of arguments. Then, BELOW, the cursors are moved and the function definition 
+entered. As the last argument is the xvarargs match, the 3 dot ellipsis. 
+Now the varargs logic kicks in. The body is entered, and that body 
+(for printf) is an MC call:
+
+</p>
+
+<pre>
+	printf char fmt(0); ... [
+		MC 101
+	]
+</pre>
+
+<p>_enter is called again, and ABOVE restores the nargs, parses and pushes the 
+101 thus bumping nargs by 1, and calls machineCall(nargs), <a href="#334">~334</a>. MC 101 does 
+its thing, pFmt, a recursive use of the fmt string to print the formatted set 
+of arguments, machineCall.c ~65.
+
+<!--Expression grammar-->
+<a name="gramm"></a>
+</p><p class="h1">Expression grammar
+</p><p>What is a grammar? It is a way of assembling tokens (words and punctuation) into meaningful natural language sentences. By analogy for a 
+computer language a grammar defines a valid statement.
+</p><p>Computer languages have a well-defined grammar. Usually the grammar 
+can be described very compactly using a formal notation called Backus-Naur 
+form, BNF. Here in simple English is the essence of BNF for just some of 
+tiny-c, captured from comments and slightly edited. It is both definitions 
+and a recipe for discovery:
+
+</p>
+
+<pre>
+	An ASGN is a RELN or an LVALUE = ASGN
+	an LVALUE is a symbol, specifically a variable reference.
+	a RELN is an EXPR or a comparison of EXPRs
+	an EXPR is a TERM or sum or difference of TERMs
+	a TERM is a FACTOR or a product, quotient, or remainder of FACTORs
+	a FACTOR is an ( ASGN ), or a constant, or a variable reference, or a 
+		function call.
+</pre>
+
+<p>Real BNF would continue by defining symbol, comparison, sum, product, etc. 
+In fact it sometimes  goes down to defining the alphabet and the digits. 
+Very detailed. But the above gives the idea. A high level element is defined 
+in terms of lower level elements all the way to the most primitive.
+</p><p>If you are familiar with BNF and with recursion, skip the rest of 
+this section. If it's new to you read on.
+</p><p>Consider this assignment:
+</p><pre>
+	a = b = c = 77
+</pre>
+<p>Following the recipe above ASGN parses the 'a' and concludes it has at 
+least a RELN and maybe an assignment. Then it parses the '='. So it is not 
+a RELN. It must be an assignment, LVALUE = ASGN. So 'a' must be the LVALUE, 
+and the new ASGN must be the not yet parsed 'b = c = 77'. 
+So the new ASGN parses the 'b' and the '=', 
+and the third ASGN must be '77'. The third parses the 'c' and the '=' and 
+the fourth ASGN must be just the 77. And (looking ahead) it is, but let's 
+get there in small steps, following the recipe.
+</p><p>The fourth ASGN tries RELN first, and RELN can be an EXPR. Then EXPR can be a TERM, which can be a FACTOR, which can be a constant. 77 is a constant, 
+and therefore the entire chain is satisfied.
+</p><p>Parsing goes top down through the recipe. When it gets a NO reply, 
+it moves up a level, and at that level the next alternative. When all 
+alternatives at a given level are satisfied it ascends one level saying NO, 
+and that higher level tries its next alternative. This process is called 
+"top down recursion."
+</p><p>Next is the expression parser. This goes into more detail than the 
+quick recipe overview.
+
+<!--Expression parsing-->
+<a name="parsi"></a>
+</p><p class="h1">Expression parsing
+
+</p><p class="h2">Parsing
+</p><p>Consider this statement with the cursor pointing before the x:
+</p>
+
+<pre>
+          x = y + 3
+     ---^	
+</pre>
+
+<p>st(), <a href="#752">~752</a>, is called to parse and execute a statement. st() tests for 
+several possibilities: is this a declaration (no), is it compound (no), is 
+it a reserved word, if, while, etc, (no)? This rather long if-else statement 
+goes all the way to <a href="#848">~848</a>, where it tests for an assignment statement. These 
+actual tests are done by functions that are called, _decl(), _lit(), and 
+eventually _asgn(). st() is asking: "Is this yours? If so do your thing, 
+and then tell me yes (return true). Otherwise tell me no." st() gets a lot 
+of no's, but _asgn returns yes. And that is where we begin.
+</p><p>Why is _asgn put at the very end of the long if-else chain? Because 
+to be sure it really is an assign it must first eliminate other possibilities 
+including language key words. It's as simple as that.
+</p><p>So the expression recognition/parsing work gets done in _asgn, <a href="#462">~462</a>.
+
+</p><p class="h2">What's an expression?
+</p><p>Let's eliminate a point of possible confusion. A tiny-c expression is 
+parsed by _asgn. But a part of that parsing is done by _expr to recognize an 
+algebraic expression. And if _asgn recognizes something it may not be an 
+assignment! For example (x&lt;10) is recognized by _asgn.
+</p><p>In the C community the word “expression” is used to mean a  C expression, 
+a generalization of an algebraic expression.
+</p><p>Classical algebraic functions work down a hierarchy of "parts", and 
+these parts have classical names. An expression is a sum/difference of one 
+or more terms, a term is a product/quotient of one or more factors, a factor 
+is either a constant or a variable or a parenthesized expression. Note the 
+recursion. The grammar chapter showed this way of defining could be expanded 
+to an entire grammar, and BNF has become the standard way of expressing the 
+grammar. The highest level of C expression is the assignment. So an expression 
+is recognized by _asgn.
+</p><p>I used the algebraic names of expressions, adding relation and 
+assignment, at the top, and function class at the bottom. The highest 
+level is an actual assignment. So _asgn() evaluates a tiny-c expression, 
+and _expr (<a href="#519">~519</a>) evaluates a classical algebraic expression.
+</p><p>Expression parsing implements the hierchical recipe in the grammar 
+chapter. One function handles one level of the hierarchy.
+</p><p>Start at tc.c <a href="#462">~462</a>, _asgn(), and read down to <a href="#668">~668</a>. But don't read 
+every line. Read just the lines with no or a single indent. Read just this:
+</p>
+
+<pre>
+	/* An asgn is a reln or an lvalue = asgn. Note that
+		   reln can match an lvalue.
+		 */
+	462	int _asgn(){ 
+			if(_reln()){ .. }
+			return error? 0: 1;
+		}
+		/* a RELN is an expr or a comparison of exprs
+		 */
+	474	int _reln(){
+			if(_expr()){ .. }
+			return 0;   /* not an expr is not a reln */
+		}
+		/* an EXPR is a term or sum (diff) of terms.
+		 */
+	519	int _expr(){
+			if(_lit(xminus)){ .. }    /* unary minus */
+			else if(_lit(xplus)){ .. }
+			else _term();
+			while(!error){ .. }    /* rest of the terms */
+			return 0;   /* error, set down deep */
+		}
+		/* ;a term is a factor or a product of factors.
+		 */
+	555	int _term() {
+			_factor();
+			while(!error) { .. }
+			return 0;
+		}
+		/* a FACTOR is a ( asgn ), or a constant, or a variable reference, or a function reference.
+		 */
+	590	void _factor() {
+			if(_lit(xlpar)) { .. } 
+			else if( type=_konst() ) { .. }
+			else if( _symName() ) { .. }
+			else {
+				eset(SYNXERR);
+			}
+		}
+</pre>
+
+<p>This manner of reading gives a high level view of the parser without 
+getting bogged down in details. A code's pattern becomes a bit easier to 
+see. For example the code in every layer begins with a call to the next 
+layer. So a call to _asgn rapidly descends to _factor which is the first 
+to look through its alternative possibilities. At every layer the function 
+returns an int except _factor which returns nothing (void). So factor is 
+somehow a bit different because it must always succeed or else there is 
+a syntax error communicated more strongly by eset.
+</p><p>Another pattern is calls vs returns. A call descends to the next 
+layer, returns ascend to the layer above signaling YES/NO to the parse 
+so far. When ascending the cursor has been moved so the parent layer can 
+continue the parse.
+</p><p>All of this is classical LR parsing, often described as "bottom up" 
+because actual treatment is done from the bottom, _factor, to the top, _asgn. 
+For a deeper understanding of LR parsing, see: 
+</p><p>	https://en.wikipedia.org/wiki/LR_parser
+
+</p><p class="h2">Treatment
+</p><p>Treatment means what happens when something is matched. For a 
+compiler treatments emit code. For this interpreter the treatment performs 
+the action determined by the match. Here is one treatment, the one for 
+_asgn. The full code: 
+</p>
+
+<pre>
+		/* An asgn is a reln or an lvalue = asgn. Note that
+		   reln can match an lvalue.
+		 */
+	462	int _asgn(){ 
+	463		if(_reln()){
+	464			if(_lit(xeq)){
+	465				_asgn();
+	466				if(!error)_eq();
+	467			}
+	468		}
+	469		return error? 0: 1;
+	470	}
+</pre>
+
+<p>Back to this line of code with the cursor pointing before the x:
+</p>
+
+<pre>
+	     x = y + 3
+ 	 ---^	
+</pre>
+
+<p>x is a symbol name. _asgn is called and tunnels down to _symname 
+which returns "I got it" (true), and the pointer is advanced just past the x:
+</p>
+
+<pre>
+	     x = y + 3
+	   ---^	
+</pre>
+
+<p>The return true is propagated all the way up to _asgn, where _reln 
+returns true, <a href="#463">~463</a>. So we have a successful _reln and treatment begins. 
+_lit(xeq) looks for an equal sign, <a href="#464">~464</a>, and voila, it is there. _lit 
+advances the cursor, so we have:
+</p>
+
+<pre>
+	     x = y + 3
+ 	     ---^	
+</pre>
+
+<p>Then _asgn calls itself, <a href="#465">~465</a>, classical recursion. 
+</p><p>	https://en.wikipedia.org/wiki/Recursion_(computer_science)
+</p><p>The right side of an = is an expression, and this second call 
+to _asgn totally parses and evaluates the expression (detail in next 
+section), and pushes the value on the stack. The cursor is advanced 
+beyond the expression, pointing to a possible comment or an end-of-line.
+</p>
+
+<pre>
+	     x = y + 3
+	           ---^	
+</pre>
+
+<p>Finally, if no error has occurred _eq() performs the assignment, <a href="#466">~466</a>, 
+giving x the value of y+3. All the data _eq() needs is in those two stack 
+pushes, the first is the address of the cell holding x, the second being
+the fully calculated value of y+3. _eq() does no parsing, just assignment. 
+Somewhere out in data-land the x gets its new value. That is the ultimate 
+treatment for an assignment.
+</p><p>Reviewing parsing vs treatment: 
+<ul>
+<li>Lines 463..467 are treatment for a parsed _reln. 
+</li><li>Within that treatment lines 464..465 are treatment for a parsed =. 
+</li><li>Parsing is matching, usually trying several possibilities. 
+</li><li>Treatment is doing something once a match happens possibly 
+including more matching.
+</li></ul>
+<p>Notice how bullet 2 above is nested within bullet 1.
+The treatment of bullet 1 includes additional parsing that matches the =, hence treatment for that match.
+</p>
+
+<!--A full walkthrough of one expression-->
+<a name="fullw"></a>
+</p><p class="h1">A full walkthrough of one expression
+</p><p>To wrap up here is a full walkthough of a case that includes 
+parenthetical expression and a function call: x=y*(3+foo(z+7)).
+</p><p>To keep it brief a quite condensed but (hopefully) self 
+explanatory notation is used. For example when I write “_asgn 
+parses the y” you should know by now that _asgn initiates a 
+process that descends through the layers to _symname which does 
+the real work, then “I got it” ascends back to _asgn.
+</p><p>And a notation: To show what is on the stack lv(x) means 
+x as lvalue. ad(3) means actual datum 3. And state is shown like this:
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		<empty>
+	 ---^
+</pre>
+
+<p>READY:
+</p><p>_asgn called, it parses the x (<a href="#463">~463</a>)
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x)
+	  ---^
+</pre>
+
+<p>_asgn parses '='  (<a href="#464">~464</a>), calls self recursively (<a href="#465">~465</a>), parses 'y'
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y)  <<<-top
+	    ---^
+</pre>
+
+<p>Returns ascend to _term (<a href="#557">~557</a>) which parses the '*', and calls _factor (<a href="#559">~559</a>)
+</p><p>_factor parses '('   (<a href="#594">~594</a>), calls _asgn to do the full parenthesized 
+expression (<a href="#595">~595</a>). _asgn is now 2 recursions deep.
+</p><p>_asgn parses '3',  _konst does the work, called by _factor (<a href="#600">~600</a>), 
+recognizes digit (<a href="#415">~415</a>). 
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3)  <<<-top
+	       ---^
+</pre>
+
+<p>Returns ascend to _expr (<a href="#529">~529</a>)  which parses '+' (<a href="#540">~540</a>), and calls _term 
+(<a href="#541">~541</a>), which parses 'foo'. _factor does the work using _symname (<a href="#619">~619</a>).  
+foo is class 'E' so _factor calls _enter (<a href="#634">~634</a>)
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3)  <<<-top
+	           ---^
+</pre>
+
+<p>_enter ABOVE calls _asgn (<a href="#325">~325</a>) to parse z+7, _asgn parses and pushes  z, 
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) lv(z) <<<-top
+	             ---^
+</pre>
+
+<p>Returns ascend to _expr which parses + , calls _term (<a href="#541">~541</a>) which parses 7.
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) lv(z) ad(7) <<<-top
+	               ---^
+</pre>
+
+<p>
+Returns ascend to _expr which uses toptoi() to pop the top into b, <a href="#543">~543</a>, and 
+again for the value of z into a, <a href="#544">~544</a>. Assume z==100. toptoi resolves the 
+lv(z) into ad(100). 
+</p><p>	Data in _expr: (<a href="#545">~545</a>)  a is ad(100), b is ad(7), both are class 0. 
+Both have been popped by toptoi.
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) <<<-top
+	               ---^
+</pre>
+
+<p>Both are data (class 0) so _expr (<a href="#546">~546</a>) pushes their sum 107. Had one of them been a pointer (class 1) _expr would have pushed their sum as a pointer.
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) ad(107) <<<-top
+	               ---^
+</pre>
+
+<p>_expr sees no more + or – so returns ascend to _enter which looks for 
+a comma for more args (<a href="#327">~327</a>), tosses the ')' (<a href="#330">~330</a>), where is true so 
+control goes to BELOW. 
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) ad(107) <<<-top
+	                ---^
+</pre>
+
+<p>The calling cursors are saved (<a href="#343">~343</a>), the cursor set to where, a 
+new variable stack frame pushed, newfun, <a href="#345">~345</a>. foo's declaration is
+
+<pre>
+	Cursor:				 Stack:
+	foo int x […]			lv(x) lv(y) ad(3) ad(107) <<<-top
+	---^
+</pre>
+
+<p>so _lit(xint) is true (<a href="#348">~348</a>), _setarg allocates foo's local x giving 
+it the initial value 107. 
+</p><p>It's not varargs and arg was bumped to match nxtarg so the one 
+arg is popped (<a href="#379">~379</a>). 
+</p><p>The function is executed (<a href="#383">~383</a>), foo does its thing (not a part of 
+this walk through). Assume a return statement in foo's body pushes 200 
+onto the stack as the value of foo. And return always sets leave true. 
+So the pushzero default (<a href="#384">~384</a>) doesn't happen, leave is set back to 0, 
+the cursors are restored:
+
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) ad(200) <<<-top
+	                ---^
+</pre>
+
+<p>The stack frame is popped (fundone), and the debugger is advised a 
+function return has just happened, (<a href="#385">~385</a>..389). foo has done its duty! 
+_enter returns and returns ascend to _expr (<a href="#542">~542</a>) which as before toptoi's 
+the two entries on top, adds them, and pushes the sum (<a href="#543">~543</a>..545). 
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(203) <<<-top
+	                ---^
+</pre>
+<p>_expr looks for another + or -, ascends to _factor... (<a href="#596">~596</a>) 
+</p><p>
+[wait a minute! Ascends? How can _expr ascend to _factor which is lower in
+the grammar? Answer: because of recursion. 
+_factor called _asgn which descended to _expr. 
+So in the call stack _expr is below _factor.]
+</p><p>
+Ok, so _expr ascends to _factor where _mustFind insists on a ), 
+which is there so the cursor is set just past it (<a href="#597">~597</a>).
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(203) <<<-top
+	                 ---^
+</pre>
+<p>How deep are the recursive levels of _asgn, I have lost count. But, 
+from the most recent, returns ascend to _term (<a href="#560">~560</a>) where the top two 
+on the stack popped and their product pushed. Assume the value of y is 
+5, so the product is 1015.
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) ad(1015) <<<-top
+	                 ---^
+</pre>
+<p>And finally the returns ascend to the very first _asgn (<a href="#466">~466</a>) 
+waiting patiently all this time to do the assignment. 
+</p><p>No error, so the actual assign is done by _eq which dips directly 
+into the stack, probably the only code outside of stack.c to do so (<a href="#62">~62</a>..63). 
+val points to 1015, lval to x. And x is an lval, so <a href="#75">~75</a> is happy and 
+testing both classes we end up at <a href="#118">~118</a>. Its an int to int assign, so 
+<a href="#124">~124</a> gets the 1015 from val, and <a href="#127">~127</a> puts it into x's storage cell. 
+And <a href="#127">~128</a> pushes iDatum onto the stack. An assignment when done always leaves the value on the stack. 
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) ad(1015) ad(1015) <<<-top
+	                 ---^
+</pre>
+Another "Wait a minute." At (<a href="#141">~141</a>) two popst() calls pop that value twice, leaving just the lv(x). Isn't that a bug? Hmm!
+<pre>
+	Cursor:				Stack:
+	    x=y*(3+foo(z+7))		lv(x) <<<-top
+	                 ---^
+</pre>
+</p><p>
+Well, yes. But there is the lv(x) which satisfies the assignment's "when done" requirement. So the (ahem) flaw is just wasted work. It will never show up in a test.
+</p><p>
+Notice there are 5 calls to _asgn, and each ends by pushing a 
+value. _asgn is happy if it is just a variable or a constant. The parse 
+functions are named after the highest level that may actually be there, 
+but they are all satisfied by a lower level. 
+</p>
+<p>	And: x is 1015 in its storage allocation.
+
+</p><p>And so ends our walkthrough.
+</p>
+<a name="postl"></a>
+<p class="h1">
+Postlogue
+</p><p>
+I would change this code several ways on a modern computer. But I wanted a near clone of the 8080 code, architecture and all. Here are some of my thoughts.
+</p>
+<ul><li>
+Separate the parsing from the action. Use an action interface, and a separate action module for treatment. Let others ADD new actions, posssibly a code emitter???
+</li><li>
+Use lex and yacc, or their modern equivalent. Also there are tools today that write a parser from BNF. Googling "tool to write a parser from bnf" generated several interesting sites.
+</li><li>
+Create a plug-in interface. Let others ADD to the product without recompiling the whole thing. 
+</li><li>
+Fix the few pattern violations. Read the walkthrough to see what I mean by a pattern. For example the return statement follows the pattern but flowing out of a function (no return statement) does not.
+</li><li>
+Use _name more consistently. It was intended to identify functions private to the particular module, whereas no underscore was public. But you will find several underscore functions in tc.h.
+</li></ul>
+Basically all the above criticims can be summarized as: push the code gently towards object orientation. 
+</p>
+<a name="appen"></a>
+<p class = "h1">Appendix - Listing of tc.c
+</p>
+<p>The file tc.c is the core file of this version of tiny-c. It is just one of eleven source files for tiny-c. The full source and documentation is available at:
+</p><pre>
+	www.github.com/tgibson37/tiny-c
+</pre><p>It is GPL licensed, and the license is posted there, too.
+The Walkthrough document references lines in this file using what I call the "twiddle" notation:  ~xxx refers to line xxx. If the original file is edited its line numbers will drift, perhaps a lot. The purpose of this appendix is to publish just this file with the line numbers as used in the main document. For the html version each tc.c ~ notation links a few lines above the line number below. Use your browsers back arrow to return to the walkthrough text.
+</p>
+<pre>
+0001	#include "tc.h"
+0002	
+0003	#if defined(_WIN32)
+0004	        char* defaultLibrary = "pps\\library.tc";
+0005	#else
+0006	        char* defaultLibrary = "pps/library.tc";
+0007	#endif0008	<a name="12">
+0009	int varargs = 0;
+0010	
+0011	 /************** literals **************/
+0012	char* xif = "if";<a name="16">
+0013	char* xelse = "else";
+0014	char* xint = "int";
+0015	char* xchar = "char";
+0016	char* xwhile = "while";
+0017	char* xreturn = "return";
+0018	char* xbreak = "break";
+0019	char* xendlib = "endlibrary";
+0020	char* xr = "r";
+0021	char* xg = "g";
+0022	char* xlb = "[";
+0023	char* xrb = "]";
+0024	char* xlpar = "(";
+0025	char* xrpar = ")";
+0026	char* xcomma = ",";
+0027	char* newline = "\n";
+0028	char* xcmnt = "/*";
+0029	char* xcmnt2 = "//";<a name="33">
+0030	char* xstar = "*";
+0031	char* xsemi = ";";
+0032	char* xpcnt = "%";
+0033	char* xslash = "/";
+0034	char* xplus = "+";
+0035	char* xminus = "-";
+0036	char* xlt = "&lt;";
+0037	char* xgt = ">";
+0038	char* xnoteq = "!=";
+0039	char* xeqeq = "==";
+0040	char* xeq = "=";<a name="44">
+0041	char* xge = ">=";
+0042	char* xle = "&le;";
+0043	char* xnl = "\n";
+0044	char* xvarargs = "...";
+0045	
+0046	/* stored size of one datum */
+0047	int typeToSize( int class, Type type ) {
+0048		if(type==Char)return 1;
+0049		else if(type==Int)return sizeof(int);
+0050		else eset(TYPEERR);
+0051		return 0; /* has to be one of the above */
+0052	}
+0053	<a name="57">
+0054	/* SITUATION: Parsed an assignment expression. Two stack entries, lvalue, datam.
+0055	 *	Effects the assignment. <a name="59">
+0056	 */
+0057	int _eq() {
+0058		int  iDatum;  /* memcpy into these from pr using val.stuff */<a name="62">
+0059		char cDatum;  /*  and val.size, giving needed cast */
+0060		void* pDatum;
+0061	
+0062		struct stackentry *val = &amp;stack[nxtstack-1]; /* value (on top) */
+0063		struct stackentry *lval = &amp;stack[nxtstack-2]; /* where to put it */
+0064		if(verbose[VE]){
+0065			fprintf(stderr,"\neq: lval");
+0066			dumpStackEntry(nxtstack-2);
+0067			fprintf(stderr,"\neq: val");
+0068			dumpStackEntry(nxtstack-1);
+0069		}
+0070		void* where = &amp;((*lval).value.up);
+0071		int class = (*lval).class;<a name="75">
+0072		int type = (*lval).type;
+0073		int whereSize = typeToSize(class,type);  /* of the lvalue */
+0074	
+0075		if((*lval).lvalue != 'L') { 
+0076			eset(LVALERR); 
+0077			return; 
+0078		}
+0079		
+0080		if(class==1 &amp;&amp; (*val).class==1) {
+0081			pDatum = (*val).value.up;
+0082			if( (*val).lvalue=='L' ){
+0083				pDatum = (char*)(*(int*)pDatum);   /* now its 'A' */
+0084			}
+0085			char **where = (*lval).value.up;
+0086			*where = (char*)pDatum;
+0087			pushst(class, 'A', type, &amp;(*val).value);
+0088		}
+0089		else if(class==1 &amp;&amp; (*val).class==0) {  /* ptr = int */
+0090			if( (*val).type != Int ){
+0091				eset(EQERR);
+0092				return;
+0093			}
+0094			if( (*val).lvalue=='L' ) {
+0095				iDatum = get_int((*val).value.up);
+0096			}
+0097			else {
+0098				iDatum = (*val).value.ui;
+0099			}
+0100			pDatum = (void*)iDatum;
+0101			char **where = (*lval).value.up;
+0102			*where = (char*)pDatum;
+0103			pushst(class, 'A', type, &amp;(*val).value);
+0104		}
+0105		else if(class==0 &amp;&amp; (*val).class==1) {  /* int = ptr */
+0106			if(type!=Int){
+0107				eset(EQERR);
+0108				return;
+0109			}
+0110			pDatum = (*val).value.up;
+0111			if( (*val).lvalue=='L' ){
+0112				pDatum = (char*)(*(int*)pDatum);   /* now its 'A' */
+0113			}
+0114			iDatum = (int)pDatum;<a name="118">
+0115			put_int( (*lval).value.up, iDatum);
+0116			pushk(iDatum);
+0117		}
+0118		else if(class==0 &amp;&amp; (*val).class==0) {
+0119			if(type==Int){
+0120				if( (*val).lvalue=='L' ) {<a name="124">
+0121					iDatum = get_int((*val).value.up);
+0122				}
+0123				else {<a name="127">
+0124					iDatum = (*val).value.ui;
+0125				}
+0126				if((*val).type==Char) iDatum = iDatum&amp;0xff;
+0127				put_int( (*lval).value.up, iDatum);
+0128				pushk(iDatum);
+0129			}
+0130			else if(type==Char){
+0131				if( (*val).lvalue=='L' ) {
+0132					cDatum = get_char((*val).value.up);
+0133				}
+0134				else {
+0135					cDatum = (*val).value.uc;
+0136				}
+0137				put_char( (*lval).value.up, cDatum );<a name="141">
+0138				pushk(cDatum);
+0139			}
+0140		}
+0141		popst();popst();  
+0142	}
+0143	
+0144	/******* set error unless already set, capture cursor in errat *******/
+0145	int eset( int err ){
+0146		if(!error){error=err;errat=cursor;}
+0147		return error;
+0148	}
+0149	
+0150	/* Bump cursor over whitespace. Then return true on match and advance
+0151	   cursor beyond the literal else false and do not advance cursor
+0152	 */
+0153	int _lit(char *s){
+0154		while( *cursor == ' ' 
+0155			|| *cursor == '\t' ) ++cursor;
+0156		int match = !strncmp(s,cursor, strlen(s));
+0157		if( match ) {
+0158			cursor += strlen(s);
+0159			return 1;
+0160		}
+0161		return 0; /* no match */
+0162	}
+0163	
+0164	/* skips balance l-r assuming left is matched. 
+0165	 *	Returns 0 on OK, else count of missing ]'s.
+0166	 */
+0167	int _skip(char l, char r) {
+0168		int counter = 1;
+0169		 while( counter>0 &amp;&amp; cursor&lt;endapp ) {
+0170			if(*cursor==l)++counter;
+0171			if(*cursor==r)--counter;
+0172			++cursor;
+0173		};
+0174		if( counter )return counter;
+0175		return 0;
+0176	}
+0177	<a name="181"><a name="183"><a name="185"><a name="189"><a name="197">
+0178	/* Parse a symbol defining fname, lname. ret: true if symbol.
+0179	 *	Advances the cursor to but not over the symbol,
+0180	 */
+0181	int _symName() {
+0182		char* temp;
+0183		while( *cursor == ' ' || *cursor == '\t' ) ++cursor;
+0184		temp=cursor;
+0185		if( isalpha(*temp) || *temp=='_') {
+0186			fname = temp;
+0187		}
+0188		else return 0;  /* not a symbol */
+0189		while( isalnum(*temp) || *temp=='_'){
+0190			++temp; 
+0191		}
+0192		lname = temp-1;
+0193		if(verbose[VP]){
+0194			fprintf(stderr,"\nparsed ");
+0195			dumpft(fname,lname);
+0196		}
+0197		return lname-fname+1;  /* good, fname and lname defined */
+0198	}
+0199	
+0200	/****************** some C helper functions **************/
+0201	
+0202	/* return true if symname matches arg, no state change */
+0203	int _symNameIs(char* name){
+0204		int x = strncmp(fname, name, lname-fname+1);
+0205		return( !x );
+0206	}
+0207	/* State is not changed by find or mustFind. Returned value is
+0208	sole purpose of find. That plus setting err for mustFind. */
+0209	char* find( char* from, char* upto, char c) {
+0210		char* x = from;
+0211		while( *x != c &amp;&amp; x&lt;upto) {
+0212			++x;
+0213		}
+0214		return x&lt;upto ? x : 0;
+0215	}
+0216	/* same as find but sets err on no match */
+0217	char* _mustFind( char *from, char *upto, char c, int err ) {
+0218		char* x = find(from, upto, c);
+0219		if( x ) return x;
+0220		else { eset(err); return 0; }
+0221	}
+0222	
+0223	/* special find for end of string */
+0224	char* _findEOS( char* x ) {
+0225		while( x&lt;endapp) {
+0226			if( *x==0 || *x==0x22 ) return x;
+0227			++x;
+0228		}
+0229		eset(CURSERR);
+0230		return 0;
+0231	}
+0232	
+0233	/* skip over comments and/or empty lines in any order, new version
+0234		tolerates 0x0d, and implements // as well as old /* comments.
+0235	 */
+0236	void _rem() {
+0237		for(;;) {
+0238			while(    *cursor==0x0a
+0239					||*cursor==0x0d
+0240					||*cursor==' '
+0241					||*cursor=='\t'
+0242				  )++cursor;
+0243			if( !(_lit(xcmnt)||_lit(xcmnt2)) ) return;
+0244			while( *cursor != 0x0a &amp;&amp; *cursor != 0x0d &amp;&amp; cursor&lt;endapp )
+0245				++cursor;
+0246		}
+0247	}
+0248	
+0249	/* 	SITUATION: int or char is parsed.<a name="253">
+0250	 *	Parses one variable. Makes allocation and symbol entry.
+0251	 */
+0252	void _varAlloc(Type type, union stuff *vpassed) {
+0253		if( !_symName() ) {		/*defines fname,lname. True is match.*/
+0254			eset(SYMERR);
+0255			return;
+0256		}
+0257		cursor=lname+1;
+0258		if( _lit("(") ){
+0259			vclass = 1;		/* array or pointer */
+0260			char* fn=fname; /* localize globals that _asgn() may change */
+0261			char* ln=lname;
+0262			if( _asgn() ) alen=toptoi()+1;  /* dimension */
+0263			fname=fn; 		/* restore the globals */
+0264			lname=ln;
+0265			char* x = _mustFind(cursor,cursor+5,')',RPARERR);
+0266			if(x)cursor = x+1;
+0267		} else {
+0268			vclass = 0;
+0269			alen = 1;
+0270		}
+0271		newvar(vclass, type, alen, vpassed);
+0272	}
+0273	
+0274	/* Situation: parsing argument declarations, passed values are on the stack.
+0275	 * arg points into stack to an argument of type. 
+0276	 * Gets actual value of arg, calls valloc which parses and sets
+0277	 * up local with the passed value.
+0278	 */ 
+0279	void _setArg( Type type, struct stackentry *arg ) {
+0280		union stuff vpassed  = (*arg).value;
+0281		char* where;
+0282		int class = (*arg).class;
+0283		int lvalue = (*arg).lvalue;
+0284		int stacktype = (*arg).type;
+0285		if( lvalue=='L') {
+0286			where = (char*)vpassed.up;
+0287			if( class==1 ) { 
+0288				vpassed.up = *((char**)(*arg).value.up);
+0289			}
+0290			else if( stacktype==Int ) vpassed.ui = get_int(where);
+0291			else if( stacktype==Char) vpassed.ui = get_char(where);
+0292				/* ui to clear high order byte */
+0293		}
+0294	//fprintf(stderr,"\n~295SA type %d passed %d", type, vpassed.ui);
+0295		_varAlloc( type, &amp;vpassed);
+0296	}
+0297	
+0298	/*	SITUATION: Just parsed symbol with class 'E', or special symbol MC.
+0299	 *	Parses the args putting values are on the stack, arg pointing to the first 
+0300	 *	of them.
+0301	 *	Sets the cursor to the called function's 'where'. Parses arg decl's
+0302	 *	giving them values from the stack. Executes the function body.
+0303	 *	Pops the locals (vars and values). Restores the caller's stcurs and 
+0304	 *	cursor.
+0305	 */
+0306	<a name="307"><a name="308"><a name="310"><a name="312"><a name="313"><a name="314">
+0307	void _enter( char* where) {
+0308		int arg=nxtstack;
+0309		int nargs=0;
+0310		if(varargs>0) nargs=varargs-1;
+0311	//fprintf(stderr,"\n~311E ABOVE: va %d na %d",varargs,nargs);
+0312		if(where)fcn_enter();
+0313		_lit(xlpar); /* optional (   */
+0314		int haveArgs = ! (  _lit(xrpar)
+0315						 || *cursor==*xlb
+0316						 || *cursor==*xrb
+0317						 || *cursor==*xsemi
+0318						 || *cursor==*xnl
+0319						 || *cursor==0x0d<a name="323"><a name="325"><a name="327">
+0320						 || *cursor==*xslash
+0321						);
+0322		if ( haveArgs ) {
+0323			do {
+0324				if(error)return;
+0325				if( _asgn()) ++nargs;
+0326				else break;  /* break on error */
+0327			} while( _lit(xcomma) );
+0328		}<a name="330"><a name="331"><a name="332"><a name="333"><a name="334"><a name="335"><a name="337"><a name="339">
+0329		if(error)return;
+0330		_lit(xrpar);   /* optional )   */
+0331		_rem();
+0332		if(!where) {
+0333			if(nxtstack) {
+0334				machinecall( nargs );
+0335				varargs=0;
+0336	//fprintf(stderr,"\n~336E va %d na %d",varargs,nargs);
+0337			}
+0338			else eset(MCERR);
+0339			return;<a name="341"><a name="343"><a name="345"><a name="346"><a name="348">
+0340		}
+0341		else {   /* ABOVE parses the call args, BELOW parses the called's arg decls */
+0342	//fprintf(stderr,"\n~342E BELOW: va %d na %d",varargs,nargs);
+0343			char *localstcurs=stcurs, *localcurs=cursor;
+0344			cursor = where;
+0345			newfun();  
+0346			for(;;) {	  
+0347				_rem();
+0348				if(_lit(xint)) { 
+0349					do {
+0350						_setArg(Int, &amp;stack[arg]);
+0351						arg++;
+0352					} while(_lit(xcomma));
+0353					_lit(xsemi); /* optional */
+0354				} 
+0355				else if ( _lit(xchar)) {
+0356					do {
+0357	//fprintf(stderr," ~358CHAR ");
+0358						_setArg(Char, &amp;stack[arg]);
+0359						arg++;
+0360					} while(_lit(xcomma));
+0361					_lit(xsemi);
+0362				}<a name="363"><a name="364">
+0363				else if ( _lit(xvarargs) ){
+0364					varargs=nargs+1;
+0365	//fprintf(stderr,"\n~362E va %d na %d ",varargs,nargs);
+0366					break;
+0367				}
+0368				else {
+0369					break;
+0370				}
+0371			}<a name="371"><a name="372">
+0372			if(!varargs) {
+0373				if(arg != nxtstack) {
+0374					cursor=localcurs;
+0375					stcurs=localstcurs;
+0376					eset(ARGSERR);
+0377				}<a name="379"><a name="383"><a name="383"><a name="384"><a name="384"><a name="385"><a name="386">
+0378				while(nargs>0){
+0379					popst();
+0380					--nargs;
+0381				}
+0382			}
+0383			if(!error)st();     /*  &lt;&lt;-- execute fcn's body */
+0384			if(!leave)pushzero();
+0385			leave=0;
+0386			cursor=localcurs;
+0387			stcurs=localstcurs;
+0388			fundone();
+0389			fcn_leave();
+0390		}
+0391	}
+0392	
+0393	/********** expression parser *****************/
+0394	
+0395	/* converts fname..lname inclusive to integer
+0396	 */
+0397	int _atoi() {
+0398		char* x = fname;
+0399		int val = 0;
+0400		int sign = *x=='-' ? -1 : 1;
+0401		if( *x=='-' || *x=='+' ) ++x;
+0402		do{ 
+0403			val = 10*val+*x-'0'; 
+0404		} while( ++x &le; lname );
+0405		return sign*val;
+0406	}
+0407	
+0408	/*	parses constant defining fname..lname which brackets trimmed constant. 
+0409	 *	Cursor moved just beyond constant. Returns Type: 
+0410	 */<a name="415">
+0411	Type _konst() {
+0412		char* x;
+0413		while(*cursor==' ')++cursor;
+0414		char c = *cursor;
+0415		if( c=='+' || c=='-' || (c>='0'&amp;&amp;c&le;'9') ) {
+0416			fname = cursor;
+0417			do{
+0418				++cursor; c=*cursor;
+0419			} while(c>='0'&amp;&amp;c'9');
+0420			lname=cursor-1;
+0421			if(verbose[VP]){
+0422				fprintf(stderr,"\nparsed ");
+0423				dumpft(fname,lname);
+0424			}
+0425			return Int;
+0426	
+0427		} else if(_lit("\"")) {
+0428			fname=cursor;
+0429			/* set lname = last char, cursor = lname+2 (past the quote) */
+0430			if( x = _findEOS(fname) ) {
+0431				lname = x-1; /*before the quote */
+0432				cursor = x+1; /*after the quote */
+0433				*x = 0;
+0434			}
+0435			else { eset(CURSERR); return Err; }
+0436			if(verbose[VP]){
+0437				fprintf(stderr,"\nparsed ");
+0438				dumpft(fname,lname);
+0439			}
+0440			return CharStar;
+0441	
+0442		} else if(_lit("\'")) {
+0443			fname=cursor;
+0444			/* lname = last char, cursor = lname+2 (past the quote) */
+0445			if( x=_mustFind(fname+1,fname+2,'\'',CURSERR) ) {
+0446				lname = x-1; 
+0447				cursor = x+1;
+0448			}
+0449			else { eset(CURSERR); return -1; }
+0450			if(verbose[VP]){
+0451				fprintf(stderr,"\nparsed ");
+0452				dumpft(fname,lname);
+0453			}
+0454			return Char;
+0455		
+0456		} else return Err;  /* no match, Err==0 */
+0457	}
+0458	<a name="462"><a name="463"><a name="464"><a name="465"><a name="466">
+0459	/* An asgn is a reln or an lvalue = asgn. Note that
+0460	   reln can match an lvalue.
+0461	 */
+0462	int _asgn(){ 
+0463		if(_reln()){
+0464			if(_lit(xeq)){
+0465				_asgn();
+0466				if(!error)_eq();
+0467			}
+0468		}
+0469		return error? 0: 1;
+0470	}
+0471	
+0472	/* a RELN is an expr or a comparison of exprs
+0473	 */
+0474	int _reln(){
+0475		if(_expr()){
+0476			if(_lit(xle)){
+0477				if(_expr()){
+0478					if(topdiff()0)pushone();
+0479					else pushzero();
+0480				}
+0481			}
+0482			else if(_lit(xge)){
+0483				if(_expr()){
+0484					if(topdiff()>=0)pushone();
+0485					else pushzero();
+0486				}
+0487			}
+0488			else if(_lit(xeqeq)){
+0489				if(_expr()){
+0490					if(topdiff()==0)pushone();
+0491					else pushzero();
+0492				}
+0493			}
+0494			else if(_lit(xnoteq)){
+0495				if(_expr()){
+0496					if(topdiff()!=0)pushone();
+0497					else pushzero();
+0498				}
+0499			}
+0500			else if(_lit(xgt)){
+0501				if(_expr()){
+0502					if(topdiff()>0)pushone();
+0503					else pushzero();
+0504				}
+0505			}
+0506			else if(_lit(xlt)){
+0507				if(_expr()){
+0508					if(topdiff()&lt;0)pushone();
+0509					else pushzero();
+0510				}
+0511			}
+0512			else return 1;  /* just expr is a reln */
+0513		}
+0514		return 0;   /* not an expr is not a reln */
+0515	}
+0516	<a name="519"><a name="529">
+0517	/* ;an EXPR is a term or sum (diff) of terms.
+0518	 */
+0519	int _expr(){
+0520		if(_lit(xminus)){    /* unary minus */
+0521			_term();
+0522			pushk(-toptoi());
+0523		}
+0524		else if(_lit(xplus)){
+0525			_term();
+0526			pushk(toptoi());
+0527		}
+0528		else _term();
+0529		while(!error){    /* rest of the terms */
+0530			int leftclass = stack[nxtstack-1].class;
+0531			int rightclass;
+0532			if(_lit(xminus)){
+0533				_term();
+0534				rightclass = stack[nxtstack-1].class;
+0535				int b=toptoi();
+0536				int a=toptoi();
+0537				if( rightclass || leftclass) pushPtr(a-b);
+0538				else pushk(a-b);
+0539			}<a name="540"><a name="541"><a name="542"><a name="543"><a name="544"><a name="545"><a name="546">
+0540			else if(_lit(xplus)){
+0541				_term();
+0542				rightclass = stack[nxtstack-1].class;
+0543				int b=toptoi();
+0544				int a=toptoi();
+0545				if( rightclass || leftclass) pushPtr(a+b);
+0546				else pushk(a+b);
+0547			}
+0548			else return 1;   /* is expression, all terms done */
+0549		}
+0550		return 0;   /* error, set down deep */
+0551	}
+0552	<a name="557"><a name="559"><a name="560">
+0553	/* ;a term is a factor or a product of factors.
+0554	 */
+0555	int _term() {
+0556		_factor();
+0557		while(!error) {
+0558			if(_lit(xstar)){
+0559				_factor();
+0560				if(!error)pushk(toptoi()*toptoi());
+0561			}
+0562			else if(_lit(xslash)){
+0563				if(*cursor=='*' || *cursor=='/') {
+0564					--cursor;    /* opps, its a comment */
+0565					return 1;
+0566				}
+0567				_factor();
+0568				int denom = toptoi();
+0569				int numer = toptoi();
+0570				int div = numer/denom;
+0571				if(!error)pushk(div);
+0572			}
+0573			else if(_lit(xpcnt)){
+0574				_factor();
+0575				int b=toptoi();
+0576				int a=toptoi();
+0577				int pct = a%b;
+0578				if(!error)pushk(pct);
+0579			}
+0580			else return 1;  /* no more factors */
+0581		}
+0582		return 0;
+0583	}
+0584	
+0585	/* a FACTOR is a ( asgn ), or a constant, or a variable reference, or a function
+0586	    reference. NOTE: factor must succeed or it esets SYNXERR. Callers test error
+0587	    instead of a returned true/false. This varies from the rest of the expression 
+0588	    stack.
+0589	 */
+<a name="594"><a name="595"><a name="596"><a name="597"><a name="600">
+0590	void _factor() {
+0591		union stuff foo;
+0592		Type type;
+0593		char* x;
+0594		if(_lit(xlpar)) {
+0595			_asgn();
+0596			if( x=_mustFind( cursor, cursor+5, ')' , RPARERR ) ) {
+0597				cursor = x+1; /*after the paren */
+0598			}
+0599		} 
+0600		else if( type=_konst() ) {
+0601		/* Defines fname,lname. Returns Type. 
+0602		   void pushst( int class, int lvalue, Type type, void* stuff );
+0603		*/
+0604			switch(type){
+0605			case Int: 
+0606				pushk( _atoi() );  /* integer, use private _atoi */
+0607				break;
+0608			case Char:
+0609				foo.uc = *fname;
+0610				pushst( 0, 'A', type, &amp;foo );
+0611				break;
+0612			case CharStar:		/* special type used ONLY here */
+0613				foo.up = fname;
+0614				pushst( 1, 'A', Char, &amp;foo );
+0615			case Err:<a name="619">
+0616				return;
+0617			}
+0618		}
+0619		else if( _symName() ) {
+0620			cursor = lname+1;
+0621			int where, len, class, obsize, stuff;
+0622			if( _symNameIs("MC") ) { 
+0623				_enter(0); return;
+0624			} else {
+0625				struct var *v = addrval();  /* looks up symbol */
+0626				if( !v ){ eset(SYMERR); return; } /* no decl */<a name="634">
+0627			  	char* where = (*v).value.up;
+0628			  	int integer =  (*v).value.ui; 
+0629			  	int character = (*v).value.uc;
+0630			  	int class=(*v).class; 
+0631		  		int type=(*v).type; 
+0632		  		int obsize = typeToSize(class,type);
+0633		  		int len=(*v).len;
+0634			  	if( class=='E' ) _enter(where);  /* fcn call */
+0635				else {   /* is var name */
+0636					if( _lit(xlpar) ) {		       /* is dimensioned */
+0637				  		if( !class ) {   /* must be class>0 */
+0638							eset(CLASERR);
+0639				  		} else {  /* dereference the lvalue */
+0640				  			/* reduce the class and recompute obsize */
+0641		  					obsize = typeToSize(--class,type);
+0642				  			/* increment where by subscript*obsize */
+0643			        		_asgn(); if( error )return;
+0644			        		_lit(xrpar);
+0645				      		int subscript = toptoi();
+0646							if(len-1)if( subscript&lt;0 || subscript>=len )eset(RANGERR); 
+0647							where += subscript * obsize;
+0648							foo.up = where;
+0649							pushst( class, 'L', type, &amp;foo);
+0650							return;
+0651						}
+0652					} else {	
+0653					/* is simple. Must push as 'L', &amp;storagePlace. */
+0654						if(class==1){
+0655							foo.up = &amp;((*v).value.up);
+0656						}
+0657						else{
+0658							foo.up = where;
+0659						}
+0660				  		pushst( class, 'L', type, &amp;foo);
+0661					}
+0662				}
+0663			}<a name="668">
+0664		}
+0665		else {
+0666			eset(SYNXERR);
+0667		}
+0668	}
+0669	
+0670	/************ scan tools ******************/
+0671	
+0672	/*	skip a possibly compound statement. Shortcoming is brackets
+0673	 *	in comments, they must be balanced.
+0674	 */
+0675	void _skipSt() {
+0676		_rem();
+0677		if( _lit(xlb) ) {		/* compound */
+0678			_skip('[',']');
+0679			_rem();
+0680			return;
+0681		}
+0682		else if( _lit(xif)||_lit(xwhile) ) {
+0683			_lit(xlpar);			/* optional left paren */
+0684			_skip('(',')');
+0685			_skipSt();
+0686			_rem();
+0687			if(_lit(xelse))_skipSt();
+0688			_rem();
+0689			return;
+0690		}
+0691		else {					/* simple statement, eol or semi ends */
+0692			while(++cursor&lt;endapp) {
+0693				if( (*cursor==0x0d)||(*cursor=='\n')||(*cursor==';') )break;
+0694			}
+0695			++cursor;
+0696			_rem();
+0697		}
+0698	}
+0699	
+0700	/* Returns true if user signals quit, or any other error.
+0701	 *	NOTE: MC 2 esets KILL on ESC, but test here for hard loop
+0702	 */
+0703	
+0704	#if defined(_WIN32)
+0705	int quit() {    // mods lrb
+0706	 int x;
+0707	 if (kbhit()) {
+0708	  x = getch_(ECHO);
+0709	  if (x == ESCAPE) {
+0710	   eset(KILL);
+0711	   return 1;
+0712	   }
+0713	  }
+0714	 return 0;
+0715	}
+0716	#else
+0717	int quit() {
+0718		int foo[]={0};  /* to avoid tcc error */
+0719		if(kbhit()==0x1b){
+0720			getch_(0);
+0721			return escKey();
+0722		}
+0723		return 0; 
+0724	}
+0725	#endif
+0726	
+0727	/* Match char or int, else do nothing. If match parse
+0728	 *  all comma separated declarations of that particular type
+0729	 *	making var table entries and allocating value storage. Returns false
+0730	 *	if not a declaration statement, true if it is. Leaves cursor just past
+0731	 *  optional semi. 
+0732	 */
+0733	int _decl() { 
+0734		Type t;
+0735		if( _lit(xchar) ) {
+0736			do {
+0737				_varAlloc( Char, 0 );  /* 2nd arg is vpassed */
+0738			} while( _lit(xcomma) );
+0739		} else if( _lit(xint) ) {
+0740			do {
+0741				_varAlloc( Int, 0 );  /* 2nd arg is vpassed */
+0742			} while( _lit(xcomma) );
+0743		} else {
+0744			return 0;  /* not decl */
+0745		}
+0746		_lit(xsemi);    /* is decl */
+0747		return 1;
+0748	}
+0749	<a name="752">
+0750	/* st(): interprets a possibly compound statement
+0751	 */
+0752	void st() {
+0753		char *whstcurs, *whcurs, *objt, *agin ;
+0754		brake=0;
+0755	
+0756		if(quit())return;
+0757		_rem();
+0758		stbegin();
+0759		stcurs = cursor;
+0760		if(_decl()){
+0761			_rem();
+0762			return;
+0763		}
+0764		else if( _lit(xlb) ){     /* compound statement */
+0765			for(;;){
+0766				_rem();
+0767				if(leave||brake||error)return;
+0768				if(_lit(xrb)){
+0769					_rem();
+0770					return;
+0771				}
+0772				st();
+0773			}
+0774		}
+0775		else if(_lit(xif)) {
+0776			if(_asgn()) {
+0777				if(toptoi()) {
+0778					st();
+0779					_rem();
+0780					if(_lit(xelse)) {
+0781						_skipSt();
+0782					}
+0783				} 
+0784				else {
+0785					_skipSt();
+0786					_rem();
+0787					if(_lit(xelse)) {
+0788						st();
+0789					}
+0790				}
+0791				_rem();
+0792				return;
+0793			}
+0794		}
+0795		else if(_lit(xwhile)) {
+0796			_lit(xlpar);    /* optional left paren */
+0797			if( !_asgn() )return;   /* error */
+0798			_lit(xrpar);
+0799			int condition = toptoi();
+0800			if( condition ) {
+0801	/* prepare for repeating/skipping while (stcurs) 
+0802		or object */ 
+0803				agin = stcurs;
+0804				objt = cursor;
+0805				st();
+0806	
+0807				if(brake) {
+0808					cursor = objt;	/* break: done with the while */
+0809					_skipSt();		/* skip over the object */
+0810					brake = 0;
+0811					return;
+0812				}
+0813				else {
+0814					cursor = agin;	/* no break: do the entire while again */
+0815					return;
+0816				}
+0817			}
+0818			else {
+0819				_skipSt();
+0820			}
+0821		}
+0822		else if(_lit(xsemi)) {
+0823			_rem();
+0824		}
+0825		else if(_lit(xreturn)) {
+0826			int eos = ( _lit(xrpar)
+0827						 || *cursor==*xlb
+0828						 || *cursor==*xrb
+0829						 || *cursor==*xsemi
+0830						 || *cursor==*xnl
+0831						 || *cursor==0x0d
+0832						 || *cursor==*xslash
+0833						);
+0834			if ( eos ) {
+0835				pushzero(); /* default return value */
+0836			}
+0837			else {
+0838				_asgn();  /* specified return value */
+0839			}
+0840			leave=1;		/* signal st() to leave the compound 
+0841							statement containing this return */
+0842			return;
+0843		}<a name="848">
+0844		else if(_lit(xbreak)) {
+0845			brake=1;
+0846			return;
+0847		}
+0848		else if( _asgn() ) {      /* if expression discard its value */
+0849			toptoi();
+0850	        _lit(xsemi);
+0851		}
+0852		else {
+0853			eset(STATERR);
+0854		}
+0855	}
+0856	
+0857	/*     Checks for balanced brackets, cursor to endapp inclusive. 
+0858	void checkBrackets() {
+0859	   int count;
+0860	   while(*(cursor++) != '[' &amp;&amp; cursor&le;endapp) ;
+0861	   if(_skip('[',']'))eset(RBRCERR);
+0862	}
+0863	 */
+0864	
+0865	/*
+0866	 *	Checks for balanced brackets, cursor to stop.
+0867	 */
+0868	int checkBrackets(char* stop) {
+0869		int err;
+0870		char* save=endapp;  /* _skip uses endapp as limit */
+0871		endapp=stop;
+0872		while(cursor&lt;stop) {
+0873			while(*(cursor++) != '[' &amp;&amp; cursor&lt;stop) ;
+0874			if(cursor&lt;stop) {
+0875				if(err = _skip('[',']'))return err;
+0876			}
+0877		}
+0878		endapp=save;
+0879		return 0;
+0880	}
+0881	
+0882	/*********** a variety of dumps for debugging **********/
+0883	char* typeToWord(Type t){
+0884		switch(t) {
+0885			case Char:     return "Char";
+0886			case Int:      return "Int";
+0887			default:       return " NOT A TYPE ";
+0888		}
+0889	}
+0890	
+0891	void dumpHex( void* where, int len ) {
+0892		char* w=where;
+0893		fflush(stdout);
+0894		fprintf(stderr,"\n%x: ",w);
+0895		int i;
+0896		for( i=0; i&lt;len; ++i )fprintf(stderr," %x",w[i]);
+0897	}
+0898	
+0899	/* dump from..to inclusive  */
+0900	void dumpft(char *from, char *to ) {
+0901		fflush(stdout);
+0902		while(from &le; to) fprintf(stderr,"%c",*(from++));
+0903	}
+0904	
+0905	/* dump the line cursor is in from cursor to nl */
+0906	void dumpLine() {
+0907		fflush(stdout);
+0908		char* begin = cursor;
+0909		char* end = cursor;
+0910		while (*end!=0x0a &amp;&amp; *end!=0x0d &amp;&amp; end&lt;endapp){  /* find end of line */
+0911			++end;
+0912		}
+0913		while(begin&lt;end){
+0914			fprintf(stderr,"%c",*begin);
+0915			++begin;
+0916		}
+0917	}
+0918	
+0919	int stateCallNumber=0;
+0920	void dumpState() {
+0921		fflush(stdout);
+0922		if(stateCallNumber==0){
+0923			fprintf(stderr,"\nADDRESSES (hex)");
+0924			fprintf(stderr,"\npr:     %x",pr);
+0925			fprintf(stderr,"\nstack:  %x",stack);
+0926			fprintf(stderr,"\nvartab: %x",vartab);	
+0927		}
+0928	
+0929		fprintf(stderr,"\n----\nSTATE %d\nparsing: ",stateCallNumber++);
+0930		dumpLine();
+0931		fprintf(stderr,"&lt;--end of line--");
+0932		dumpVarTab();
+0933		dumpStack();
+0934	}
+0935	
+0936	/* dump a just parsed piece of pr, typically a name */
+0937	void dumpName() {
+0938		fflush(stdout);
+0939		char *c = fname;
+0940		while( c &le; lname ) { 
+0941				pc(*(c++));
+0942		}
+0943	}
+0944	<a name="945">
+0945	/****  C tools to deal with typeless storage ****/
+0946	void put_int(char *where, int datum) {
+0947		memcpy( where, &amp;datum, sizeof(datum) );
+0948	}
+0949	int get_int(char *where) {
+0950		int datum;
+0951		memcpy( &amp;datum, where, sizeof(datum));
+0952		return datum;
+0953	}
+0954	void put_char(char *where, char datum) {
+0955		memcpy(where, &amp;datum, sizeof(datum));
+0956	}
+0957	char get_char(char *where) {
+0958		char datum;
+0959		memcpy( &amp;datum, where, sizeof(datum));
+0960		return datum;
+0961	}
+0962	
+0963	/*
+0964	 *	Saves and (and later restores) cursor, then
+0965	 *	scans program from pr to progend and allocates all externals 
+0966	 * 	in next fctn layer. An "endlibrary" line causes a new fctn layer
+0967	 * 	to be opened and globals done there.
+0968	 */
+0969	void tclink() {
+0970		char* x;
+0971		char* savedCursor=cursor;
+0972	/*	check Brackets from cursor to limit*/
+0973		cursor=pr;
+0974		if(checkBrackets(lpr))eset(RBRCERR+1000);
+0975		if(checkBrackets(apr))eset(RBRCERR+2000);
+0976		if(checkBrackets(endapp))eset(RBRCERR+3000);
+0977		if(error)whatHappened();
+0978		cursor=lpr;
+0979		newfun();
+0980		while(cursor&lt;endapp &amp;&amp; !error){
+0981			char* lastcur = cursor;
+0982			_rem();
+0983			if(_lit(xlb)) _skip('[',']');
+0984			else if(_decl()) ;
+0985			else if(_lit(xendlib)){
+0986				if(curfun==fun) {   /* 1st endlib, assume globals follow */
+0987					newfun();
+0988					curglbl=curfun;
+0989				}
+0990				else {        /* subsequent endlib, 
+0991				                 move assummed globals to frame 0 */
+0992					fun[0].lvar = nxtvar-1;     /* moved */
+0993					fun[1].fvar = nxtvar;      /* globals now empty */
+0994				}
+0995			}
+0996			else if(_symName()) {     /* fctn decl */
+0997				union stuff kursor;
+0998				kursor.up = cursor = lname+1;
+0999				newvar('E',2,1,&amp;kursor);
+1000				if(x=_mustFind(cursor, endapp, '[',LBRCERR)) {
+1001					cursor=x+1;
+1002					_skip('[',']');
+1003				}
+1004			}
+1005			else if(*cursor=='#'){
+1006				while(++cursor&lt;endapp) {
+1007					if( (*cursor==0x0d)||(*cursor=='\n') )break;
+1008				}
+1009			}
+1010	//printf("~985 %d %d %d %c\n",lpr-pr,apr-pr,cursor-pr,*cursor);
+1011			if(cursor==lastcur)eset(LINKERR);
+1012		}
+1013		cursor = savedCursor;
+1014		if(verbose[VL])dumpVarTab();
+1015	}
+1016	
+1017	/*	allocate four major areas
+1018	 */
+1019	int allocStuff() {
+1020	    int prlen=PRLEN, err;
+1021	    err = iProperty("pps/tc.prop", "PRLEN", &amp;prlen, PRLEN);
+1022	    if(err){
+1023	    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
+1024	    }
+1025	    pr = malloc(prlen);
+1026	    EPR=pr+prlen;
+1027	
+1028	    int funlen=FUNLEN,size;
+1029	    err = iProperty("pps/tc.prop", "FUNLEN", &amp;funlen, FUNLEN);
+1030	    if(err){
+1031	    	fprintf(stderr,"pps/tc.prop err, running fun[%d]",FUNLEN);
+1032	    }
+1033	    size = sizeof(struct funentry);
+1034	    fun = malloc(funlen*size);
+1035	    efun=fun+funlen*size;
+1036	
+1037	    stacklen=STACKLEN;
+1038	    err = iProperty("pps/tc.prop", "STACKLEN", &amp;stacklen, STACKLEN);
+1039	    if(err){
+1040	    	fprintf(stderr,"pps/tc.prop err, running stack[%d]",STACKLEN);
+1041	    }
+1042	    stack = malloc(stacklen*sizeof(struct stackentry));
+1043	
+1044	    vtablen=VTABLEN;
+1045	    err = iProperty("pps/tc.prop", "VTABLEN", &amp;vtablen, VTABLEN);
+1046	    if(err){
+1047	    	fprintf(stderr,"pps/tc.prop err, running var[%d]",VTABLEN);
+1048	    }
+1049	    vartab = malloc(vtablen*sizeof(struct var));
+1050	//fprintf(stderr,"~1035TC: sizes of pr %d fun %d stack %d var %d\n", 
+1051	//    			prlen, funlen, stacklen, vtablen);
+1052	}
+
+
+</pre>
+
+</body>
+</html>

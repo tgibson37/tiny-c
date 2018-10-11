@@ -88,6 +88,7 @@ int fileWrite(char* name, char* buff, int bufflen){
 int tcFopen(char* name, char* mode){
 	if(nxtUnit>MAX_UNIT)return -9;
 	FILE* file = fopen(name,mode);
+//fprintf(stderr,"~91 %s %c %d",name,mode,file);
 	if(file==NULL)return -1;
 	fileUnit[nxtUnit] = file;
 	return nxtUnit++;
