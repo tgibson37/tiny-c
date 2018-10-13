@@ -61,6 +61,8 @@ p.h2{
 </p><p class="toc-item"><a href="#fullw">A full walkthrough of one expression</a>
 </p><p class="toc-item"><a href="#postl">Postlogue</a>
 </p><p class="toc-item"><a href="#appen">Appendix - Listing of tc.c</a>
+
+
 <a name="intro"></a>
 </p><p class="h1">Introduction
 </p><p>
@@ -72,7 +74,7 @@ Several issues before we dive in:
 <li>
 I make extensive use of what I call the "twiddle notation." Example: tc.c ~94 means file tc.c, line 94.
 </li><li>
-In the html version of this writing the twiddles into the file tc.c are links, and the file tc.c is an appendix. All one document. Click the link to see the code, and click the browsers "back" arrow to return to the walkthrough text.
+In the html version of this writing the twiddles into the file tc.c are links, and the file tc.c is an appendix. All one document. Click the link to see the code, and click the browser's "back" arrow to return to the walkthrough text.
 </li><li>
 The link is typically to a few lines above the referenced line to show some context.
 </li><li>
@@ -90,9 +92,12 @@ It is GPL'd, so download it and play with the source.
 </ul>
 <p>
 We begin...
+
+
 <!--Frequently encountered code-->
 <a name="frequ"></a>
 </p><p class="h1">Frequently encountered code
+
 </p><p class="h2">cursor, stcurs
 </p><p>There are two cursors.
 </p>
@@ -105,117 +110,116 @@ We begin...
  the matched text. Stcurs points to the beginning of the current statement. 
 
 </p><p class="h2">lit, the x words
-
 </p>
-
 <pre>
 	int _lit(char *s)
 </pre>
-
 <p>Lit matches an exact string, returning true on match, else false. It advances 
 the cursor over spaces and tabs, but does not go to the next line. If the cursor 
 then points to an exact copy of the string s, it advances the cursor beyond that 
 copy and returns true. Otherwise it returns false. This is used to match 
 operators, punctuation, and keywords. Almost always it is embedded in an if 
 statement:
-
 </p>
-
 <pre>
 	if(_lit(xwhile)) {...
 </pre>
-
-<p>The exception is optional punctuation where it matters not if the match was 
-true or false. The word xwhile is defined in tc.c <a href="#16">~16</a> as “while”. All keywords, 
-punctuations, and operators are defined in similar x words. The list starts at 
-<a href="#12">~12</a>. So
-
+<p>The exception is optional punctuation where it matters not if the
+match was true or false. 
+The word xwhile is defined in tc.c <a href="#16">~16</a> as “while”. 
+All keywords, punctuations, and operators are defined in 
+similar x words. 
+The list starts at <a href="#12">~12</a>. So
 </p>
-
 <pre>
 	if(_lit(xsemi)) {…
 </pre>
-
-<p>is testing for a semicolon.
-</p><p>It is not a error for a _lit call to return false. As we will see parsing
- is mostly code asking, “are you this?, no, well are you that?,...”. Look for 
- chains of else-if's doing just such a search.
+<p>
+is testing for a semicolon.
+</p><p>
+It is not an error for a _lit call to return false. 
+As we will see parsing is mostly code asking, “are you this?, no, 
+well are you that?,...”. 
+Look for chains of else-if's doing just such a search.
 
 </p><p class="h2">eset, error
-</p><p>But errors do occur. When a parsing error occurs, perhaps an undeclared or 
-misspelled variable, or weird syntax the function eset sets the variable error to 
-a code. 
-
+</p><p>
+But errors do occur. When a parsing error occurs, perhaps an 
+undeclared or misspelled variable, or weird syntax the function 
+eset sets the variable error to a code. 
 </p>
-
 <pre>
 	eset(STATERR);
 </pre>
-
-<p>The codes are defined in tc.h ~33. The variable error is frequently tested, for
- example at the beginning of each statement. Eventually the interpreter grinds to 
- a halt, and issues a message.
+<p>The codes are defined in tc.h ~33. 
+The variable error is frequently tested, for example at the 
+beginning of each statement. 
+Eventually the interpreter grinds to a halt, and issues a message.
 
 </p><p class="h2">rem
-
 </p>
-
 <pre>
 	void _rem() 
 </pre>
-
-<p>_rem skips whitespace and remarks. It keeps skipping until the cursor is on 
-significant program text. _rem is the only way the cursor advances to the next 
-line. 
+<p>_rem skips whitespace and remarks. 
+It keeps skipping until the cursor is on significant program text. 
+_rem is the only way the cursor advances to the next line. 
 
 </p><p class="h2">verbose
+</p><p>
+The array verbose has switches that turn on debugging reports. 
+Ignore an if(verbose[XX])… you encounter. 
+Or use them to see the parsing in action.
+The list of XX's to plug in are documented in 
+“the new tiny-c.doc,” debug section, the v (verbose) command. 
+You can turn individual reports on and off.
 
-</p><p>The array verbose has switches that turn on debugging reports. Ignore
-an if(verbose[XX])… you encounter. Or use them to see the parsing in action.
-The list of XX's to plug in are documented in “the new tiny-c.doc” debug
-section, the v command. You can turn individual reports on and off.
 
 <!--Token matching-->
 <a name="token"></a>
 </p><p class="h1">Token matching
-</p><p>A program is a string of "tokens."  For tiny-c the tokens are:
+</p><p>A program is a string of "tokens."  
+For tiny-c the tokens are:
 <ul>
 <li>symbols: keywords, function, variable names
 </li><li>	constants: numbers, character, strings
 </li><li>	punctuation: operators, structure definers ([], ())
 </li><li>	end-of-line (including a remark if present)
 </li>
-
-</ul><p>Those tokens are the object of the "Are you this?" logic. The function
- _lit is used to ask this question for keywords and punctuation, _rem does
-end-of-line. We defined those in the Frequent..code section above.  Constants
-are handled by _konst, and functions and variable names, collectively called 
-symbols by _symName.
+</ul>
+<p>
+Those tokens are the object of the "Are you this?" logic. 
+The function _lit is used to ask this question for keywords 
+and punctuation, _rem does end-of-line. 
+We defined those in the Frequent..code section above.  
+Constants are handled by _konst, and functions and variable names, 
+collectively called symbols by _symName.
 
 </p><p class="h2">symName	
-</p><p>Consider this code with the cursor at or just before the x:
+</p><p>
+Consider this code with the cursor at or just before the x:
 </p>
-
 <pre>
 	         x = 1
 	cursor--^
 </pre>
-
-<p>As the parser grinds away it eventually asks, "Are you a symbol?" 
+<p>
+As the parser grinds away it eventually asks, "Are you a symbol?" 
 An example is <a href="#253">~253</a> in tc.c:
 </p>
-
 <pre>
 	if( !_symName() ) {    /*defines fname,lname. True is match.*/
 </pre>
-
-<p>_symname() examines the next significant text after the cursor, but on the 
-same line. If it is a symbol it defines two global char* pointers to the first
-and last characters of the symbol, fname and lname, and returns the length of
-the symbol, which also serves as a TRUE. If it is not a symbol it returns 0,
-FALSE. In either case the cursor is left at the first significant
-non-whitespace character. Here is the code, tc.c <a href="#181">~181</a>:
-
+<p>
+_symname() examines the next significant text after the cursor, 
+but on the same line. 
+If it is a symbol it defines two global char* pointers to 
+the first and last characters of the symbol, fname and lname, 
+and returns the length of the symbol, which also serves as a TRUE. 
+If it is not a symbol it returns 0, FALSE. 
+In either case the cursor is left at the first significant
+non-whitespace character. 
+Here is the code, tc.c <a href="#181">~181</a>:
 <pre>
 	0181	int _symName() {
 	0182		char* temp;
@@ -236,20 +240,23 @@ non-whitespace character. Here is the code, tc.c <a href="#181">~181</a>:
 	0197		return lname-fname+1;  /* good, fname and lname defined */
 	0198	}
 </pre>
-
-<p>At <a href="#183">~183</a> the cursor is advanced over whitespace. At <a href="#185">~185</a> the first character 
-is tested for alphabetic or underscore. If true this is a symbol and fname 
-is defined. Otherwise it is not a symbol. The code at <a href="#189">~189</a>..192 defines lname. 
+<p>
+At <a href="#183">~183</a> the cursor is advanced over whitespace. 
+At <a href="#185">~185</a> the first character is tested for 
+alphabetic or underscore. 
+If true this is a symbol and fname is defined. 
+Otherwise it is not a symbol. 
+The code at <a href="#189">~189</a>..192 defines lname. 
 And at <a href="#197">~197</a> the length is returned.
-</p><p>Another part of the pattern is changing state. _symname does a trivial 
-state change, the cursor over whitespace. Often when the answer is YES the 
-state change is more significant.
+</p><p>
+Another part of the pattern is changing state. 
+_symname does a trivial state change, the cursor over whitespace. 
+Often when the answer is YES the state change is more significant.
 
 </p><p class="h2">konst
-</p><p>Highlights of the code in tc.c:
-
+</p><p>
+Highlights of the code in tc.c:
 </p>
-
 <pre>
 	0411	Type _konst() {
 	0412		char* x;
@@ -268,30 +275,29 @@ state change is more significant.
 	0456		} else return Err;  /* no match, Err==0 */
 	0457	}
 </pre>
-
 <p>And in tc.h is:
-
 </p>
-
 <pre>
 	typedef enum type {Err,Char,Int,CharStar} Type;
 </pre>
-
-<p>The ellipses have code that finds and sets lname and advances the 
-cursor, different in detail, but similar to code in _symname. From the 
-code shown we see that_konst() not only sets fname and lname, it returns 
-the Type, defined in the typedef. And Err is 0, i.e. FALSE, so it 
-serves as a boolean: "Are you a constant?" 
+<p>
+The ellipses have code that finds and sets lname and advances the 
+cursor, different in detail, but similar to code in _symname. 
+From the code shown we see that_konst() not only sets fname and lname, 
+it returns the Type, defined in the typedef. 
+And Err is 0, aka boolean FALSE.
 </p><p>
-Type Err by the way is a misnomer. It is not an error. Rather it an answer "NO" to the question: "Are you a constant?" 
+Type Err by the way is a misnomer. It is not an error. Rather it is an answer "NO" to the question: "Are you a constant?" 
+
 
 <!--The expression stack-->
 <a name="expre"></a>
 </p><p class="h1">The expression stack
-</p><p>tiny-c's stack holds not just the datum but also information about 
-the datum. So what is pushed is a struct:
+</p><p>
+tiny-c's stack holds not just the datum but also information about 
+the datum. 
+So what is pushed is a struct:
 </p>
-
 <pre>
 	/* a stack entry */
 	struct stackentry { 
@@ -299,121 +305,145 @@ the datum. So what is pushed is a struct:
 		union stuff value; 
 	};
 </pre>
-
-<p>class is an integer, 0 for actual datum, or 1 for pointer reference to 
-the datum. If we ever implement pointers to pointers (2 and higher dimension 
-arrays) larger values would happen, it is conceptually the distance from 
-the pointer to the datum..
-</p><p>lvalue is true if the data is a valid lvalue, a reference to the 
-value's storage, false otherwise. Thus function _eq (tc.c <a href="#57">~57</a>) which affects 
-an assignment has the address it needs to do so. Normally data is stored in 
-the array pr (tc.h ~98) which also has all the code being interpreted. After 
-all the code, libraries and application, are loaded into pr (the program 
-array) the rest of pr is data values.
-</p><p>How an array name is parsed is interesting. It is both a class 1, and 
-an lvalue. Its value can be changed by a simple assignment. For example:
-
+<p>
+class is an integer, 0 for actual datum, or 1 for pointer reference 
+to the datum. 
+If we ever implement pointers to pointers (2 and higher dimension 
+arrays) larger values would happen. 
+It is conceptually the distance from the pointer to the datum.
+</p><p>
+lvalue is true if the data is a valid lvalue, a reference to the 
+value's storage, false otherwise. 
+Thus function _eq (tc.c <a href="#57">~57</a>) which affects 
+an assignment has the address it needs to do so. 
+Normally data is stored in the array pr (tc.h ~98) which also has 
+all the code being interpreted.
+After all the code, libraries and application are loaded into pr
+(the program array), the rest of pr is data values.
+</p><p>
+How an array name is parsed is interesting. 
+It is both a class 1, and an lvalue. 
+Its value can be changed by a simple assignment. 
+For example:
 </p>
-
 <pre>
 	char buff(100), bp(0); bp = buff;   …;  bp = bp+1;
 </pre>
-
-<p>declares a buff and a “pointer” bp. It is a pointer ONLY because of the 
-way it is used in subsequent code, first to set its value to the same as 
-buff's, second to increment that pointer. The value of bp is in vartab. 
-When bp is parsed it goes into the stack with stuff.value.up pointing into 
-vartab, not pr.
-</p><p>The type is an enum, tc.h ~65:
-
+<p>
+declares a buff and a “pointer” bp. 
+It is a pointer ONLY because of the way it is used in subsequent code, 
+first to set its value to the same as buff's, second to increment 
+that pointer. 
+The value of bp is in vartab. 
+When bp is parsed it goes into the stack with stuff.value.up pointing into vartab, not pr.
+</p><p>
+The type is an enum, tc.h ~65:
 </p>
-
 <pre>
 	typedef enum type {Err,Char,Int,CharStar} Type;
 </pre>
-
 <p>The union stuff has the value, tc.h ~63:
-
 </p>
-
 <pre>
 	union stuff { char uc; int ui; void* up; };
 </pre>
-
-<p>If class is 1 or if lvalue is true the value is referenced via stuff.up 
-which points to the value. Some values are in the variable table, vartab, 
-and some in program space, pr, as described above. Hence stuff.up must be 
-a void*, i.e. typeless. More on typeless coming up.
+<p>
+If class is 1 or if lvalue is true the value is referenced via 
+stuff.up which points to the value. 
+Some values are in the variable table, vartab, and some in 
+program space, pr, as described above. 
+Hence stuff.up must be a void*, i.e. typeless. 
+More on typeless coming up.
 tiny-c's stack is declared in tc.h ~72:
-
 </p>
-
 <pre>
 	/* the stack */
 	struct stackentry *stack;
 	int nxtstack, stacklen;
 </pre>
-
-<p>nxtstack starts out 0 and is incremented by each push, and decremented by 
-pops. stacklen is the size.
-</p><p>The stack code is in stack.c. It is short and reasonably readable, 
+<p>
+nxtstack starts out 0 and is incremented by each push, 
+and decremented by pops. 
+stacklen is the size.
+</p><p>
+The stack code is in stack.c. It is short and reasonably readable, 
 so an actual walkthrough is not needed.
+
 
 <!--The variable table-->
 <a name="varia"></a>
 </p><p class="h1">The variable table
-</p><p>The file var.c defines actions on the variable table. All symbols, 
-both variables and functions, are placed in this table when they are 
-declared. The table is a stack of frames. Frame 0 has all the globals in 
-all the libraries. Frame 1 has all the globals for the application. Frames 
-2 and up have locals. Opening a new frame is done by newfun, var.c ~6, 
-closing by fundone, ~24. tc.h ~76..91 define the arrays used for defining 
-frames (fun) and the frames themselves (vartab), plus various pointers 
-into them. The arrays are malloc'd, hence they are defined in tc.h as 
+</p><p>
+The file var.c defines actions on the variable table. 
+All symbols, both variables and functions, are placed in this 
+table when they are declared. 
+The table is a stack of frames. 
+Frame 0 has all the globals in all the libraries. 
+Frame 1 has all the globals for the application. 
+Frames 2 and up have locals. 
+Opening a new frame is done by newfun, var.c ~6, 
+closing by fundone, ~24. 
+tc.h ~76..91 define the arrays used for 
+defining frames (fun) and the frames themselves (vartab), 
+plus various pointers into them. 
+The arrays are malloc'd, hence they are defined in tc.h as 
 pointers, ~82 and ~90.
-</p><p>Read newfun and fundone, they are both straightforward to the 
-push/pop task as functions are entered, or returned. But vartab needs 
-a bit of explanation.
-</p><p>At tc.h ~85 is the declaration of an entry in this table:
-
+</p><p>
+Read newfun and fundone, they are both straightforward 
+to the push/pop task as functions are entered, or returned. 
+But vartab needs a bit of explanation.
+</p><p>
+At tc.h ~85 is the declaration of an entry in this table:
 </p>
-
 <pre>
 	struct var { 
 		char name[VLEN+1]; int class; Type type; int len; int brkpt;
 		union stuff value; 
 	};
 </pre>
+<p>
+When a function or variable is declared newvar (var.c ~76) 
+adds a struct var describing that variable into the current frame: 
+name, class, type, length. 
+And brkpt (used only by the debugger) is zero. Var.c ~83 returns 
+the object size, 4 for ints and 1 for chars in this implementation, 
+used by _allocSpace ~83 to allocate space for the actual data. 
+Length is 1 except for arrays when it is the declared dimension plus 1.
+</p><p>
+Class is 0 for datum, 1 for array, 'E' for function. 
+</p><p>
+The value is the address where the value is stored for a datum or array 
+(value.up, a void *, tc.h ~63). 
+For a function value.up is the entry point of the function's 
+definition, which is just after the function's name. 
+So it points to either the first argument declaration for the 
+function, or the [ of its compound statement body if there are no 
+arguments. 
 
-<p>When a function or variable is declared newvar (var.c ~76) adds a struct var
-describing that variable into the current frame: name, class, type, length. 
-And brkpt (used only by the debugger) is zero. Var.c ~83 returns the object 
-size, 4 for ints and 1 for chars in this implementation, used by _allocSpace 
-~83 to allocate space for the actual data. Length is 1 except for arrays 
-when it is the declared dimension plus 1.
-</p><p>Class is 0 for datum, 1 for array, 'E' for function. 
-</p><p>The value is the address where the value is stored for a datum or array 
-(value.up, a void *, tc.h ~63). For a function value.up is the entry point 
-of the function's definition, which is just after the function's name. So 
-it points to either the first argument declaration for the function, or the 
-[ of its compound statement body if there are no arguments. 
 
 <!--Typeless data access-->
 <a name="typel"></a>
 </p><p class="h1">Typeless data access
-</p><p>The original tiny-c code was 8080 assembler. The 8080 platform is 
-typeless. The closest it got to types beyond bytes was a few instructions 
-that were 2 bytes. This implementation is reverse coded from my 1977 8080 
-code listing. To do it that way needed tools to handle data in a typeless 
-fashion. The struct stuff is an example. It can be passed through many 
-levels of calls, and only the ultimate receiving code need determine its 
-actual type. But stuff is never passed without its descriptive information. 
-Problem solved. Intermediate passing is typeless, but end receiver has 
+</p><p>The original tiny-c code was 8080 assembler. 
+The 8080 platform is typeless. 
+The closest it got to types beyond bytes was a few instructions 
+that were 2 bytes. 
+This implementation is reverse coded from my 1977 8080 code listing. 
+To do it that way needed tools to handle data in a typeless fashion. 
+The struct stuff is an example. 
+It can be passed through many levels of calls, and only the 
+ultimate receiving code need determine its actual type. 
+But stuff is never passed without its descriptive information. 
+Problem solved. 
+Intermediate passing is typeless, but the end receiver has 
 the data to do the proper thing. 
-</p><p>But storage needed to be typeless, too. I toyed with using two 
-arrays, char* and int*. But settled on using C's typeless memcpy function. 
-So read the code at tc.c <a href="#945">~945</a>, get_int, put_int, etc. This turned memory 
-into pure ram, just like the 8080.
+</p><p>But storage needed to be typeless, too. 
+I toyed with using two arrays, char* and int*, 
+but settled on using C's typeless memcpy function. 
+So read the code at tc.c <a href="#945">~945</a>, 
+get_int, put_int, etc. 
+This turned memory into pure ram, just like the 8080.
+
 
 <!--Function calls-->
 <a name="funct"></a>
@@ -425,193 +455,298 @@ arguments not yet parsed. _factor calls _enter which:
 </p><ol>
 <li>completes the parsing
 </li><li>moves the cursor to the entry point of the function
-</li><li>parses the argument declarations assigning them values from the stack
+</li><li>parses the argument declarations assigning them 
+values from the stack
 </li><li>executes the function body
 </li><li>moves the cursor back to just after the totally parsed call
-</li><li>returns with the global flag 'leave' set true if a return value 
-is stacked, else false.
+</li><li>returns with the global flag 'leave' set true if a 
+return value is stacked, else false.
 </li>
 </ol>
-<p>Upon _enter returning, _factor is done also, and returns. So the net 
-effect of the six steps above is the pushed value, plus advancing the 
-cursor past the call.<p>Notice how this fits into the pattern of anything 
-_factor recognizes. Whether it is a variable, a constant, a parenthesis 
-expression or a function call the net effect is the same: a pushed value 
-and an advanced cursor.
-</p><p>_enter, <a href="#307">~307</a>, takes one argument, char* where. A special case is 
-where==0, which is a machine call. If not 0 it is a pointer to the entry 
-point of the function definition, somewhere in array pr. This walkthrough 
-will cover that latter case.
-</p><p>The code is divided into two sections, called in the comments 
-ABOVE and BELOW.  That boundary separates the parsing of  call data 
-from function defined arguments. Above, <a href="#308">~308..340</a>, 
-completes the call parsing stacking the argument values, and handles 
-the special case of machine call. 
-That is the first of the above 5 steps. Below, <a href="#343">~343..389</a>, 
-handles the usual case of calling a tiny-c function, the remaining five steps.
-</p><p>At <a href="#312">~312</a> advise the debugger a function call is in progress. At <a href="#313">~313</a> 
-skip the optional left paren, if present. Then real work begins:
-</p><p>	<a href="#314">~314</a>: Look for all punctuation that means there are no arguments.
-</p><p>	<a href="#323">~323</a>..327: parse all the args. Note that commas are required to 
-keep this loop going.
-</p><p>	<a href="#330">~330</a>: skip optional right paren.
-</p><p>	<a href="#331">~331</a>: advance cursor over remark and/or newline if present.
-</p><p>	<a href="#332">~332</a>..340: test for and handle machine call special case. (There 
-must be at least one argument, the MC number. <a href="#333">~333</a> nextstack seems a poor 
-choice to test, 0 means empty stack. A better test would be nargs. I document 
-here the code the way it is, not the way it could be.)
-</p><p>	<a href="#339">~339</a>: return for this case. Machine calls do not do BELOW code.
-</p><p>	<a href="#341">~341</a>..391: The fun stuff begins!
-</p><p>	<a href="#343">~343</a>: save the cursors.
-</p><p>	<a href="#345">~345</a>: open a new stack frame for locals.
-</p><p>	<a href="#346">~346</a>..~371 parse the declarations creating locals in the new stack frame. Initialize them with the values stacked ABOVE. _setArg does that. Down count for each arg, and the loop ends when there are no more declarations.
-</p><p>Assume for now a fixed number of arguments. The varargs case is treated later.
-</p><p>	<a href="#383">~383</a>: if no error execute the body. It is a compound statement, therefore a call to st suffices.
-</p><p>	<a href="#384">~384</a>: st() may or may not push a resulting value. leave is true if it did. Otherwise push a zero. We need that because _enter must always return a pushed value.
-</p><p>	<a href="#386">~386</a>..389 cleanup: restore the cursors, pop the locals variable frame (fundone), advise the debugger we are leaving a function.
+<p>
+Upon _enter returning, _factor is done also, and returns. 
+So the net effect of the six steps above is the pushed value, 
+plus advancing the cursor past the call.
+</p><p>
+Notice how this fits into the pattern of anything _factor recognizes. 
+Whether it is a variable, a constant, a parenthesis 
+expression or a function call the net effect is the same: 
+a pushed value and an advanced cursor.
+</p><p>
+_enter, <a href="#307">~307</a>, takes one argument, char* where. 
+A special case is where==0, which is a machine call. 
+If not 0 it is a pointer to the entry point of the function 
+definition, somewhere in array pr. 
+This walkthrough will cover that latter case.
+</p><p>
+The code is divided into two sections, called in the comments 
+ABOVE and BELOW.  
+That boundary separates the parsing of  call data 
+from function defined arguments. 
+Above, <a href="#308">~308..340</a>, completes the call parsing 
+stacking the argument values, and handles the special case of 
+machine call. 
+That is the first of the above 5 steps. 
+Below, <a href="#343">~343..389</a>, handles the usual case of 
+calling a tiny-c function, the remaining five steps.
+</p><p>
+At <a href="#312">~312</a> advise the debugger a function call 
+is in progress. 
+At <a href="#313">~313</a> skip the optional left paren, if present. 
+Then real work begins:
+</p><p>	
+<a href="#314">~314</a>: Look for all punctuation that means 
+there are no arguments.
+</p><p>	
+<a href="#323">~323</a>..327: parse all the args. 
+Note that commas are required to keep this loop going.
+</p><p>	
+<a href="#330">~330</a>: skip optional right paren.
+</p><p>	
+<a href="#331">~331</a>: advance cursor over remark and/or 
+newline if present.
+</p><p>	
+<a href="#332">~332</a>..340: test for and handle 
+machine call special case. 
+(There must be at least one argument, the MC number. 
+<a href="#333">~333</a> nextstack seems a poor choice to test, 
+0 means empty stack. 
+A better test would be nargs. 
+I document here the code the way it is, not the way it could be.)
+</p><p>	
+<a href="#339">~339</a>: return for this case. 
+Machine calls do not do BELOW code.
+</p><p>	
+<a href="#341">~341</a>..391: The fun stuff begins!
+</p><p>	
+<a href="#343">~343</a>: save the cursors.
+</p><p>	
+<a href="#345">~345</a>: open a new stack frame for locals.
+</p><p>	
+<a href="#346">~346</a>..~371: parse the declarations creating locals in the new stack frame. 
+Initialize them with the values stacked ABOVE. 
+_setArg does that. 
+Down count for each arg, and the loop ends when there are 
+no more declarations.
+</p><p>
+Assume for now a fixed number of arguments. 
+The varargs case is treated later.
+</p><p>
+<a href="#383">~383</a>: if no error execute the body. 
+It is a compound statement, therefore a call to st suffices.
+</p><p>
+<a href="#384">~384</a>: st() may or may not push a resulting value. 
+leave is true if it did. 
+Otherwise push a zero. 
+We need that because _enter must always return a pushed value.
+</p><p>
+<a href="#386">~386</a>..389 cleanup: 
+restore the cursors, pop the locals variable frame (fundone), 
+advise the debugger we are leaving a function.
 
 </p><p class="h2">Variable number of arguments
-</p><p>One of the x words is xvarargs defined as a 3 dot ellipsis, tc.c <a href="#44">~44</a>. 
-It is used in BELOW in parsing the argument declarations, <a href="#363">~363</a>, and, like C,
- specifies a variable number of arguments, from zero up. Its only use so far 
- is for the printf function in pps/library.tc ~10. This is a new feature in 
- this implementation of tiny-c, it did not exist in the 1977 versions. And 
- it was amazingly easy to implement because a machine call, MC, has always 
- had a variable number of arguments. So most of the work was already done ABOVE. 
-</p><p>All the parser does is set a global flag, varargs. It is initially zero, and after every machine call, 
-at <a href="#335">~335</a> it is set back to zero just in case it was used. So going into BELOW we assured it is zero.
-At <a href="#364">~364</a> to the number of arguments plus one, the latter to make it 
-flag true if there are zero arguments. And at <a href="#372">~372</a>..381 a portion of the 
-cleanup to assure the number of arguments parsed equals the number declared 
-is made conditional on the fixed argument case. That is still a valid test 
-for that case.
-</p><p>In _enter <a href="#310">~310</a> with varargs true the correct number of arguments is 
-recovered. And that is all! Why this works is magic. But it does. I get 
-confused every time I try to figure it out again. But here goes.
-</p><p>The whole varargs thing begins BELOW, then completes on another call 
-to _enter ABOVE. It's topsy-turvey. When a function is called its supplied 
-arguments are parsed, evaluated, and pushed, counting the pushes in nargs. 
-All that happens ABOVE with no knowledge of being fixed or variable number 
-of arguments. Then, BELOW, the cursors are moved and the function definition 
-entered. As the last argument is the xvarargs match, the 3 dot ellipsis. 
-Now the varargs logic kicks in. The body is entered, and that body 
-(for printf) is an MC call:
-
+</p><p>
+One of the x words is xvarargs defined as a 3 dot ellipsis, 
+tc.c <a href="#44">~44</a>. 
+It is used in BELOW in parsing the argument declarations, 
+<a href="#363">~363</a>, and, like C,
+ specifies a variable number of arguments, from zero up. 
+ Its only use so far  is for the printf function in pps/library.tc ~10. 
+ This is a new feature in this implementation of tiny-c. 
+ It did not exist in the 1977 versions. 
+ And it was amazingly easy to implement because a machine call, 
+ MC, has always  had a variable number of arguments. 
+ So most of the work was already done ABOVE. 
+</p><p>
+All the parser does is set a global flag, varargs. 
+It is initially zero, and after every machine call, 
+at <a href="#335">~335</a> it is set back to zero 
+just in case it was used. 
+So going into BELOW we assured it is zero.
+At <a href="#364">~364</a> to the number of arguments plus one, 
+the latter to make it flag true if there are zero arguments. 
+And at <a href="#372">~372</a>..381 a portion of the cleanup to assure 
+the number of arguments parsed equals the number declared is made 
+conditional on the fixed argument case. 
+That is still a valid test for that case.
+</p><p>
+In _enter <a href="#310">~310</a> with varargs true the correct 
+number of arguments is recovered. 
+And that is all! 
+Why this works is magic. 
+But it does. 
+I get confused every time I try to figure it out again. 
+But here goes.
+</p><p>
+The whole varargs thing begins BELOW, then completes on another 
+call to _enter ABOVE. 
+It's topsy-turvey. 
+When a function is called its supplied arguments are parsed, 
+evaluated, and pushed, counting the pushes in nargs. 
+All that happens ABOVE with no knowledge of being fixed or 
+variable number of arguments. 
+Then, BELOW, the cursors are moved and the function definition 
+entered. 
+As the last argument is the xvarargs match, the 3 dot ellipsis. 
+Now the varargs logic kicks in. 
+The body is entered, and that body (for printf) is an MC call:
 </p>
-
 <pre>
 	printf char fmt(0); ... [
 		MC 101
 	]
 </pre>
+<p>_enter is called again, and ABOVE restores the nargs, 
+parses and pushes the 101 thus bumping nargs by 1, 
+and calls machineCall(nargs), <a href="#334">~334</a>. 
+MC 101 does its thing, pFmt, a recursive use of the fmt string 
+to print the formatted set of arguments, machineCall.c ~65.
 
-<p>_enter is called again, and ABOVE restores the nargs, parses and pushes the 
-101 thus bumping nargs by 1, and calls machineCall(nargs), <a href="#334">~334</a>. MC 101 does 
-its thing, pFmt, a recursive use of the fmt string to print the formatted set 
-of arguments, machineCall.c ~65.
 
 <!--Expression grammar-->
 <a name="gramm"></a>
 </p><p class="h1">Expression grammar
-</p><p>What is a grammar? It is a way of assembling tokens (words and punctuation) into meaningful natural language sentences. By analogy for a 
-computer language a grammar defines a valid statement.
-</p><p>Computer languages have a well-defined grammar. Usually the grammar 
-can be described very compactly using a formal notation called Backus-Naur 
-form, BNF. Here in simple English is the essence of BNF for just some of 
-tiny-c, captured from comments and slightly edited. It is both definitions 
-and a recipe for discovery:
-
+</p><p>What is a grammar? 
+It is a way of assembling tokens (words and punctuation) into meaningful natural language sentences. 
+By analogy for a computer language a grammar defines a valid statement.
+</p><p>
+Computer languages have a well-defined grammar. 
+Usually the grammar can be described very compactly using a formal 
+notation called Backus-Naur form, BNF. 
+Here in simple English is the essence of BNF for just some of 
+tiny-c, captured from comments and slightly edited. 
+It is both definitions and a recipe for discovery:
 </p>
-
 <pre>
 	An ASGN is a RELN or an LVALUE = ASGN
 	an LVALUE is a symbol, specifically a variable reference.
 	a RELN is an EXPR or a comparison of EXPRs
 	an EXPR is a TERM or sum or difference of TERMs
 	a TERM is a FACTOR or a product, quotient, or remainder of FACTORs
-	a FACTOR is an ( ASGN ), or a constant, or a variable reference, or a 
-		function call.
+	a FACTOR is an ( ASGN ), or a constant, or a variable reference, 
+		or a function call.
 </pre>
-
-<p>Real BNF would continue by defining symbol, comparison, sum, product, etc. 
-In fact it sometimes  goes down to defining the alphabet and the digits. 
-Very detailed. But the above gives the idea. A high level element is defined 
-in terms of lower level elements all the way to the most primitive.
-</p><p>If you are familiar with BNF and with recursion, skip the rest of 
-this section. If it's new to you read on.
-</p><p>Consider this assignment:
+<p>Real BNF would continue by defining symbol, comparison, 
+sum, product, etc. 
+In fact it sometimes  goes down to defining the alphabet 
+and the digits. 
+Very detailed. But the above gives the idea. 
+A high level element is defined in terms of lower level elements 
+all the way to the most primitive.
+</p><p>
+If you are familiar with BNF and with recursion, skip the rest of 
+this section. 
+If it's new to you read on.
+</p><p>
+Consider this assignment:
 </p><pre>
 	a = b = c = 77
 </pre>
-<p>Following the recipe above ASGN parses the 'a' and concludes it has at 
-least a RELN and maybe an assignment. Then it parses the '='. So it is not 
-a RELN. It must be an assignment, LVALUE = ASGN. So 'a' must be the LVALUE, 
-and the new ASGN must be the not yet parsed 'b = c = 77'. 
-So the new ASGN parses the 'b' and the '=', 
-and the third ASGN must be '77'. The third parses the 'c' and the '=' and 
-the fourth ASGN must be just the 77. And (looking ahead) it is, but let's 
-get there in small steps, following the recipe.
-</p><p>The fourth ASGN tries RELN first, and RELN can be an EXPR. Then EXPR can be a TERM, which can be a FACTOR, which can be a constant. 77 is a constant, 
-and therefore the entire chain is satisfied.
-</p><p>Parsing goes top down through the recipe. When it gets a NO reply, 
-it moves up a level, and at that level the next alternative. When all 
-alternatives at a given level are satisfied it ascends one level saying NO, 
-and that higher level tries its next alternative. This process is called 
-"top down recursion."
-</p><p>Next is the expression parser. This goes into more detail than the 
-quick recipe overview.
+<p>
+Following the recipe above ASGN parses the 'a' and concludes 
+it has at least a RELN and maybe an assignment. 
+Then it parses the '='. 
+So it is not a RELN. 
+It must be an assignment, LVALUE = ASGN. 
+So 'a' must be the LVALUE, and the new ASGN must be the not 
+yet parsed 'b = c = 77'. 
+So the new ASGN parses the 'b' and the '=', and the third ASGN 
+must be '77'. 
+The third parses the 'c' and the '=' and the fourth ASGN must 
+be just the 77. 
+And (looking ahead) it is, but let's get there in small steps, 
+following the recipe.
+</p><p>
+The fourth ASGN tries RELN first, and RELN can be an EXPR. 
+Then EXPR can be a TERM, which can be a FACTOR, which can be 
+a constant. 
+77 is a constant, and therefore the entire chain is satisfied.
+</p><p>
+Parsing goes top down through the recipe. 
+When it gets a NO reply, it moves up a level, and at that level the 
+next alternative. 
+When all alternatives at a given level are satisfied it ascends one 
+level saying NO, and that higher level tries its next alternative. 
+This process is called "top down recursion."
+</p><p>
+Next is the expression parser. 
+This goes into more detail than the quick recipe overview.
+
 
 <!--Expression parsing-->
 <a name="parsi"></a>
 </p><p class="h1">Expression parsing
 
 </p><p class="h2">Parsing
-</p><p>Consider this statement with the cursor pointing before the x:
+</p><p>
+Consider this statement with the cursor pointing before the x:
 </p>
-
 <pre>
           x = y + 3
      ---^	
 </pre>
-
-<p>st(), <a href="#752">~752</a>, is called to parse and execute a statement. st() tests for 
-several possibilities: is this a declaration (no), is it compound (no), is 
-it a reserved word, if, while, etc, (no)? This rather long if-else statement 
-goes all the way to <a href="#848">~848</a>, where it tests for an assignment statement. These 
-actual tests are done by functions that are called, _decl(), _lit(), and 
-eventually _asgn(). st() is asking: "Is this yours? If so do your thing, 
-and then tell me yes (return true). Otherwise tell me no." st() gets a lot 
-of no's, but _asgn returns yes. And that is where we begin.
-</p><p>Why is _asgn put at the very end of the long if-else chain? Because 
+<p>
+st(), <a href="#752">~752</a>, is called to parse and execute a 
+statement. 
+st() tests for several possibilities: is this a declaration (no), 
+is it compound (no), is it a reserved word, if, while, etc, (no)? 
+This rather long if-else statement goes all the way to 
+<a href="#848">~848</a>, 
+where it tests for an assignment statement. 
+These actual tests are done by functions that are called, _decl(), 
+_lit(), and eventually _asgn(). 
+st() is asking: "Is this yours? 
+If so do your thing, and then tell me yes (return true). 
+Otherwise tell me no." 
+st() gets a lot of no's, but _asgn returns yes. 
+And that is where we begin.
+</p><p>
+Why is _asgn put at the very end of the long if-else chain? Because 
 to be sure it really is an assign it must first eliminate other possibilities 
 including language key words. It's as simple as that.
-</p><p>So the expression recognition/parsing work gets done in _asgn, <a href="#462">~462</a>.
+</p><p>So the expression recognition/parsing work gets done 
+in _asgn, <a href="#462">~462</a>.
 
 </p><p class="h2">What's an expression?
-</p><p>Let's eliminate a point of possible confusion. A tiny-c expression is 
-parsed by _asgn. But a part of that parsing is done by _expr to recognize an 
-algebraic expression. And if _asgn recognizes something it may not be an 
+</p><p>
+Let's eliminate a point of possible confusion. 
+A tiny-c expression is parsed by _asgn. 
+But a part of that parsing is done by _expr to recognize an 
+algebraic expression. 
+And if _asgn recognizes something it may not be an 
 assignment! For example (x&lt;10) is recognized by _asgn.
-</p><p>In the C community the word “expression” is used to mean a  C expression, 
-a generalization of an algebraic expression.
-</p><p>Classical algebraic functions work down a hierarchy of "parts", and 
-these parts have classical names. An expression is a sum/difference of one 
-or more terms, a term is a product/quotient of one or more factors, a factor 
-is either a constant or a variable or a parenthesized expression. Note the 
-recursion. The grammar chapter showed this way of defining could be expanded 
-to an entire grammar, and BNF has become the standard way of expressing the 
-grammar. The highest level of C expression is the assignment. So an expression 
-is recognized by _asgn.
-</p><p>I used the algebraic names of expressions, adding relation and 
+</p><p>
+In the C community the word “expression” is used to mean a  C 
+expression, a generalization of an algebraic expression.
+</p><p>
+Classical algebraic functions work down a hierarchy of "parts", and 
+these parts have classical names. 
+An expression is a sum/difference of one or more terms, 
+a term is a product/quotient of one or more factors, a factor 
+is either a constant or a variable or a parenthesized expression. 
+Note the recursion. 
+The grammar chapter showed this way of defining could be expanded 
+to an entire grammar, and BNF has become the standard way of 
+expressing the grammar. 
+The highest level of C expression is the assignment. 
+So an expression is recognized by _asgn.
+</p><p>
+I used the algebraic names of expressions, adding relation and 
 assignment, at the top, and function class at the bottom. The highest 
-level is an actual assignment. So _asgn() evaluates a tiny-c expression, 
-and _expr (<a href="#519">~519</a>) evaluates a classical algebraic expression.
-</p><p>Expression parsing implements the hierchical recipe in the grammar 
-chapter. One function handles one level of the hierarchy.
-</p><p>Start at tc.c <a href="#462">~462</a>, _asgn(), and read down to <a href="#668">~668</a>. But don't read 
-every line. Read just the lines with no or a single indent. Read just this:
+level is an actual assignment. 
+So _asgn() evaluates a tiny-c expression, and _expr 
+(<a href="#519">~519</a>) evaluates a classical algebraic expression.
+</p><p>
+Expression parsing implements the hierarchical recipe in the 
+grammar chapter. 
+One function handles one level of the hierarchy.
+</p><p>
+Start at tc.c <a href="#462">~462</a>, _asgn(), 
+and read down to <a href="#668">~668</a>. 
+But don't read every line. 
+Read just the lines with no or a single indent. 
+Read just this:
 </p>
-
 <pre>
 	/* An asgn is a reln or an lvalue = asgn. Note that
 		   reln can match an lvalue.
@@ -653,31 +788,40 @@ every line. Read just the lines with no or a single indent. Read just this:
 			}
 		}
 </pre>
-
-<p>This manner of reading gives a high level view of the parser without 
-getting bogged down in details. A code's pattern becomes a bit easier to 
-see. For example the code in every layer begins with a call to the next 
-layer. So a call to _asgn rapidly descends to _factor which is the first 
-to look through its alternative possibilities. At every layer the function 
-returns an int except _factor which returns nothing (void). So factor is 
-somehow a bit different because it must always succeed or else there is 
-a syntax error communicated more strongly by eset.
-</p><p>Another pattern is calls vs returns. A call descends to the next 
-layer, returns ascend to the layer above signaling YES/NO to the parse 
-so far. When ascending the cursor has been moved so the parent layer can 
+<p>
+This manner of reading gives a high level view of the parser without 
+getting bogged down in details. 
+A code's pattern becomes a bit easier to see. 
+For example the code in every layer begins with a call to the next 
+layer. 
+So a call to _asgn rapidly descends to _factor which is the first 
+to look through its alternative possibilities. 
+At every layer the function returns an int except _factor which 
+returns nothing (void). 
+So factor is somehow a bit different because it must always succeed 
+or else there is a syntax error communicated more strongly by eset.
+</p><p>
+Another pattern is calls vs returns. 
+A call descends to the next layer, returns ascend to the layer above 
+signaling YES/NO to the parse so far. 
+When ascending the cursor has been moved so the parent layer can 
 continue the parse.
-</p><p>All of this is classical LR parsing, often described as "bottom up" 
-because actual treatment is done from the bottom, _factor, to the top, _asgn. 
+</p><p>
+All of this is classical LR parsing, often described as "bottom up" 
+because actual treatment is done from the bottom, _factor, 
+to the top, _asgn. 
 For a deeper understanding of LR parsing, see: 
 </p><p>	https://en.wikipedia.org/wiki/LR_parser
 
 </p><p class="h2">Treatment
-</p><p>Treatment means what happens when something is matched. For a 
-compiler treatments emit code. For this interpreter the treatment performs 
-the action determined by the match. Here is one treatment, the one for 
-_asgn. The full code: 
+</p><p>
+Treatment means what happens when something is matched. 
+For a compiler treatments emit code. 
+For this interpreter the treatment performs the action determined 
+by the match. 
+Here is one treatment, the one for _asgn. 
+The full code: 
 </p>
-
 <pre>
 		/* An asgn is a reln or an lvalue = asgn. Note that
 		   reln can match an lvalue.
@@ -692,87 +836,96 @@ _asgn. The full code:
 	469		return error? 0: 1;
 	470	}
 </pre>
-
-<p>Back to this line of code with the cursor pointing before the x:
+<p>
+Back to this line of code with the cursor pointing before the x:
 </p>
-
 <pre>
 	     x = y + 3
  	 ---^	
 </pre>
-
-<p>x is a symbol name. _asgn is called and tunnels down to _symname 
+<p>
+x is a symbol name. _asgn is called and tunnels down to _symname 
 which returns "I got it" (true), and the pointer is advanced just past the x:
 </p>
-
 <pre>
 	     x = y + 3
 	   ---^	
 </pre>
-
-<p>The return true is propagated all the way up to _asgn, where _reln 
-returns true, <a href="#463">~463</a>. So we have a successful _reln and treatment begins. 
-_lit(xeq) looks for an equal sign, <a href="#464">~464</a>, and voila, it is there. _lit 
-advances the cursor, so we have:
+<p>
+The return true is propagated all the way up to _asgn, where _reln 
+returns true, <a href="#463">~463</a>. 
+So we have a successful _reln and treatment begins. 
+_lit(xeq) looks for an equal sign, <a href="#464">~464</a>, and 
+voila, it is there. 
+_lit advances the cursor, so we have:
 </p>
-
 <pre>
 	     x = y + 3
  	     ---^	
 </pre>
-
-<p>Then _asgn calls itself, <a href="#465">~465</a>, classical recursion. 
-</p><p>	https://en.wikipedia.org/wiki/Recursion_(computer_science)
-</p><p>The right side of an = is an expression, and this second call 
+<p>
+Then _asgn calls itself, <a href="#465">~465</a>, classical recursion. 
+</p><pre>
+	https://en.wikipedia.org/wiki/Recursion_(computer_science)
+</pre><p>
+The right side of an = is an expression, and this second call 
 to _asgn totally parses and evaluates the expression (detail in next 
-section), and pushes the value on the stack. The cursor is advanced 
-beyond the expression, pointing to a possible comment or an end-of-line.
+section), and pushes the value on the stack. 
+The cursor is advanced beyond the expression, pointing to a possible 
+comment or an end-of-line.
 </p>
-
 <pre>
 	     x = y + 3
 	           ---^	
 </pre>
-
-<p>Finally, if no error has occurred _eq() performs the assignment, <a href="#466">~466</a>, 
-giving x the value of y+3. All the data _eq() needs is in those two stack 
-pushes, the first is the address of the cell holding x, the second being
-the fully calculated value of y+3. _eq() does no parsing, just assignment. 
-Somewhere out in data-land the x gets its new value. That is the ultimate 
-treatment for an assignment.
-</p><p>Reviewing parsing vs treatment: 
+<p>
+Finally, if no error has occurred _eq() performs the assignment, 
+<a href="#466">~466</a>, giving x the value of y+3. 
+All the data _eq() needs is in those two stack pushes, the first is 
+the address of the cell holding x, the second being the fully 
+calculated value of y+3. 
+_eq() does no parsing, just assignment. 
+Somewhere out in data-land the x gets its new value. 
+That is the ultimate treatment for an assignment.
+</p><p>
+Reviewing parsing vs treatment: 
 <ul>
 <li>Lines 463..467 are treatment for a parsed _reln. 
-</li><li>Within that treatment lines 464..465 are treatment for a parsed =. 
+</li><li>Within that treatment lines 464..465 are treatment for a 
+parsed =. 
 </li><li>Parsing is matching, usually trying several possibilities. 
 </li><li>Treatment is doing something once a match happens possibly 
 including more matching.
 </li></ul>
-<p>Notice how bullet 2 above is nested within bullet 1.
+<p>
+Notice how bullet 2 above is nested within bullet 1.
 The treatment of bullet 1 includes additional parsing that matches the =, hence treatment for that match.
 </p>
+
 
 <!--A full walkthrough of one expression-->
 <a name="fullw"></a>
 </p><p class="h1">A full walkthrough of one expression
-</p><p>To wrap up here is a full walkthough of a case that includes 
+</p><p>
+To wrap up here is a full walkthough of a case that includes 
 parenthetical expression and a function call: x=y*(3+foo(z+7)).
-</p><p>To keep it brief a quite condensed but (hopefully) self 
+</p><p>
+To keep it brief a quite condensed but (hopefully) self 
 explanatory notation is used. For example when I write “_asgn 
 parses the y” you should know by now that _asgn initiates a 
 process that descends through the layers to _symname which does 
 the real work, then “I got it” ascends back to _asgn.
-</p><p>And a notation: To show what is on the stack lv(x) means 
+</p><p>
+And a notation: To show what is on the stack lv(x) means 
 x as lvalue. ad(3) means actual datum 3. And state is shown like this:
-
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		<empty>
 	 ---^
 </pre>
-
 <p>READY:
-</p><p>_asgn called, it parses the x (<a href="#463">~463</a>)
+</p><p>
+_asgn called, it parses the x (<a href="#463">~463</a>)
 
 <pre>
 	Cursor:				Stack:
@@ -780,198 +933,255 @@ x as lvalue. ad(3) means actual datum 3. And state is shown like this:
 	  ---^
 </pre>
 
-<p>_asgn parses '='  (<a href="#464">~464</a>), calls self recursively (<a href="#465">~465</a>), parses 'y'
-
+<p>
+_asgn parses '='  (<a href="#464">~464</a>), calls self recursively (<a href="#465">~465</a>), parses 'y'
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y)  <<<-top
 	    ---^
 </pre>
-
-<p>Returns ascend to _term (<a href="#557">~557</a>) which parses the '*', and calls _factor (<a href="#559">~559</a>)
-</p><p>_factor parses '('   (<a href="#594">~594</a>), calls _asgn to do the full parenthesized 
+<p>
+Returns ascend to _term (<a href="#557">~557</a>) which parses the '*', and calls _factor (<a href="#559">~559</a>)
+</p><p>
+_factor parses '('   (<a href="#594">~594</a>), calls _asgn to do the full parenthesized 
 expression (<a href="#595">~595</a>). _asgn is now 2 recursions deep.
-</p><p>_asgn parses '3',  _konst does the work, called by _factor (<a href="#600">~600</a>), 
+</p><p>
+_asgn parses '3',  _konst does the work, called by _factor (<a href="#600">~600</a>), 
 recognizes digit (<a href="#415">~415</a>). 
-
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3)  <<<-top
 	       ---^
 </pre>
-
-<p>Returns ascend to _expr (<a href="#529">~529</a>)  which parses '+' (<a href="#540">~540</a>), and calls _term 
+<p>
+Returns ascend to _expr (<a href="#529">~529</a>)  which parses '+' (<a href="#540">~540</a>), and calls _term 
 (<a href="#541">~541</a>), which parses 'foo'. _factor does the work using _symname (<a href="#619">~619</a>).  
-foo is class 'E' so _factor calls _enter (<a href="#634">~634</a>)
-
+foo is class 'E' so _factor calls _enter (<a href="#634">~634</a>).
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3)  <<<-top
 	           ---^
 </pre>
-
-<p>_enter ABOVE calls _asgn (<a href="#325">~325</a>) to parse z+7, _asgn parses and pushes  z, 
-
+<p>
+_enter ABOVE calls _asgn (<a href="#325">~325</a>) to parse z+7, 
+_asgn parses and pushes  z, 
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) lv(z) <<<-top
 	             ---^
 </pre>
-
-<p>Returns ascend to _expr which parses + , calls _term (<a href="#541">~541</a>) which parses 7.
-
+<p>
+Returns ascend to _expr which parses + , calls _term 
+(<a href="#541">~541</a>) which parses 7.
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) lv(z) ad(7) <<<-top
 	               ---^
 </pre>
-
 <p>
-Returns ascend to _expr which uses toptoi() to pop the top into b, <a href="#543">~543</a>, and 
-again for the value of z into a, <a href="#544">~544</a>. Assume z==100. toptoi resolves the 
-lv(z) into ad(100). 
-</p><p>	Data in _expr: (<a href="#545">~545</a>)  a is ad(100), b is ad(7), both are class 0. 
+Returns ascend to _expr which uses toptoi() to pop the top into b, 
+<a href="#543">~543</a>, and again for the value of z into a, 
+<a href="#544">~544</a>. 
+Assume z==100. toptoi resolves the lv(z) into ad(100). 
+</p><p>
+Data in _expr: (<a href="#545">~545</a>)  a is ad(100), b is ad(7), 
+both are class 0. 
 Both have been popped by toptoi.
-
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) <<<-top
 	               ---^
 </pre>
-
-<p>Both are data (class 0) so _expr (<a href="#546">~546</a>) pushes their sum 107. Had one of them been a pointer (class 1) _expr would have pushed their sum as a pointer.
-
+<p>
+Both are data (class 0) so _expr (<a href="#546">~546</a>) pushes 
+their sum 107. 
+Had one of them been a pointer (class 1) _expr would have pushed 
+their sum as a pointer.
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) ad(107) <<<-top
 	               ---^
 </pre>
-
-<p>_expr sees no more + or – so returns ascend to _enter which looks for 
-a comma for more args (<a href="#327">~327</a>), tosses the ')' (<a href="#330">~330</a>), where is true so 
-control goes to BELOW. 
-
+<p>
+_expr sees no more + or – so returns ascend to _enter which looks for 
+a comma for more args (<a href="#327">~327</a>), tosses the ')' 
+(<a href="#330">~330</a>), where is true so control goes to BELOW. 
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) ad(107) <<<-top
 	                ---^
 </pre>
-
-<p>The calling cursors are saved (<a href="#343">~343</a>), the cursor set to where, a 
-new variable stack frame pushed, newfun, <a href="#345">~345</a>. foo's declaration is
-
+<p>
+The calling cursors are saved (<a href="#343">~343</a>), 
+the cursor set to where, a 
+new variable stack frame pushed, newfun, <a href="#345">~345</a>. 
+foo's declaration is
 <pre>
 	Cursor:				 Stack:
 	foo int x […]			lv(x) lv(y) ad(3) ad(107) <<<-top
 	---^
 </pre>
-
-<p>so _lit(xint) is true (<a href="#348">~348</a>), _setarg allocates foo's local x giving 
-it the initial value 107. 
-</p><p>It's not varargs and arg was bumped to match nxtarg so the one 
+<p>
+so _lit(xint) is true (<a href="#348">~348</a>), _setarg allocates 
+foo's local x giving it the initial value 107. 
+</p><p>
+It's not varargs and arg was bumped to match nxtarg so the one 
 arg is popped (<a href="#379">~379</a>). 
-</p><p>The function is executed (<a href="#383">~383</a>), foo does its thing (not a part of 
-this walk through). Assume a return statement in foo's body pushes 200 
-onto the stack as the value of foo. And return always sets leave true. 
-So the pushzero default (<a href="#384">~384</a>) doesn't happen, leave is set back to 0, 
-the cursors are restored:
-
+</p><p>
+The function is executed (<a href="#383">~383</a>), foo does its 
+thing (not a part of this walk through). 
+Assume a return statement in foo's body pushes 200 onto the stack 
+as the value of foo. 
+And return always sets leave true. 
+So the pushzero default (<a href="#384">~384</a>) doesn't happen, 
+leave is set back to 0, the cursors are restored:
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(3) ad(200) <<<-top
 	                ---^
 </pre>
-
-<p>The stack frame is popped (fundone), and the debugger is advised a 
-function return has just happened, (<a href="#385">~385</a>..389). foo has done its duty! 
-_enter returns and returns ascend to _expr (<a href="#542">~542</a>) which as before toptoi's 
-the two entries on top, adds them, and pushes the sum (<a href="#543">~543</a>..545). 
+<p>
+The stack frame is popped (fundone), and the debugger is advised a 
+function return has just happened, (<a href="#385">~385</a>..389). 
+foo has done its duty! 
+_enter returns and returns ascend to _expr (<a href="#542">~542</a>) 
+which as before toptoi's the two entries on top, adds them, 
+and pushes the sum (<a href="#543">~543</a>..545). 
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(203) <<<-top
 	                ---^
 </pre>
-<p>_expr looks for another + or -, ascends to _factor... (<a href="#596">~596</a>) 
+<p>
+_expr looks for another + or -, ascends to _factor... 
+(<a href="#596">~596</a>) 
 </p><p>
-[wait a minute! Ascends? How can _expr ascend to _factor which is lower in
-the grammar? Answer: because of recursion. 
+[wait a minute! Ascends? How can _expr ascend to _factor which is 
+lower in the grammar? 
+Answer: because of recursion. 
 _factor called _asgn which descended to _expr. 
 So in the call stack _expr is below _factor.]
 </p><p>
 Ok, so _expr ascends to _factor where _mustFind insists on a ), 
-which is there so the cursor is set just past it (<a href="#597">~597</a>).
+which is there so the cursor is set just past it 
+(<a href="#597">~597</a>).
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) lv(y) ad(203) <<<-top
 	                 ---^
 </pre>
-<p>How deep are the recursive levels of _asgn, I have lost count. But, 
-from the most recent, returns ascend to _term (<a href="#560">~560</a>) where the top two 
-on the stack popped and their product pushed. Assume the value of y is 
-5, so the product is 1015.
+<p>
+How deep are the recursive levels of _asgn, I have lost count. 
+But, from the most recent, returns ascend to _term 
+(<a href="#560">~560</a>) where the top two on the stack popped and 
+their product pushed. 
+Assume the value of y is 5, so the product is 1015.
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) ad(1015) <<<-top
 	                 ---^
 </pre>
-<p>And finally the returns ascend to the very first _asgn (<a href="#466">~466</a>) 
-waiting patiently all this time to do the assignment. 
-</p><p>No error, so the actual assign is done by _eq which dips directly 
-into the stack, probably the only code outside of stack.c to do so (<a href="#62">~62</a>..63). 
-val points to 1015, lval to x. And x is an lval, so <a href="#75">~75</a> is happy and 
-testing both classes we end up at <a href="#118">~118</a>. Its an int to int assign, so 
-<a href="#124">~124</a> gets the 1015 from val, and <a href="#127">~127</a> puts it into x's storage cell. 
-And <a href="#127">~128</a> pushes iDatum onto the stack. An assignment when done always leaves the value on the stack. 
+<p>
+And finally the returns ascend to the very first _asgn 
+(<a href="#466">~466</a>) waiting patiently all this time 
+to do the assignment. 
+</p><p>
+No error, so the actual assign is done by _eq which dips directly 
+into the stack, probably the only code outside of stack.c to do so 
+(<a href="#62">~62</a>..63). 
+val points to 1015, lval to x. 
+And x is an lval, so <a href="#75">~75</a> is happy and testing both 
+classes we end up at <a href="#118">~118</a>. 
+Its an int to int assign, so <a href="#124">~124</a> gets the 1015 
+from val, and <a href="#127">~127</a> puts it into x's storage cell. 
+And <a href="#127">~128</a> pushes iDatum onto the stack. 
+An assignment, when done, always leaves the value on the stack. 
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) ad(1015) ad(1015) <<<-top
 	                 ---^
 </pre>
-Another "Wait a minute." At (<a href="#141">~141</a>) two popst() calls pop that value twice, leaving just the lv(x). Isn't that a bug? Hmm!
+Another "Wait a minute." 
+At (<a href="#141">~141</a>) two popst() calls pop that value twice, 
+leaving just the lv(x). 
+Isn't that a bug? Hmm!
 <pre>
 	Cursor:				Stack:
 	    x=y*(3+foo(z+7))		lv(x) <<<-top
 	                 ---^
 </pre>
 </p><p>
-Well, yes. But there is the lv(x) which satisfies the assignment's "when done" requirement. So the (ahem) flaw is just wasted work. It will never show up in a test.
+Well, yes. 
+But there is the lv(x) which satisfies the assignment's 
+"when done" requirement. So the (ahem) flaw is just wasted work. 
+It will never show up in a test.
 </p><p>
-Notice there are 5 calls to _asgn, and each ends by pushing a 
-value. _asgn is happy if it is just a variable or a constant. The parse 
-functions are named after the highest level that may actually be there, 
-but they are all satisfied by a lower level. 
+Notice there are 5 calls to _asgn, and each ends by pushing a value. 
+_asgn is happy if it is just a variable or a constant. 
+The parse functions are named after the highest level that may 
+actually be there, but they are all satisfied by a lower level. 
 </p>
-<p>	And: x is 1015 in its storage allocation.
+<p>
+And: x is 1015 in its storage allocation.
+</p><p>
+And so ends our walkthrough.
+</p>
 
-</p><p>And so ends our walkthrough.
-</p>
+
 <a name="postl"></a>
 <p class="h1">
 Postlogue
 </p><p>
-I would change this code several ways on a modern computer. But I wanted a near clone of the 8080 code, architecture and all. Here are some of my thoughts.
+I would change this code several ways on a modern computer. 
+But I wanted a near clone of the 8080 code, architecture and all. 
+Here are some of my thoughts.
 </p>
 <ul><li>
-Separate the parsing from the action. Use an action interface, and a separate action module for treatment. Let others ADD new actions, posssibly a code emitter???
+Separate the parsing from the action. 
+Use an action interface, and a separate action module for treatment. Let others ADD new actions, posssibly a code emitter???
 </li><li>
-Use lex and yacc, or their modern equivalent. Also there are tools today that write a parser from BNF. Googling "tool to write a parser from bnf" generated several interesting sites.
+Use lex and yacc, or their modern equivalent. 
+Also there are tools today that write a parser from BNF. 
+Googling "tool to write a parser from bnf" generated several 
+interesting sites.
 </li><li>
-Create a plug-in interface. Let others ADD to the product without recompiling the whole thing. 
+Create a plug-in interface. 
+Let others ADD to the product without recompiling the whole thing. 
 </li><li>
-Fix the few pattern violations. Read the walkthrough to see what I mean by a pattern. For example the return statement follows the pattern but flowing out of a function (no return statement) does not.
+Fix the few pattern violations. 
+Read the walkthrough to see what I mean by a pattern. 
+For example the return statement follows the pattern but flowing out 
+of a function (no return statement) does not.
 </li><li>
-Use _name more consistently. It was intended to identify functions private to the particular module, whereas no underscore was public. But you will find several underscore functions in tc.h.
+Use _name more consistently. 
+It was intended to identify functions private to the particular module, 
+whereas no underscore was public. 
+But you will find several underscore functions in tc.h.
 </li></ul>
 Basically all the above criticims can be summarized as: push the code gently towards object orientation. 
 </p>
+
+
 <a name="appen"></a>
 <p class = "h1">Appendix - Listing of tc.c
 </p>
-<p>The file tc.c is the core file of this version of tiny-c. It is just one of eleven source files for tiny-c. The full source and documentation is available at:
+<p>
+The file tc.c is the core file of this version of tiny-c. 
+It is just one of eleven source files for tiny-c. 
+The full source and documentation is available at:
 </p><pre>
 	www.github.com/tgibson37/tiny-c
-</pre><p>It is GPL licensed, and the license is posted there, too.
-The Walkthrough document references lines in this file using what I call the "twiddle" notation:  ~xxx refers to line xxx. If the original file is edited its line numbers will drift, perhaps a lot. The purpose of this appendix is to publish just this file with the line numbers as used in the main document. For the html version each tc.c ~ notation links a few lines above the line number below. Use your browsers back arrow to return to the walkthrough text.
+</pre><p>
+It is GPL licensed, and the license is posted there, too.
+The Walkthrough document references lines in this file using what I 
+call the "twiddle" notation:  ~xxx refers to line xxx. 
+If the original file is edited its line numbers will drift, perhaps a 
+lot. 
+The purpose of this appendix is to publish just this file with the 
+line numbers as used in the main document. 
+For the html version each tc.c ~ notation links a few lines above 
+the line number below. 
+Use your browser's back arrow to return to the walkthrough text.
 </p>
 <pre>
 0001	#include "tc.h"
@@ -2026,9 +2236,6 @@ The Walkthrough document references lines in this file using what I call the "tw
 1050	//fprintf(stderr,"~1035TC: sizes of pr %d fun %d stack %d var %d\n", 
 1051	//    			prlen, funlen, stacklen, vtablen);
 1052	}
-
-
 </pre>
-
 </body>
 </html>
