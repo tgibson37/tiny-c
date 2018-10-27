@@ -50,10 +50,12 @@ HDRS = tc.h
 
 # Add -I to the dir the include files are in
 #CFLAGS = -Wall -g        #<< still a flood
+CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl
 CFLAGS = -w -g
 
 .PHONY: all run difft diffd keep dotest install latest
-all: $(TC) $(TEST) $(VERSIONPROP)
+all: $(TC) $(TEST)
+# $(VERSIONPROP)
 
 run:
 	$(RUN)
@@ -82,13 +84,13 @@ latest:
 
 # Build (link) the executable files
 $(TC): $(OBJTC)
-	$(CC) $(CFLAGS) $(OBJTC) -o $(TC)
+	$(CC) $(CFLAGS) $(OBJTC) -o $(TC) $(CLIBS)
 
 $(TEST): $(OBJTEST)
 	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST)
 	
-$(VERSIONPROP):
-	./version.sh
+#$(VERSIONPROP):
+#	./version.sh
 # alternative for _WIN32
 # manually launch the following .bat file
 #	version.bat	

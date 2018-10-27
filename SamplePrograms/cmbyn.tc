@@ -6,6 +6,19 @@
 
 bar char x(0) [return ceqn(x,"call ",4)]
 
+// prints "call me by your name" and lib version, then "call.." twice more
+// in all caps, and lower case. Prints the length of the string (20). Calls 
+// bar() and prints returned value (1, i.e. true). Queries "Type a character:".
+// Tests the reply is 'c', prints comment if not. Computes a file name, reads
+// that file, and processes it using double. Result is list of unique words,
+// sometimes twice with digit 1 after the second.
+// Standard Lib fcns used: printf, strlen, index, readfile, pl, pft, ceqn
+// lrblib.tc fcns used: toupper
+// double.tc fcns used: double
+// cmbyn.tc fcns used: bar
+// This appears to be a test program for several fcns, mainly double.
+// I am using it to test library loading using #include.  (tag, 10/26/2018)
+
 main [
  char cmbyn(100),t(5000)
  int k,p

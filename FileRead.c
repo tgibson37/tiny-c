@@ -4,6 +4,7 @@
 #include <libgen.h>
 #include "tc.h"
 
+/*	
 #if defined(_WIN32)
 #else
 #include <limits.h>
@@ -15,9 +16,9 @@ int getInstallPath(char* buf, size_t len2){
 	return len;
 }
 
-/*	sets global ppsPath to <installPath>/pps. Returns 0 on success,
- *	else negative error code.
- */
+//	sets global ppsPath to <installPath>/pps. Returns 0 on success,
+// *	else negative error code.
+//
 int setPPSpath() {
 	if(ppsPath)return 0;  // set by compiler
 	char buf[PATH_MAX], buf2[PATH_MAX];
@@ -30,15 +31,14 @@ int setPPSpath() {
 	return 0;
 }
 
-/*	
 int main(char* argv[], int argc) {
 	int err = setPPSpath();
 	if(err)fprintf(stderr,"setPPSpath failed %d\n",err);
 	else printf("%s\n", ppsPath);
 }
- */
 
 #endif
+ */
 
 int nxtUnit=0;
 /* read the named file into buffer pr. Return amount read on success,

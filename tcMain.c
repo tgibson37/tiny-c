@@ -1,4 +1,5 @@
 #include "tc.h"
+#include <dlfcn.h>
 
 /*	main for the tc interpreter. Their are two mains. The other, test.c
  * 	loads a set regression tests which can be run individually or collectively.
@@ -8,6 +9,7 @@ extern int optind;
 extern char* optarg;
 extern char* xendlib;
 char* startSeed="[main();]";
+char* ppsPath="./pps";
 
 void tcUsage() {
 	printf("Usage: tc [-q] [-d] [-r seed-code] appfile");
@@ -27,6 +29,21 @@ void tcUsage() {
 	printf("\n  statement.");
 	printf("\nNo args prints this usage.");
 	printf("\n");
+}
+
+int loadMC(char* libName) {
+	char fileName[1000];
+	strcpy(fileName,"lib");
+	strcat(fileName,libName);
+	strcat(fileName,".so");
+	printf("~34stub loading MC, file: %s\n",fileName);
+// Open the dynamic library
+    void* libMC = dlopen(fileName,  RTLD_LAZY | RTLD_GLOBAL);
+    if (!libMC) {
+        fprintf(stderr, "Could not open %s\n",fileName);
+        exit(1);
+    }
+
 }
 
 int loadCode(char* file) {
@@ -49,50 +66,44 @@ void markEndlibrary() {
 	apr=endapp;
 }
 
-/*	Process one one from the top of the app to see if it is a #include,
- *	and load the include file if so. Return negative on error, 1 on load
- *	done, false on not a #anything.
- */
-int doOneInc(char* line, int lineno){
-	char* filename;
-	if(*line == '#'){
-		if(!strncmp(line,"#include ",9)){
-			filename = line+9;
-			loadCode(filename);
-			return 1;
-		}
-		else{
-			fprintf(stderr,"\nunrecognized # line %d",lineno);
-			fprintf(stderr,"\n%s",line);
-			return -11;
-		}
-	}
-	else return 0;
-}
-
 /*	open the app file, read and process its leading # lines, close 
  *	the file. Return negative on error, else a count of loaded files.
  */
 int doIncludes(char* fname) {
-	int unit,len,more,lineno,count=0;
+	int unit,len,lineno,libCount,loadCount=0;
 	char buff[200];
 	unit = tcFopen(fname,"r");
 //	if(unit<0)return unit;
 	if(unit<0){eset(APPERR);_errToWords();exit(unit);} // lrb
-	more=1;
-	while(more){
+	while(1){
 		len = tcFgets(buff,sizeof(buff),unit);
-		if( buff[len-1]=='\n' || buff[len-1]==0x0d ){
-			buff[len-1]=NULL;
-			if( buff[len-2]=='\n' || buff[len-2]==0x0d )buff[len-2]=NULL;
-		}
 		if(len<0)return len;
-		more = doOneInc(buff,++lineno);
-		if(more<0)return more;
-		if(more==1)++count;
+		++lineno;
+		if(len>0){
+			if( buff[len-1]=='\n' || buff[len-1]==0x0d ){
+				buff[len-1]=NULL;
+				if(len>1){
+					if( buff[len-2]=='\n' || buff[len-2]==0x0d )
+						buff[len-2]=NULL;
+				}
+			}
+		}
+		if(!strncmp(buff,"#include ",9)) {
+			loadCode(buff+9);  // exit(1) on failure
+			++libCount;
+			if(!quiet)printf("%s loaded\n",buff+9);
+		}
+		else if(!strncmp(buff,"#loadMC ",8)) {
+			loadMC(buff+8);  // exit(1) on failure
+			++loadCount;
+			if(!quiet)printf("%s loaded\n",buff+8);
+		}
+		else{
+			break;
+		}
 	}
 	tcFclose(unit);
-	return count;
+	return libCount;
 }
 
 int main(int argc, char *argv[]) {
@@ -145,8 +156,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	numIncs = doIncludes(argv[argc-1]);
+	if(numIncs<0)exit(numIncs);
 	if(numIncs==0)loadCode(defaultLibrary);
-//	else if(numIncs<0)exit(numIncs);
 
 	markEndlibrary();
 	/* load the app */

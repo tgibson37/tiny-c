@@ -117,7 +117,7 @@ char* stcurs;
 char* errat;
 int obsize, vclass, alen;
 int traceMode;
-char* ppsPath="./pps";
+extern char* ppsPath;
 
 FILE* fileUnit[MAX_UNIT];
 int tcFopen(char* name, char* mode);
