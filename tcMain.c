@@ -4,10 +4,13 @@
 /*	main for the tc interpreter. Their are two mains. The other, test.c
  * 	loads a set regression tests which can be run individually or collectively.
  */
+int loadMsg=0;
 extern char* defaultLibrary;
 extern int optind;
 extern char* optarg;
 extern char* xendlib;
+extern int  (*piMC )(int,int,int*);
+
 char* startSeed="[main();]";
 char* ppsPath="./pps";
 
@@ -31,19 +34,35 @@ void tcUsage() {
 	printf("\n");
 }
 
+// Get the function pointer to the function
+void* getFcnPtr(void* lib, const char* fcnName) {
+    void* fptr = dlsym(lib, fcnName);
+    if (!fptr) {
+        fprintf(stderr, "Could not get function pointer for %s\n  error is: %s\n\n", fcnName, dlerror());
+        return NULL;
+    }
+    return fptr;
+}
+
 int loadMC(char* libName) {
 	char fileName[1000];
-	strcpy(fileName,"lib");
+	strcpy(fileName,"./lib");
 	strcat(fileName,libName);
 	strcat(fileName,".so");
-	printf("~34stub loading MC, file: %s\n",fileName);
+
 // Open the dynamic library
     void* libMC = dlopen(fileName,  RTLD_LAZY | RTLD_GLOBAL);
     if (!libMC) {
         fprintf(stderr, "Could not open %s\n",fileName);
         exit(1);
     }
-
+// Set the fcn pointer
+    piMC = getFcnPtr(libMC, "plugInMC");
+	if(!piMC) {
+        fprintf(stderr, "Protocol: plug in MC %s needs plugInMC function\n",libName);
+        exit(1);
+    }
+    if(loadMsg)printf("MC: %s loaded\n",fileName);
 }
 
 int loadCode(char* file) {
@@ -52,9 +71,12 @@ int loadCode(char* file) {
 		fprintf(stderr,"No such file: %s\n",file);
 		exit(1);
 	}
-	if(nread<0){
+	else if(nread<0){
 		fprintf(stderr,"Err reading file: %s\n",file);
 		exit(1);
+	}
+	else if(loadMsg){
+		printf("%s loaded\n",file);
 	}
 	endapp += nread;
 	return nread;
@@ -64,13 +86,14 @@ void markEndlibrary() {
 	strcpy(endapp,xendlib);
 	endapp+=10;
 	apr=endapp;
+	if(loadMsg)printf("  endlibrary\n");
 }
 
 /*	open the app file, read and process its leading # lines, close 
  *	the file. Return negative on error, else a count of loaded files.
  */
 int doIncludes(char* fname) {
-	int unit,len,lineno,libCount,loadCount=0;
+	int unit,len,lineno=0,libCount=0,loadCount=0;
 	char buff[200];
 	unit = tcFopen(fname,"r");
 //	if(unit<0)return unit;
@@ -91,12 +114,10 @@ int doIncludes(char* fname) {
 		if(!strncmp(buff,"#include ",9)) {
 			loadCode(buff+9);  // exit(1) on failure
 			++libCount;
-			if(!quiet)printf("%s loaded\n",buff+9);
 		}
 		else if(!strncmp(buff,"#loadMC ",8)) {
 			loadMC(buff+8);  // exit(1) on failure
 			++loadCount;
-			if(!quiet)printf("%s loaded\n",buff+8);
 		}
 		else{
 			break;
@@ -112,8 +133,11 @@ int main(int argc, char *argv[]) {
 	allocStuff();
 	strcpy(pr,startSeed);
 	lpr = endapp = prused = pr+strlen(startSeed);
-    while ((opt = getopt(argc, argv, "qdvr:")) != -1) {
+    while ((opt = getopt(argc, argv, "lqdvr:")) != -1) {
         switch (opt) {
+        case 'l':
+        	loadMsg=1;
+        	break;
         case 'q':
         	quiet=1;
         	break;
@@ -157,8 +181,10 @@ int main(int argc, char *argv[]) {
 
 	numIncs = doIncludes(argv[argc-1]);
 	if(numIncs<0)exit(numIncs);
-	if(numIncs==0)loadCode(defaultLibrary);
-
+	if(numIncs==0){
+		loadCode(defaultLibrary);
+		if(loadMsg)printf("  (default)\n");
+	}
 	markEndlibrary();
 	/* load the app */
 	loadCode(argv[argc-1]);

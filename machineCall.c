@@ -1,17 +1,6 @@
 #include "tc.h"
 
-/* 	todo: MC's 7,8,9,13
- *	Propose to deprecate 3,4,5,6 and replace with
- *	102,103. readFile,writeFile.
-
-		MC7 ;move a block up or down. Args are first,last,K. If K
-		  negative, block is moved down |k| bytes, if positive
-		  then up K bytes.
-
-		MC8 ;count # instances of character CH in a block. Args are
-		 first,last,CH.
-*/
-
+int  (*piMC )(int,int,int*);
 typedef int (*McList)(int,int*);
 
 /*		MC9 ;scan for nth occurance of CH in a block. Args are
@@ -361,8 +350,11 @@ void userMC(int mcno, int nargs, int *args) { // lrb
 	}
 }
 
+int plugInMC(int mcno, int nargs, int *args) {
+	return (*piMC)(mcno, nargs, args);
+}
+
 void machinecall( int nargs ) {
-/*printf("\nMC ~211, nargs %d",nargs);*/
 //	int i, args[nargs-1];
 	int i, args[10]; // lrb tcc complains ... wants a constant expression
 	int mcno = toptoi();
@@ -372,8 +364,13 @@ void machinecall( int nargs ) {
 		args[nargs-1-i]=x;
 	}
 	if(mcno<100)origMC(mcno, nargs, args);
-	else if(mcno<200)newMC(mcno-100, nargs, args);
-	else userMC(mcno-200, nargs, args);
+	else if(mcno<200) newMC(mcno-100, nargs, args);
+	else if(mcno<300) userMC(mcno-200, nargs, args);
+	else {
+		int rval;
+		rval = plugInMC(mcno-1000, nargs, args);
+		pushk(rval);
+	}
 	if(error==KILL)return;
 	if(error==EXIT)return;
 	if(error)printf("\nMC %d not defined",mcno);
