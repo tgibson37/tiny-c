@@ -1,0 +1,19 @@
+#loadMC plugInEg
+#include pps/library.tc
+
+main [
+	ps "From testLoadMC.tc: test of loading libtestMC.so"; pl""
+
+	ps "  calling MC1002, bar"; pl""
+	MC 11, 1002
+	pl "  returning from MC1002"
+	pl "  should print 77/11 is 7"
+	pl""
+
+	ps "  calling MC1001, foo"; pl""
+	MC "hello plug-in", 1001
+	pl "  returning from MC1001"
+	pl "  should print hello plug-in"
+
+	pl "LAST pl from testLoadMC.tc"
+]
