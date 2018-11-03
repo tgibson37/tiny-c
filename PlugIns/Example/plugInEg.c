@@ -1,4 +1,3 @@
-#include "../tc.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -30,8 +29,11 @@ int main(int argc, char **argv) {
  *	first in this list is MC 1001. Change the names to functions 
  *	written above. Enlarge the list for larger libraries.
  */
+int naf(int nargs, int *args);
+void eset(int);
 #define MCERR        24
 typedef int (*McList)(int,int*);
+
 McList plugInList[] =
 	{ &foo, &bar
 	};
@@ -40,6 +42,7 @@ McList plugInList[] =
  *	determines the MC number starting with 1001.
  */
 void plugInMC(int mcno, int nargs, int *args) {
+eset(MCERR);
 	if(mcno<1 || mcno>(sizeof(plugInList)/sizeof(void*))) {
 		eset(MCERR);
 	}

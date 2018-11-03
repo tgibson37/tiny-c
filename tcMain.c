@@ -46,14 +46,16 @@ void* getFcnPtr(void* lib, const char* fcnName) {
 
 int loadMC(char* libName) {
 	char fileName[1000];
+
+// Open the dynamic library
 	strcpy(fileName,"./lib");
 	strcat(fileName,libName);
 	strcat(fileName,".so");
-
-// Open the dynamic library
+fprintf(stderr,"fileName: %s\n", fileName);
     void* libMC = dlopen(fileName,  RTLD_LAZY | RTLD_GLOBAL);
     if (!libMC) {
         fprintf(stderr, "Could not open %s\n",fileName);
+        fprintf(stderr, "dlerror: %s\n", dlerror());
         exit(1);
     }
 // Set the fcn pointer

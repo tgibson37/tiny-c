@@ -152,7 +152,7 @@ int Mpft(int nargs, int *args) {
 		/*putchar(*from);*/
 }
 
-int bar(int nargs, int *args)
+int naf(int nargs, int *args)
 {
 	fprintf(stderr,"\nPhantom MC");
     return 2;
@@ -297,9 +297,9 @@ int Mcdate(int nargs, int *argsv) {
 
 /* first in this list is MC 1 */
 McList origList[] =
-	{ &Mpc, &Mgch, &bar, &bar, &bar
-	, &bar, &MmvBl, &Mcountch, &Mscann, &bar // lrb
-	, &bar, &Mchrdy, &Mpft, &Mpn, &bar
+	{ &Mpc, &Mgch, &naf, &naf, &naf
+	, &naf, &MmvBl, &Mcountch, &Mscann, &naf // lrb
+	, &naf, &Mchrdy, &Mpft, &Mpn, &naf
 };
 
 /* first in this list is MC 101 */
@@ -307,13 +307,13 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
-	, &Mgetprop, &bar, &bar, &bar, &bar
+	, &Mgetprop, &naf, &naf, &naf, &naf
 };
 
 /* first in this list is MC 201 */
 McList userList[] =
-	{ &bar, &bar, &bar, &bar, &bar  // lrb
-	, &bar, &bar, &bar, &bar, &bar
+	{ &naf, &naf, &naf, &naf, &naf  // lrb
+	, &naf, &naf, &naf, &naf, &naf
 };
 
 /*	code the MC above and register in McList array. Placement in the array
