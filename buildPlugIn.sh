@@ -14,10 +14,13 @@ fi
 
 echo code at $CODE_AT
 
+rm $CODE_AT/$1.o
 gcc -w -c -fPIC   $CODE_AT/$1.c   -o $CODE_AT/$1.o
+if [ $? -ne 0 ]; then exit; fi
 echo "object done: `ls $CODE_AT/$1.o`"  
-gcc    -shared $CODE_AT/$1.o   -o lib$1.so
+
+gcc -shared $CODE_AT/$1.o   -o lib$1.so
+if [ $? -ne 0 ]; then exit; fi
 echo "so Lib  done: `ls lib$1.so`"
-chmod 755 lib$1.so
 
 ls -lt lib$1.so

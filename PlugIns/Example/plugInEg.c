@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define MCERR        24
+// prototypes for callback functions
+void (*callEset)(int) = NULL;
+//void (*callNaf)() = NULL;
+
 // plug-in example function. Argument is char*.
 int foo(int nargs, int *args) {
 	char* str = (char*)args[0];
@@ -29,9 +34,8 @@ int main(int argc, char **argv) {
  *	first in this list is MC 1001. Change the names to functions 
  *	written above. Enlarge the list for larger libraries.
  */
-int naf(int nargs, int *args);
-void eset(int);
-#define MCERR        24
+//int naf(int nargs, int *args);
+//void eset(int);
 typedef int (*McList)(int,int*);
 
 McList plugInList[] =
@@ -42,12 +46,16 @@ McList plugInList[] =
  *	determines the MC number starting with 1001.
  */
 void plugInMC(int mcno, int nargs, int *args) {
-eset(MCERR);
 	if(mcno<1 || mcno>(sizeof(plugInList)/sizeof(void*))) {
-		eset(MCERR);
+		callEset(MCERR);
 	}
 	else {
 	    int x = plugInList[mcno-1](nargs, args);
 	}
 }
-
+// register callbacks to specific tc functions...
+//void register_function( (void(*eset)(int)) );
+void register_function( eset )
+{
+    callEset = eset;
+}

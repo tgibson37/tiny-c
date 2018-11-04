@@ -51,7 +51,6 @@ int loadMC(char* libName) {
 	strcpy(fileName,"./lib");
 	strcat(fileName,libName);
 	strcat(fileName,".so");
-fprintf(stderr,"fileName: %s\n", fileName);
     void* libMC = dlopen(fileName,  RTLD_LAZY | RTLD_GLOBAL);
     if (!libMC) {
         fprintf(stderr, "Could not open %s\n",fileName);
@@ -65,6 +64,11 @@ fprintf(stderr,"fileName: %s\n", fileName);
         exit(1);
     }
     if(loadMsg)printf("MC: %s loaded\n",fileName);
+// set callback to eset
+	void (*register_function)(void(*)());   // Prototype of fcn in .so
+	register_function = dlsym(libMC, "register_function");
+	(*register_function)(&eset);   //calls to .so's reg_fcn
+    if(loadMsg)printf("callback function eset(int) registered");
 }
 
 int loadCode(char* file) {
