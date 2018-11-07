@@ -1,0 +1,115 @@
+#include "../tc.h"
+#include <stdlib.h>
+#include <stdio.h>
+#define MCERR        24
+
+WARNING: This template has not been debugged. 
+
+/*	STEP 1: Create a sub-directory for the plug in code.
+ *	Copy this file into that directory with the same name 
+ *	as your plugin and dot-c as extent. Edit the copy 
+ *	following the STEPs 2 and up below.
+ */
+
+/*	STEP 2: Code plug-in functions here: change names of 
+ *	pi_X functions. Add more functions to form your complete 
+ *	plug in library. These use regular args in the traditional
+ *	C fashion. To each provide the Mxx function with nargs,args
+ *	MC calling sequence. These are your machine calls used by
+ *	the tc infrastructure.
+ */
+
+int Mpi_1(int nargs, int args[] ){
+	int myarg;
+	if(nargs<1){eset(MCERR); return -1; }
+	myarg = args[0];
+	return pi_1(myarg);
+}
+int pi_1(int a0){
+	...  your code here ...
+	return something;
+}
+
+int Mpi_2(int nargs, int args[] ){
+	if(nargs<2){eset(MCERR);return -1;}
+	return pi_2(args[0], (char*)args[1]);
+}
+int pi_2(int a0, char *a1){
+	... your code ...
+	return something;
+}
+
+#if 1
+/*	STEP 3: Assure #if 1 above to turn on pure C code testing.
+ *	Code a test main. Use the tradional C calls, not the Mxx
+ *	functions. Compile and test until your function code is 
+ *	satisfactory. 
+ */
+
+// This eset is used only for step 3 testing. Leave it in place.
+// When plugged into tc the real eset will get linked for callback.
+int eset(int err){
+        fprintf(stderr,"MC error %d\n",err);
+        exit(1);
+}
+// do Step 3 here. Change this code to test your functions
+int main(int argc, char **argv) {
+	printf("pi_1 returned %d\n", pi_1(11));
+	printf("pi_2 returned %d\n", pi_2(77, "hello plug-in") );
+	printf("should get: <expected results>\n");
+}
+
+#else
+
+/*	STEP 4: Assure #if 0 above to turn off your main, and turn on 
+ *	the plug-in infrastructure below.
+ */
+
+/*	INFRASTRUCTURE...
+ */
+
+/*	STEP 5: register your functions in McList array. Placement 
+ *	in the array determines the MC number starting with 1001.
+ *	This is the only change that should be made in the code below.
+ *	Add &naf rows as needed. void naf() should never get called,
+ *	they are there just to make the position in the list easy to 
+ *	determine. This is the only change that should be made in the 
+ *	code below.
+ */
+
+typedef int (*McList)(int,int*);
+void naf(){
+	return eset(MCERR);
+}
+McList plugInList[] =
+	{ &pi_1, &pi_2, &naf, &naf, &naf 
+	  , &naf, &naf, &naf, &naf, &naf
+	};
+
+/*	STEP 6: Use buildPlugIn.sh to manufacture the shared object.
+ *	Technically the plug-in is complete and plugged in. You 
+ *	should see a dot-so file in your current working directory.
+ *		
+ *	STEP 7: Write a small test tc program that uses the plug-in
+ *	functions. Don't forget the #loadMC <myPlug-in> at the top.
+ *	
+ *	STEP 8: Run you test tc program. Use the -l option to see
+ *	that your dot-so file is loaded. You are now debugging the
+ *	combo of your test tc program, and your Mxx functions above.
+ */
+
+/*	The only entry into this plug-in code. The mcno arg is reduced
+ *	by 1000 before this function is called. There is no MC 0, or
+ *	MC 1000. They all begin with 1 in their respective region. So
+ *	here we reduce it by one more to use as a proper index into
+ *	the plugInList[] above.
+ */
+void plugInMC(int mcno, int nargs, int *args) {
+	if(mcno<1 || mcno>(sizeof(plugInList)/sizeof(void*))) {
+		eset(MCERR);
+	}
+	else {
+	    int x = plugInList[mcno-1](nargs, args);
+	}
+}
+#endif
