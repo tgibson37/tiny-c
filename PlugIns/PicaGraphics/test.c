@@ -1,25 +1,25 @@
-#include "pgPlot.h"
+#include "pigra.h"
 
 /*	This version is all int and no structs.
  */
 int points;
-extern int countdown;
+//extern int countdown;
 /* test, four lines */	
 void test() {
-	pgCircle(28,43, 25, 11);
-	pgStar  (28,43, 25, 11);
-	pgLine(5,5, 75,15);
-	pgLine(5,8, 75,12);
-	pgLine(75,5, 65,70);
-	pgLine(72,5, 67,70);
+	circle(28,43, 25, 11);
+	star  (28,43, 25, 11);
+	line(5,5, 75,15);
+	line(5,8, 75,12);
+	line(75,5, 65,70);
+	line(72,5, 67,70);
 }
 
 void teststar() {
-	pgStar(40,40, 35, points);
+	star(40,40, 35, points);
 }
 
 void testcircle() {
-	pgCircle(40,40, 35, points);
+	circle(40,40, 35, points);
 }
 
 void testboth() {
@@ -28,7 +28,7 @@ void testboth() {
 
 void usage() {
 	printf("Usage: plot -gNAME [OPTIONS]\n");
-	printf("Plot a 17 pgPoint star, or some test lines\n");
+	printf("Plot a 17 Point star, or some test lines\n");
 	printf("Options:\n");
 	printf("  -d		Debug mode high level\n");
 	printf("  -D		Debug mode Deep\n");
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     	usageNeeded=0;
         switch (opt) {
         case 'd': debug=1; break;  /* just palette level */
-        case 'D': debug=2; break;  /* Deep, includes pg level */
+        case 'D': debug=2; break;  /* Deep, includes  level */
         case 'f': frame=1; break;
         case 'm': movie=1; break;
         case 'g': graphic=optarg; break;
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     	exit(0);
     }
 	if(debug){
-		countdown=3;
+//		countdown=3;
 		label='a';
 	}
 	blank();

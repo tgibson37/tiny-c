@@ -13,14 +13,14 @@ int movie;
 char label;
 
 /* basic stuff */
+//typedef struct { int x; int y; } pgPoint;
 void blank();
 void show();
 void pgPlot(int x, int y);
-void pgLine(int x0, int y0, int x1, int y1);
-void pgPointCircle(int xCenter, int yCenter, 
-		int radius, int xPts[], int yPts[], int npts);
-void pgCircle(int xCenter, int yCenter, int radius, int npts);
-void pgStar  (int xCenter, int yCenter, int radius, int npts);
+//void pgLine(pgPoint,pgPoint);
+//void pgPointCircle(pgPoint center, int radius, pgPoint pts[], int npts);
+//void pgCircle(pgPoint center, int radius, int npts);
+//void pgStar(pgPoint center, int radius, int npts);
 
 /* basic drawings */
 void pgTest();
