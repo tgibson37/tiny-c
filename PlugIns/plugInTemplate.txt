@@ -3,8 +3,6 @@
 #include <stdio.h>
 #define MCERR        24
 
-WARNING: This template has not been debugged. 
-
 /*	STEP 1: Create a sub-directory for the plug in code.
  *	Copy this file into that directory with the same name 
  *	as your plugin and dot-c as extent. Edit the copy 
