@@ -4,7 +4,6 @@
 #define MCERR        24
 // prototypes for callback functions
 void (*callEset)(int) = NULL;
-//void (*callNaf)() = NULL;
 
 // plug-in example function. Argument is char*.
 int foo(int nargs, int *args) {
@@ -17,7 +16,7 @@ int foo(int nargs, int *args) {
 int bar(int nargs, int *args) {
 	int d = args[0];
 	int x = 77;
-	printf("bar called with %d, 77/%d is %d, ",d,d,x/d);
+	printf("bar called with %d, 77/%d is %d",d,d,x/d);
 	return x/d;
 }
 
@@ -34,8 +33,6 @@ int main(int argc, char **argv) {
  *	first in this list is MC 1001. Change the names to functions 
  *	written above. Enlarge the list for larger libraries.
  */
-//int naf(int nargs, int *args);
-//void eset(int);
 typedef int (*McList)(int,int*);
 
 McList plugInList[] =

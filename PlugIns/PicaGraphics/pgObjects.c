@@ -60,28 +60,28 @@ void pgPlot(int x, int y) {
 }
 
 /* Draw a line from a to b */
-void pgLine( pgPoint a, pgPoint b ) {
+void pgLine(int x0, int y0, int x1, int y1) {
 	if(debug>1)++label;
 	else label=0;
-	if(debug>1)fprintf(stderr,"\n  pgline: %d,%d -> %d,%d",a.x,a.y,b.x,b.y);
+	if(debug>1)fprintf(stderr,"\n  pgline: %d,%d -> %d,%d",x0,y0,x1,y1);
 
-	int xr = b.x-a.x;
-	int yr = b.y-a.y;
+	int xr = x1-x0;
+	int yr = y1-y0;
 	int x,y;
 	int little,big,inc;
 	if( abs(xr) > abs(yr) ) {  /* near horizontal case */
 		if(debug>1)fprintf(stderr,"\n  horizontal");
 		float yinc, ypos;
 		yinc = (float)yr/xr;  /*   -1 < yinc < +1   */
-		if(a.x<b.x){
-			little=a.x;
-			big=b.x;
-			ypos=a.y;
+		if(x0<x1){
+			little=x0;
+			big=x1;
+			ypos=y0;
 		}
 		else{
-			little=b.x;
-			big=a.x;
-			ypos=b.y;
+			little=x1;
+			big=x0;
+			ypos=y1;
 		}
 		if(debug>1)fprintf(stderr,
 				"  little,big,yinc %d %d %f",little,big,yinc);
@@ -93,15 +93,15 @@ void pgLine( pgPoint a, pgPoint b ) {
 		if(debug>1)fprintf(stderr,"\n  vertical");
 		float xinc, xpos;
 		xinc = (float)xr/yr;
-		if(a.y<b.y){
-			little=a.y;
-			big=b.y;
-			xpos=a.x;
+		if(y0<y1){
+			little=y0;
+			big=y1;
+			xpos=x0;
 		}
 		else{
-			little=b.y;
-			big=a.y;
-			xpos=b.x;
+			little=y1;
+			big=y0;
+			xpos=x1;
 		}
 		if(debug>1)fprintf(stderr,
 				"  little,big,xinc %d %d %f",little,big,xinc);
@@ -114,32 +114,33 @@ void pgLine( pgPoint a, pgPoint b ) {
 }
 
 /* Define npts pgPoints in a circle, results in pts */
-void pgPointCircle(pgPoint center, int radius, pgPoint pts[], int npts ) {
+void pgPointCircle(int xCenter, int yCenter, 
+		int radius, int xPts[], int yPts[], int npts) {
 	int i;
 	float angle = 2*M_PI/npts;
 	for(i=0; i<npts; ++i) {
-		pts[i].x = (int)(radius*cos(i*angle)+center.x);
-		pts[i].y = (int)(radius*sin(i*angle)+center.y);
+		xPts[i] = (int)(radius*cos(i*angle)+xCenter);
+		yPts[i] = (int)(radius*sin(i*angle)+yCenter);
 	}
 }
 
-void pgCircle(pgPoint center, int radius, int npts) {
-	pgPoint pts[npts];
-	pgPointCircle(center,radius,pts,npts);
+void pgCircle(int xCenter, int yCenter, int radius, int npts) {
+	int xPts[npts],yPts[npts];
+	pgPointCircle(xCenter,yCenter,radius,xPts,yPts,npts);
 	int i;
 	for(i=0;i<npts-1;++i) {
-		pgLine(pts[i],pts[i+1]);
+		pgLine(xPts[i],yPts[i],xPts[i+1],yPts[i+1]);
 	}
-	pgLine(pts[npts-1],pts[0]);
+	pgLine(xPts[npts-1],yPts[npts-1],xPts[0],yPts[0]);
 }
 
-void pgStar(pgPoint center, int radius, int npts) {
-	pgPoint pts[npts];
-	pgPointCircle(center,radius,pts,npts);
+void pgStar(int xCenter, int yCenter, int radius, int npts) {
+	int xPts[npts],yPts[npts];
+	pgPointCircle(xCenter,yCenter,radius,xPts,yPts,npts);
 	int i, to;
 	for(i=0;i<npts;++i) {
 		to = (i+npts/2)%npts;
-		pgLine(pts[i],pts[to]);
+		pgLine(xPts[i],yPts[i],xPts[to],yPts[to]);
 	}
 }
 

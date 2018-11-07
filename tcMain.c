@@ -10,6 +10,7 @@ extern int optind;
 extern char* optarg;
 extern char* xendlib;
 extern int  (*piMC )(int,int,int*);
+int naf(int nargs, int *args);
 
 char* startSeed="[main();]";
 char* ppsPath="./pps";
@@ -57,18 +58,26 @@ int loadMC(char* libName) {
         fprintf(stderr, "dlerror: %s\n", dlerror());
         exit(1);
     }
-// Set the fcn pointer
+// Set the plugInMC fcn pointer
     piMC = getFcnPtr(libMC, "plugInMC");
 	if(!piMC) {
-        fprintf(stderr, "Protocol: plug in MC %s needs plugInMC function\n",libName);
+        fprintf(stderr, 
+        	"Protocol: plug in MC %s needs plugInMC function\n"
+        	,libName);
         exit(1);
     }
     if(loadMsg)printf("MC: %s loaded\n",fileName);
 // set callback to eset
-	void (*register_function)(void(*)());   // Prototype of fcn in .so
-	register_function = dlsym(libMC, "register_function");
-	(*register_function)(&eset);   //calls to .so's reg_fcn
-    if(loadMsg)printf("callback function eset(int) registered");
+	void (*register_eset)(void(*)());   // Prototype of fcn in .so
+	register_eset = dlsym(libMC, "register_eset");
+	if(register_eset == NULL){
+		fprintf(stderr,
+			"Error: %s needs register_eset function\n"
+			,fileName);
+		exit(1);
+	}
+	(*register_eset)(&eset);   //calls to .so's reg_fcn
+    if(loadMsg)printf("callback function eset registered");
 }
 
 int loadCode(char* file) {

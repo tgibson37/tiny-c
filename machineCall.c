@@ -154,7 +154,8 @@ int Mpft(int nargs, int *args) {
 
 int naf(int nargs, int *args)
 {
-	fprintf(stderr,"\nPhantom MC");
+	fprintf(stderr,"\nMC: no such number");
+	eset(MCERR);
     return 2;
 }
 
