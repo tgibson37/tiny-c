@@ -52,7 +52,7 @@ void plugInMC(int mcno, int nargs, int *args) {
 }
 // register callbacks to specific tc functions...
 //void register_function( (void(*eset)(int)) );
-void register_function( eset )
+void register_eset( eset )
 {
     callEset = eset;
 }
