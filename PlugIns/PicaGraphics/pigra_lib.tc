@@ -1,0 +1,34 @@
+// testPigra.tc
+// Requires #loadMC pigra 
+
+blank[
+	MC 1001
+]
+
+show[
+	MC 1002
+]
+
+sleep int s[
+	MC s,1008
+]
+
+plot int x,y [
+	MC x,y,1003
+]
+
+line int x0,y0,x1,y1[
+	MC x0,y0,x1,y1,1004
+]
+
+circle int x,y,r,p[
+	MC x,y,r,p,1005
+]
+
+star int x,y,r,p [
+	MC x,y,r,p,1006
+]
+
+text int x,y; char t(0) [
+	MC x,y,t,1007
+]

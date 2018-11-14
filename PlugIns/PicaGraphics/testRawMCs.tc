@@ -1,0 +1,19 @@
+#loadMC pigra
+
+//testRawMC.tc
+//	{ &Mblank, &Mshow, &Mplot, &Mline, &Mcircle 
+//		, &Mstar, &Mtext, &naf, &naf, &naf
+//	};
+main[
+	MC 1001
+	MC(30,50,1003 );
+	MC(48,28,1003 );
+	MC(50,28," <-- another",1007 );
+	MC(55,26,"mangled text",1007 );
+	MC(10,10, 70,70 ,1004 );
+	MC(40,40, 25, 29, 1005 );
+	MC(40,40, 25, 7, 1006 );
+	MC(32,50," <-- see the dot", 1007 );
+	MC(24,12,"Put text last to avoid mangling",1007 );
+	MC(1002);
+]

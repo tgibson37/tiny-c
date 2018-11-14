@@ -1,0 +1,21 @@
+#loadMC pigra
+#include PlugIns/PicaGraphics/pigra_lib.tc
+
+main[
+	blank
+	plot(30,50);
+	text(32,50," <-- see the dot");
+	show
+	sleep(2)
+	plot(48,28);
+	text(50,28," <-- another");
+	show
+	sleep(2)
+	text(55,26,"mangled text");
+	line(10,10, 70,70);
+	circle(40,40, 25, 29);
+	star(40,40, 25, 7);
+	text(32,50," <-- see the dot");
+	text(24,12,"Put text last to avoid mangling");
+	show
+]
