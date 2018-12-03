@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 71
+#define testcases 72
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1224,6 +1224,15 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 		The huge negative may vary, its a C pointer.
 		The date-time is compile time for tc, i.e. version.
  */
+		case 72:
+			testWhole("./testFiles/72");
+			break;
+/* 	Should get... 
+
+
+
+
+
 /***************  keyboard input tests, run manually *********/
 /*	Test 90 MUST be run using ./test 90. It is NOT a tc program.
  *	Tests 91 up may be run using ./test 9x, or ./tc testFiles/9x. They

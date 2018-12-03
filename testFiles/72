@@ -1,0 +1,13 @@
+// 72, system call
+main [
+	int err
+	ps "calling MC ./testFiles/72bash, 117 ..."
+	pl""
+	err = MC "./testFiles/72bash", 117
+	ps"MC returns"; pn err
+
+	ps "calling system(./testFiles/72bash,117) ..."
+	pl""
+	err = system "./testFiles/72bash"
+	ps "system returns"; pn err
+]

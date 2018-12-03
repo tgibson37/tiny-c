@@ -267,6 +267,11 @@ cdate char buff(0) [
 	return MC buff,110
 ]
 
+// system call
+system char cmd(0) [
+	return MC cmd,117
+]
+
 /* test system entry, not used by tc */
 _MAIN [
 	pl "----tc system level, calling appl main"

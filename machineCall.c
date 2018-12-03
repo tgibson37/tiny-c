@@ -296,6 +296,13 @@ int Mcdate(int nargs, int *argsv) {
 	return buff;
 }
 
+// execute another process, hangs until process ends
+int Msystem(int nargs, int *argsv) {
+	if(nargs<1){ eset(MCERR); return -1; }
+	char *cmd = (char*)argsv[0];
+	return system(cmd);
+}
+
 /* first in this list is MC 1 */
 McList origList[] =
 	{ &Mpc, &Mgch, &naf, &naf, &naf
@@ -308,7 +315,7 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
-	, &Mgetprop, &naf, &naf, &naf, &naf
+	, &Mgetprop, &Msystem, &naf, &naf, &naf
 };
 
 /* first in this list is MC 201 */
