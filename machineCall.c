@@ -1,6 +1,6 @@
 #include "tc.h"
 
-int  (*piMC )(int,int,int*);
+int  (*piMC )(int,int,int*) = NULL;
 typedef int (*McList)(int,int*);
 
 /*		MC9 ;scan for nth occurance of CH in a block. Args are
@@ -352,7 +352,9 @@ void userMC(int mcno, int nargs, int *args) { // lrb
 }
 
 int plugInMC(int mcno, int nargs, int *args) {
-	return (*piMC)(mcno, nargs, args);
+//fprintf(stderr,"~355mc %d\n",piMC);
+	if(piMC==NULL) eset(MCERR);
+	else return (*piMC)(mcno, nargs, args);
 }
 
 void machinecall( int nargs ) {

@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 #define MCERR        24
-// prototypes for callback functions
-void (*callEset)(int) = NULL;
 
 // plug-in example function. Argument is char*.
 int foo(int nargs, int *args) {
@@ -51,7 +49,7 @@ void plugInMC(int mcno, int nargs, int *args) {
 	}
 }
 // register callbacks to specific tc functions...
-//void register_function( (void(*eset)(int)) );
+void (*callEset)(int) = NULL;
 void register_eset( eset )
 {
     callEset = eset;

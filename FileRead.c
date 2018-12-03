@@ -99,7 +99,7 @@ int tcFopen(char* name, char* mode){
 int tcFputs(char* str, int unit) {
 	if(unit<0 + unit>MAX_UNIT)return -8;
 	if(fileUnit[unit]==NULL)return -9;
- 	if( fputs(str,fileUnit[unit]) != 0){
+ 	if( fputs(str,fileUnit[unit]) >= 0){
  		return strlen(str);
  	}
  	return -2;
