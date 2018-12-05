@@ -196,7 +196,7 @@ void Msleep(int nargs, int *argsv)
 }
 
 int Mfilrd(int nargs, int *argsv) {
-	if(nargs<3){ eset(MCERR); return -1; }
+	if(nargs<3){ eset(ARGSERR); return -1; }
 	char *name = (char*)argsv[0];
 	char *buff = (char*)argsv[1];
 	int bufflen = argsv[2];
@@ -204,7 +204,7 @@ int Mfilrd(int nargs, int *argsv) {
 }
 
 int Mfilwt(int nargs, int *argsv) {
-	if(nargs<3){ eset(MCERR); return -1; }
+	if(nargs<3){ eset(ARGSERR); return -1; }
 	char *name = (char*)argsv[0];
 	char *buff = (char*)argsv[1];
 	int bufflen = argsv[2];
@@ -212,20 +212,20 @@ int Mfilwt(int nargs, int *argsv) {
 }
 
 int Mstrlen(int nargs,int *argsv) {
-	if(nargs<1){ eset(MCERR); return -1; }
+	if(nargs<1){ eset(ARGSERR); return -1; }
 	char* s=(char*)argsv[0];
 	return strlen(s);
 }
 
 int Mstrcat(int nargs, int *argsv) {
-	if(nargs<2){ eset(MCERR); return -1; }
+	if(nargs<2){ eset(ARGSERR); return -1; }
 	char* a=(char*)argsv[0];
 	char* b=(char*)argsv[1];
 	return (int)strcat(a,b);
 }
 
 int Mstrcpy(int nargs, int *argsv) {
-	if(nargs<2){ eset(MCERR); return -1; }
+	if(nargs<2){ eset(ARGSERR); return -1; }
 	char* a=(char*)argsv[0];
 	char* b=(char*)argsv[1];
 	int x = (int)strcpy(a,b);
@@ -283,7 +283,7 @@ int Mgetprop(int nargs, int *args) {
 
 // load current date and time into supplied buff
 int Mcdate(int nargs, int *argsv) {
-	if(nargs<1){ eset(MCERR); return -1; }
+	if(nargs<1){ eset(ARGSERR); return -1; }
 	char *buff = (char*)argsv[0];
 	time_t rawtime;
 	struct tm *info;
@@ -298,9 +298,25 @@ int Mcdate(int nargs, int *argsv) {
 
 // execute another process, hangs until process ends
 int Msystem(int nargs, int *argsv) {
-	if(nargs<1){ eset(MCERR); return -1; }
+	if(nargs<1){ eset(ARGSERR); return -1; }
 	char *cmd = (char*)argsv[0];
 	return system(cmd);
+}
+// Like pn, but to an open file
+int Mfpn(int nargs, int *argsv) {
+	if(nargs<2){ eset(ARGSERR); return -1; }
+	int x = argsv[0];
+	int unit = argsv[1];
+	char buf[12];
+
+	if(unit<0 + unit>MAX_UNIT)return -8;
+	if(fileUnit[unit]==NULL)return -9;
+// itoa...
+	sprintf(buf, "%d", x);
+ 	if( fputs(buf,fileUnit[unit]) >= 0){
+ 		return strlen(buf);
+ 	}
+ 	return -2;
 }
 
 /* first in this list is MC 1 */
@@ -315,7 +331,8 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
-	, &Mgetprop, &Msystem, &naf, &naf, &naf
+	, &Mgetprop, &Msystem, &Mfpn, &naf, &naf
+	, &naf, &naf, &naf, &naf, &naf
 };
 
 /* first in this list is MC 201 */
@@ -330,7 +347,7 @@ McList userList[] =
 
 void origMC(int mcno, int nargs, int *args) {
 	if(mcno<1 || mcno>(sizeof(origList)/sizeof(void*))) {
-		pushk(0); eset(MCERR);
+		pushk(0); eset(ARGSERR);
 	}
 	else {
 	    int x = origList[mcno-1](nargs, args);
@@ -340,7 +357,7 @@ void origMC(int mcno, int nargs, int *args) {
 
 void newMC(int mcno, int nargs, int *args) {
 	if(mcno<1 || mcno>(sizeof(newList)/sizeof(void*))) {
-		pushk(0); eset(MCERR);
+		pushk(0); eset(ARGSERR);
 	}
 	else {
 	    int x = newList[mcno-1](nargs, args);
@@ -350,7 +367,7 @@ void newMC(int mcno, int nargs, int *args) {
 
 void userMC(int mcno, int nargs, int *args) { // lrb
 	if(mcno<1 || mcno>(sizeof(userList)/sizeof(void*))) {
-		pushk(0); eset(MCERR);
+		pushk(0); eset(ARGSERR);
 	}
 	else {
 	    int x = userList[mcno-1](nargs, args);
@@ -360,7 +377,7 @@ void userMC(int mcno, int nargs, int *args) { // lrb
 
 int plugInMC(int mcno, int nargs, int *args) {
 //fprintf(stderr,"~355mc %d\n",piMC);
-	if(piMC==NULL) eset(MCERR);
+	if(piMC==NULL) eset(ARGSERR);
 	else return (*piMC)(mcno, nargs, args);
 }
 

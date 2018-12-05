@@ -209,6 +209,14 @@ fputs char str(0); int unit [
 	return code;
 ]
 
+fpn int x; int unit [
+	fputc ' ',unit
+	MC x,unit,118
+]
+fpn_ns int x; int unit [
+	MC x,unit,118
+]
+
 fputc char c; int unit [
 	int code;
 	code=MC c,unit,113
