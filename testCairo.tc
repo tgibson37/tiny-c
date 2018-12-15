@@ -1,24 +1,25 @@
 #include cairoGraphicsLib.tc
 #include pps/library.tc
 
-testCaigra [
-    cg_start "test_draw", 600, 600
-    cg_rectangle 150,30,240,50
-    cg_moveto  100, 100
-    cg_lineto  500, 500
-    cg_next
-    cg_ellipse 200,250,200,100
-    cg_next
-    cg_arc     300, 300, 150, 90, 180
-    cg_next
-    cg_arc     450, 150, 30, 0, 360
-    cg_show
+main[
+    draw_setup  //required SETUP
+    testCaigra
+    pl""
+    code_peek
 ]
 
-main[
-    draw_setup
-    testCaigra
-//    code_peek
-// uncover code_peek to see the code sent to gtk to do the drawing
-// so far above cg_xxx codes are all, but plan to add text, fill, color
+testCaigra [
+    ps"demo of available draw codes"
+    start "test_draw", 600, 600  //required START
+    rectangle 150,30,240,50
+    moveto  100, 100
+    lineto  500, 500
+    next
+    ellipse 200,250,200,100
+    next
+    arc     300, 300, 150, 90, 180
+    next
+    arc     450, 150, 30, 0, 360
+    dot 100, 120
+    show
 ]

@@ -34,11 +34,14 @@ void moveto (int x, int y) {
 void lineto (int x, int y) {
   cairo_line_to (cr,  x,y);
 }
-void arc (int x, int y, int r, int b, int e) {
 #ifndef M_PI
 #    define M_PI 3.14159265358979323846
 #endif
+void arc (int x, int y, int r, int b, int e) {
   cairo_arc (cr,  x,y,r,  b*(M_PI/180),  e*(M_PI/180)  );
+}
+void arcneg (int x, int y, int r, int b, int e) {
+  cairo_arc_negative (cr,  x,y,r,  b*(M_PI/180),  e*(M_PI/180)  );
 }
 void ellipse(int x, int y, int width, int height){
   cairo_save (cr);
@@ -48,7 +51,8 @@ void ellipse(int x, int y, int width, int height){
   cairo_restore (cr);
 }
 
-enum fcn {FINISH,START,RECTANGLE,MOVETO,LINETO,NEXT,ELLIPSE,ARC};
+enum fcn {FINISH,START,RECTANGLE,MOVETO,LINETO,NEXT,ELLIPSE,
+  ARC,ARCNEG};
 
 /* draw_this is advanced past len,width,height
  */
@@ -89,6 +93,10 @@ do_draw_code(int *draw_this){
         break;
       case ARC:
         arc(*(draw_this+i+1),*(draw_this+i+2),*(draw_this+i+3),*(draw_this+i+4),*(draw_this+i+5));
+        i += 6;
+        break;
+      case ARCNEG:
+        arcneg(*(draw_this+i+1),*(draw_this+i+2),*(draw_this+i+3),*(draw_this+i+4),*(draw_this+i+5));
         i += 6;
         break;
       default:
