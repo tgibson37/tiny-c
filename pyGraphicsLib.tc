@@ -1,0 +1,87 @@
+// cairoGraphicsLib.tc
+// Define draw codes, init icode. Note that code(0) will be
+// filled in when the actually used code length is known.
+// start, show must be first,last respectively
+
+char _cgdrawname(50) //users name for drawing, no spaces
+char _cgfilename(55) // file passing draw vector to cairoGraphics
+char _cgcmd(70) // system command to start cairoGraphics
+int unit
+char NL, QUOTE  
+
+start 
+    char name(0)
+    int a1,a2 
+[
+  _cgdrawname = name
+  strcpy _cgfilename,_cgdrawname
+  strcat _cgfilename,".draw"
+  strcpy _cgcmd, "python cairopy.py "
+  strcat _cgcmd, _cgdrawname
+  NL=10
+  QUOTE=34
+  unit = fopen _cgfilename, "w"
+  if(unit<0)
+  [
+    printf "Cannot open %s for writing, err %d", _cgfilename, unit
+    exit
+  ]
+  cs "window"; ci a1; ci a2; nl
+]
+
+show [
+  cs "show"; nl
+  fclose unit
+  system _cgcmd
+]
+
+// shorthand puts to the file
+cs char s(0)[fputs s,unit]
+ci int x    [fpn x,unit]
+cc char x   [fputc x,unit]
+nl          [fputc 10,unit]
+
+// actual draw tools...
+arc int a1,a2,a3,a4,a5 [
+  cs "arc"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
+]
+arcneg int a1,a2,a3,a4,a5 [
+  cs "arc_negative"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
+]
+dot int x,y[
+  moveto x,y; 
+  lineto x+1,y+1
+]
+ellipse int a1,a2,a3,a4 [
+  
+]
+lineto int a1,a2 [
+  cs "line_to";ci a1; ci a2; nl
+]
+next [
+  cs "new_sub_path"; nl
+]
+moveto int a1,a2 [
+  cs "move_to";ci a1; ci a2; nl
+]
+rectangle int a1,a2,a3,a4 [
+  cs "rectangle";ci a1; ci a2; ci a3; ci a4; nl
+]
+raster int w,h,d [
+    int row,col
+    row=d
+    while(row<h) [
+        col=d
+        while(col<w)[
+            dot row,col
+            col=col+d
+        ]
+        row=row+d
+    ]
+]
+setfontsize int x [
+  cs "set_font_size"; ci x; nl
+]
+showtext char t(0)[
+  cs "show_text "; cc QUOTE; cs t; cc QUOTE; nl
+]

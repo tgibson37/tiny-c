@@ -1,16 +1,13 @@
-#include cairoGraphicsLib.tc
+#include pyGraphicsLib.tc
 #include pps/library.tc
 
 main[
-    draw_setup  //required SETUP
     testCaigra
     pl""
-    code_peek
 ]
 
 testCaigra [
-    ps"demo of available draw codes"
-    start "test_draw", 600, 600  //required START
+    start "test_draw", 600, 600
     rectangle 150,30,240,50
     moveto  100, 100
     lineto  500, 500
@@ -19,7 +16,12 @@ testCaigra [
     next
     arc     300, 300, 150, 90, 180
     next
+    arcneg     300, 300, 150, 0, 270
+    next
     arc     450, 150, 30, 0, 360
     dot 100, 120
+    moveto 100, 150
+    setfontsize 20
+    showtext "see the dot"
     show
 ]

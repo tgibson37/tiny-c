@@ -233,12 +233,14 @@ int Mstrcpy(int nargs, int *argsv) {
 }
 
 int Mfopen(int nargs, int *args) {
+	if(nargs<2){ eset(ARGSERR); return -1; }
 	char *filename = (char*)args[0];
 	char *mode   = (char*)args[1];
 	return tcFopen(filename,mode);
 }
 
 int Mfgets(int nargs, int *args) {
+	if(nargs<3){ eset(ARGSERR); return -1; }
 	char* buff = (char*)args[0];
 	int len = args[1];
 	int unit = args[2];
@@ -246,18 +248,21 @@ int Mfgets(int nargs, int *args) {
 }
 
 int Mfputs(int nargs, int *args) {
+	if(nargs<2){ eset(ARGSERR); return -1; }
 	char* str = (char*)args[0];
 	int unit = args[1];
 	return tcFputs(str,unit);
 }
 
 int Mfputc(int nargs, int *args) {
+	if(nargs<2){ eset(ARGSERR); return -1; }
 	char c = (char)args[0];
 	int unit = args[1];
 	return tcFputc(c,unit);
 }
 
 int Mfclose(int nargs, int *args) {
+	if(nargs<1){ eset(ARGSERR); return -1; }
 	int unit = args[0];
 	return tcFclose(unit);
 }
