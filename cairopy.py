@@ -43,7 +43,8 @@ def show():
 	ctx.stroke()
 	surface.write_to_png(pngname)
 	from subprocess import call
-	call(["display", pngname])
+	if len(show_app)>0:
+		call([show_app, pngname])
 def usage():
 	print "Usage: ", sys.argv[0], "drawfile"
 
@@ -55,6 +56,7 @@ if len(sys.argv)>1:
 else:
 	usage()
 	sys.exit()
+show_app = "display"
 M_PI = 3.14159265358979323846
 with open(drawfile) as f:
     for line in f:
@@ -63,7 +65,14 @@ with open(drawfile) as f:
 			comment(line)
 		elif x[0]=="window":
 			window(x)
+		elif x[0]=="showapp":
+			if len(x)>1:
+				show_app = x[1]
+			else:
+				show_app = ""
 		elif x[0]=="show":
+			if len(x)>1:
+				image_display=x[1]
 			show()
 		elif x[0]=="show_text":
 			ctx.show_text(x[1])

@@ -23,5 +23,6 @@ testCaigra [
     moveto 100, 150
     setfontsize 20
     showtext "see the dot"
+//    showapp ""
     show
 ]

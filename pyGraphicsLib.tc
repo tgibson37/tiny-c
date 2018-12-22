@@ -29,6 +29,10 @@ start
   cs "window"; ci a1; ci a2; nl
 ]
 
+showapp char r(0) [
+  cs "showapp "; cs r; nl
+]
+
 show [
   cs "show"; nl
   fclose unit
