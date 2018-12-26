@@ -3,12 +3,10 @@
 
 main[
     testCaigra
-    pl""
 ]
 
 testCaigra [
     start "test_draw", 600, 600
-    rectangle 150,30,240,50
     moveto  100, 100
     lineto  500, 500
     next
@@ -21,8 +19,15 @@ testCaigra [
     arc     450, 150, 30, 0, 360
     dot 100, 120
     moveto 100, 150
-    setfontsize 20
+    setfontsize 15
     showtext "see the dot"
+    moveto 95, 145
+    lineto 80, 145
+    lineto 95, 126
+    lineto 90, 126
+    moveto 95, 126
+    lineto 95, 131
+
 //    showapp ""
     show
 ]

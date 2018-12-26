@@ -63,19 +63,6 @@ with open(drawfile) as f:
 		x = shlex.split(line)
 		if ord(line[:1])==35:    # decimal 35 is hash
 			comment(line)
-		elif x[0]=="window":
-			window(x)
-		elif x[0]=="showapp":
-			if len(x)>1:
-				show_app = x[1]
-			else:
-				show_app = ""
-		elif x[0]=="show":
-			if len(x)>1:
-				image_display=x[1]
-			show()
-		elif x[0]=="show_text":
-			ctx.show_text(x[1])
 		elif x[0]=="arc":
 			r1 = float(x[1])
 			r2 = float(x[2])
@@ -94,6 +81,26 @@ with open(drawfile) as f:
 			d5 = int(x[5])
 			r5 = float(d5*(M_PI/180))
 			ctx.arc_negative(r1,r2,r3,r4,r5)
+
+		elif x[0]=="setrgb":
+			r1 = float(x[1])/100
+			r2 = float(x[2])/100
+			r3 = float(x[3])/100
+			ctx.set_source_rgb(r1,r2,r3)
+
+		elif x[0]=="show":
+			if len(x)>1:
+				image_display=x[1]
+			show()
+		elif x[0]=="showapp":
+			if len(x)>1:
+				show_app = x[1]
+			else:
+				show_app = ""
+		elif x[0]=="showtext":
+			ctx.show_text(x[1])
+		elif x[0]=="window":
+			window(x)
 		else:
 			draw(x)
 		'''

@@ -57,7 +57,14 @@ dot int x,y[
   lineto x+1,y+1
 ]
 ellipse int a1,a2,a3,a4 [
-  
+  cs "save";nl
+  cs "translate";ci a1+a3/2;ci a2+a4/2;nl
+  cs "scale";ci a3/2;ci a4/2;nl
+  cs "arc"; ci 0; ci 0; ci 1; ci 0; ci 360;nl
+  cs "restore";nl
+]
+fill[
+  cs "fill";nl
 ]
 lineto int a1,a2 [
   cs "line_to";ci a1; ci a2; nl
@@ -86,6 +93,9 @@ raster int w,h,d [
 setfontsize int x [
   cs "set_font_size"; ci x; nl
 ]
+setrgb int r,g,b [
+  cs "setrgb"; ci r;ci g;ci b; nl
+]
 showtext char t(0)[
-  cs "show_text "; cc QUOTE; cs t; cc QUOTE; nl
+  cs "showtext "; cc QUOTE; cs t; cc QUOTE; nl
 ]
