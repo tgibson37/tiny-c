@@ -94,7 +94,7 @@ setfontsize int x [
   cs "set_font_size"; ci x; nl
 ]
 setrgb int r,g,b [
-  cs "setrgb"; ci r;ci g;ci b; nl
+  cs "set_source_rgb"; ci r;ci g;ci b; nl
 ]
 showtext char t(0)[
   cs "showtext "; cc QUOTE; cs t; cc QUOTE; nl
