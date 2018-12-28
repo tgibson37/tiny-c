@@ -82,6 +82,11 @@ with open(drawfile) as f:
 			r5 = float(d5*(M_PI/180))
 			ctx.arc_negative(r1,r2,r3,r4,r5)
 
+		elif x[0]=="setrgb":
+			r1 = float(x[1])/256
+			r2 = float(x[2])/256
+			r3 = float(x[3])/256
+			ctx.set_source_rgb(r1,r2,r3)
 
 		elif x[0]=="show":
 			if len(x)>1:
