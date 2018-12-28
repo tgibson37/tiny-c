@@ -1,0 +1,119 @@
+#include pyGraphicsLib.tc
+#include pps/library.tc
+
+int x,y,dx,dy,w,h
+int gcol(90), ng
+main [
+	// bisque
+	gcol(0)=255 ;gcol(1)=228 ;gcol(2)=196
+	// alice blue (240,248,255)
+	gcol(3)=240 ;gcol(4)=248 ;gcol(5)=255
+	// spring green
+	gcol(6)=230 ;gcol(7)=230 ;gcol(8)=250
+	// orange
+	gcol(9)=255 ;gcol(10)=165 ;gcol(11)=0
+	ng=12
+//ref: https://www.rapidtables.com/web/color/RGB_Color.html
+	x=y=0
+	dx=80; dy=80
+	w=h=50
+    start "color", 350, 360
+    rectangle 0,0,350,300
+    setrgb 255,255,255
+    fill
+    setfontsize 15
+    icolors
+    gcolors
+    show
+]
+placement[ 
+	if(x==0)[x=30; y=60]
+	else x = x+dx; 
+	if( x>270)[
+		x=30
+		y = y+dy
+		pl "y = ";pn y
+		if( y==220) y=y+50
+	]
+]
+// intense colors (0 or 255)
+icolors [
+	int r,g,b
+	r=g=b=0
+	moveto 20,30
+	setrgb 0,0,0
+	showtext "Intense colors"
+	y = y+30
+	while(r<=255)[
+		while(g<=255)[
+			while(b<=255)[
+				placement
+				ilabel x,y,r,g,b
+				box r,g,b
+				b=b+255
+			]
+			b=0;g=g+255
+		]
+		g=0;r=r+255
+	]
+]
+
+// gentle colors (sample)
+gcolors [
+	int r,g,b,ig
+	ig=0
+	moveto 20,240
+	showtext "Gentle colors (sample)"
+	while(ig<ng)[
+		r=gcol(ig); ig=ig+1
+		g=gcol(ig); ig=ig+1
+		b=gcol(ig); ig=ig+1
+	    placement
+	    glabel(ig/3)
+		box r,g,b
+	]
+]
+
+ilabel int x,y,r,g,b[
+	char l(6)
+	l(0)=0
+	if(r>0)[
+		if(r>28)strcat l, "R"
+		else strcat l, "r"
+	]
+	if(g>0)[
+		if(g>28)strcat l, "G"
+		else strcat l, "g"
+	]
+	if(b>0)[
+		if(b>28)strcat l, "B"
+		else strcat l, "b"
+	]
+	if((r+b+g)==0) strcpy l, "black"
+	moveto x,y
+	setrgb 0,0,0
+	showtext l
+	pl l
+]
+glabel int i[
+	moveto x,y
+	setrgb 0,0,0
+	if(i==1)showtext "bisque"
+	if(i==2)showtext "alice blue"
+	if(i==3)showtext "lavender"
+	if(i==4)showtext "orange"
+]
+
+box int r,g,b [
+	pl"";pn r;pn g;pn b;ps(" at");pn x;pn y;
+	rectangle x,y+5,w,h
+	if( (r+g+b)>=756 ) [white; return ]
+	setrgb r,g,b
+	fill
+]
+
+white [
+	pl "white"
+	setrgb 0,0,0
+	stroke
+]
