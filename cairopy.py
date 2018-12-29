@@ -106,10 +106,4 @@ with open(drawfile) as f:
 		'''
 		elif x[0]=="":
 			ctx.
-		elif x[0]=="setrgb":
-			r1 = float(x[1])/100
-			r2 = float(x[2])/100
-			r3 = float(x[3])/100
-			ctx.set_source_rgb(r1,r2,r3)
 		'''
-#print("done")

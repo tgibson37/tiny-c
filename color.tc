@@ -32,7 +32,7 @@ placement[
 	if( x>270)[
 		x=30
 		y = y+dy
-		pl "y = ";pn y
+		//pl "y = ";pn y
 		if( y==220) y=y+50
 	]
 ]
@@ -93,7 +93,7 @@ ilabel int x,y,r,g,b[
 	moveto x,y
 	setrgb 0,0,0
 	showtext l
-	pl l
+	//pl l
 ]
 glabel int i[
 	moveto x,y
@@ -105,7 +105,7 @@ glabel int i[
 ]
 
 box int r,g,b [
-	pl"";pn r;pn g;pn b;ps(" at");pn x;pn y;
+	//pl"";pn r;pn g;pn b;ps(" at");pn x;pn y;
 	rectangle x,y+5,w,h
 	if( (r+g+b)>=756 ) [white; return ]
 	setrgb r,g,b
@@ -113,7 +113,7 @@ box int r,g,b [
 ]
 
 white [
-	pl "white"
+	//pl "white"
 	setrgb 0,0,0
 	stroke
 ]
