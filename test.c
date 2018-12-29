@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 72
+#define testcases 74
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -34,6 +34,10 @@ void markEndlibrary() {
 	strcpy(endapp,xendlib);
 	endapp+=10;
 	apr=endapp;
+}
+
+void testBash(char* bashFile){
+	system(bashFile);
 }
 
 /* setup tools used by some of the tests */
@@ -1228,6 +1232,26 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			testWhole("./testFiles/72");
 			break;
 /* 	Should get... 
+				calling MC ./testFiles/72bash, 117 ...
+				    This echo is from script 72bash
+				MC returns 0calling system(./testFiles/72bash,117) ...
+				    This echo is from script 72bash
+				system returns 0
+ */
+ 		case 73:
+			testBash("./testFiles/test_app.sh pf");
+			break;
+/* 	Should get... 
+				test_pf
+				test_pf done
+ */
+ 		case 74:
+			testBash("./testFiles/test_app.sh trek");
+			break;
+/* 	Should get... 
+				test_trek
+				test_trek done
+ */
 
 
 

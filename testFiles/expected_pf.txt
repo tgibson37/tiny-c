@@ -1,0 +1,104 @@
+***  TINY-C VERSION 1.0,  COPYRIGHT 1977, T A GIBSON  ***
+        This C version copyright 2017, T A Gibson
+seed 
+
+
+move  1 into the boat
+move  2 into the boat
+move  3 into the boat
+move  4 into the boat
+move 
+Canoe has 74 yards to go, and is 25% full
+Canoe has 48 yards to go, and is 50% full
+Canoe has 22 yards to go, and is 75% full
+A piranha fish has jumped into the boat. He is swimming
+around. He is looking at the toe of the cannibal.
+The cannibal has speared the fish. 
+trip to far shore is complete.
+
+move 
+move  1 into the boat
+move 
+Canoe has 70 yards to go, and is 25% full
+Canoe has 40 yards to go, and is 50% full
+A piranha fish has jumped into the boat. He is swimming
+around. He is looking at the toe of the cannibal.
+The cannibal has speared the fish. 
+Canoe has 10 yards to go, and is 75% full
+trip to near shore is complete.
+
+move 
+move  1 into the boat
+move  5 into the boat
+move  6 into the boat
+move  7 into the boat
+move 
+Canoe has 83 yards to go, and is 25% full
+A piranha fish has jumped into the boat. He is swimming
+around. He is looking at the toe of the missionary.
+The missionary is calm. He is staring back at the
+fish. The fish just jumped back in the river.
+Canoe has 66 yards to go, and is 50% full
+Canoe has 49 yards to go, and is 75% full
+Canoe has 32 yards to go, and is 100% full
+The boat is swamped.....
+CAPSIZE!!!  Everybody swim FAST!! The fish are coming..
+Player 1 makes it.
+Player 5 makes it.
+BYTE!! BYTE!!  player 6 fortunately escapes with minor wounds
+trip to far shore is complete. 6 attended by doctor.
+
+move 
+move  1 into the boat
+move 
+Canoe has 70 yards to go, and is 25% full
+Canoe has 40 yards to go, and is 50% full
+Canoe has 10 yards to go, and is 75% full
+A piranha fish has jumped into the boat. He is swimming
+around. He is looking at the toe of the cannibal.
+The cannibal has speared the fish. 
+Unfortunately he made a hole int the
+boat, increasing its sink rate 10%.
+trip to near shore is complete.
+ 6 is much worse
+
+move 
+move  1 into the boat
+move  8 into the boat
+move  9 into the boat
+move 
+Canoe has 84 yards to go, and is 27% full
+A piranha fish has jumped into the boat. He is swimming
+around. He is looking at the toe of the missionary.
+The missionary is calm. He is staring back at the
+fish. The fish just jumped back in the river.
+Canoe has 68 yards to go, and is 54% full
+Canoe has 52 yards to go, and is 81% full
+A piranha fish has jumped into the boat. He is swimming
+around. He is looking at the toe of the missionary.
+The missionary is calm. He is staring back at the
+fish. The fish just jumped back in the river.
+The boat is swamped.....
+CAPSIZE!!!  Everybody swim FAST!! The fish are coming..
+BYTE!! BYTE!!  player 1 fortunately escapes with minor wounds
+BYTE!! BYTE!!  player 8 major wounds acquired
+trip to far shore is complete. 1 attended by doctor.
+ 1 is much worse 8 attended by doctor.
+
+
+
+near shore                      far shore
+
+                       1 cannibal major att  
+                       2 cannibal 
+                       3 hunter 
+                       4 hunter 
+                       5 doctor 
+                       6 nurse major att  
+                       7 missionary 
+                       8 missionary major att  
+                       9 missionary 
+                           canoe
+    
+Your score is 970
+done

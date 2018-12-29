@@ -27,6 +27,7 @@ DIFF1 = diff test_results testFiles/good_t_results
 KEEP1 = cp test_results testFiles/good_t_results
 DIFF2 = diff dump_results testFiles/good_d_results
 KEEP2 = cp dump_results testFiles/good_d_results
+DIFF3 = cat diff_*.txt
 
 # Linux install dirs, note these are file names
 INSTALLTC = /usr/local/bin/tinyc
@@ -65,6 +66,9 @@ difft:
 
 diffd:
 	$(DIFF2)
+
+diffp:
+	$(DIFF3)
 
 keep: $(TEST_RESULTS)
 	$(KEEP1)
