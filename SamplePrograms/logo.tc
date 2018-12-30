@@ -1,0 +1,95 @@
+#include pyGraphicsLib.tc
+#include pps/library.tc
+
+logo_c int dx,dy [
+lineto 179+dx,dy+144
+arc 100+dx,dy+100,90,30,95
+lineto 94+dx,dy+10
+arc 100+dx,dy+100,90,265,325
+arcneg 100+dx,dy+100,100,330,30
+//lineto 378,0
+]
+
+logo_y int dx,dy [
+dy=dy+45
+//dx=dx+197  // to make room for joined logo_c
+moveto 0+dx,dy+0
+lineto 84+dx,dy+145
+//logo_c 20+dx-197,dy+145
+logo_c dx-197,dy+145+45
+lineto 181+dx,dy+0
+lineto 178+dx,dy+0
+lineto 168+dx,dy+0
+lineto 114+dx,dy+92
+lineto 60+dx,dy+0
+lineto 0+dx,dy+0
+]
+
+logo_n int dx,dy [
+dy=dy+45
+moveto 0+dx,dy+0
+lineto 60+dx,dy+0
+lineto 60+dx,dy+22
+arc 120+dx,dy+89,88,227,270
+arc 120+dx,dy+40,40,270,0
+lineto 160+dx,dy+145
+lineto 100+dx,dy+145
+lineto 100+dx,dy+30
+arcneg 90+dx,dy+30,10,0,250
+arcneg 90+dx,dy+50,30,260,180
+lineto 60+dx,dy+145
+lineto 0+dx,dy+145
+lineto 0+dx,dy+0
+]
+
+logo_i int dx,dy [
+rectangle 0+dx,dy+45,60,145
+moveto 60+dx,dy+15
+ellipse 0+dx,dy+0,60,30
+]
+
+logo_t int dx,dy [
+// rt vert incl cross, 
+//    S (south, general direction of following draws)
+moveto 90+dx,dy+0
+lineto 90+dx,dy+45
+lineto 120+dx,dy+45
+lineto 120+dx,dy+55
+lineto 90+dx,dy+55
+lineto 90+dx,dy+172
+// upper arc NE (northeast)
+arcneg 95+dx,dy+175,5,180,63
+arcneg 84+dx,dy+130,50,70,31
+// round tip
+arc 132+dx,dy+156,5,200,25
+// bottom arc, W
+arc 84+dx,dy+130,60,30,155
+// lft vert up incl bar, N
+lineto 30+dx,dy+55
+lineto 0+dx,dy+55
+lineto 0+dx,dy+45
+lineto 30+dx,dy+45
+lineto 30+dx,dy+20
+// slanted top, NE
+lineto 90+dx,dy+0
+]
+
+logo int dx,dy [
+    logo_t 0+dx,dy+0
+    logo_i 150+dx,dy+0
+    logo_n 230+dx,dy+0
+    logo_y 390+dx,dy+0
+]
+
+main [
+    ps"outline of our 1977 logo"
+
+    int w,h,dx,dy
+    w=615; h=490
+    start "logo_t",w,h
+    setrgb 1,1,0
+    logo 20,20
+    setrgb 255,0,0
+    fill
+    show
+]

@@ -1,6 +1,6 @@
 #include "tc.h"
 
-#define testcases 74
+#define testcases 77
 
 char timeStamp[40];
 extern struct stackentry poptop;
@@ -1248,9 +1248,22 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  		case 74:
 			testBash("./testFiles/test_app.sh trek");
 			break;
-/* 	Should get... 
-				test_trek
-				test_trek done
+/* 	Should get...    similar
+ */
+ 		case 75:
+			testBash("./testFiles/test_app.sh testCairo");
+			break;
+/* 	Should get...     similar
+ */
+ 		case 76:
+			testBash("./testFiles/test_app.sh color");
+			break;
+/* 	Should get...     similar
+ */
+ 		case 77:
+			testBash("./testFiles/test_app.sh logo-t");
+			break;
+/* 	Should get...     similar
  */
 
 
