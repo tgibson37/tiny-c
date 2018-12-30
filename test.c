@@ -1261,7 +1261,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 /* 	Should get...     similar
  */
  		case 77:
-			testBash("./testFiles/test_app.sh logo-t");
+			testBash("./testFiles/test_app.sh logo");
 			break;
 /* 	Should get...     similar
  */
