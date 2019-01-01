@@ -1,6 +1,5 @@
 // cairoGraphicsLib.tc
-// Define draw codes, init icode. Note that code(0) will be
-// filled in when the actually used code length is known.
+// Define draw codes, init icode. 
 // start, show must be first,last respectively
 
 char _cgdrawname(50) //users name for drawing, no spaces
