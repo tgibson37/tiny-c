@@ -1,0 +1,63 @@
+//intersect.tc  --  computes intersection between two lines.
+//  The lines are defined by pixel locations of two points each.
+
+main[
+	int ix(1)
+	ix(0) = 77
+	ix(1) = 99
+	// args: answer, line a, line b
+	xersect ix, 5,5,10,10, 25,5,20,10
+	ps"x,y =";pn ix(0); pn ix(1)
+]
+
+// THE MATH
+// find x,y, the intersection where ay==by, and ax==bx
+// given the args lax0,..,lby1 above, compute e,f,g,h
+
+// General formula for each line:
+// a	y = e + f*x					(line a)
+// b	y = g + h*x					(line b)
+//   x,y notations specific to each line
+// 1	ay = e + f*ax				(a)
+// 2	by = g + h*bx				(b)
+// 3  At pt ax0,ay0..
+// 4	ay0 = e + f*ax0				(3->1)
+// 5	e = ay0 - f*ax0				(4)
+// 6  At pt ax1,ay1..
+// 7	e = ay1 - f*ax1				(like 5)
+// 8	ay0-ay1-f*ax0+f*ax1 = 0		(5 minus 7)
+// 9*	f = day/dax  				(8)
+//  		where day = ay1-ay0, etc
+// 10*	e = ay0 - f*ax0				(9->5)
+// 11*	h = dby/dbx					(like 9)
+// 12*	g = by0 - h*bx0				(like 10)
+// compute x,y, the intersection
+// 13	e + f*x = g + h*x			(a=b)
+// 14	e-g = h*x-f*x = (h-f)*x		(13)
+// 15*	x = (e-g)/(h-f)				(14)
+// 16*	y = g + h*x					(a)
+//   * lines are solutions
+// 2 CAUTIONs: avoid divide by 0, avoid loss of precision
+// args: answer, line a, line b
+
+xersect int ix(1), ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 
+[
+	int day,dax,dby,dbx,f,e,h,g,y,x
+	day = ay1-ay0
+	dax = ax1-ax0
+	dby = by1-by0
+	dbx = bx1-bx0
+	// f and h made big to carry precision
+	f = day*1000/dax
+	// AFTER multiply divide back down to true e,g value
+	e = ay0 - f*ax0/1000
+	h = dby*1000/dbx
+	g = by0 - h*bx0/1000
+	// e,f,g,h known; solve for x,y
+	f = f/1000; h = h/1000  // back to normal
+	x = (e-g)/(h-f)
+	y = g + h*x
+//	pl"e,f,g,h =";pn e; pn f;pn g; pn h
+	ix(0) = x
+	ix(1) = y
+] 
