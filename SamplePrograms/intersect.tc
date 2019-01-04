@@ -1,3 +1,6 @@
+#include pyGraphicsLib.tc
+#include pps/library.tc
+
 //intersect.tc  --  computes intersection between two lines.
 //  The lines are defined by pixel locations of two points each.
 

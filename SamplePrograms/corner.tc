@@ -1,0 +1,153 @@
+#include pyGraphicsLib.tc
+#include pps/library.tc
+
+//corner.tc  --  Using last lines direction computes a new direction 
+//		given +/- degrees. Draws nothing. Returns a point.
+// Example: Draws an arrowhead
+//		moveto 10,10
+//		lineto 20,20
+//		corner (rtx, 135, 5)
+//		corner (ltx, -135, 5)
+//		lineto rtx(0), rtx(1)
+//		moveto 20,20
+//		lineto ltx(0), ltx(1)
+
+// returns the largest magnitude
+xmaglargest int x,y [
+	if(x<0)x=-x
+	if(y<0)y=-y
+	if(x>y)return x
+	else return y
+]
+// returns the smallest magnitude
+xmagsmallest int x,y [
+	if(x<0)x=-x
+	if(y<0)y=-y
+	if(x>y)return y
+	else return x
+]
+// return approximate distance between 2 points
+alen  int x0,y0, x1,y1 [
+	int len,dx,dy
+	dx=x1-x0; dy=y1-y0
+	len = asqrt(dx*dx+dy*dy)
+	return len
+]
+
+// returns an int approximation to sqrt
+asqrt int x[
+	int x0,x1,i
+	x = x*100  // for precision
+	x0 = 1000
+	i = 11
+	while(i=i-1) [
+		x1 = x0-(x0*x0-x)/(2*x0)
+//pl"";pn i;ps":"; pn x0; pn x1
+		if(x0==x1)break
+		x0 = x1
+	]
+	return (x1+5)/10
+]
+
+// turn right 90 degrees, return target for lineto of equal length
+// in ix(0),ix(1). Returns approximate len.
+rt90 int ix(1) [
+	int x0, y0, x1, y1, dx, dy, r
+	x0=lastmoveto(0); y0=lastmoveto(1)
+	x1=lastlineto(0); y1=lastlineto(1)
+pl"x0 y0 x1 y1 ="; pn x0; pn y0; pn x1; pn y1
+	dx=x1-x0; dy=y1-y0
+pl"dx dy =";pn dx;pn dy
+	r=x1/y1
+	ix(0)=dy  // invert x,y into new direction
+	ix(1)=dx
+	if(r<0)ix(1)=-ix(1)  // adjust one sign to right 90
+	else ix(0)=-ix(0)
+	ix(0) = ix(0)+x1  // apply to point 1
+	ix(1) = ix(1)+y1
+pl"r ="; pn r
+	return alen(x0,y0,x1,y1)
+]
+
+main[
+	int ix(1),len
+	start "test", 130,90
+	moveto 10,10
+	lineto 30,30
+	len = rt90 ix
+	pl"ix len ="; pn ix(0); pn ix(1); pn len
+	// should be 10,50,28
+	lineto ix(0),ix(1)
+	pl"";pl"second rt90"
+	moveto 90,50
+	lineto 70,30
+	len = rt90 ix
+	pl"ix len ="; pn ix(0); pn ix(1); pn len
+	// should be 90,10,28
+	lineto ix(0),ix(1)
+	pl"";pl"third rt90"
+	moveto 110,10
+	lineto 120,60
+	len = rt90 ix
+	pl"ix len ="; pn ix(0); pn ix(1); pn len
+	// should be 70,70,51
+	lineto ix(0),ix(1)
+	len = rt90 ix
+	pl"ix len ="; pn ix(0); pn ix(1); pn len
+	// should be 60,20,51
+	lineto ix(0),ix(1)
+	show
+]
+
+xmain [
+	int x,y
+	y=asqrt(x=612)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=99)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=4612)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=20612)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=32000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=1000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=500000)
+	pl"sqrt of"; pn x; ps" is" pn y
+]
+
+
+
+// various tests, if 1 to chose one
+xmain [
+	int  x1,y1,length
+	x1=40
+	y1=0
+pl"right edge from 0,0"
+	while(y1<=30)[
+		length=len(0,0,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		y1 = y1+10
+	]
+	pl"bottom"
+	while(x1>0)[
+		length=len(0,0,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		x1 = x1-10
+	]
+	pl"";pl"left edge from 40,40"
+	while(y1>0)[
+		length=len(40,40,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		y1 = y1-10
+	]
+	pl"top"
+	while(x1<=40)[
+		length=len(40,40,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		x1 = x1+10
+	]
+]
+
+// THE MATH

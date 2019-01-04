@@ -6,7 +6,9 @@ char _cgdrawname(50) //users name for drawing, no spaces
 char _cgfilename(55) // file passing draw vector to cairoGraphics
 char _cgcmd(70) // system command to start cairoGraphics
 int unit
-char NL, QUOTE  
+char NL, QUOTE
+// recent points are remembered
+int lastmoveto(1), lastlineto(1), _have_previous_lineto
 
 start 
     char name(0)
@@ -19,6 +21,7 @@ start
   strcat _cgcmd, _cgdrawname
   NL=10
   QUOTE=34
+//  _drawing_under_way = 0
   unit = fopen _cgfilename, "w"
   if(unit<0)
   [
@@ -67,12 +70,26 @@ fill[
 ]
 lineto int a1,a2 [
   cs "line_to";ci a1; ci a2; nl
-]
-next [
-  cs "new_sub_path"; nl
+  if(_have_previous_lineto)[
+    lastmoveto(0)=lastlineto(0)
+    lastmoveto(1)=lastlineto(1)
+  ]
+  lastlineto(0)=a1
+  lastlineto(1)=a2
+  _have_previous_lineto=1
 ]
 moveto int a1,a2 [
   cs "move_to";ci a1; ci a2; nl
+  lastmoveto(0)=a1
+  lastmoveto(1)=a2
+  _have_previous_lineto = 0
+]
+next [
+  cs "new_sub_path"; nl
+  lastmoveto(0)=0
+  lastmoveto(1)=0
+  lastlineto(0)=0
+  lastlineto(1)=0
 ]
 rectangle int a1,a2,a3,a4 [
   cs "rectangle";ci a1; ci a2; ci a3; ci a4; nl
