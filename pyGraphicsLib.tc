@@ -106,6 +106,12 @@ raster int w,h,d [
         row=row+d
     ]
 ]
+setdash int d, off [
+  cs "set_dash";ci d; ci off; nl
+]
+setdash2 int d1,d2,off [
+  cs "set_dash";ci d1; ci d2; ci off; nl
+]
 setfontsize int x [
   cs "set_font_size"; ci x; nl
 ]
@@ -123,43 +129,44 @@ stroke[
 // returns: -1 for parallel lines, 0 for OK
 xersect int ix(1), ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 
 [
-//pl"line a ="; pn ax0;pn ay0;pn ax1;pn ay1
-//pl"line b ="; pn bx0;pn by0;pn bx1;pn by1
+int xdb;xdb = 1
+          if(xdb)pl"line a ="; pn ax0;pn ay0;pn ax1;pn ay1
+          if(xdb)pl"line b ="; pn bx0;pn by0;pn bx1;pn by1
     int day,dax,dby,dbx,f,e,h,g,y,x,avert,bvert
     dax = ax1-ax0
     day = ay1-ay0
     dbx = bx1-bx0
     dby = by1-by0
-//pl"dax,day,dbx,dby";pn dax;pn day;pn dbx;pn dby
+        if(xdb)pl"dax,day,dbx,dby";pn dax;pn day;pn dbx;pn dby
     if(dax==0) [  // line a is vertical
       if(dbx==0) return -1  // parallel
       x = ax0
       avert=1
-//pl"x ="; pn x
+          if(xdb)pl"x ="; pn x
     ]
     else [
       f = day*1000/dax        //slope
       e = ay0 - f*ax0/1000    // y=0 intersept
-//pl"e f ="; pn e;pn f
+          if(xdb)pl"e f ="; pn e;pn f
     ]
     if(dbx==0) [  // line b is vertical
       x = bx0
       bvert=1
-//pl"x ="; pn x
+          if(xdb)pl"x ="; pn x
     ]
     else [
       h = dby*1000/dbx
       g = by0 - h*bx0/1000
-//pl"g h ="; pn g;pn h
+          if(xdb)pl"g h ="; pn g;pn h
     ]
 
     if(h==f)return -1;
     if( 0==(avert+bvert) ) x = ((e-g)*1000)/(h-f)
-//pl"x ="; pn x
+          if(xdb)pl"x ="; pn x
 
     if( 0==bvert ) y = g + h*x/1000
     else y = e + f*x/1000
-//pl"bvert y ="; pn bvert;pn y
+          if(xdb)pl"bvert y ="; pn bvert;pn y
 
     ix(0) = x
     ix(1) = y

@@ -6,11 +6,12 @@
 // Example: Draws an arrowhead
 //		moveto 10,10
 //		lineto 20,20
-//		corner (rtx, 135, 5)
-//		corner (ltx, -135, 5)
+//		corner (rtx, 135, 5)  <<== not coded yet, 
+//		corner (ltx, -135, 5)  <<== probably needs tan
 //		lineto rtx(0), rtx(1)
 //		moveto 20,20
 //		lineto ltx(0), ltx(1)
+// But corner90 does a rt angle turn left or right, no trig used.
 
 // returns the largest magnitude
 xmaglargest int x,y [
@@ -34,7 +35,7 @@ alen  int x0,y0, x1,y1 [
 	return len
 ]
 
-// returns an int approximation to sqrt
+// returns an int approximation to sqrt. Uses Newton's method.
 asqrt int x[
 	int x0,x1,i
 	x = x*100  // for precision
@@ -42,63 +43,87 @@ asqrt int x[
 	i = 11
 	while(i=i-1) [
 		x1 = x0-(x0*x0-x)/(2*x0)
-//pl"";pn i;ps":"; pn x0; pn x1
 		if(x0==x1)break
 		x0 = x1
 	]
 	return (x1+5)/10
 ]
-
-// turn right 90 degrees, return target for lineto of equal length
-// in ix(0),ix(1). Returns approximate len.
-rt90 int ix(1) [
-	int x0, y0, x1, y1, dx, dy, r
+// turn right/left 90 degrees, return target point for lineto 
+// of equal length in ix(0),ix(1). Returns approximate len.
+// THE CORNER90 MATH
+// Given the prior lines start and end points (captured
+// as lastmoveto and lastlineto) exchange the numerator
+// and denominator for the new slope. One of these must 
+// change sign. If the new direction is towards the upper
+// left or lower right, change the numerator, else the 
+// denominator. The result is a delta direction. Add the
+// delta to the current position and return that point.
+// WARNING: not hardened against vert or horz lines
+corner90 int ix(1), rl [
+	int x0, y0, x1, y1, dx, dy, r, temp
 	x0=lastmoveto(0); y0=lastmoveto(1)
 	x1=lastlineto(0); y1=lastlineto(1)
-pl"x0 y0 x1 y1 ="; pn x0; pn y0; pn x1; pn y1
+		//if(dbg)[pn x1;pn y1]
+		//if(dbg)[pl"x0 y0 x1 y1 ="; pn x0; pn y0; pn x1; pn y1]
 	dx=x1-x0; dy=y1-y0
-pl"dx dy =";pn dx;pn dy
-	r=x1/y1
-	ix(0)=dy  // invert x,y into new direction
-	ix(1)=dx
-	if(r<0)ix(1)=-ix(1)  // adjust one sign to right 90
-	else ix(0)=-ix(0)
-	ix(0) = ix(0)+x1  // apply to point 1
-	ix(1) = ix(1)+y1
-pl"r ="; pn r
+	r=dx/dy
+		//if(dbg)[ps"   last dx dy r =";pn dx;pn dy;pn r]
+	temp=dy  // invert x,y into new direction
+	dy=dx
+	dx=temp
+		//if(dbg)[ps"      rl="; pn rl]
+	if(rl>0)[   // right turn sign switch
+		if(r>0)dy= -dy
+		else dx= -dx
+	]
+	else [   // left turn
+		if(r>0)dx= -dx
+		else dy = -dy
+	]
+		//if(dbg)[pl "new  dx dy   ="; pn dx;pn dy ]
+	ix(0) = dx+x1  // return point 1 plus new delta
+	ix(1) = dy+y1
+		if(dbg)[
+			if(rl>0)pl"rt ";else pl"lf "
+			pn dx;pn dy;pn ix(0);pn ix(1)
+		]
 	return alen(x0,y0,x1,y1)
 ]
+// calculates
+rt90 int ix(1)[ return corner90 ix, +1 ]
+lf90 int ix(1)[ return corner90 ix, -1 ]
+// draws
+lf [int ix(1), len; len = lf90 ix; lineto ix(0),ix(1) ]
+rt [int ix(1), len; len = rt90 ix; lineto ix(0),ix(1) ]
 
-main[
+// THREE mains. xmain two of them to run the third.
+xmain[
 	int ix(1),len
-	start "test", 130,90
-	moveto 10,10
-	lineto 30,30
-	len = rt90 ix
-	pl"ix len ="; pn ix(0); pn ix(1); pn len
-	// should be 10,50,28
-	lineto ix(0),ix(1)
-	pl"";pl"second rt90"
-	moveto 90,50
-	lineto 70,30
-	len = rt90 ix
-	pl"ix len ="; pn ix(0); pn ix(1); pn len
-	// should be 90,10,28
-	lineto ix(0),ix(1)
-	pl"";pl"third rt90"
-	moveto 110,10
-	lineto 120,60
-	len = rt90 ix
-	pl"ix len ="; pn ix(0); pn ix(1); pn len
-	// should be 70,70,51
-	lineto ix(0),ix(1)
-	len = rt90 ix
-	pl"ix len ="; pn ix(0); pn ix(1); pn len
-	// should be 60,20,51
-	lineto ix(0),ix(1)
+	start "test", 380,300
+dbg=0
+				if(dbg)[
+					ps"seed line from 210 10 to 220 60"
+					pl"    dx   dy   x   y"
+				]
+// seed line plus 3 more
+	moveto 120,80
+	lineto 170,70
+	lf;rt;rt
+if(1)[
+	lf;rt;rt;lf;rt;rt;
+				if(dbg)[arc(180,120,5,0,360);pl"1"]
+	lf;rt;lf;lf;rt;lf;
+				if(dbg)[arc(40,200,5,0,360);pl"2"]
+	lf;rt;lf;lf;rt;rt;
+				if(dbg)[arc(200,220,5,0,360);pl"3"]
+	lf;rt;lf;lf;rt;lf;
+				if(dbg)[arc(340,140,5,0,360);pl"4"]
+lf;rt
+]
 	show
 ]
 
+// various asqrt tests (a because it is approximate)
 xmain [
 	int x,y
 	y=asqrt(x=612)
@@ -117,37 +142,33 @@ xmain [
 	pl"sqrt of"; pn x; ps" is" pn y
 ]
 
-
-
-// various tests, if 1 to chose one
-xmain [
+// various alen tests. len uses asqrt.
+main [
 	int  x1,y1,length
 	x1=40
 	y1=0
-pl"right edge from 0,0"
+	pl"right edge from 0,0"
 	while(y1<=30)[
-		length=len(0,0,x1,y1)
+		length=alen(0,0,x1,y1)
 		pl"x1,y1,length";pn x1;pn y1;pn length
 		y1 = y1+10
 	]
 	pl"bottom"
 	while(x1>0)[
-		length=len(0,0,x1,y1)
+		length=alen(0,0,x1,y1)
 		pl"x1,y1,length";pn x1;pn y1;pn length
 		x1 = x1-10
 	]
 	pl"";pl"left edge from 40,40"
 	while(y1>0)[
-		length=len(40,40,x1,y1)
+		length=alen(40,40,x1,y1)
 		pl"x1,y1,length";pn x1;pn y1;pn length
 		y1 = y1-10
 	]
 	pl"top"
 	while(x1<=40)[
-		length=len(40,40,x1,y1)
+		length=alen(40,40,x1,y1)
 		pl"x1,y1,length";pn x1;pn y1;pn length
 		x1 = x1+10
 	]
 ]
-
-// THE MATH

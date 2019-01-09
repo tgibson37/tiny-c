@@ -45,7 +45,7 @@ if(1)[
 
 main[
 //Note: turn off/on using if(0) and/or //
-if(1)[
+if(0)[
 	xmain1
 	test 60,40,60,120, 70,50,75,120, "acute verticle a"
 	test 10,70,40,40,  50,80,90,120, "line b away from a"
@@ -53,13 +53,14 @@ if(1)[
 	test 50,90,80,60,  60,60,65,140, "near vertical across diagonal"
 	test 20,50,25,120, 10,70,40,40,  "diagonal across near vertical"
 	test 40,100,80,60,  30,80,100,75, "near horzntl across diagonal"
+] else [
 	test 30,80,100,75, 40,100,80,60,   "diag across near horizontal"
-]
 	test 30,80,100,75, 30,90,100,85, "parallel, check err == -1 ?"
 	test 20,50,25,120, 40,50,45,120, "parallel near vert"
 	test 20,50,125,50, 20,70,125,70, "parallel horz"
 	test 20,50,20,120, 40,50,40,120, "parallel vert"
 //	test fake, fake, fake
+]
 ]
 
 xmain1[
