@@ -60,6 +60,7 @@ asqrt int x[
 // delta to the current position and return that point.
 // WARNING: not hardened against vert or horz lines
 corner90 int ix(1), rl [
+int dbg;dbg=0
 	int x0, y0, x1, y1, dx, dy, r, temp
 	x0=lastmoveto(0); y0=lastmoveto(1)
 	x1=lastlineto(0); y1=lastlineto(1)
@@ -100,7 +101,7 @@ rt [int ix(1), len; len = rt90 ix; lineto ix(0),ix(1) ]
 xmain[
 	int ix(1),len
 	start "test", 380,300
-dbg=0
+int dbg;dbg=0
 				if(dbg)[
 					ps"seed line from 210 10 to 220 60"
 					pl"    dx   dy   x   y"
@@ -124,7 +125,7 @@ lf;rt
 ]
 
 // various asqrt tests (a because it is approximate)
-xmain [
+main [
 	int x,y
 	y=asqrt(x=612)
 	pl"sqrt of"; pn x; ps" is" pn y
@@ -143,7 +144,7 @@ xmain [
 ]
 
 // various alen tests. len uses asqrt.
-main [
+xmain [
 	int  x1,y1,length
 	x1=40
 	y1=0
