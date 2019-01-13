@@ -8,23 +8,17 @@ main [
 	while(x<=end) [
 		int y
 		y=asin(x)
-		if(y>=1000)printf "%c%4d  %d.%03d", 10, x, y/1000, y%1000
-		else if(y<= -1000)
-			printf "%c%4d  %d.%03d", 10, x, y/1000, (-y)%1000
-		else if(y>0)printf "%c%4d  0.%03d", 10, x, y
-		else   printf "%c%4d -0.%03d", 10, x, -y
+		printf "%c%4d   ", 10, x
+		if(y>=1000) pdec(y)
+		else if(y<= -1000) pdec y
+		else if(y>0) pdec y
+		else pdec y
 
 		y=acos(x)
-		if(y>=1000)printf "    %d.%03d", y/1000, y%1000
-		else if(y<= -1000)printf "    %d.%03d", y/1000, (-y)%1000
-		else if(y>0)printf "    0.%03d", y
-		else   printf "   -0.%03d", -y
+		ptab;pdec y
 
 		y=atan(x)
-		if(y>=1000)printf "    %4d.%03d", y/1000, y%1000
-		else if(y<= -1000)printf "    %4d.%03d", y/1000, (-y)%1000
-		else if(y>0)printf "    0.%03d", y
-		else   printf "   -0.%03d", -y
+		ptab;pdec y
 		x = x+inc
 	]
 ]

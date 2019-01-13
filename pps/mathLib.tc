@@ -77,3 +77,11 @@ asqrt int x[
 	]
 	return (x1+5)/10
 ]
+// prints y/1000 as a decimal
+pdec int y [
+	if(y>=1000)printf "%d.%03d", y/1000, y%1000
+	else if(y<= -1000)printf "%d.%03d", y/1000, (-y)%1000
+	else if(y>0)printf "0.%03d", y
+	else   printf "-0.%03d", -y
+]
+ptab [putchar 9]
