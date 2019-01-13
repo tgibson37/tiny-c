@@ -1,6 +1,6 @@
 #include pps/library.tc
-#include lrblib.tc
-#include double.tc
+#include SamplePrograms/lrblib.tc
+#include SamplePrograms/double.tc
 
 // cmbyn.tc - lrb - 5/31/18
 
@@ -20,9 +20,10 @@ bar char x(0) [return ceqn(x,"call ",4)]
 // I am using it to test library loading using #include.  (tag, 10/26/2018)
 
 main [
- char cmbyn(100),t(5000)
+ char cmbyn(100),t(5000),file(100)
  int k,p
- strcpy cmbyn,"Call Me By Your Name"
+ strcpy cmbyn,"Call.Me.By.Your.Name"
+ strcpy file, "SamplePrograms/"
  printf "%c%s%c",10,cmbyn,10
  toupper cmbyn
  lrblibver
@@ -35,8 +36,12 @@ main [
  if 'c'==MC 2 printf "%c",10
  else printf "%cYour character wasn't a 'c'",10)
  while (p=index(cmbyn,k," ",1)) cmbyn(p-1)='.'
- strcat cmbyn,".txt"
- if ((k=readfile(cmbyn,t,5000-1))<=0) [ pl "error reading file";pl ""]
+ strcat file,cmbyn
+ strcat file,".txt"
+ if ((k=readfile(file,t,5000-1))<=0) [ 
+ 	pl "error reading file: "
+ 	pl cmbyn
+ ]
  else [pft t,t+k;double cmbyn,1]
  ]
 

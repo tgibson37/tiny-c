@@ -1,0 +1,26 @@
+// math about cairo lines
+corner90 int ix(1), rl [
+	int x0, y0, x1, y1, dx, dy, r, temp
+	x0=lastmoveto(0); y0=lastmoveto(1)
+	x1=lastlineto(0); y1=lastlineto(1)
+	dx=x1-x0; dy=y1-y0
+	r=dx/dy
+	temp=dy  // invert x,y into new direction
+	dy=dx
+	dx=temp
+	if(rl>0)[   // right turn sign switch
+		if(r>0)dy= -dy
+		else dx= -dx
+	]
+	else [   // left turn
+		if(r>0)dx= -dx
+		else dy = -dy
+	]
+		//if(dbg)[pl "new  dx dy   ="; pn dx;pn dy ]
+	ix(0) = dx+x1  // return point 1 plus new delta
+	ix(1) = dy+y1
+	return alen(x0,y0,x1,y1)
+]
+// convenience routines
+rt90 int ix(1)[ return corner90 ix, +1 ]
+lf90 int ix(1)[ return corner90 ix, -1 ]

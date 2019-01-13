@@ -1,0 +1,33 @@
+#include pps/mathLib.tc
+#include pps/library.tc
+
+// various alen tests. alen uses asqrt.
+main [
+	int  x1,y1,length
+	x1=40
+	y1=0
+	pl"right edge from 0,0"
+	while(y1<=30)[
+		length=alen(0,0,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		y1 = y1+10
+	]
+	pl"bottom"
+	while(x1>0)[
+		length=alen(0,0,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		x1 = x1-10
+	]
+	pl"";pl"left edge from 40,40"
+	while(y1>0)[
+		length=alen(40,40,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		y1 = y1-10
+	]
+	pl"top"
+	while(x1<=40)[
+		length=alen(40,40,x1,y1)
+		pl"x1,y1,length";pn x1;pn y1;pn length
+		x1 = x1+10
+	]
+]

@@ -1,0 +1,37 @@
+#include tomlib.tc
+#include pps/library.tc
+
+//lineNumberedPrint.tc
+
+main [
+	char buf(999), name(99)
+	int lineno, unit, code
+
+	ps "File? "
+	gs name
+
+	unit=fopen name, "r"
+	if(unit<0)[
+		printf "error: cannot open %s, err is %d %c", name,unit,10
+		abort
+	]
+	lineno = 1
+	while(1) [
+runlimit 40
+		code=fgets buf, 999, unit
+		if(code== -4)[
+			pl""
+			abort   //all done
+		]
+		if(code<0)[
+			if(code == -9)break
+			ps "err reading line "
+			pn lineno
+			ps ", code is "
+			pn code
+		]
+		printf "%04d%c%s", lineno, 9, buf
+		lineno = lineno+1
+	]
+	ps "err "; pn code
+]

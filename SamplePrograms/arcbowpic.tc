@@ -1,0 +1,54 @@
+#include pps/pyGraphicsLib.tc
+#include pps/library.tc
+
+main[
+		if(1)[
+	start "arcbow_example",300,300
+	moveto 40,200
+	lineto 100,140
+	arc 130,170,42,220,340
+	moveto 170,156
+	lineto 200,224
+	dot 129,170
+	showtext " c"
+	next
+	int ix(1)
+	xersect ix, 40,200,100,140, 170,156,200,224
+	dot ix(0),ix(1)
+	showtext " intersect"
+	moveto 52,170
+	showtext "a"
+	moveto 190,190
+	showtext "b"
+	moveto 100,140
+//	setdash2 5,3,5
+//	lineto ix(0),ix(1)
+	show
+		]
+		if(0)[
+	start "line_example",300,300
+	moveto 40,215
+	showtext "40,200"
+	moveto 40,200
+	lineto 100,140
+
+	moveto 100,135
+	showtext "100,140"
+	moveto 100,140
+	lineto 170,156
+
+	moveto 172,156
+	showtext "170,156"
+	moveto 170,156
+	lineto 200,224
+
+	moveto 203,224
+	showtext "200,224"
+
+	moveto 55,170
+	showtext "a"
+	moveto 190,190
+	showtext "b"
+	show
+		]
+]

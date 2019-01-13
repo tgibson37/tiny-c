@@ -1,0 +1,21 @@
+#include pps/mathLib.tc
+#include pps/library.tc
+
+// various asqrt tests (a because it is approximate)
+main [
+	int x,y
+	y=asqrt(x=612)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=99)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=4612)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=20612)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=32000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=1000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=500000)
+	pl"sqrt of"; pn x; ps" is" pn y
+]

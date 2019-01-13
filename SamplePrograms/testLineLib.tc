@@ -60,12 +60,8 @@
 // 	return alen(x0,y0,x1,y1)
 // ]
 // // convenience routines
-// rt90 int ix(1)[ return corner90 ix, +1 ]
-// lf90 int ix(1)[ return corner90 ix, -1 ]
-// // draws
-
-lf [int ix(1), len; len = lf90 ix; lineto ix(0),ix(1) ]
-rt [int ix(1), len; len = rt90 ix; lineto ix(0),ix(1) ]
+ lf [int ix(1), len; len = lf90 ix; lineto ix(0),ix(1) ]
+ rt [int ix(1), len; len = rt90 ix; lineto ix(0),ix(1) ]
 
 main[
 	int ix(1),len
@@ -79,7 +75,7 @@ int dbg;dbg=0
 	moveto 120,80
 	lineto 170,70
 	lf;rt;rt
-if(1)[
+				if(1)[
 	lf;rt;rt;lf;rt;rt;
 				if(dbg)[arc(180,120,5,0,360);pl"1"]
 	lf;rt;lf;lf;rt;lf;
@@ -88,8 +84,8 @@ if(1)[
 				if(dbg)[arc(200,220,5,0,360);pl"3"]
 	lf;rt;lf;lf;rt;lf;
 				if(dbg)[arc(340,140,5,0,360);pl"4"]
-lf;rt
-]
+				lf;rt
+				]
 	show
 ]
 

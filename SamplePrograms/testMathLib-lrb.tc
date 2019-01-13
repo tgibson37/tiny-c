@@ -1,0 +1,24 @@
+#include pps/mathLib.tc
+#include pps/library.tc
+
+char htab
+
+foo int x,y;char str(0) [
+ if (y>=1000) printf "%c%s(%3d) = %d.%03d",htab,str,x,y/1000,y%1000
+ else if (y<=-1000) printf "%c%s(%3d) = %d.%03d",htab,str,x,y/1000,(-y)%1000
+ else if (y>0) printf "%c%s(%3d) = 0.%03d",htab,str,x,y
+ else printf "%c%s(%3d) = -0.%03d",htab,str,x,-y
+ ]
+
+main [
+ printf "%ctestMathLib.tc - 1/11/19%c%c",10,10,10
+ htab=9
+ int x,y1,y2,y3
+ while x<=360 [
+  y1=asin(x);y2=acos(x);y3=atan(x)
+  foo x,y1,"sin";foo x,y2,"cos";foo x,y3,"tan"
+  pl ""
+  x=x+15
+  ]
+ putchar 10
+ ]
