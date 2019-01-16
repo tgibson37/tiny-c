@@ -46,7 +46,7 @@ def show():
 	if len(show_app)>0:
 		call([show_app, pngname])
 def usage():
-	print "Usage: ", sys.argv[0], "drawfile"
+	print("Usage: ", sys.argv[0], "drawfile")
 
 # It all starts here
 if len(sys.argv)>1:

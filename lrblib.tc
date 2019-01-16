@@ -65,13 +65,6 @@ toupper char s(0) [
   ]
  ]
 
-// quiet exit
-abort [MC 109]
-
-getprop char file(0),request(0),tcbuff(0);int bufflen;char default(0) [ // returns pointer to text following request
- return MC file,request,tcbuff,bufflen,default,116
- ]
-
 help char h(0) [
  char url(50)
  strcpy url,"http://primepuzzle.com/tc/tchelp."
@@ -81,12 +74,8 @@ help char h(0) [
  ]
 
 lrblibver [
- printf "%clrblib version 1.12%c",10,10
+ printf "%clrblib version 1.13%c",10,10
  ]
-
-cdate char buff(0) [
-	return MC buff,110
-]
 
 url int n; char u(0) [ // returns pointer to url string
  if n==0 strcpy u,"http://tinyurl.com/programmersguide"

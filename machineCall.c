@@ -307,7 +307,7 @@ int Msystem(int nargs, int *argsv) {
 	char *cmd = (char*)argsv[0];
 	return system(cmd);
 }
-// Like pn, but to an open file
+// Put an integer to an open file, no leading space
 int Mfpn(int nargs, int *argsv) {
 	if(nargs<2){ eset(ARGSERR); return -1; }
 	int x = argsv[0];

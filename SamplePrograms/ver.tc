@@ -12,18 +12,18 @@ main char v(0) [
  getproperty "pps/version.prop","date =",tcbuff,40,"..."
  printf "%s",tcbuff
  printf "%cThe operating system is ",10
- getprop "pps/version.prop","os =",tcbuff,40,"..."
+ getproperty "pps/version.prop","os =",tcbuff,40,"..."
  printf "%s",tcbuff
  char os(30);strcpy os,tcbuff
  printf "%cThe program length is ",10
- getprop "pps/tc.prop","PRLEN",tcbuff,40,"..."
+ getproperty "pps/tc.prop","PRLEN",tcbuff,40,"..."
  printf "%s",tcbuff
  printf "%ctiny-C authors ",10
- getprop "pps/tc.prop","AUTHOR1",tcbuff,40,"..."
+ getproperty "pps/tc.prop","AUTHOR1",tcbuff,40,"..."
  printf "%s",tcbuff
- getprop "pps/tc.prop","AUTHOR2",tcbuff,40,"..."
+ getproperty "pps/tc.prop","AUTHOR2",tcbuff,40,"..."
  printf ", %s",tcbuff
- getprop "pps/tc.prop","AUTHOR3",tcbuff,40,"..."
+ getproperty "pps/tc.prop","AUTHOR3",tcbuff,40,"..."
  printf ", %s",tcbuff
  char mydate(20);cdate mydate
  printf "%cThe current date and time is %s",10,mydate,10
