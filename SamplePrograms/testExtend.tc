@@ -1,0 +1,219 @@
+#include pps/mathLib.tc
+#include pps/lineLib.tc
+#include pps/library.tc
+
+//set data for one test and do the test
+seed int a,b,c,d,e,f [
+	fac=a; len=b; seg(0)=c; seg(1)=d; seg(2)=e; seg(3)=f;
+	pl""
+	dotest
+	pl""
+]
+
+dotest[
+	psegment seg
+	pl"length"; pn seglen(seg)
+if(0)[     // test _extend and _trim ELSE test extend
+pl" factor test"
+	pl"extend by factor of"; pn fac
+	_extend ix, seg, fac
+	if(fac>0)[
+		pl"new last point"
+		seg(2)=ix(0)
+		seg(3)=ix(1)
+	]
+	else if(fac<0)[
+		pl"new first point"
+		seg(0)=ix(0)
+		seg(1)=ix(1)
+	]
+	ppoint ix
+	pl"new segment "; psegment seg
+pl" trim test"
+	pl"length"; pn seglen(seg)
+	if(len!=0)[
+		pl"trim off"; pn len
+		_trim ix, seg, len
+		if(len>0)[
+			pl"new last point"
+			seg(2)=ix(0)
+			seg(3)=ix(1)
+		]else[
+			pl"new first point"
+			seg(0)=ix(0)
+			seg(1)=ix(1)
+		]
+		ppoint ix
+		pl"new segment "; psegment seg
+		pl"final length"; pn seglen(seg)
+	]
+]else
+[     // test extend. 
+	pl" extend test"
+	int slen
+	pl"orig length"; pn slen=seglen(seg)
+	len = slen*fac-len   // seed fac,len -> final len
+	pl"extend to"; pn len
+	extend ix,seg,len
+	if(len>0)[
+		pl"new last point"
+		seg(2)=ix(0)
+		seg(3)=ix(1)
+	]else[
+		pl"new first point"
+		seg(0)=ix(0)
+		seg(1)=ix(1)
+	]
+	ppoint ix
+	pl"new segment "; psegment seg
+	pl"final length"; pn seglen(seg)
+]
+]
+
+int SIZE_INT
+	int ix(1), fac, len, seg(3)
+main[
+	SIZE_INT = 4
+// 8 cases, 4 extend from line's end, 4 from beginning
+//	   fac= 5, len= 12
+	seed(5,12,5,5,105,105)   // ++ slope
+	ps"SHOULD BE   [[ 5 5][ 499 499]], 699";pl""
+	seed(5,12,5,105,105,5)   // +- slope
+	ps"SHOULD BE   [[ 5 105][ 499 -389]], 699";pl""
+	seed(5,12,105,5,5,105)   // -+ slope
+	ps"SHOULD BE   [[ 105 5][ -389 499]], 699";pl""
+	seed(5,12,105,105,5,5)   // -- slope
+	ps"SHOULD BE   [[ 105 105][ -389 -389]], 699";pl""
+//	   fac= -5, len= -12
+	ps"-----negative fac and len-----";pl""
+	seed(-5,-12,5,5,105,105)
+	ps"SHOULD BE   [[ -389 -389][ 105 105]], 699";pl""
+	seed(-5,-12,5,105,105,5)
+	ps"SHOULD BE   [[ -389 499][ 105 5]], 699";pl""
+	seed(-5,-12,105,5,5,105)
+	ps"SHOULD BE   [[ 499 -389][ 5 105]], 699";pl""
+	seed(-5,-12,105,105,5,5)
+	ps"SHOULD BE   [[ 499 499][ 5 5]], 699";pl""
+]
+
+// ABOVE is test code. Below is code now in pps/lineLib.tc,
+// but stripped of debug code. For the record this commented
+// out has the debug code, which may be handy.
+
+// computes a point ix that would extend a line segment
+// to length len. Positive len extends from the lines end,
+// negative from the lines beginning. seg is not modified.
+//extend int ix(1), seg(3), len [
+//		int dbg;dbg=0
+//			if(dbg)[
+//				pl"   ~150 in extend: "
+//				psegment seg;ps" len";pn len
+//			]
+//	int slen, fac
+//	slen = seglen(seg)
+//	if(len>0)fac = 1+len/slen
+//	else fac = -1+len/slen
+//			if(dbg)[
+//				pl"~159 len,fac";pn len;pn fac
+//			]
+//	_extend ix,seg,fac
+//	if(fac>0)[
+//		seg(2)=ix(0)
+//		seg(3)=ix(1)
+//		if(dbg)[pl"~165 new last point"; ppoint seg+2*SIZE_INT]
+//	]
+//	else if(fac<0)[
+//		seg(0)=ix(0)
+//		seg(1)=ix(1)
+//		if(dbg)[pl"~159 new first point"; ppoint seg]
+//	]
+//	slen = seglen seg
+//			if(dbg)[
+//				pl"new seg";psegment seg;ps" slen";pn slen
+//				pl"";pl"~172 calling trim"; 
+//			]
+//			if(dbg)[pl"~178: len slen";pn len;pn slen]
+////	_trim ix,seg,-9
+//	if(len>0)[
+//	_trim ix,seg,slen-len
+//		seg(2)=ix(0)
+//		seg(3)=ix(1)
+//		if(dbg)[pl"~165 new last point"; ppoint seg+2*SIZE_INT]
+//	]
+//	else if(len<0)[
+//	_trim ix,seg,-slen-len
+//		seg(0)=ix(0)
+//		seg(1)=ix(1)
+//		if(dbg)[pl"~159 new first point"; ppoint seg]
+//	]
+//]
+//
+//// compute point ix that would extend seg's length by a factor,
+//// fac. Positive fac extends the lines end, negative the 
+//// beginning. seg is not modified.
+//_extend int ix(1), seg(3), fac [
+//		int dbg;dbg=0
+//			if(dbg)[pl"   ~7(ex): fac";pn fac]
+//	int mfac, dx, dy
+//	if(fac>0)mfac=fac; else mfac=-fac
+//			if(dbg)[pl"   ~9(ex): mfac";pn mfac]
+//	dx = (seg(2)-seg(0))*mfac
+//	dy = (seg(3)-seg(1))*mfac
+//			if(dbg)[pl"   ~11: dx,dy";pn dx;pn dy]
+//	if(fac>0)[
+//		ix(0) = seg(0)+dx
+//		ix(1) = seg(1)+dy
+//	] else [
+//		ix(0) = seg(2)-dx
+//		ix(1) = seg(3)-dy
+//	]
+//			if(dbg)[pl"   ~21: ix ";ppoint ix]
+//			if(dbg)[pl"   _extend done";pl""]
+//]
+//
+//// if length of seg>mag(len) return in ix a new point that //would //
+// tri//m to mag(len) seg's length. Trim from seg(2..3) if len>0, 
+// els//e seg(0..1). seg is not modified.
+//
+//_trim int ix(1),seg(4),len [
+//		int dbg;dbg=0
+//	int slen, amt, dx, dy
+//	dx = seg(2)-seg(0)
+//	dy = seg(3)-seg(1)
+//			if(dbg)[pl"   ~32(tr): dx,dy";pn dx;pn dy]
+//	slen = seglen(seg)
+//	if(len>0)[
+//		amt = (1000*len+500)/slen
+//			if(dbg)[pl"   ~36: len,slen,amt";
+//				pn len;pn slen;pn amt ]
+//		ix(0) = seg(2) - amt*dx/1000
+//		ix(1) = seg(3) - amt*dy/1000
+//	]
+//	else[
+//		amt = (-1000*len-500)/slen
+//			if(dbg)[pl"   len,slen,amt";pn len;pn slen;pn amt]
+//		ix(0) = seg(0) + amt*dx/1000
+//		ix(1) = seg(1) + amt*dy/1000
+//	]
+//]
+//
+//// sets a segment array, seg, with two points
+//setsegment int seg(3), ax,ay,bx,by [
+//	seg(0)=ax; seg(1)=ay; seg(2)=bx; seg(3)=by;
+//]
+//
+//// prints a segment in brackets
+//psegment int seg(3) [
+//	ps"["; ppoint seg; ppoint seg+2*SIZE_INT; ps"]"
+//]
+//
+//// prints a point in brackets
+//ppoint int pt(1) [
+//	ps"["; pn pt(0); pn pt(1); ps"]"
+//]
+//
+//// returns the length of a segment
+//seglen int seg(3) [
+//	return alen seg(0),seg(1),seg(2),seg(3)
+//]
+//
