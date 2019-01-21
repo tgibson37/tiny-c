@@ -1,0 +1,19 @@
+//testMC118.tc
+main
+[
+  int unit
+  unit = fopen "test118junk", "w"
+  MC 2, unit, 118
+  MC 4, unit, 118
+  MC 6, unit, 118
+  MC 8, unit, 118
+  MC 999, unit, 118
+  fpn_ns(2,unit)
+  fpn_ns(2,unit)
+  fpn_ns(2,unit)
+  fpn 1,unit
+  fpn 3,unit
+  fpn 5,unit
+  fpn 7,unit
+  fclose unit
+]
