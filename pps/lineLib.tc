@@ -1,6 +1,10 @@
 // math about cairo lines
 // This lib does not draw. It has computational aids.
 
+//manefest constants, tc style:
+SIZE_INT[return 4]
+INFINITY[return 2147483647]
+
 // Turn 90 degree corners
 corner90 int ix(1), rl [
 	int x0, y0, x1, y1, dx, dy, r, temp
@@ -63,7 +67,6 @@ extend int ix(1), seg(3), len [
 				pl"";pl"~172 calling trim"; 
 			]
 			if(dbg)[pl"~178: len slen";pn len;pn slen]
-//	_trim ix,seg,-9
 	if(len>0)[
 	_trim ix,seg,slen-len
 		seg(2)=ix(0)
@@ -152,46 +155,48 @@ seglen int seg(3) [
 // returns: -1 for parallel lines, 0 for OK
 xersect int ix(1), ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 
 [
-int xdb;xdb = 1
-          if(xdb)pl"line a ="; pn ax0;pn ay0;pn ax1;pn ay1
-          if(xdb)pl"line b ="; pn bx0;pn by0;pn bx1;pn by1
+		  int xdb;xdb=0
+          if(xdb)[pl"line a ="; pn ax0;pn ay0;pn ax1;pn ay1]
+          if(xdb)[pl"line b ="; pn bx0;pn by0;pn bx1;pn by1]
     int day,dax,dby,dbx,f,e,h,g,y,x,avert,bvert
     dax = ax1-ax0
     day = ay1-ay0
     dbx = bx1-bx0
     dby = by1-by0
-        if(xdb)pl"dax,day,dbx,dby";pn dax;pn day;pn dbx;pn dby
+        if(xdb)[pl"dax,day,dbx,dby";pn dax;pn day;pn dbx;pn dby]
     if(dax==0) [  // line a is vertical
       if(dbx==0) return -1  // parallel
       x = ax0
       avert=1
-          if(xdb)pl"x ="; pn x
+          if(xdb)[pl"a is vertical at x ="; pn x]
+      f=INFINITY    // a slope hopefully never encountered
     ]
     else [
       f = day*1000/dax        //slope
       e = ay0 - f*ax0/1000    // y=0 intersept
-          if(xdb)pl"e f ="; pn e;pn f
+          if(xdb)[pl"a: y=fx+e  f,e="; pn f;pn e]
     ]
     if(dbx==0) [  // line b is vertical
       x = bx0
       bvert=1
-          if(xdb)pl"x ="; pn x
+          if(xdb)[pl"b is vertical at x ="; pn x]
     ]
     else [
       h = dby*1000/dbx
       g = by0 - h*bx0/1000
-          if(xdb)pl"g h ="; pn g;pn h
+          if(xdb)[pl"b: y=hx+g ="; pn h;pn g]
+      if(h==f)return -1;    // parallel
     ]
 
-    if(h==f)return -1;
     if( 0==(avert+bvert) ) x = ((e-g)*1000)/(h-f)
-          if(xdb)pl"x ="; pn x
+          if(xdb)[pl"x ="; pn x]
 
     if( 0==bvert ) y = g + h*x/1000
     else y = e + f*x/1000
-          if(xdb)pl"bvert y ="; pn bvert;pn y
+          if(xdb)[pl"bvert y ="; pn bvert;pn y]
 
     ix(0) = x
     ix(1) = y
+          if(xdb)[pl"intersect is at "; ppoint ix]
     return 0
 ]

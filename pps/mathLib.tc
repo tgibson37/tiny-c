@@ -65,17 +65,8 @@ alen  int x0,y0, x1,y1 [
 	return len
 ]
 // returns approximation to sqrt.
-asqrt int x[
-	int x0,x1,i
-	x = x*100  // for precision
-	x0 = 1000
-	i = 11
-	while(i=i-1) [
-		x1 = x0-(x0*x0-x)/(2*x0)
-		if(x0==x1)break
-		x0 = x1
-	]
-	return (x1+5)/10
+asqrt int x [
+	return MC x,119 
 ]
 // prints y/1000 as a decimal
 pdec int y [

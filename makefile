@@ -51,7 +51,7 @@ HDRS = tc.h
 
 # Add -I to the dir the include files are in
 #CFLAGS = -Wall -g        #<< still a flood
-CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl
+CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl -lm
 CFLAGS = -w -g
 
 .PHONY: all run difft diffd keep dotest install latest
@@ -91,7 +91,7 @@ $(TC): $(OBJTC)
 	$(CC) $(CFLAGS) $(OBJTC) -o $(TC) $(CLIBS)
 
 $(TEST): $(OBJTEST)
-	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST)
+	$(CC) $(CFLAGS) $(OBJTEST) -o $(TEST) $(CLIBS)
 	
 #$(VERSIONPROP):
 #	./version.sh

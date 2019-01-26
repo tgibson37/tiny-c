@@ -1,4 +1,5 @@
 #include "tc.h"
+#include <math.h>
 
 int  (*piMC )(int,int,int*) = NULL;
 typedef int (*McList)(int,int*);
@@ -323,6 +324,13 @@ int Mfpn(int nargs, int *argsv) {
  	}
  	return -2;
 }
+// Approximate square root
+int Msqrt(int nargs, int *argsv) {
+	if(nargs<1){ eset(ARGSERR); return -1; }
+	double x = (double)argsv[0];
+	if(x<0.0){ eset(ARGSERR); return -1; }
+	return (int)sqrt(x);
+}
 
 /* first in this list is MC 1 */
 McList origList[] =
@@ -336,7 +344,7 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
-	, &Mgetprop, &Msystem, &Mfpn, &naf, &naf
+	, &Mgetprop, &Msystem, &Mfpn, &Msqrt, &naf
 	, &naf, &naf, &naf, &naf, &naf
 };
 

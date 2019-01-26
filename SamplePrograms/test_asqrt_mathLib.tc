@@ -16,6 +16,18 @@ main [
 	pl"sqrt of"; pn x; ps" is" pn y
 	y=asqrt(x=1000000)
 	pl"sqrt of"; pn x; ps" is" pn y
-	y=asqrt(x=500000)
+	y=asqrt(x=2000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=49000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=100000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=1440000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	y=asqrt(x=2000000000)
+	pl"sqrt of"; pn x; ps" is" pn y
+	pl"NEXT ONE FAILS: 2.25 billion, overflow"
+	pl"  (MC119 is defined, by the way, it did all the above)..."
+	y=asqrt(x=2250000000)
 	pl"sqrt of"; pn x; ps" is" pn y
 ]
