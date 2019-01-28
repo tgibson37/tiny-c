@@ -52,7 +52,7 @@ arc int a1,a2,a3,a4,a5 [
   cs "arc"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
 ]
 arcneg int a1,a2,a3,a4,a5 [
-  cs "arc_negative"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
+  cs "arcneg"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
 ]
 dot int x,y[
   moveto x,y; 
@@ -107,10 +107,10 @@ raster int w,h,d [
     ]
 ]
 setdash int d, off [
-  cs "set_dash";ci d; ci off; nl
+  cs "setdash";ci d; ci off; nl
 ]
 setdash2 int d1,d2,off [
-  cs "set_dash";ci d1; ci d2; ci off; nl
+  cs "setdash";ci d1; ci d2; ci off; nl
 ]
 setfontsize int x [
   cs "set_font_size"; ci x; nl

@@ -72,7 +72,7 @@ with open(drawfile) as f:
 			d5 = int(x[5])
 			r5 = float(d5*(M_PI/180))
 			ctx.arc(r1,r2,r3,r4,r5)
-		elif x[0]=="arc_negative":
+		elif x[0]=="arcneg":
 			r1 = float(x[1])
 			r2 = float(x[2])
 			r3 = float(x[3])
@@ -82,17 +82,17 @@ with open(drawfile) as f:
 			r5 = float(d5*(M_PI/180))
 			ctx.arc_negative(r1,r2,r3,r4,r5)
 		elif x[0]=="setdash":
-			num = len(x)-2
 			d = x[1:-1]
-			da = [d]
-			st = x[num+1:]
-			ctx.set_dash(da,num,st)
+			id = [float(x) for x in d]
+			st = float(x[-1])
+			print "id:", id
+			print "st:", st
+			ctx.set_dash(id,st)
 		elif x[0]=="setrgb":
 			r1 = float(x[1])/256
 			r2 = float(x[2])/256
 			r3 = float(x[3])/256
 			ctx.set_source_rgb(r1,r2,r3)
-
 		elif x[0]=="show":
 			if len(x)>1:
 				image_display=x[1]
