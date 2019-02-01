@@ -1,4 +1,4 @@
-#include pyGraphicsLib.tc
+#include pps/pyGraphicsLib.tc
 #include pps/library.tc
 
 int x,y,dx,dy,w,h

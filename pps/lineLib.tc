@@ -200,3 +200,100 @@ xersect int ix(1), ax0,ay0,ax1,ay1, bx0,by0,bx1,by1
           if(xdb)[pl"intersect is at "; ppoint ix]
     return 0
 ]
+
+// set a point bsect that bisects the angle between sega,segb.
+// assumes the angle is defined by sega's first point, the
+// intersection, and segb's last point. The returned point has
+// distance 1000 from the intersection.
+bisect int bsect(1), sega(3),segb(3) [
+		int dbg; dbg=0
+	int xret, icntr(1), segin(3),segout(3), ptout(1),ptin(1)
+	xret = xersect icntr,sega(0),sega(1),sega(2),sega(3),segb(0),segb(1),segb(2),segb(3)
+	if(xret)return xret   // parallel, no angle
+	bisectpts bsect, sega(0),sega(1),icntr(0),icntr(1),segb(2),segb(3)
+]
+
+// assign p1=p2
+assignpt int p1(1), p2(1)[
+	p1(0)=p2(0)
+	p1(1)=p2(1)
+]
+// swap two points
+swappt int p1(1), p2(1)[
+	int temp(1)
+	assign temp,p1
+	assign p1,p2
+	assign p2,temp
+]
+
+// set n=nearest and f=furthest from ii points of seg
+// return 0 if ii is between n and f, else +1 for nearest
+// is segs end or -1 if its beginning
+nearfar int n(1), f(1), ii(1), seg(3)[
+	int len1, len2
+	len1 = alen ii(0),ii(1),seg(0),seg(1)
+	len2 = alen ii(0),ii(1),seg(2),seg(3)
+	if(len1>len2)[
+		assign f,seg
+		assign n,seg+2*SIZE_INT
+		which = +1
+	] else [
+		assign n,seg
+		assign f,seg+2*SIZE_INT
+		which = -1
+	]
+	if(len1+len2==(seglen(seg)) return 0 // NOT QUITE ROBUST
+	else return which
+]
+
+// test that three pts are roughly colinear. Return 0 if not,
+// else 1,2,3 to indicate which is in the middle. Return -1 if
+// points are tightly clustered. NEEDS TESTING.
+colinear int p1(1),p2(1),p3(1)[
+	int d12, d13, d23, dlargest
+	d12=distance p1,p2
+	d13=distance p1,p3
+	d23=distance p2,p3
+	dlargest=d12; middle=3; dsum=d13+d23
+	if(d13>dlargest)[ dlargest = d13; middle = 2; dsum=d12+d23 ]
+	if(d23>dlargest)[ dlargest = d23; middle = 1; dsum=d12+d13 ]
+	if(dlargest<2) return -1  // tightly clustered
+	ddiff = dsum-dlargest
+	if((-1<ddiff)*(ddiff<+1))return middle
+	return 0
+]
+
+// Return true if two segments are parallel
+parallel int a(3),b(3) [
+	return _parallel a(0),a(1),a(2),a(3),b(0),b(1),b(2),b(3)
+]
+_parallel int ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 [
+    int day,dax,dby,dbx,aslope,bslope
+    dax = ax1-ax0; day = ay1-ay0; dbx = bx1-bx0; dby = by1-by0
+    if(dax==0) [             // a vertical, 
+    	if(dbx==0) return 1      // both vertical
+    	else return 0            // b slopes
+    ] else [                 // a slopes
+    	if(dbx==0) return 0      // b vertical
+    ]
+    aslope = 1000*day/dax; bslope = 1000*dby/dbx  // both slope
+    if(aslope==bslope) return 1         // parallel
+    return 0
+]
+
+// given 3 points, begin,middle,end, set the point bsect to
+// bisect the angle at middle. NOT ROBUST yet for nearly but not quite parallel.
+bisectpts int bsect(1), b0,b1,m0,m1,e0,e1 [
+		int dbg;dbg=1
+	int segin(3), segout(3), ptout(1),ptin(1)
+	setsegment segin, m0,m1,b0,b1  //middle outwards
+	setsegment segout, m0,m1,e0,e1
+		if(dbg)[pl"    segin,segout";psegment(segin);psegment(segout)]
+	if(parallel(segin,segout)) return -1
+	extend ptin,  segin,  500
+	extend ptout, segout, 500
+		if(dbg)[pl"    ptin,ptout";ppoint(ptin);ppoint(ptout)]
+	bsect(0) = (ptout(0)+ptin(0))/2
+	bsect(1) = (ptout(1)+ptin(1))/2
+	return 0
+]

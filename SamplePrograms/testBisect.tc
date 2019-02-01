@@ -1,0 +1,92 @@
+#include pps/lineLib.tc
+#include pps/mathLib.tc
+#include pps/library.tc
+#include pps/pyGraphicsLib.tc
+
+// NOTE TO READER: several main/seed/test functions. Some renamed with leading x. Uncover by removing the x from all related,
+// i.e. grouped under one comment. Cover the others.
+// Within a group further select the actual test(s) of interest // by covering others with comment flag //.
+
+
+// TESTS FOR parallel (just main, no seed or test fcn)
+main[
+	int sega(3), segb(3)
+	ps"parallel test"
+	pn _parallel(20,20,60,00,20,50,60,30)  // parallel and slope
+	pn _parallel(20,20,60,00,20,50,60,29)  // not by one pixel
+	pn _parallel(20,20,60,00,20,50,60,31)  // ditto
+	pn _parallel(1,1,1,5,2,1,2,5)  // both vert
+	pn _parallel(1,1,1,5,2,1,12,5) // a vert
+	pn _parallel(1,1,2,5,2,1,2,5)  // b vert
+	pn _parallel(1,1,2,5,2,1,3,5)  // both slope, parallel
+	setsegment(sega,20,20,60,00)
+	setsegment(segb,20,50,60,30)
+	pn parallel(sega,segb)  // parallel and slope
+	segb(3) = segb(3)-1
+	pn parallel(sega,segb)  // not by one pixel
+	pl"SHOULD GET    1 0 0 1 0 0 1 1 0"
+]
+
+// TESTS FOR segment bisect (test, seed, and main fcns)
+xtest int sega(3),segb(3) [
+	int bsect(1), prll
+	pl"segs a:"; psegment sega
+	ps" b:"; psegment segb
+	prll=bisect bsect, sega, segb
+	if(prll)pl"parallel segs"
+	pl"        bsect "; ppoint bsect
+
+	start "bisect_test", 1000,1000
+	moveto sega(0),sega(1)
+	lineto sega(2),sega(3)
+	moveto segb(0),segb(1)
+	lineto segb(2),segb(3)
+	next
+	arc bsect(0),bsect(1),5,0,360
+//	moveto segb(2),segb(3)
+//	lineto bsect(0),bsect(1)
+	show
+]
+xseed int a,b,c,d, e,f,g,h[
+	int sega(3), segb(3)
+	setsegment sega, a,b,c,d
+	setsegment segb, e,f,g,h
+	test sega, segb
+]
+xmain [
+//	seed 10,100,10,20, 20,10,100,10
+//	pl"    SHOULD BE ";ps"[ 260 260]"
+//	seed 50,50,100,100, 10,50,10,100
+//	pl"    SHOULD BE ";ps"[ 354 854]"
+	seed 110,130,140,110, 140,110,150,130
+	pl"    SHOULD BE ";ps"[ ]"
+]
+
+// TESTS FOR point bisect (main and test, no seed)
+xmain[
+//	test 100,400,100,100,400,100
+//	pl"SHOULD BE [ 350 350]"
+//	test 100,400,250,100,400,400
+//	pl"SHOULD BE [ 250 548]"
+//	test 200,100,500,250,200,400
+//	pl"SHOULD BE [ 52 250]"
+//	test 100,100,250,500,400,100
+//	pl"SHOULD BE [ 250 32]"
+	test 400,100,100,400,500,150
+	pl"SHOULD BE [ 489 90]"
+//	test 100,400,100,100,400,100
+//	pl"SHOULD BE [ ]"
+]
+xtest int a,b,c,d,e,f[
+	int bsect(1)
+	pl"points, begin,mid,end "; pn a; pn b; pn c; pn d; pn e; pn f
+	bisectpts bsect,a,b,c,d,e,f
+	pl"    bsect ";ppoint bsect
+	start "pt_bisect", 1000, 600
+	moveto a,b; lineto c,d; lineto e,f
+	moveto c,d; lineto bsect(0),bsect(1)
+	arc bsect(0),bsect(1), 5, 0, 360
+	show
+]
+
+
