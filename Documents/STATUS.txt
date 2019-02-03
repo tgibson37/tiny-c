@@ -1,9 +1,63 @@
-STATUS.txt (latest on top, future at bottom)
+STATUS.txt (latest on top. From the bottom reads like a log.)
+updated: February 2, 2019
+------------------
+
+Feb 3 GOAL: document these extensions.
+
+Jan 1-31, 2019
+Extensive additions to mathLib.tc, lineLib.tc, pyGraphicsLib.tc
+
+Dec 24-28, 2018
+Added color 
+
+Dec 21, 2018
+python grahics works, and is already more advanced than gtk version. Removed gtk version from github. Supporting only the python version.
+
+Dec 16, 2018
+Line math advanced. Switching to python back end. Much better than gtk for this kind of work. Documented: cairoGraphicsPython.docx.
+
+Dec 12, graphics works. ./tc cairoGraphics.tc writes an int array to a file. That encodes the drawing to be done by ./cairoGraphics filename, using the system() call to launch it. It is a gtk C program. Documented in Documents/cairoGraphics.doc (Dec 15).
+
+Dec 3, 2018
+WHOLE NEW APPROACH, use system() to launch gtk window.
+
+Nov 25, 2018
+Cairo over gtk works, but it is awfully complex. 
+
+Nov 16, 2018
+gave up on bgi. Looking over Cairo graphics via gnu toolkit.
+
+Nov 9, 2018
+Looking overlinux port of old borland grapics interface (bgi).
+
+Oct 16-Nov 4, 2018
+Plugin MC's, with two examples, all documented in "..new_classical..".
+
+Sept 1-Oct 12, 2018 
+walk_through.html: " I have no intention to write a walkthrough of the entire 11 files of C source code for this project, but I thought it would be fun and perhaps useful to some students to walk through the heart of the system, the parser and actions of the expression evaluator."
+
+Aug 30, 2018
+Lots of new SamplePrograms. 
+
+May 27, 2018
+mallocs for the four main globals: pr, fun, stack, vartab. Defaults override-able by settings in pps/tc.prop.
+
+April 29-May 11, 2018
+#include added as first line(s) of tc file. This dramatically simplifies the loading of multiple libraries compared to the command line version.
+
+Thur, Apr 26, 2018
+Two issues bother me. One is the complex command line startup for a function other than a zero arg main, the default, especially with second etc libraries. The other is how to share a private library that uses private MC's without requiring the MC's be installed by a recompile of source.
+
+April 23-25, 2018
+A pretty nice formatted printf() from standard C now suplements the 1977 pl, ps, pn style of console printing. Variable number of args always existed for machine calls. A simple exploitation of that as MC 101 enables the new printf(). This is probably the first modernization of this implementation.
 
 April 18, 2018
-Basically more testing. Two bugs fixed. New sample programs: trek, mandel, runhits. Two new lib functions: exit, runlimit.
+Exploitation phase. Two really nice games. Pyranha fish from 1977 Owners Manual. Cute, but not very challenging. My kids played a maximum carnage game. And an incredibly nice and challenging TREK donated by Ed Davis. This also dates from the 70's. Its in David Ahl's book, BASIC COMPUTER GAMES, 1973, 550 lines of BASIC code! Back then it was called Space-Wars. bit Trek became its name soon after. Not sure when Ed translated it into tiny-c. It runs fine on this tiny-C.
 
-March 31, 2018 - updated Documents/the_new_classical_tiny-C.doc describes new features of the -d debug option, gives a walkthrough of its use, new command line syntax loads multiple libraries, keyboard arrow keys enabled. Most important: lots of use has made this release pretty solid. 
+April 6-7, 2018
+Record level file i/o.
+
+March 31, 2018 - Documents/the_new_classical_tiny-C.doc describes new features of the -d debug option, gives a walkthrough of its use, new command line syntax loads multiple libraries, keyboard arrow keys enabled. Most important: lots of use has made this release pretty solid. 
 
 Feb 2, 2018 - ESC now kills hard loop.
 
@@ -13,19 +67,34 @@ Jan 7, 2018 - Tidied the files. Moved much material into two new folders: Sample
 
 Dec 19, 2017 - pf.tc runs fine. Helped find a few bugs, PLUS many improvements to the debugger. Documentation on all is coming next.
 
-Nov 24, 2017 - First big test, pf.tc. Not working well, finding bugs.
+Nov 24, 2017 - First big program test, pf.tc, Pirhana Fish. Not working well, finding bugs.
 
-Nov 21, 2017 - A useful debugger. Classical lib needs file i/o, and unbuffered getchar. Need doc, i.e. a new OM.
+Nov 21, 2017 - A useful debugger. Classical lib needs file i/o, and unbuffered getchar. Need doc, i.e. a new Owners Manual.
 
-Nov 15, 2017 - All lib except the file i/o. Everything is now in the master branch. Started work on a simple debugger, but that is a WIP. It compiles and links and will not interfere with usage.
+Nov 15, 2017 - All lib except the file i/o. Everything is now in the master branch. Started work on a simple debugger. It compiles and links and will not interfere with usage.
 
 Nov 7, 2017 - More lib: scann, index, countch. Also whatHappened (user friendly diagnostic). BIG DEAL: integrated gedit using its external tools. Instead of pps we now have a nice wysiwyg editor.
 
-Nov  1, 2017 - more Classical Library stuff (ceqn, scann)
+------------------------
 
-Oct 30, 2017 - The Classical branch (not uploaded yet) will be updates to the classical library. Currently master branch has  putchar, getchar, pft, gs, ps, pl, alpha, num, atoi
+Saturday, Oct 28, 2017
+symname: A symbol can now have one leading '_'.
+system main is now _MAIN() vs app main still main().
+STATUS 5:38pm, EDT, WE MAY BE DONE!! 
+	- tcMain.c now boots the whole thing, prints the logo, starts the system, which enters app main(). IT WORKS. We can now write whole programs as tests.
+	$ ./tc<ret>   prints Usage.
 
-Oct 30, 2017 - I plan to describe my development environment. This may help others interested in porting to different environments.
 
-Oct 28, 2017 - The master branch has a command line version of tiny-c. 
-	$ ./tc<ret>   will print Usage.
+Oct 25
+Last 3 days explored github, and how to upload stuff there. This project posted at...	github.com/tgibson37/tiny-c
+
+Sept 21
+Working on library.tc with functions needed for line editor, pps. Using these fcns as test cases, too. [LATER decided not to do the line editor, but pps/library.tc  survives even though there is no Program Preparation System.]
+
+Sept 15
+Parts are working. E.g. from notes:
+	"Have been working on enter(). Needed three dependant functions, newfun, fundone(), and setarg(). And had to finish newvar."
+
+
+Aug 3, 2017
+Starting from my own TC.ASM supplied by Lee Bradley, my plan is to clone it to my own C version that runs native on Unix, Linux, or wherever a C compiler exists. Goal is a GPS version so ANYONE can use it under gps rules.

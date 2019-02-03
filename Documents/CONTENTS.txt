@@ -1,32 +1,29 @@
 CONTENTS.txt
----
-Oct 25, 2017, updated: Nov 8
-Notice: this is work in progress. My testing is fairly advanced, and all my test materials and results are included. But it is ready for Beta testing by others. See STATUS for latest info. 
+	updated Feb 2, 2019
 
+Main directory
+	Interpreter source code, (*.h, *.c)
+	Plug in object files (*.so)
+	executables (tc for mint linux, tc.exe for windows)
+	makefile, plus sh and bat files for compiling
+	sh and bat files for version update
+	python code: cairopy.py, supports drawing library
 	LICENSE (gpl)
 	README.md (simple greeting from me)
 	tc.asm (Original source from 1977)
-Source code...
-	tc.h
-	tc.c
-	machineCall.c
-	debug.c  (built in debugger for users tiny-C code)
-	tcMain.c
-	test.c   (regression tests)
-	tcTestMain.c
-	time.c
-	FileRead.c
-	kbhit.c
-Makefile
-	makefile
-Log of my work
-	Archive/notes.txt
-	Archive/about_testing.txt
-Directories
-	testFiles (see about_testing.txt)
-	pps (just the library)
-Other documentation in Documents/
+pps
+	general usage libraries, property files
+Documents
+	"The New Classical tiny-C"
 	CONTENTS.txt (this document)
     MY_ENVIRONMENT.txt (may be useful for porting)
     STATUS (brief description, latest on top)
-
+    a few more on specific issues
+PlugIns
+	Three machine call plugins, plugInTemplate
+Projects
+	Sample programs involving several files
+SamplePrograms
+	Lots and lots and lots, plus test for specific library functions
+testFiles
+	files used by the regression tests

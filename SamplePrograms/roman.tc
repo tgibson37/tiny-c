@@ -1,0 +1,332 @@
+#include pps/pyGraphicsLib.tc
+#include pps/library.tc
+
+// this program reads two roman numerals and outputs their sum (or product), both
+// graphically and on the screen
+
+// ref:
+// https://www.geeksforgeeks.org/converting-decimal-number-lying-between-1-to-3999-to-roman-numerals/
+
+rtod char r(0) [ // roman to decimal
+ char rn(7),rl(20),wk1(1),wk2(1)
+ int l,rni(7),pos,d,i1,i2
+ strcpy rn," IVXLCDM"
+ rni(0)=0;rni(1)=1;rni(2)=5
+ rni(3)=10;rni(4)=50;rni(5)=100
+ rni(6)=500;rni(7)=1000
+ strcpy rl,r;strcat rl," "
+ wk1(1)=wk2(1)=0
+ l=strlen(rl)
+ while pos<l-1 [
+  wk1(0)=rl(pos);wk2(0)=rl(pos+1)
+  i1=index(rn,8,wk1,1)-1;i2=index(rn,8,wk2,1)-1
+  if i1<i2 [ // e.g. CM
+   d=d+rni(i2)-rni(i1);pos=pos+2
+   ]
+  else [ // e.g. XI
+   d=d+rni(i1);pos=pos+1
+   ]
+  ]
+ return d
+ ]
+
+// To add corresponding base symbols in the array
+// to handle cases which follow subtractive notation.
+// Base symbols are added index 'i'. 
+
+sub_digit char num1, num2; int i; char c(0) [
+ c(i)=num1;i=i+1;c(i)=num2;i=i+1
+ return i
+ ]
+
+// To add symbol 'ch' n times after index i in c(i)
+
+digit char ch; int n,i; char c(0) [
+ int j
+ while (j < n ) [
+  c(i)=ch;i=i+1;j=j+1
+  ]
+ return i
+ ]
+
+// convert decimal to roman
+
+dtor int number [
+ char c(20);int i
+ // convert decimal number to roman numerals
+ while (number != 0) [
+  // If base value of number is greater than 1000
+  if (number >= 1000) [
+   // Add 'M' number/1000 times after index i
+   i = digit 'M', number/1000, i, c
+   number = number%1000
+   ]
+  // If base value of number is greater than or
+  // equal to 500
+  else if (number >= 500) [
+   // To add base symbol to the character array
+   if (number < 900) [
+    // Add 'D' number/500 times after index i
+    i = digit 'D', number/500, i, c
+    number = number%500
+    ]
+   // To handle subtractive notation in case of number
+   // having digit as 9 and adding corresponding base
+   // symbol
+   else [
+    // Add C and M after index i/.
+    i = sub_digit 'C', 'M', i, c
+    number = number%100
+    ]
+   ]
+   // If base value of number is greater than or equal to 100
+   else if (number >= 100) [
+    // To add base symbol to the character array
+    if (number < 400) [
+     i = digit 'C', number/100, i, c
+     number = number%100
+     ]
+    // To handle subtractive notation in case of number
+    // having digit as 4 and adding corresponding base
+    // symbol
+   else [
+    i = sub_digit 'C','D',i,c
+    number = number%100
+    ]
+   ]
+  // If base value of number is greater than or equal to 50
+  else if (number >= 50) [
+   // To add base symbol to the character array
+   if (number < 90) [
+    i = digit 'L', number/50,i,c
+    number = number%50
+    ]
+   // To handle subtractive notation in case of number
+   // having digit as 9 and adding corresponding base
+   // symbol
+   else [
+   i = sub_digit 'X','C',i,c
+   number = number%10
+   ]
+  ]
+ // If base value of number is greater than or equal to 10
+ else if (number >= 10) [
+  // To add base symbol to the character array
+  if (number < 40) [
+   i = digit 'X', number/10,i,c
+   number = number%10
+   ]
+  // To handle subtractive notation in case of
+  // number having digit as 4 and adding
+  // corresponding base symbol
+  else [
+   i = sub_digit 'X','L',i,c
+   number = number%10
+   ]
+  ]
+ // If base value of number is greater than or equal to 5
+ else if (number >= 5) [
+  if (number < 9) [
+   i = digit 'V', number/5,i,c
+   number = number%5
+   ]
+  // To handle subtractive notation in case of number
+  // having digit as 9 and adding corresponding base
+  // symbol
+  else [
+   i = sub_digit 'I','X',i,c
+   number = 0
+   ]
+  ]
+ // If base value of number is greater than or equal to 1
+ else if (number >= 1) [
+  if (number < 4) [
+   i = digit 'I', number,i,c
+   number = 0
+   ]
+  // To handle subtractive notation in case of
+  // number having digit as 4 and adding corresponding
+  // base symbol
+  else [
+   i = sub_digit 'I', 'V', i, c
+   number = 0
+   ]
+  ]
+ ]
+
+ int j,pos;pos=1
+
+ while (j<i) [
+  if (c(j)=='M')      [mf pos;putchar 'M']
+  else if (c(j)=='D') [df pos;putchar 'D']
+  else if (c(j)=='C') [cf pos;putchar 'C']
+  else if (c(j)=='L') [lf pos;putchar 'L']
+  else if (c(j)=='X') [xf pos;putchar 'X']
+  else if (c(j)=='V') [vf pos;putchar 'V']
+  else if (c(j)=='I') [fi pos;putchar 'I']
+  pos=pos+1;j=j+1
+  ]
+ ]
+
+int xcol(3),xrow(3)   // X   10
+int ecol(3),erow(3)   // =   equals
+int pcol(3),prow(3)   // +   plus
+int mcol(4),mrow(4)   // M   1000
+int icol(1),irow(1)   // I   1
+int vcol(2),vrow(2)   // V   5
+int lcol(2),lrow(2)   // L   50
+int ccol(3),crow(3)   // C   100
+int dcol(2),drow(2)   // D   500
+int tcol(3),trow(3 )  // x   times
+
+mf int pos [ // M
+ moveto iicol-60*(13-pos)-(60-mcol(0)),mrow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-mcol(1)),mrow(1)+rowoffset
+ lineto iicol-60*(13-pos)-(60-mcol(2)),mrow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-mcol(3)),mrow(3)+rowoffset
+ lineto iicol-60*(13-pos)-(60-mcol(4)),mrow(4)+rowoffset
+ ]
+
+fi int pos [ // I (can't name it if)
+ moveto iicol-60*(13-pos)-(60-icol(0)),irow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-icol(0)),irow(1)+rowoffset
+ ]
+
+vf int pos [ // V
+ moveto iicol-60*(13-pos)-(60-vcol(0)),vrow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-vcol(1)),vrow(1)+rowoffset
+ lineto iicol-60*(13-pos)-(60-vcol(2)),vrow(2)+rowoffset
+ ]
+
+lf int pos [ // L
+ moveto iicol-60*(13-pos)-(60-lcol(2)),lrow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-lcol(1)),lrow(1)+rowoffset
+ lineto iicol-60*(13-pos)-(60-lcol(0)),lrow(0)+rowoffset
+ ]
+
+xf int pos [ // X
+ moveto iicol-60*(13-pos)-(60-xcol(0)),xrow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-xcol(3)),xrow(3)+rowoffset
+ moveto iicol-60*(13-pos)-(60-xcol(2)),xrow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-xcol(1)),xrow(1)+rowoffset
+ ]
+
+cf int pos [ // C
+ moveto iicol-60*(13-pos)-(60-ccol(0)),crow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-ccol(1)),crow(1)+rowoffset
+ lineto iicol-60*(13-pos)-(60-ccol(2)),crow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-ccol(3)),crow(3)+rowoffset
+ ]
+
+df int pos [ // D
+ moveto iicol-60*(13-pos)-(60-dcol(0)),drow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-dcol(1)),drow(1)+rowoffset
+ lineto iicol-60*(13-pos)-(60-dcol(2)),drow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-dcol(0)),drow(0)+rowoffset
+ ]
+
+pf int pos [ // + (plus)
+ moveto iicol-60*(13-pos)-(60-pcol(0)),prow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-pcol(1)),prow(1)+rowoffset
+ moveto iicol-60*(13-pos)-(60-pcol(2)),prow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-pcol(3)),prow(3)+rowoffset
+ ]
+
+ef int pos [ // = (equals)
+ moveto iicol-60*(13-pos)-(60-ecol(0)),erow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-ecol(1)),erow(1)+rowoffset
+ moveto iicol-60*(13-pos)-(60-ecol(2)),erow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-ecol(3)),erow(3)+rowoffset
+ ]
+
+tf int pos [ // x (times)
+ moveto iicol-60*(13-pos)-(60-tcol(0)),trow(0)+rowoffset
+ lineto iicol-60*(13-pos)-(60-tcol(3)),trow(3)+rowoffset
+ moveto iicol-60*(13-pos)-(60-tcol(2)),trow(2)+rowoffset
+ lineto iicol-60*(13-pos)-(60-tcol(1)),trow(1)+rowoffset
+ ]
+
+int iicol,rowoffset
+
+main [
+
+ iicol=840
+
+ xcol(0)=10;xrow(0)=30
+ xcol(1)=50;xrow(1)=30
+ xcol(2)=10;xrow(2)=70
+ xcol(3)=50;xrow(3)=70
+
+ pcol(0)=20;prow(0)=50
+ pcol(1)=40;prow(1)=50
+ pcol(2)=30;prow(2)=40
+ pcol(3)=30;prow(3)=60
+
+ ecol(0)=20;erow(0)=43
+ ecol(1)=40;erow(1)=43
+ ecol(2)=20;erow(2)=57
+ ecol(3)=40;erow(3)=57
+
+ tcol(0)=20;trow(0)=40
+ tcol(1)=40;trow(1)=40
+ tcol(2)=20;trow(2)=60
+ tcol(3)=40;trow(3)=60
+
+ mcol(0)=10;mrow(0)=70
+ mcol(1)=10;mrow(1)=30
+ mcol(2)=30;mrow(2)=50
+ mcol(3)=50;mrow(3)=30
+ mcol(4)=50;mrow(4)=70
+
+ icol(0)=30;irow(0)=70
+ icol(1)=30;irow(1)=30
+
+ vcol(0)=10;vrow(0)=30
+ vcol(1)=30;vrow(1)=70
+ vcol(2)=50;vrow(2)=30
+
+ lcol(0)=10;lrow(0)=30
+ lcol(1)=10;lrow(1)=70
+ lcol(2)=50;lrow(2)=70
+
+ ccol(0)=50;crow(0)=30
+ ccol(1)=10;crow(1)=30
+ ccol(2)=10;crow(2)=70
+ ccol(3)=50;crow(3)=70
+
+ dcol(0)=10;drow(0)=70
+ dcol(1)=50;drow(1)=50
+ dcol(2)=10;drow(2)=30
+
+ printf "%croman.tc - lrb - 2/2/19%c",10,10
+ start "roman",900,300
+ setfontsize 24
+
+ char r1(20),r2(20),port
+ int d1,d2,d3
+
+ printf "%cEnter Roman numeral 1 : ",10
+ gs r1
+ printf "Enter Roman numeral 2 : "
+ gs r2
+ printf "+ or * (add or multiply) ? ";port=getchar
+ printf "%c%c",10,10
+ d1=rtod r1;d2=rtod r2
+ if port=='+' d3=d1+d2
+ if port=='*' d3=d1*d2
+ dtor d1
+ if port=='+' pf 12
+ if port=='*' tf 12
+ printf " %c ",port
+ rowoffset=100
+ dtor d2
+ ef(12)
+ printf " = "
+ rowoffset=200
+ dtor d3
+ printf "%c%c%d %c %d = %d",10,10,d1,port,d2,d3
+ showapp "mspaint.exe"
+ show
+ pl ""
+
+ ]
