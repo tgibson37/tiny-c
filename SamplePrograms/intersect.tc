@@ -8,19 +8,22 @@
 int num
 test int a0,a1,a2,a3, b0,b1,b2,b3, ttl(0)
 [
-	int x,y, err
+	int x,y, err, sega(3),segb(3)
 	num = num+1
 	int ix(1), err
 	start "test", 300,300
 	moveto 20,20
 	setfontsize 15
 	showtext ttl
+	setsegment sega, a0,a1,a2,a3
+	setsegment segb, b0,b1,b2,b3
 
 	moveto a0, a1; showtext "aS"; moveto a0,a1
 	lineto a2, a3; showtext "aE" 
 	moveto b0, b1; showtext "bS"; moveto b0,b1 
 	lineto b2, b3; showtext "bE" 
-	err=xersect ix,a0,a1,a2,a3, b0,b1,b2,b3
+//	err=_xersect ix,a0,a1,a2,a3, b0,b1,b2,b3
+	err=xersect ix,sega,segb
 	x=ix(0); y=ix(1)
 	next
 	if(err)showtext "parallel"
@@ -29,12 +32,15 @@ test int a0,a1,a2,a3, b0,b1,b2,b3, ttl(0)
 if(1)[
 	a0=a0+150;a1=a1+150;a2=a2+150;a3=a3+150;
 	b0=b0+150;b1=b1+150;b2=b2+150;b3=b3+150;
+	setsegment sega, a0,a1,a2,a3
+	setsegment segb, b0,b1,b2,b3
 
 	moveto a0, a1; showtext "aS"; moveto a0,a1
 	lineto a2, a3; showtext "aE" 
 	moveto b0, b1; showtext "bS"; moveto b0,b1 
 	lineto b2, b3; showtext "bE" 
-	err=xersect ix,a0,a1,a2,a3, b0,b1,b2,b3
+//	err=_xersect ix,a0,a1,a2,a3, b0,b1,b2,b3
+	err=xersect ix,sega,segb
 	x=ix(0); y=ix(1)
 	next
 	if(err)showtext "parallel"

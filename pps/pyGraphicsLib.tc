@@ -1,10 +1,10 @@
-// cairoGraphicsLib.tc
+// cairoGraphi_csLib.tc
 // Define draw codes, init icode. 
 // start, show must be first,last respectively
 
 char _cgdrawname(50) //users name for drawing, no spaces
-char _cgfilename(55) // file passing draw vector to cairoGraphics
-char _cgcmd(70) // system command to start cairoGraphics
+char _cgfilename(55) // file passing draw vector to cairoGraphi_cs
+char _cgcmd(70) // system command to start cairoGraphi_cs
 int unit
 char NL, QUOTE
 // recent points are remembered
@@ -28,48 +28,48 @@ start
     printf "Cannot open %s for writing, err %d", _cgfilename, unit
     exit
   ]
-  cs "window"; ci a1; ci a2; nl
+  _cs "window"; _ci a1; _ci a2; _nl
 ]
 
 showapp char r(0) [
-  cs "showapp "; cs r; nl
+  _cs "showapp "; _cs r; _nl
 ]
 
 show [
-  cs "show"; nl
+  _cs "show"; _nl
   fclose unit
   system _cgcmd
 ]
 
 // shorthand puts to the file
-cs char s(0)[fputs s,unit]
-ci int x    [fpn x,unit]
-cc char x   [fputc x,unit]
-nl          [fputc 10,unit]
+_cs char s(0)[fputs s,unit]
+_ci int x    [fpn x,unit]
+_cc char x   [fputc x,unit]
+_nl          [fputc 10,unit]
 
 // actual draw tools...
 arc int a1,a2,a3,a4,a5 [
-  cs "arc"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
+  _cs "arc"; _ci a1; _ci a2; _ci a3; _ci a4; _ci a5; _nl
 ]
 arcneg int a1,a2,a3,a4,a5 [
-  cs "arcneg"; ci a1; ci a2; ci a3; ci a4; ci a5; nl
+  _cs "arcneg"; _ci a1; _ci a2; _ci a3; _ci a4; _ci a5; _nl
 ]
 dot int x,y[
   moveto x,y; 
   lineto x+1,y+1
 ]
 ellipse int a1,a2,a3,a4 [
-  cs "save";nl
-  cs "translate";ci a1+a3/2;ci a2+a4/2;nl
-  cs "scale";ci a3/2;ci a4/2;nl
-  cs "arc"; ci 0; ci 0; ci 1; ci 0; ci 360;nl
-  cs "restore";nl
+  _cs "save";_nl
+  _cs "translate";_ci a1+a3/2;_ci a2+a4/2;_nl
+  _cs "scale";_ci a3/2;_ci a4/2;_nl
+  _cs "arc"; _ci 0; _ci 0; _ci 1; _ci 0; _ci 360;_nl
+  _cs "restore";_nl
 ]
 fill[
-  cs "fill";nl
+  _cs "fill";_nl
 ]
 lineto int a1,a2 [
-  cs "line_to";ci a1; ci a2; nl
+  _cs "line_to";_ci a1; _ci a2; _nl
   if(_have_previous_lineto)[
     lastmoveto(0)=lastlineto(0)
     lastmoveto(1)=lastlineto(1)
@@ -79,20 +79,20 @@ lineto int a1,a2 [
   _have_previous_lineto=1
 ]
 moveto int a1,a2 [
-  cs "move_to";ci a1; ci a2; nl
+  _cs "move_to";_ci a1; _ci a2; _nl
   lastmoveto(0)=a1
   lastmoveto(1)=a2
   _have_previous_lineto = 0
 ]
 next [
-  cs "new_sub_path"; nl
+  _cs "new_sub_path"; _nl
   lastmoveto(0)=0
   lastmoveto(1)=0
   lastlineto(0)=0
   lastlineto(1)=0
 ]
 rectangle int a1,a2,a3,a4 [
-  cs "rectangle";ci a1; ci a2; ci a3; ci a4; nl
+  _cs "rectangle";_ci a1; _ci a2; _ci a3; _ci a4; _nl
 ]
 raster int w,h,d [
     int row,col
@@ -107,20 +107,20 @@ raster int w,h,d [
     ]
 ]
 setdash int d, off [
-  cs "setdash";ci d; ci off; nl
+  _cs "setdash";_ci d; _ci off; _nl
 ]
 setdash2 int d1,d2,off [
-  cs "setdash";ci d1; ci d2; ci off; nl
+  _cs "setdash";_ci d1; _ci d2; _ci off; _nl
 ]
 setfontsize int x [
-  cs "set_font_size"; ci x; nl
+  _cs "set_font_size"; _ci x; _nl
 ]
 setrgb int r,g,b [
-  cs "setrgb"; ci r;ci g;ci b; nl
+  _cs "setrgb"; _ci r;_ci g;_ci b; _nl
 ]
 showtext char t(0)[
-  cs "showtext "; cc QUOTE; cs t; cc QUOTE; nl
+  _cs "showtext "; _cc QUOTE; _cs t; _cc QUOTE; _nl
 ]
 stroke[
-  cs "stroke"; nl
+  _cs "stroke"; _nl
 ]

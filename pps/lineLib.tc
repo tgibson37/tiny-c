@@ -153,7 +153,11 @@ seglen int seg(3) [
 // intersection of two lines
 // args: answer, line a, line b
 // returns: -1 for parallel lines, 0 for OK
-xersect int ix(1), ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 
+xersect int ix(1), sa(3), sb(3) [
+	return _xersect ix, sa(0),sa(1),sa(2),sa(3),sb(0),sb(1),sb(2),sb(3)
+]
+
+_xersect int ix(1), ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 
 [
 		  int xdb;xdb=0
           if(xdb)[pl"line a ="; pn ax0;pn ay0;pn ax1;pn ay1]

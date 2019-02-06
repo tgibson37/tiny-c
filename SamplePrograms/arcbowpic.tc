@@ -13,7 +13,7 @@ main[
 	showtext " c"
 	next
 	int ix(1)
-	xersect ix, 40,200,100,140, 170,156,200,224
+	_xersect ix, 40,200,100,140, 170,156,200,224
 	dot ix(0),ix(1)
 	showtext " intersect"
 	moveto 52,170

@@ -1,4 +1,5 @@
 import sys
+import os
 import cairo
 import shlex
 
@@ -56,7 +57,10 @@ if len(sys.argv)>1:
 else:
 	usage()
 	sys.exit()
-show_app = "display"
+if os.name == "nt":
+	show_app = "mspaint.exe"
+else:
+	show_app = "display"
 M_PI = 3.14159265358979323846
 with open(drawfile) as f:
     for line in f:
@@ -85,8 +89,8 @@ with open(drawfile) as f:
 			d = x[1:-1]
 			id = [float(x) for x in d]
 			st = float(x[-1])
-			print "id:", id
-			print "st:", st
+			#print "id:", id
+			#print "st:", st
 			ctx.set_dash(id,st)
 		elif x[0]=="setrgb":
 			r1 = float(x[1])/256
