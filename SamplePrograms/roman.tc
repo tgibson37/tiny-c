@@ -325,7 +325,7 @@ main [
  rowoffset=200
  dtor d3
  printf "%c%c%d %c %d = %d",10,10,d1,port,d2,d3
- showapp "mspaint.exe"
+// showapp "mspaint.exe"
  show
  pl ""
 
