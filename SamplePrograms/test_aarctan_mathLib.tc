@@ -1,0 +1,50 @@
+#include pps/mathLib.tc
+#include pps/library.tc
+
+// various asqrt tests (a because it is approximate)
+main [
+	int x,y
+if(1)[
+	y=aarctan(x=612)
+	printf "%carctan of 0.%03d",10, x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=1000)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=2000)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=20000)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=57290)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+]
+if(1)[
+	y=aarctan(x=966)
+	pl"";pl "arctan of best==>> "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=982)
+	pl "  arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=983)
+	pl "  arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=1000)
+	pl "arctan of best==>> "; pdec x; ps" is"; pn y; ps" degrees"
+
+	y=aarctan(x=-966)
+	pl"";pl "arctan of best==>> "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-982)
+	pl "  arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-983)
+	pl "  arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-1000)
+	pl "arctan of best==>> "; pdec x; ps" is"; pn y; ps" degrees"
+]
+if(1)[
+	y=aarctan(x=-612)
+	pl"";printf "%carctan of 0.%03d",10, x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-1000)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-2000)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-20000)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+	y=aarctan(x=-57290)
+	pl "arctan of "; pdec x; ps" is"; pn y; ps" degrees"
+]
+]
