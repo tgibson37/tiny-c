@@ -3,13 +3,15 @@
 #include pps/library.tc
 #include pps/pyGraphicsLib.tc
 
-// NOTE TO READER: several main/seed/test functions. Some renamed with leading x. Uncover by removing the x from all related,
-// i.e. grouped under one comment. Cover the others.
-// Within a group further select the actual test(s) of interest // by covering others with comment flag //.
+// NOTE TO READER: several main/seed/test functions. Some renamed with 
+// leading x. Do a specific test by removing the x (or y or z) from 
+// one main, commenting out the DO EVERYTHING main at the end.
+// Further select the actual test(s) of interest 
+// by covering test calls with comment flag.
 
 
-// TESTS FOR parallel (just main, no seed or test fcn)
-main[
+// x TESTS FOR parallel (just main, no seed or test fcn)
+xmain[
 	int sega(3), segb(3)
 	ps"parallel test"
 	pn _parallel(20,20,60,00,20,50,60,30)  // parallel and slope
@@ -27,12 +29,12 @@ main[
 	pl"SHOULD GET    1 0 0 1 0 0 1 1 0"
 ]
 
-// TESTS FOR segment bisect (test, seed, and main fcns)
-xtest int sega(3),segb(3) [
-	int bsect(1), prll
+// y TESTS FOR bisectseg (test, seed, and main fcns)
+ytest int sega(3),segb(3) [
+	int bsect(1), icntr(1), prll
 	pl"segs a:"; psegment sega
 	ps" b:"; psegment segb
-	prll=bisect bsect, sega, segb
+	prll=bisectseg bsect, icntr, sega, segb
 	if(prll)pl"parallel segs"
 	pl"        bsect "; ppoint bsect
 
@@ -43,50 +45,55 @@ xtest int sega(3),segb(3) [
 	lineto segb(2),segb(3)
 	next
 	arc bsect(0),bsect(1),5,0,360
-//	moveto segb(2),segb(3)
-//	lineto bsect(0),bsect(1)
+	stroke
+	moveto icntr(0), icntr(1)
+	setdash2 5,3,5
+	lineto bsect(0),bsect(1)
 	show
 ]
-xseed int a,b,c,d, e,f,g,h[
+yseed int a,b,c,d, e,f,g,h[
 	int sega(3), segb(3)
 	setsegment sega, a,b,c,d
 	setsegment segb, e,f,g,h
-	test sega, segb
+	ytest sega, segb
 ]
-xmain [
-//	seed 10,100,10,20, 20,10,100,10
-//	pl"    SHOULD BE ";ps"[ 260 260]"
-//	seed 50,50,100,100, 10,50,10,100
-//	pl"    SHOULD BE ";ps"[ 354 854]"
-	seed 110,130,140,110, 140,110,150,130
-	pl"    SHOULD BE ";ps"[ ]"
+ymain [
+	yseed 10,100,10,20, 20,10,100,10
+	pl"    SHOULD BE ";ps"[ 260 260]"
+	yseed 50,50,100,100, 10,50,10,100
+	pl"    SHOULD BE ";ps"[ 187 437]"
+	yseed 110,130,140,110, 140,110,150,130
+	pl"    SHOULD BE ";ps"[ 51 483]"
 ]
 
-// TESTS FOR point bisect (main and test, no seed)
-xmain[
-//	test 100,400,100,100,400,100
-//	pl"SHOULD BE [ 350 350]"
-//	test 100,400,250,100,400,400
-//	pl"SHOULD BE [ 250 548]"
-//	test 200,100,500,250,200,400
-//	pl"SHOULD BE [ 52 250]"
-//	test 100,100,250,500,400,100
-//	pl"SHOULD BE [ 250 32]"
-	test 400,100,100,400,500,150
+// z TESTS FOR point bisect (main and test, no seed)
+zmain[
+	ztest 100,400,100,100,400,100
+	pl"SHOULD BE [ 350 350]"
+	ztest 100,400,250,100,400,400
+	pl"SHOULD BE [ 250 548]"
+	ztest 200,100,500,250,200,400
+	pl"SHOULD BE [ 52 250]"
+	ztest 100,100,250,500,400,100
+	pl"SHOULD BE [ 250 32]"
+	ztest 400,100,100,400,500,150
 	pl"SHOULD BE [ 489 90]"
-//	test 100,400,100,100,400,100
-//	pl"SHOULD BE [ ]"
+	ztest 100,400,100,100,400,100
+	pl"SHOULD BE [ ]"
 ]
-xtest int a,b,c,d,e,f[
+ztest int a,b,c,d,e,f[
 	int bsect(1)
 	pl"points, begin,mid,end "; pn a; pn b; pn c; pn d; pn e; pn f
-	bisectpts bsect,a,b,c,d,e,f
+	bisect bsect,a,b,c,d,e,f
 	pl"    bsect ";ppoint bsect
 	start "pt_bisect", 1000, 600
 	moveto a,b; lineto c,d; lineto e,f
+	stroke
 	moveto c,d; lineto bsect(0),bsect(1)
+	setdash2 5,3,5
 	arc bsect(0),bsect(1), 5, 0, 360
 	show
 ]
 
-
+// TESTS EVERYTHING
+main [ xmain; ymain; zmain ]

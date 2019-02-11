@@ -86,6 +86,8 @@ with open(drawfile) as f:
 			r5 = float(d5*(M_PI/180))
 			ctx.arc_negative(r1,r2,r3,r4,r5)
 		elif x[0]=="setdash":
+			#print ""
+			#print x
 			d = x[1:-1]
 			id = [float(x) for x in d]
 			st = float(x[-1])
