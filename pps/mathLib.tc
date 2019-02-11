@@ -1,3 +1,6 @@
+aarctan int x [
+	return MC x,120
+]
 asin int x [
 	int sign; sign=1
 	x = x%360

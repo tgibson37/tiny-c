@@ -331,6 +331,14 @@ int Msqrt(int nargs, int *argsv) {
 	if(x<0.0){ eset(ARGSERR); return -1; }
 	return (int)sqrt(x);
 }
+// Approximate arctan
+int Marctan(int nargs, int *argsv) {
+	if(nargs<1){ eset(ARGSERR); return -1; }
+	double x = (double)argsv[0];
+	x = x/1000.0;
+//printf("\n %f %f %f", x, x/1000, atan(x)*180/3.14159);
+	return (int)(atan(x)*180/3.14159 + (x>0?0.5:-0.5) );
+}
 
 /* first in this list is MC 1 */
 McList origList[] =
@@ -344,7 +352,7 @@ McList newList[] =
 	{ &MprF, &Msleep, &Mfilrd, &Mstrlen, &Mstrcat
 	, &Mstrcpy, &Mfilwt, &Mexit, &Mexitq, &Mcdate
 	, &Mfopen, &Mfputs, &Mfputc, &Mfgets, &Mfclose
-	, &Mgetprop, &Msystem, &Mfpn, &Msqrt, &naf
+	, &Mgetprop, &Msystem, &Mfpn, &Msqrt, &Marctan
 	, &naf, &naf, &naf, &naf, &naf
 };
 
