@@ -75,12 +75,13 @@ int dbg;dbg=0
 					ps"seed line from 210 10 to 220 60"
 					pl"    dx   dy   x   y"
 				]
-// seed line plus 3 more
+// seed line plus 4 more
 	moveto 120,80
 	lineto 170,70
 	lf;rt;rt
+	lf
 if(1)[
-	lf;rt;rt;lf;rt;rt;
+	rt;rt;lf;rt;rt;
 				if(dbg)[arc(180,120,5,0,360);pl"1"]
 	lf;rt;lf;lf;rt;lf;
 				if(dbg)[arc(40,200,5,0,360);pl"2"]
@@ -88,7 +89,7 @@ if(1)[
 				if(dbg)[arc(200,220,5,0,360);pl"3"]
 	lf;rt;lf;lf;rt;lf;
 				if(dbg)[arc(340,140,5,0,360);pl"4"]
-lf;rt
+	lf;rt
 ]
 	show
 ]

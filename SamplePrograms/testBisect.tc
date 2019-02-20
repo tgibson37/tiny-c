@@ -27,6 +27,10 @@ xmain[
 	segb(3) = segb(3)-1
 	pn parallel(sega,segb)  // not by one pixel
 	pl"SHOULD GET    1 0 0 1 0 0 1 1 0"
+	pl"reverseseg test"
+	pl"";psegment sega
+	reverseg sega
+	pl"";psegment sega
 ]
 
 // y TESTS FOR bisectseg (test, seed, and main fcns)
@@ -68,6 +72,7 @@ ymain [
 
 // z TESTS FOR point bisect (main and test, no seed)
 zmain[
+	factor = 1
 	ztest 100,400,100,100,400,100
 	pl"SHOULD BE [ 350 350]"
 	ztest 100,400,250,100,400,400
@@ -79,21 +84,49 @@ zmain[
 	ztest 400,100,100,400,500,150
 	pl"SHOULD BE [ 489 90]"
 	ztest 100,400,100,100,400,100
-	pl"SHOULD BE [ ]"
+	pl"SHOULD BE [ 350 350]"
 ]
-ztest int a,b,c,d,e,f[
-	int bsect(1)
+int factor
+// c,d is the angle point
+ztest int a,b,c,d,e,f [
+	int bsect(1), segbisect(3)
+	start "pt_bisect", 1000, 600
 	pl"points, begin,mid,end "; pn a; pn b; pn c; pn d; pn e; pn f
 	bisect bsect,a,b,c,d,e,f
 	pl"    bsect ";ppoint bsect
-	start "pt_bisect", 1000, 600
 	moveto a,b; lineto c,d; lineto e,f
 	stroke
-	moveto c,d; lineto bsect(0),bsect(1)
-	setdash2 5,3,5
-	arc bsect(0),bsect(1), 5, 0, 360
+		// w test cases: extend the bisect line by big factor
+	setsegment segbisect, c,d,bsect(0),bsect(1)  //needs to be a seg
+	pl "bisect line len before extending"
+	pn seglen(segbisect)
+	_extend bsect, segbisect, factor
+
+	moveto c,d; 
+	lineto bsect(0),bsect(1)
+	arc bsect(0),bsect(1), 5, 0, 360  // the point
+
+	setdash2 5,3,5       // the dashed bisect line
 	show
+]
+// compute point ix that would extend seg's length by a factor,
+// _extend int ix(1), seg(3), fac
+
+// w TESTS FOR obtuse angles, uses  ztest
+wmain [
+	factor = 100
+//	ztest 10,310, 160,157, 310,10
+//	pl"   10,310, 160,157, 310,10   BAD"
+	ztest 10,310, 210,158, 410,30
+	pl"   10,310, 210,158, 410,30   VERY CLOSE"
+//	ztest 10,310, 210,158, 410,20
+//	pl"   10,310, 210,158, 410,20   BAD"
 ]
 
 // TESTS EVERYTHING
-main [ xmain; ymain; zmain ]
+main [ 
+	wmain  // obtuse
+//	xmain  // parallel, no pics
+//	ymain  // 2 seg args
+//	zmain  // 3 point args  << principle version
+]

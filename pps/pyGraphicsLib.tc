@@ -5,7 +5,7 @@
 char _cgdrawname(50) //users name for drawing, no spaces
 char _cgfilename(55) // file passing draw vector to cairoGraphi_cs
 char _cgcmd(70) // system command to start cairoGraphi_cs
-int unit
+int unit, _drawing_under_way
 char NL, QUOTE
 // recent points are remembered
 int lastmoveto(1), lastlineto(1), _have_previous_lineto
@@ -21,7 +21,7 @@ start
   strcat _cgcmd, _cgdrawname
   NL=10
   QUOTE=34
-//  _drawing_under_way = 0
+  _drawing_under_way = 1
   unit = fopen _cgfilename, "w"
   if(unit<0)
   [
@@ -31,6 +31,8 @@ start
   _cs "window"; _ci a1; _ci a2; _nl
 ]
 
+drawing_under_way [ return _drawing_under_way]
+
 showapp char r(0) [
   _cs "showapp "; _cs r; _nl
 ]
@@ -38,6 +40,7 @@ showapp char r(0) [
 show [
   _cs "show"; _nl
   fclose unit
+  _drawing_under_way = 0
   system _cgcmd
 ]
 
@@ -57,6 +60,12 @@ arcneg int a1,a2,a3,a4,a5 [
 dot int x,y[
   moveto x,y; 
   lineto x+1,y+1
+]
+drawseg int s(4)[
+  next
+  moveto s(0),s(1)
+  lineto s(2),s(3)
+  next
 ]
 ellipse int a1,a2,a3,a4 [
   _cs "save";_nl

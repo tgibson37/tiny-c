@@ -5,29 +5,73 @@
 SIZE_INT[return 4]
 INFINITY[return 2147483647]
 
-// Turn 90 degree corners
+// Turn 90 degree corners, +1 for right, -1 for left
 corner90 int ix(1), rl [
-	int x0, y0, x1, y1, dx, dy, r, temp
+	int x0, y0, x1, y1
 	x0=lastmoveto(0); y0=lastmoveto(1)
 	x1=lastlineto(0); y1=lastlineto(1)
+	return _corner90 ix, x0, y0, x1, y1, rl
+]
+
+_corner90 int ix(1), x0, y0, x1, y1, rl [
+		int dbg;dbg=1
+			if(dbg)[pl"";pn x0;pn y0;pn x1;pn y1;pn rl;]
+	int dx, dy, sdir, sdir, ndir, dtab(3), sdtab, temp
+//	given a seg get two deltas, dx dy.
 	dx=x1-x0; dy=y1-y0
-	r=dx/dy
-	temp=dy  // invert x,y into new direction
-	dy=dx
-	dx=temp
-	if(rl>0)[   // right turn sign switch
-		if(r>0)dy= -dy
-		else dx= -dx
-	]
-	else [   // left turn
-		if(r>0)dx= -dx
-		else dy = -dy
-	]
-		//if(dbg)[pl "new  dx dy   ="; pn dx;pn dy ]
-	ix(0) = dx+x1  // return point 1 plus new delta
+			if(dbg)[pl"dx,dy";pn dx;pn dy]
+//	compute signdir from their respective signs
+	sdir = 0; if(dx>0)sdir=2; if(dy>0)sdir=sdir+1
+			if(dbg)[pl"sdir";pn sdir]
+//	from sign map to ndir
+	setsegment dtab, 2,3,1,0
+			if(dbg)[pl"dtab";psegment dtab]
+//	from the rl arg compute new ndir (ndir +- 1)%4
+	ndir = (dtab(sdir)+rl+4)%4  // new direction
+			if(dbg)[pl"ndir";pn ndir]
+//	map back to signdir
+	setsegment dtab, 3,2,0,1
+	sdir = dtab(ndir)
+			if(dbg)[]
+//	flip the MAGNITUDEs of dx and dy
+	if(dx>0)temp = dx; else temp=-dx
+	if(dy>0)dx = dy; else dx = -dy
+	dy = temp
+			if(dbg)[]
+//	apply the signs to dx and dy
+	if(sdir%2==0)dx = -dx
+	if(sdir/2==0)dy = -dy
+			if(dbg)[]
+// set ix to point 1 plus new delta
+	ix(0) = dx+x1
 	ix(1) = dy+y1
+			if(dbg)[]
+// return length
 	return alen(x0,y0,x1,y1)
 ]
+
+//OLD VERSION   _corner90 int ix(1), x0, y0, x1, y1, rl [
+//	int dx, dy, r, temp
+//	dx=x1-x0; dy=y1-y0
+//	r=???
+//	if(dy)r=dx/dy
+//	temp=dy  // invert x,y into new direction
+//	dy=dx
+//	dx=temp
+//	if(rl>0)[   // right turn sign switch
+//		if(r>0)dy= -dy
+//		else dx= -dx
+//	]
+//	else [   // left turn
+//		if(r>0)dx= -dx
+//		else dy = -dy
+//	]
+//		//if(dbg)[pl "new  dx dy   ="; pn dx;pn dy ]
+//	ix(0) = dx+x1  // return point 1 plus new delta
+//	ix(1) = dy+y1
+//	return alen(x0,y0,x1,y1)
+//]
+
 // convenience routines
 rt90 int ix(1)[ return corner90 ix, +1 ]
 lf90 int ix(1)[ return corner90 ix, -1 ]
@@ -135,6 +179,11 @@ setsegment int seg(3), ax,ay,bx,by [
 	seg(0)=ax; seg(1)=ay; seg(2)=bx; seg(3)=by;
 ]
 
+// sets a point array, p, with x,y
+setpoint int p(1), ax,ay[
+	p(0)=ax; p(1)=ay
+]
+
 // prints a segment in brackets
 psegment int seg(3) [
 	ps"["; ppoint seg; ppoint seg+2*SIZE_INT; ps"]"
@@ -221,17 +270,56 @@ bisectseg int bsect(1), icntr(1), sega(3),segb(3) [
 // bisect the angle at middle. NOT ROBUST yet for nearly but not quite parallel.
 bisect int bsect(1), b0,b1,m0,m1,e0,e1 [
 		int dbg;dbg=1
-	int segin(3), segout(3), ptout(1),ptin(1)
-	setsegment segin, m0,m1,b0,b1  //middle outwards
+	int segin(3), segout(3), ptout(1),ptin(1),inoutlen
+	setsegment segin, m0,m1,b0,b1       //both segs middle outwards
 	setsegment segout, m0,m1,e0,e1
 		if(dbg)[pl"    segin,segout";psegment(segin);psegment(segout)]
 	if(parallel(segin,segout)) return -1
 	extend ptin,  segin,  500
 	extend ptout, segout, 500
-		if(dbg)[pl"    ptin,ptout";ppoint(ptin);ppoint(ptout)]
-	bsect(0) = (ptout(0)+ptin(0))/2
-	bsect(1) = (ptout(1)+ptin(1))/2
-	return 0
+	inoutlen = alen(ptin(0),ptin(1),ptout(0),ptout(1))
+		if(dbg)[pl"    ptin,ptout,len";
+			ppoint(ptin);ppoint(ptout);
+			pn inoutlen
+		]
+	if(inoutlen<=800)[
+		bsect(0) = (ptout(0)+ptin(0))/2
+		bsect(1) = (ptout(1)+ptin(1))/2
+		return 0
+	] else [
+		if(dbg) [
+			pl"OBTUSE   segin, segout "
+			psegment segin
+			psegment segout
+		]
+		reverseseg segin; reverseseg segout
+		if(dbg)[
+			pl"reversed segin, segout "
+			psegment segin
+			psegment segout
+			pl"both now point inwards"
+		]
+		int in90(1), out90(1)
+		_corner90 in90, segin(0), segin(1), segin(2), segin(3), -1
+		_corner90 out90, segout(0), segout(1), segout(2), segout(3), 1
+		if(dbg)[
+			int midpt(1); setpoint(midpt,m0,m1)
+			pl"new acute angle "
+			ppoint in90
+			ppoint midpt
+			ppoint out90
+			int duw; duw = drawing_under_way
+			if(duw)[
+				setsegment segin,  midpt(0), midpt(1), in90(0), in90(1)
+				setsegment segout, midpt(0), midpt(1), out90(0), out90(1)
+				pl"   ~313"
+				showtext "   ~313"
+				drawseg segin
+				drawseg segout
+			]
+		]
+		return bisect(bsect,in90(0),in90(1),m0,m1,out90(0),out90(1))
+	]
 ]
 
 // assign p1=p2
@@ -242,9 +330,13 @@ assignpt int p1(1), p2(1)[
 // swap two points
 swappt int p1(1), p2(1)[
 	int temp(1)
-	assign temp,p1
-	assign p1,p2
-	assign p2,temp
+	assignpt temp,p1
+	assignpt p1,p2
+	assignpt p2,temp
+]
+// swap first and last points of s
+reverseseg int s(3)[
+	swappt s, s+2*SIZE_INT
 ]
 
 // set n=nearest and f=furthest from ii points of seg
