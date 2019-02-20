@@ -9,7 +9,101 @@
 // Further select the actual test(s) of interest 
 // by covering test calls with comment flag.
 
+// This file has 2/20/2019 version of parallel, bisectseg, bisect with
+// comments and imbedded debug code. They are renamed with leading x
+// so the actual test code wont call them, but rather call the
+// lineLib.tc version. The library versions are stripped of comments
+// and test code.
 
+//////////////  SUBJECTs of tests
+// Return true if two segments are parallel
+xparallel int a(3),b(3) [
+	return _parallel a(0),a(1),a(2),a(3),b(0),b(1),b(2),b(3)
+]
+x_parallel int ax0,ay0,ax1,ay1, bx0,by0,bx1,by1 [
+    int day,dax,dby,dbx,aslope,bslope
+    dax = ax1-ax0; day = ay1-ay0; dbx = bx1-bx0; dby = by1-by0
+    if(dax==0) [             // a vertical, 
+    	if(dbx==0) return 1      // both vertical
+    	else return 0            // b slopes
+    ] else [                 // a slopes
+    	if(dbx==0) return 0      // b vertical
+    ]
+    aslope = 1000*day/dax; bslope = 1000*dby/dbx  // both slope
+    if(aslope==bslope) return 1         // parallel
+    return 0
+]
+
+// set a point bsect that bisects the angle between sega,segb.
+// assumes the angle is defined by sega's first point, the
+// intersection, and segb's last point. The returned point bsect has
+// distance 1000 from the returned intersection, icntr.
+xbisectseg int bsect(1), icntr(1), sega(3),segb(3) [
+		int dbg; dbg=0
+	int xret, segin(3),segout(3), ptout(1),ptin(1)
+	xret = _xersect icntr,sega(0),sega(1),sega(2),sega(3),segb(0),segb(1),segb(2),segb(3)
+	if(xret)return xret   // parallel, no angle
+	bisect bsect, sega(0),sega(1),icntr(0),icntr(1),segb(2),segb(3)
+]
+
+// given 3 points, begin,middle,end, set the point bsect to
+// bisect the angle at middle.
+xbisect int bsect(1), b0,b1,m0,m1,e0,e1 [
+		int dbg;dbg=1
+	int segin(3), segout(3), ptout(1),ptin(1),inoutlen
+	setsegment segin, m0,m1,b0,b1       //both segs middle outwards
+	setsegment segout, m0,m1,e0,e1
+		if(dbg)[pl"    segin,segout";psegment(segin);psegment(segout)]
+	if(parallel(segin,segout)) return -1
+	extend ptin,  segin,  500
+	extend ptout, segout, 500
+	inoutlen = alen(ptin(0),ptin(1),ptout(0),ptout(1))
+		if(dbg)[pl"    ptin,ptout,len";
+			ppoint(ptin);ppoint(ptout);
+			pn inoutlen
+		]
+	if(inoutlen<=800)[
+		bsect(0) = (ptout(0)+ptin(0))/2
+		bsect(1) = (ptout(1)+ptin(1))/2
+		return 0
+	] else [
+		if(dbg) [
+			pl"OBTUSE   segin, segout "
+			psegment segin
+			psegment segout
+		]
+		reverseseg segin; reverseseg segout
+		if(dbg)[
+			pl"reversed segin, segout "
+			psegment segin
+			psegment segout
+			pl"both now point inwards"
+		]
+		int in90(1), out90(1)
+		_corner90 in90, segin(0), segin(1), segin(2), segin(3), -1
+		_corner90 out90, segout(0), segout(1), segout(2), segout(3), 1
+		if(dbg)[
+			int midpt(1); setpoint(midpt,m0,m1)
+			pl"new acute angle "
+			ppoint in90
+			ppoint midpt
+			ppoint out90
+			int duw; duw = drawing_under_way
+			if(duw)[
+				setsegment segin,  midpt(0), midpt(1), in90(0), in90(1)
+				setsegment segout, midpt(0), midpt(1), out90(0), out90(1)
+				pl"   ~313"
+				showtext "   ~313"
+				drawseg segin
+				drawseg segout
+			]
+		]
+		return bisect(bsect,in90(0),in90(1),m0,m1,out90(0),out90(1))
+	]
+]
+
+
+//////////  TEST CODE
 // x TESTS FOR parallel (just main, no seed or test fcn)
 xmain[
 	int sega(3), segb(3)
@@ -115,18 +209,18 @@ ztest int a,b,c,d,e,f [
 // w TESTS FOR obtuse angles, uses  ztest
 wmain [
 	factor = 100
-//	ztest 10,310, 160,157, 310,10
-//	pl"   10,310, 160,157, 310,10   BAD"
+	ztest 10,310, 160,157, 310,10
+	pl"   10,310, 160,157, 310,10"
 	ztest 10,310, 210,158, 410,30
-	pl"   10,310, 210,158, 410,30   VERY CLOSE"
-//	ztest 10,310, 210,158, 410,20
-//	pl"   10,310, 210,158, 410,20   BAD"
+	pl"   10,310, 210,158, 410,30"
+	ztest 10,310, 210,158, 410,20
+	pl"   10,310, 210,158, 410,20"
 ]
 
 // TESTS EVERYTHING
 main [ 
 	wmain  // obtuse
-//	xmain  // parallel, no pics
-//	ymain  // 2 seg args
-//	zmain  // 3 point args  << principle version
+	xmain  // parallel, no pics
+	ymain  // 2 seg args
+	zmain  // 3 point args
 ]
