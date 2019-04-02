@@ -57,6 +57,36 @@ arc int a1,a2,a3,a4,a5 [
 arcneg int a1,a2,a3,a4,a5 [
   _cs "arcneg"; _ci a1; _ci a2; _ci a3; _ci a4; _ci a5; _nl
 ]
+arcto3 int f(3),t(3), dir [   //from, to, rotation direction
+  int lsB(3),pta(1),ptb(1), cpt(1),lsX(3),center(1),radius,bd,ed      
+  if( bisectseg(pta,ptb,f,t) )[
+    int eight
+    midpoint pta, f, t
+    eight = 2*SIZE_INT
+    midpoint ptb, f+eight, t+eight
+  ]
+  setsegment3 lsB,pta,ptb
+  _corner90 cpt, f(0), f(1), f(2), f(3), dir
+  int eight
+  eight = 2*SIZE_INT
+  setsegment3 lsX, f+eight, cpt
+  if(xersect center, lsX, lsB)) [
+    pl"ERR: lsX and lsB are parallel. See arcto3 code."
+    ps" Should be in parallel case."
+    exit
+  ]
+  radius = alen center(0), center(1), f(2), f(3)
+  // bd,ed good for dir == -1
+  if(dir<0)[
+    bd = degrees(f)+90
+    ed = degrees(t)+90
+  ] else [
+    bd = degrees(f)-90
+    ed = degrees(t)-90
+  ]
+  if(dir>0) arc center(0),center(1),radius,bd,ed
+  else arcneg center(0),center(1),radius,bd,ed
+]
 dot int x,y[
   moveto x,y; 
   lineto x+1,y+1

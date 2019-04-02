@@ -12,6 +12,15 @@
 
 			int dbg		// turned on/off in main
 
+LongBlockComment[
+// The code inside this fake function serving as block comment
+// has been copied into appropriate libraries with debug code
+// and comments removed. The removed stuff has value, though and
+// is preserved in this file. The actual test code is outside the
+// block comment.
+
+//  Intended for pyGraphicsLib.tc
+
 arcto3 int f(3),t(3), dir [   //from, to, rotation direction
 	int lsB(3),pta(1),ptb(1), cpt(1),lsX(3),center(1),radius,bd,ed      
 	if( bisectseg(pta,ptb,f,t) )[
@@ -65,10 +74,10 @@ arcto3 int f(3),t(3), dir [   //from, to, rotation direction
 			]
 	if(dir>0) arc center(0),center(1),radius,bd,ed
 	else arcneg center(0),center(1),radius,bd,ed
-showtext "arc"; next
 ]
 
-// these intended for lineLib.tc, OR mathLib.tc
+// these intended for lineLib.tc
+
 	setsegment3 int as(3),ps(1),pe(1) [
 		setsegment as, ps(0),ps(1), pe(0),pe(1)
 	]
@@ -86,7 +95,7 @@ showtext "arc"; next
 		midpoint p,s,s+eight
 	]
 
-//mathlib
+// intended for mathlib
 	aarctan2 int y,x [
 		if(x==0)[
 			if(y==0)return 0
@@ -101,6 +110,10 @@ showtext "arc"; next
 		]
 	]
 // put ABOVE in appropriate Lib
+
+] //END LongBlockComment
+
+// test mains. Remove the x from xmain to test aarctan2(y,x).
 
 xmain[
 	int x,y,d
@@ -125,11 +138,9 @@ xmain[
 	]
 ]
 main [
-			dbg=0
-//			if(dbg)[
-				start "test_arcto", 600,700
+				dbg=0
+	start "test_arcto", 600,700
 				if(dbg>1)raster 600,700,100
-//			]
 	int pta(1),ptb(1),ptc(1),ptd(1),pte(1),ptf(1),ptg(1),pth(1),ptj(1)
 	setpoint1 ptb,300,500
 	setpoint1 ptc,500,300
@@ -150,14 +161,14 @@ main [
 	setsegment3 lsP, ptc, ptg
 	setsegment3 lsQ, ptf, ptb
 	arcto3 lsN, lsP, +1		// angle clockwise arc
-//	next
+	showtext "arc"; next
 	arcto3 lsP, lsQ, -1		// angle counterclockwise arc
+	showtext "arc"; next
 	arcto3 lsQ, lsM, +1		// parallel case
+	showtext "arc"; next
 	drawseg lsM; showtext "lsM"
 	drawseg lsN; showtext "lsN"
 	drawseg lsP; showtext "lsP"
 	drawseg lsQ; showtext "lsQ"
-	//dot pta(0),pta(1); showtext "  pta"
-	//dot pth(0),pth(1); showtext "  pth"
 	show
 ]

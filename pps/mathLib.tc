@@ -1,6 +1,19 @@
 aarctan int x [
 	return MC x,120
 ]
+aarctan2 int y,x [
+	if(x==0)[
+		if(y==0)return 0
+		if(y>0)return 90
+		if(y<0)return -90
+	]
+	int aa; aa=aarctan((1000*y)/x)
+	if(x>0) return aa
+	if(x<0)[
+		if(y>=0) return aa+180
+		if(y<0)  return aa-180
+	]
+]
 asin int x [
 	int sign; sign=1
 	x = x%360
