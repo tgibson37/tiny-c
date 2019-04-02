@@ -219,8 +219,8 @@ wmain [
 
 // TESTS EVERYTHING
 main [ 
-	wmain  // obtuse
-	xmain  // parallel, no pics
+//	wmain  // obtuse
+//	xmain  // parallel, no pics
 	ymain  // 2 seg args
-	zmain  // 3 point args
+//	zmain  // 3 point args
 ]

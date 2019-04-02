@@ -14,7 +14,7 @@ corner90 int ix(1), rl [
 ]
 
 _corner90 int ix(1), x0, y0, x1, y1, rl [
-		int dbg;dbg=1
+		int dbg;dbg=0
 			if(dbg)[pl"";pn x0;pn y0;pn x1;pn y1;pn rl;]
 	int dx, dy, sdir, sdir, ndir, dtab(3), sdtab, temp
 //	given a seg get two deltas, dx dy.

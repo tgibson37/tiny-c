@@ -54,6 +54,7 @@ int quiet;
 #define EQERR		 27
 #define PTRERR		 28
 #define APPERR	     29 // lrb
+#define DIVERR		 30
 #define EXIT         98
 #define KILL         99
 

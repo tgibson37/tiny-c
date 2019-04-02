@@ -567,15 +567,21 @@ int _term() {
 			_factor();
 			int denom = toptoi();
 			int numer = toptoi();
-			int div = numer/denom;
-			if(!error)pushk(div);
+			if(denom){
+				int div = numer/denom;
+				if(!error)pushk(div);
+			}
+			else eset(DIVERR);
 		}
 		else if(_lit(xpcnt)){
 			_factor();
 			int b=toptoi();
 			int a=toptoi();
-			int pct = a%b;
-			if(!error)pushk(pct);
+			if(denom){
+				int pct = a%b;
+				if(!error)pushk(pct);
+			}
+			else eset(DIVERR);
 		}
 		else return 1;  /* no more factors */
 	}

@@ -329,7 +329,7 @@ int Msqrt(int nargs, int *argsv) {
 	if(nargs<1){ eset(ARGSERR); return -1; }
 	double x = (double)argsv[0];
 	if(x<0.0){ eset(ARGSERR); return -1; }
-	return (int)sqrt(x);
+	return (int)(sqrt(x)+0.5);
 }
 // Approximate arctan
 int Marctan(int nargs, int *argsv) {

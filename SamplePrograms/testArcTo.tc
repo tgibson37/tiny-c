@@ -1,0 +1,163 @@
+#include pps/lineLib.tc
+#include pps/mathLib.tc
+#include pps/pyGraphicsLib.tc
+#include pps/library.tc
+// Notes: 
+//	lsX = line segment X, pta = point a.
+//	lsP,Q,M are the "setup", all other points/lines are derived.
+//  aarctan2 returns degrees, not radians, in range -180 to 180.
+//  First main tests arcto, below main tests new aarctan2(y,x).
+// Ref: https://en.wikipedia.org/wiki/Atan2
+//    Scroll down to "Definition and computation" 
+
+			int dbg		// turned on/off in main
+
+arcto3 int f(3),t(3), dir [   //from, to, rotation direction
+	int lsB(3),pta(1),ptb(1), cpt(1),lsX(3),center(1),radius,bd,ed      
+	if( bisectseg(pta,ptb,f,t) )[
+		int eight
+			if(dbg)[
+				pl "parallel case, dir=";pn dir
+			]
+		midpoint pta, f, t
+		eight = 2*SIZE_INT
+		midpoint ptb, f+eight, t+eight
+	] else [
+			if(dbg)[
+				pl "angle case, dir=";pn dir
+			]
+	]
+	setsegment3 lsB,pta,ptb
+	_corner90 cpt, f(0), f(1), f(2), f(3), dir
+	int eight
+	eight = 2*SIZE_INT
+	setsegment3 lsX, f+eight, cpt
+	if(xersect center, lsX, lsB)) [
+		pl"ERR: lsX and lsB are parallel. See arcto3 code."
+		ps" Should be in parallel case."
+		exit
+	]
+	radius = alen center(0), center(1), f(2), f(3)
+	// bd,ed good for dir == -1
+	if(dir<0)[
+		bd = degrees(f)+90
+		ed = degrees(t)+90
+	] else [
+		bd = degrees(f)-90
+		ed = degrees(t)-90
+	]
+			if(dbg)[
+				pl "from, to = "; psegment f; psegment t
+				printf "%cdegrees bd=%d, ed=%d",10,bd,ed
+				showtext "arc"
+				dot pta(0),pta(1)
+				showtext "pta"
+				drawseg lsB
+				showtext "lsB"
+				drawseg lsX
+				showtext "lsX"
+				pl"center"; ppoint center
+				ps", radius"; pn radius
+				dot center(0), center(1)
+				showtext "center"
+				next
+				ps"dir";pn dir
+			]
+	if(dir>0) arc center(0),center(1),radius,bd,ed
+	else arcneg center(0),center(1),radius,bd,ed
+showtext "arc"; next
+]
+
+// these intended for lineLib.tc, OR mathLib.tc
+	setsegment3 int as(3),ps(1),pe(1) [
+		setsegment as, ps(0),ps(1), pe(0),pe(1)
+	]
+	setpoint1 int pa(1),ax,ay [pa(0)=ax; pa(1)=ay]
+	moveto1 int p(1) [return moveto p(0),p(1)]
+	lineto1 int p(1) [return lineto p(0),p(1)]
+	drawseg int s(3) [moveto s(0),s(1); lineto s(2),s(3)]
+	degrees int s(3) [ return aarctan2(s(3)-s(1),s(2)-s(0))]
+	midpoint int p(1), a(1), b(1)[
+		p(0) = (a(0)+b(0))/2
+		p(1) = (a(1)+b(1))/2
+	]
+	midpoint3 int p(1),s(3) [
+		int eight; eight = 2*SIZE_INT
+		midpoint p,s,s+eight
+	]
+
+//mathlib
+	aarctan2 int y,x [
+		if(x==0)[
+			if(y==0)return 0
+			if(y>0)return 90
+			if(y<0)return -90
+		]
+		int aa; aa=aarctan((1000*y)/x)
+		if(x>0) return aa
+		if(x<0)[
+			if(y>=0) return aa+180
+			if(y<0)  return aa-180
+		]
+	]
+// put ABOVE in appropriate Lib
+
+xmain[
+	int x,y,d
+	x=y= -100
+	ps"  -100   -50  <-x->  +50   +100";pl""
+	ps"-------------------------------";pl""
+	while(y<105)[
+		while(x<105)[
+			d = aarctan2(y,x)
+			//pn d
+			printf "%6d",d
+			//pl""
+			x=x+50
+		]
+		ps" | "
+		if(y==-100)ps"-100"
+		if(y==0   )ps"  y "
+		if(y==+100)ps"+100"
+		pl""
+		x= -100
+		y=y+50
+	]
+]
+main [
+			dbg=0
+//			if(dbg)[
+				start "test_arcto", 600,700
+				if(dbg>1)raster 600,700,100
+//			]
+	int pta(1),ptb(1),ptc(1),ptd(1),pte(1),ptf(1),ptg(1),pth(1),ptj(1)
+	setpoint1 ptb,300,500
+	setpoint1 ptc,500,300
+	setpoint1 ptd,100,300
+	setpoint1 pte,200,600
+	setpoint1 ptf,250,350
+	setpoint1 ptg,350,250
+	setpoint1 pth,420,100
+	setpoint1 ptj,550,220
+
+	// pt's a,b,c form acute angle
+	int lsL(3), lsM(3), lsN(3), lsP(3), lsQ(3), lsR(3), lsT(3)
+	// segs l=ab, m=de are parallel.
+	setsegment3 lsL, pta, ptb
+	setsegment3 lsM, pte, ptd
+	setsegment3 lsN, pth, ptj
+	// c,a,b ccw test angle; trimmed to g,f
+	setsegment3 lsP, ptc, ptg
+	setsegment3 lsQ, ptf, ptb
+	arcto3 lsN, lsP, +1		// angle clockwise arc
+//	next
+	arcto3 lsP, lsQ, -1		// angle counterclockwise arc
+	arcto3 lsQ, lsM, +1		// parallel case
+	drawseg lsM; showtext "lsM"
+	drawseg lsN; showtext "lsN"
+	drawseg lsP; showtext "lsP"
+	drawseg lsQ; showtext "lsQ"
+	//dot pta(0),pta(1); showtext "  pta"
+	//dot pth(0),pth(1); showtext "  pth"
+	show
+]
