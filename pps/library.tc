@@ -97,6 +97,22 @@ atoi char b(0); int v(0) [
 	return k
 ]
 
+/* converts an into to ascii string, returns the length of the string
+itoa int n; char b(30)[
+	if(n<0)[
+		b(0)='-'
+		return 1+itoa(-n,b+1)
+	]
+	if(n<10)[
+		b(0)=n+'0'
+		return 1
+	]
+	int k
+	b(k=itoa(n/10,b))=n%10+'0'
+	b(k+1)=0
+	return k+1
+]
+
 /* print an integer with a leading blank
 pn int n [
 	MC ' ',1

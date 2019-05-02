@@ -14,7 +14,7 @@ corner90 int ix(1), rl [
 ]
 
 _corner90 int ix(1), x0, y0, x1, y1, rl [
-		int dbg;dbg=0
+		int dbg;dbg=1
 			if(dbg)[pl"";pn x0;pn y0;pn x1;pn y1;pn rl;]
 	int dx, dy, sdir, sdir, ndir, dtab(3), sdtab, temp
 //	given a seg get two deltas, dx dy.
@@ -23,14 +23,16 @@ _corner90 int ix(1), x0, y0, x1, y1, rl [
 //	compute signdir from their respective signs
 	sdir = 0; if(dx>0)sdir=2; if(dy>0)sdir=sdir+1
 			if(dbg)[pl"sdir";pn sdir]
-//	from sign map to ndir
-	setsegment dtab, 2,3,1,0
+//	from sign map to ndir, ==>> Ar*/notes.txt ~9558
+//	setsegment dtab, 2,3,1,0  // BUG
+	setsegment dtab, 2,1,3,0  // FIX, this is a table, not a seg
 			if(dbg)[pl"dtab";psegment dtab]
 //	from the rl arg compute new ndir (ndir +- 1)%4
 	ndir = (dtab(sdir)+rl+4)%4  // new direction
 			if(dbg)[pl"ndir";pn ndir]
 //	map back to signdir
-	setsegment dtab, 3,2,0,1
+//	setsegment dtab, 3,2,0,1  //BUG
+	setsegment dtab, 3,1,0,2  //FIX
 	sdir = dtab(ndir)
 			if(dbg)[]
 //	flip the MAGNITUDEs of dx and dy
@@ -93,13 +95,13 @@ extend int ix(1), seg(3), len [
 	_trim ix,seg,slen-len
 		seg(2)=ix(0)
 		seg(3)=ix(1)
-		if(dbg)[pl"~165 new last point"; ppoint seg+2*SIZE_INT]
+		if(dbg)[pl"lineLib~99 new last point"; ppoint seg+2*SIZE_INT]
 	]
 	else if(len<0)[
 	_trim ix,seg,-slen-len
 		seg(0)=ix(0)
 		seg(1)=ix(1)
-		if(dbg)[pl"~159 new first point"; ppoint seg]
+		if(dbg)[pl"lineLib~104 new first point"; ppoint seg]
 	]
 ]
 
@@ -127,11 +129,14 @@ _extend int ix(1), seg(3), fac [
 ]
 
 // if length of seg>mag(len) return in ix a new point that would 
-// trim to mag(len) seg's length. Trim from seg(2..3) if len>0, 
+// trim seg's length by mag(len). Trim from seg(2..3) if len>0, 
 // else seg(0..1). seg is not modified.
 
 _trim int ix(1),seg(4),len [
-		int dbg;dbg=0
+		int dbg;dbg=1
+		if(dbg)[pl"~137 _trim seg len "; 
+			psegment seg; pn len
+		]
 	int slen, amt, dx, dy
 	dx = seg(2)-seg(0)
 	dy = seg(3)-seg(1)
@@ -150,6 +155,12 @@ _trim int ix(1),seg(4),len [
 		ix(0) = seg(0) + amt*dx/1000
 		ix(1) = seg(1) + amt*dy/1000
 	]
+]
+// trims the seg TO lenght len
+trimto int ix(1),seg(4),to [
+	int amt
+	amt = seglen(seg) - to
+	_trim ix,seg,amt
 ]
 
 // sets a segment array, seg, with two points

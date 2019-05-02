@@ -133,14 +133,20 @@ next [
 rectangle int a1,a2,a3,a4 [
   _cs "rectangle";_ci a1; _ci a2; _ci a3; _ci a4; _nl
 ]
-raster int w,h,d [
+raster int w,h,d,l [
     int row,col
     row=d
     while(row<h) [
         col=d
         while(col<w)[
-            dot row,col
+            dot col,row
+            if(l)[
+              if(row==d) if(col<w-d) shownum col
+            ]
             col=col+d
+            if(l)[
+              if(col>=w) shownum row
+            ]
         ]
         row=row+d
     ]
@@ -159,6 +165,11 @@ setrgb int r,g,b [
 ]
 showtext char t(0)[
   _cs "showtext "; _cc QUOTE; _cs t; _cc QUOTE; _nl
+]
+shownum int n[
+  int t(30)
+  itoa n,t
+  showtext t
 ]
 stroke[
   _cs "stroke"; _nl
