@@ -39,161 +39,183 @@ init[
 	setpoint1(Bzc,008,440)
 	setsegment3(Bz,Bzt,Bzc)
 ]
-
-// NEW/MODIFIED LIB STUFF
-
-// define pto=ptb offset by x,y pixels
-offset int pto(1), ptb(1),x,y [
-	pto(0)=ptb(0)+x; pto(1)=ptb(1)+y
-]
-// return magnitude of x
-mag int x [if(x<0)return -x; return x]
-
-// define x given path a to b. rl is + for rt turn, - for left. 
-// mag(rl_len)>1 implies trim to that length, else length is
-// equal to alen(a,b). 
-corner90pt int ptx(1), pta(1), ptb(1), rl_len
-[
-	int rl
-	rl=1; if(rl_len<0)rl= -1
-				if(dbg)[
-pl"~60 corner90pt points pta,ptb,rl_len,rl: "
-ppoint pta
-ppoint ptb
-pn rl_len
-pn rl
-				]
-	_corner90 ptx, pta(0), pta(1), ptb(0), ptb(1), rl
-				if(dbg)[
-pl"~68 points pta,ptb,ptx: "
-ppoint pta
-ppoint ptb
-ppoint ptx
-				]
-	if(mag(rl_len)>1)[
-		int t(3), len
-		setsegment t, ptb(0), ptb(1), ptx(0), ptx(1) 
-				if(dbg)[
-pl"~77 set t: "
-psegment t
-pl"before trim: ptx,rl_len,mag(rl_len)"
-ppoint ptx; pn rl_len; pn mag(rl_len)
-				]
-		len = mag(rl_len)
-pl"~83len";pn len
-		trimto ptx, t, len
-				if(dbg)[
-pl"~86 point ptx: "
-ppoint ptx
-				]
-	]
-]
-xersectpt int ix(1), saf(1),sat(1), sbf(1), sbt(1) [
-	int res
-				if(dbg)[
-pl"~94 points saf,sat,sbf,sbt "
-ppoint saf
-ppoint sat
-ppoint sbf
-ppoint sbt
-				]
-	res = _xersect ix, saf(0),saf(1),sat(0),sat(1),sbf(0),sbf(1),sbt(0),sbt(1)
-	if(res)[
-		pl"xersectpt: Lines are parallel"
-	]
-				if(dbg)[
-pl"~105 point ix, res "
-ppoint ix; pn res
-return res
-				]
-	return res
+drawPoints[
+	moveto1 Map; dot1 Map;showtext "Map"
+	moveto1 Mas; dot1 Mas;showtext "Mas"
+	moveto1 Mzp; dot1 Mzp;showtext "Mzp"
+	moveto1 Mzs; dot1 Mzs;showtext "Mzs"
+	moveto1 Sap; dot1 Sap;showtext "Sap"
+	moveto1 Sab; dot1 Sab;showtext "Sab"
+	moveto1 Szp; dot1 Szp;showtext "Szp"
+	moveto1 Szb; dot1 Szb;showtext "Szb"
+	moveto1 Bat; dot1 Bat;showtext "Bat"
+	moveto1 Bac; dot1 Bac;showtext "Bac"
+	moveto1 Bzt; dot1 Bzt;showtext "Bzt"
+	moveto1 Bzc; dot1 Bzc;showtext "Bzc"
 ]
 
+// NEW/MODIFIED LIB STUFF, 
+// kept commented out for the record,
+// removing comments (one fcn or more) runs local copy instead of 
+//		lib copy
+//
+//dot1 int x(1)[dot x(0),x(1)]
+//
+//// define pto=ptb offset by x,y pixels
+//offset int pto(1), ptb(1),x,y [
+//	pto(0)=ptb(0)+x; pto(1)=ptb(1)+y
+//]
+//// return magnitude of x
+//mag int x [if(x<0)return -x; return x]
+//
+//// define x given path a to b. rl is + for rt turn, - for left. 
+//// mag(rl_len)>1 implies trim to that length, else length is
+//// equal to alen(a,b). 
+//corner90pt int ptx(1), pta(1), ptb(1), rl_len
+//[
+//	int rl
+//	rl=1; if(rl_len<0)rl= -1
+//				if(dbg)[
+//pl"~60 corner90pt points pta,ptb,rl_len,rl: "
+//ppoint pta
+//ppoint ptb
+//pn rl_len
+//pn rl
+//				]
+//	_corner90 ptx, pta(0), pta(1), ptb(0), ptb(1), rl
+//				if(dbg)[
+//pl"~68 points pta,ptb,ptx: "
+//ppoint pta
+//ppoint ptb
+//ppoint ptx
+//				]
+//	if(mag(rl_len)>1)[
+//		int t(3), len
+//		setsegment t, ptb(0), ptb(1), ptx(0), ptx(1) 
+//				if(dbg)[
+//pl"~77 set t: "
+//psegment t
+//pl"before trim: ptx,rl_len,mag(rl_len)"
+//ppoint ptx; pn rl_len; pn mag(rl_len)
+//				]
+//		len = mag(rl_len)
+//pl"~83len";pn len
+//		trimto ptx, t, len
+//				if(dbg)[
+//pl"~86 point ptx: "
+//ppoint ptx
+//				]
+//	]
+//]
+//xersectpt int ix(1), saf(1),sat(1), sbf(1), sbt(1) [
+//	int res
+//				if(dbg)[
+//pl"~94 points saf,sat,sbf,sbt "
+//ppoint saf
+//ppoint sat
+//ppoint sbf
+//ppoint sbt
+//				]
+//	res = _xersect ix, saf(0),saf(1),sat(0),sat(1),sbf(0),sbf(1),sbt(0),sbt(1)
+//	if(res)[
+//		pl"xersectpt: Lines are parallel"
+//	]
+//				if(dbg)[
+//pl"~105 point ix, res "
+//ppoint ix; pn res
+//return res
+//				]
+//	return res
+//]
+//
 // end NEW/MODIFIED LIB STUFF
-
-// draw a gentle arc from cp to tp with bow b at middle. bow is the 
-// distance from straight line to the arc.
-arcbow int cp(1), tp(1), bow [
-	int m(1), a(1), cpa(1),	tpa(1), tpac(1), cpac(1), ctr(1), rad
-		// points: mid, arc, center, radius
-				if(dbg)[
-pl"~120 arcbow"
-moveto1 cp; showtext "1 cp"
-moveto1 tp; showtext "1 tp"
-				]
-
-    midpoint m,cp,tp       // define midpoint m
-				if(dbg)[
-pl"~127m";ppoint m
-moveto1 m; showtext "2 m"
-pl"bow";pn bow
-				]
-    corner90pt a, cp,m, bow  // define arcpoint a, rt turn distance bow
-				if(dbg)[
-pl"~133a";ppoint a; ps"    <<<<==== bow =";pn bow
-moveto1 a; showtext "3 a    <<<<=== bow ="
-shownum bow
-
-//pl"137 abort";abort
-				]
-    midpoint cpa, cp, a    // define cp->a midpoint, cpa
-				if(dbg)[
-moveto1 cpa; showtext "4 cpa"
-pl"~112 cpa";ppoint cpa 
-				]
-    midpoint tpa, a, tp    // define a->tp midpoint, tpa
-				if(dbg)[
-pl"tpa";ppoint tpa
-moveto1 tpa; showtext "4 tpa"
-				]
-    corner90pt tpac,tp,tpa,+1    // points towards center, rt turns,
-				if(dbg)[
-pl"~110 tpac";ppoint tpac
-moveto1 tpac; showtext "5 tpac"
-				]
-    corner90pt cpac,a,cpa,+1     //   arbitrary distance
-				if(dbg)[
-pl"~112 cpac";ppoint cpac
-moveto1 cpac; showtext "5 cpac"
-				]
-    	// define center, intersection of extended tpac,cpac
-    xersectpt ctr, tpa,tpac, cpa,cpac
-				if(dbg)[
-pl"~121 ctr";ppoint ctr
-moveto1 ctr; showtext "6 ctr"
-				]
-    rad = alen ctr(0),ctr(1), a(0),a(1)
-    next
-    int s,e,dx,dy
-    dx = tp(0)-ctr(0)
-    dy = tp(1)-ctr(1)
-    e = aarctan2 dy,dx
-pl"dx,dy,e";pn dx;pn dy;pn e
-    dx = cp(0)-ctr(0)
-    dy = cp(1)-ctr(1)
-    s = aarctan2 dy,dx
-pl"dx,dy,s";pn dx;pn dy;pn s
-
-
-
-//    s = aarctan2 ,-ctr(1)+cp(1)
-//    e = aarctan2 -ctr(0)+tp(0),-ctr(1)+tp(1)
-//    e = aarctan2 -100,-5   // y,x
-//    s = aarctan2 38,-100
-    arcneg ctr(0), ctr(1), rad, s,e
-]
+//
+//// draw a gentle arc from cp to tp with bow b at middle. bow is the 
+//// distance from straight line to the arc.
+//arcbow int cp(1), tp(1), bow [
+//	int m(1), a(1), cpa(1),	tpa(1), tpac(1), cpac(1), ctr(1), rad
+//		// points: mid, arc, center, radius
+//				if(dbg)[
+//pl"~120 arcbow"
+//moveto1 cp; showtext "1 cp"
+//moveto1 tp; showtext "1 tp"
+//				]
+//
+//    midpoint m,cp,tp       // define midpoint m
+//				if(dbg)[
+//pl"~127m";ppoint m
+//moveto1 m; showtext "2 m"
+//pl"bow";pn bow
+//				]
+//    corner90pt a, cp,m, bow  // define arcpoint a, rt turn distance bow
+//				if(dbg)[
+//pl"~133a";ppoint a; ps"    <<<<==== bow =";pn bow
+//moveto1 a; showtext "3 a    <<<<=== bow = "
+//shownum bow
+//
+////pl"137 abort";abort
+//				]
+//    midpoint cpa, cp, a    // define cp->a midpoint, cpa
+//				if(dbg)[
+//moveto1 cpa; showtext "4 cpa"
+//pl"~112 cpa";ppoint cpa 
+//				]
+//    midpoint tpa, a, tp    // define a->tp midpoint, tpa
+//				if(dbg)[
+//pl"tpa";ppoint tpa
+//moveto1 tpa; showtext "4 tpa"
+//				]
+//    corner90pt tpac,tp,tpa,+1    // points towards center, rt turns,
+//				if(dbg)[
+//pl"~110 tpac";ppoint tpac
+//moveto1 tpac; showtext "5 tpac"
+//				]
+//    corner90pt cpac,a,cpa,+1     //   arbitrary distance
+//				if(dbg)[
+//pl"~112 cpac";ppoint cpac
+//moveto1 cpac; showtext "5 cpac"
+//				]
+//    	// define center, intersection of extended tpac,cpac
+//    xersectpt ctr, tpa,tpac, cpa,cpac
+//				if(dbg)[
+//pl"~121 ctr";ppoint ctr
+//moveto1 ctr; showtext "6 ctr"
+//				]
+//    rad = alen ctr(0),ctr(1), a(0),a(1)
+//    next
+//    int s,e,dx,dy
+//    dx = tp(0)-ctr(0)
+//    dy = tp(1)-ctr(1)
+//    e = aarctan2 dy,dx
+//pl"dx,dy,e";pn dx;pn dy;pn e
+//    dx = cp(0)-ctr(0)
+//    dy = cp(1)-ctr(1)
+//    s = aarctan2 dy,dx
+//pl"dx,dy,s";pn dx;pn dy;pn s
+//    if(bow>0)arcneg ctr(0), ctr(1), rad, s,e
+//    else arc ctr(0), ctr(1), rad, s,e
+//    showtext"    <<== END, bow = ";shownum bow
+//]
 
 drawSails[
-	arcbow Map,Bac,20
-	arcbow Map,Bac,50
-	arcbow Map,Bac,100
+	bows Map,Bac
+	bows Bzc,Mzp
+	bows Sap,Sab
+	bows Szb,Szp
+]
+
+bows int from(1),to(1)[
+	arcbow from,to,-20
+	arcbow from,to,50
+	arcbow from,to,-100
 ]
 
 main[
-				dbg=1
+				dbg=0
 	init
-	start "AdamHyler", 500,600
-	raster 500,600,100,1
+	start "AdamHyler", 600,700
+	raster 600,700,100,0
+	drawPoints
 //	drawSticks
 	drawSails
 	show

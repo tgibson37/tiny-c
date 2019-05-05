@@ -5,6 +5,67 @@
 SIZE_INT[return 4]
 INFINITY[return 2147483647]
 
+// NEW/MODIFIED LIB STUFF
+
+dot1 int x(1)[dot x(0),x(1)]
+
+// define pto=ptb offset by x,y pixels
+offset int pto(1), ptb(1),x,y [
+    pto(0)=ptb(0)+x; pto(1)=ptb(1)+y
+]
+
+// define x given path a to b. rl is + for rt turn, - for left. 
+// mag(rl_len)>1 implies trim to that length, else length is
+// equal to alen(a,b). 
+corner90pt int ptx(1), pta(1), ptb(1), rl_len
+[
+    int rl
+    rl=1; if(rl_len<0)rl= -1
+    _corner90 ptx, pta(0), pta(1), ptb(0), ptb(1), rl
+    if(mag(rl_len)>1)[
+        int t(3), len
+        setsegment t, ptb(0), ptb(1), ptx(0), ptx(1) 
+        len = mag(rl_len)
+        trimto ptx, t, len
+    ]
+]
+xersectpt int ix(1), saf(1),sat(1), sbf(1), sbt(1) [
+    int res
+    res = _xersect ix, saf(0),saf(1),sat(0),sat(1),sbf(0),sbf(1),sbt(0),sbt(1)
+    if(res)[
+        pl"xersectpt: Lines are parallel"
+    ]
+    return res
+]
+
+// draw a gentle arc from cp to tp with bow b at middle. bow is the 
+// distance from straight line to the arc.
+arcbow int cp(1), tp(1), bow [
+    int m(1), a(1), cpa(1), tpa(1), tpac(1), cpac(1), ctr(1), rad
+        // points: mid, arc, center, radius
+    midpoint m,cp,tp       // define midpoint m
+    corner90pt a, cp,m, bow  // define arcpoint a, rt turn distance bow
+    midpoint cpa, cp, a    // define cp->a midpoint, cpa
+    midpoint tpa, a, tp    // define a->tp midpoint, tpa
+    corner90pt tpac,tp,tpa,+1    // points towards center, rt turns,
+    corner90pt cpac,a,cpa,+1     //   arbitrary distance
+        // define center, intersection of extended tpac,cpac
+    xersectpt ctr, tpa,tpac, cpa,cpac
+    rad = alen ctr(0),ctr(1), a(0),a(1)
+    next
+    int s,e,dx,dy
+    dx = tp(0)-ctr(0)
+    dy = tp(1)-ctr(1)
+    e = aarctan2 dy,dx
+    dx = cp(0)-ctr(0)
+    dy = cp(1)-ctr(1)
+    s = aarctan2 dy,dx
+    if(bow>0)arcneg ctr(0), ctr(1), rad, s,e
+    else arc ctr(0), ctr(1), rad, s,e
+    showtext"    <<== END, bow = ";shownum bow
+]
+
+// end NEW/MODIFIED LIB STUFF
 // Turn 90 degree corners, +1 for right, -1 for left
 corner90 int ix(1), rl [
 	int x0, y0, x1, y1
@@ -24,33 +85,33 @@ _corner90 int ix(1), x0, y0, x1, y1, rl [
 	sdir = 0; if(dx>0)sdir=2; if(dy>0)sdir=sdir+1
 			if(dbg)[pl"sdir";pn sdir]
 //	from sign map to ndir, ==>> Ar*/notes.txt ~9558
-//	setsegment dtab, 2,3,1,0  // BUG
 	setsegment dtab, 2,1,3,0  // FIX, this is a table, not a seg
 			if(dbg)[pl"dtab";psegment dtab]
 //	from the rl arg compute new ndir (ndir +- 1)%4
 	ndir = (dtab(sdir)+rl+4)%4  // new direction
 			if(dbg)[pl"ndir";pn ndir]
 //	map back to signdir
-//	setsegment dtab, 3,2,0,1  //BUG
-	setsegment dtab, 3,1,0,2  //FIX
+	setsegment dtab, 3,2,0,1  //2nd FIX
 	sdir = dtab(ndir)
-			if(dbg)[]
+			if(dbg)[pl"sdir";pn sdir]
 //	flip the MAGNITUDEs of dx and dy
 	if(dx>0)temp = dx; else temp=-dx
 	if(dy>0)dx = dy; else dx = -dy
 	dy = temp
-			if(dbg)[]
+			if(dbg)[pl"flipped mags of dx,dy";pn dx;pn dy]
 //	apply the signs to dx and dy
 	if(sdir%2==0)dx = -dx
 	if(sdir/2==0)dy = -dy
-			if(dbg)[]
+			if(dbg)[pl"signed dx,dy";pn dx;pn dy]
 // set ix to point 1 plus new delta
 	ix(0) = dx+x1
 	ix(1) = dy+y1
-			if(dbg)[]
+			if(dbg)[pl"ix";ppoint(ix)]
 // return length
 	return alen(x0,y0,x1,y1)
 ]
+//	setsegment dtab, 2,3,1,0  // BUG
+//	setsegment dtab, 3,2,0,1  //BUG
 
 // convenience routines
 rt90 int ix(1)[ return corner90 ix, +1 ]

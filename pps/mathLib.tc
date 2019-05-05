@@ -59,6 +59,8 @@ atan int x[
 	]
 	return asin(x)*1000/y
 ]
+// return magnitude of x
+mag int x [if(x<0)return -x; return x]
 // returns the largest magnitude
 maglargest int x,y [
 	if(x<0)x=-x

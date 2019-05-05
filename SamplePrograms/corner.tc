@@ -64,8 +64,9 @@
 // lf90 int ix(1)[ return corner90 ix, -1 ]
 // // draws
 
-lf [int ix(1), len; len = lf90 ix; lineto ix(0),ix(1) ]
-rt [int ix(1), len; len = rt90 ix; lineto ix(0),ix(1) ]
+int num
+lf [int ix(1), len; len = lf90 ix; lineto ix(0),ix(1); shownum(num); num=num+1 ]
+rt [int ix(1), len; len = rt90 ix; lineto ix(0),ix(1); shownum(num); num=num+1 ]
 
 main[
 	int ix(1),len
