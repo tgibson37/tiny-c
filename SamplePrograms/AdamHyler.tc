@@ -1,0 +1,102 @@
+#include pps/pyGraphicsLib.tc
+#include pps/mathLib.tc
+#include pps/lineLib.tc
+#include pps/library.tc
+				int dbg
+//AdamHyler.tc, draws replica of Santos's painting
+// points: Extremities of 6 spars (sticks)
+int Map(1),Mas(1),Mzp(1),Mzs(1)		// Mast,  main|mizzen, peak|step....
+int Sap(1),Sab(1),Szp(1),Szb(1)		// Sprit, main|mizzen, peak|butt
+int Bat(1),Bac(1),Bzt(1),Bzc(1)		// Boom,  main|mizzen, tack|clew
+// segs: sticks as lines
+int Ma(3), Mz(3), Sa(3), Sz(3), Ba(3), Bz(3)
+
+init[
+	setpoint1(Map,367,130)
+	setpoint1(Mas,415,522)
+	setsegment3(Ma,Map,Mas)
+	setpoint1(Mzp,207,265)
+	setpoint1(Mzs,215,528)
+	setsegment3(Mz,Mzp,Mzs)
+	setpoint1(Sap,230,005)
+	setpoint1(Sab,408,410)
+	setsegment3(Sa,Sap,Sab)
+	setpoint1(Szp,050,150)
+	setpoint1(Szb,215,395)
+	setsegment3(Sz,Szp,Szb)
+	setpoint1(Bat,410,473)
+	setpoint1(Bac,150,462)
+	setsegment3(Ba,Bat,Bac)
+	setpoint1(Bzt,212,463)
+	setpoint1(Bzc,008,440)
+	setsegment3(Bz,Bzt,Bzc)
+]
+drawPoints[
+	moveto1 Map; dot1 Map;showtext "Map"
+	moveto1 Mas; dot1 Mas;showtext "Mas"
+	moveto1 Mzp; dot1 Mzp;showtext "Mzp"
+	moveto1 Mzs; dot1 Mzs;showtext "Mzs"
+	moveto1 Sap; dot1 Sap;showtext "Sap"
+	moveto1 Sab; dot1 Sab;showtext "Sab"
+	moveto1 Szp; dot1 Szp;showtext "Szp"
+	moveto1 Szb; dot1 Szb;showtext "Szb"
+	moveto1 Bat; dot1 Bat;showtext "Bat"
+	moveto1 Bac; dot1 Bac;showtext "Bac"
+	moveto1 Bzt; dot1 Bzt;showtext "Bzt"
+	moveto1 Bzc; dot1 Bzc;showtext "Bzc"
+]
+
+
+drawSticks1[
+	setrgb 171,145,63
+	drawseg Ma
+	drawseg Mz
+	drawseg Sa
+	drawseg Ba
+	drawseg Bz
+	stroke
+]
+drawSticks2[
+	setrgb 171,145,63
+	drawseg Sz
+	stroke
+]
+drawSails1[
+	setrgb 160,80,80
+	int szp(1),bzc(1),bzt(1),mzp(1)
+	offset(szp,Szp,5,10)
+	offset(bzc,Bzc,10,2)
+	offset(bzt,Bzt,-10,-5)
+	offset(mzp,Mzp,-5,10)
+	arcbow szp,bzc,20
+	lineto1 bzt
+	lineto1 mzp
+	lineto1 szp
+	fill
+]
+drawSails2[
+	int sap(1),bac(1),bat(1),map(1)
+	setrgb 160,80,80
+	offset(sap,Sap,5,10)
+	offset(bac,Bac,10,2)
+	offset(bat,Bat,-10,-5)
+	offset(map,Map,-5,10)
+	arcbow sap,bac,20
+	lineto1 bat
+	lineto1 map
+	lineto1 sap
+	fill
+]
+
+main[
+				dbg=0
+	init
+	start "AdamHyler", 600,700
+//	raster 600,700,100,1
+//	drawPoints
+	drawSticks1
+	drawSails1
+	drawSticks2
+	drawSails2
+	show
+]

@@ -62,7 +62,7 @@ arcbow int cp(1), tp(1), bow [
     s = aarctan2 dy,dx
     if(bow>0)arcneg ctr(0), ctr(1), rad, s,e
     else arc ctr(0), ctr(1), rad, s,e
-    showtext"    <<== END, bow = ";shownum bow
+//    showtext"    <<== END, bow = ";shownum bow
 ]
 
 // end NEW/MODIFIED LIB STUFF
@@ -75,7 +75,7 @@ corner90 int ix(1), rl [
 ]
 
 _corner90 int ix(1), x0, y0, x1, y1, rl [
-		int dbg;dbg=1
+		int dbg;dbg=0
 			if(dbg)[pl"";pn x0;pn y0;pn x1;pn y1;pn rl;]
 	int dx, dy, sdir, sdir, ndir, dtab(3), sdtab, temp
 //	given a seg get two deltas, dx dy.
@@ -194,7 +194,7 @@ _extend int ix(1), seg(3), fac [
 // else seg(0..1). seg is not modified.
 
 _trim int ix(1),seg(4),len [
-		int dbg;dbg=1
+		int dbg;dbg=0
 		if(dbg)[pl"~137 _trim seg len "; 
 			psegment seg; pn len
 		]
