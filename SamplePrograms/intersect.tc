@@ -23,7 +23,7 @@ test int a0,a1,a2,a3, b0,b1,b2,b3, ttl(0)
 	moveto b0, b1; showtext "bS"; moveto b0,b1 
 	lineto b2, b3; showtext "bE" 
 //	err=_xersect ix,a0,a1,a2,a3, b0,b1,b2,b3
-	err=xersect ix,sega,segb
+	err=xersectseg ix,sega,segb
 	x=ix(0); y=ix(1)
 	next
 	if(err)showtext "parallel"
@@ -40,7 +40,7 @@ if(1)[
 	moveto b0, b1; showtext "bS"; moveto b0,b1 
 	lineto b2, b3; showtext "bE" 
 //	err=_xersect ix,a0,a1,a2,a3, b0,b1,b2,b3
-	err=xersect ix,sega,segb
+	err=xersectseg ix,sega,segb
 	x=ix(0); y=ix(1)
 	next
 	if(err)showtext "parallel"

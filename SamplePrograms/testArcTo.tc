@@ -36,11 +36,11 @@ arcto3 int f(3),t(3), dir [   //from, to, rotation direction
 				pl "angle case, dir=";pn dir
 			]
 	]
-	setsegment3 lsB,pta,ptb
+	setsegpt lsB,pta,ptb
 	_corner90 cpt, f(0), f(1), f(2), f(3), dir
 	int eight
 	eight = 2*SIZE_INT
-	setsegment3 lsX, f+eight, cpt
+	setsegpt lsX, f+eight, cpt
 	if(xersect center, lsX, lsB)) [
 		pl"ERR: lsX and lsB are parallel. See arcto3 code."
 		ps" Should be in parallel case."
@@ -142,24 +142,24 @@ main [
 	start "test_arcto", 600,700
 				if(dbg>1)raster 600,700,100
 	int pta(1),ptb(1),ptc(1),ptd(1),pte(1),ptf(1),ptg(1),pth(1),ptj(1)
-	setpoint1 ptb,300,500
-	setpoint1 ptc,500,300
-	setpoint1 ptd,100,300
-	setpoint1 pte,200,600
-	setpoint1 ptf,250,350
-	setpoint1 ptg,350,250
-	setpoint1 pth,420,100
-	setpoint1 ptj,550,220
+	setpointpt ptb,300,500
+	setpointpt ptc,500,300
+	setpointpt ptd,100,300
+	setpointpt pte,200,600
+	setpointpt ptf,250,350
+	setpointpt ptg,350,250
+	setpointpt pth,420,100
+	setpointpt ptj,550,220
 
 	// pt's a,b,c form acute angle
 	int lsL(3), lsM(3), lsN(3), lsP(3), lsQ(3), lsR(3), lsT(3)
 	// segs l=ab, m=de are parallel.
-	setsegment3 lsL, pta, ptb
-	setsegment3 lsM, pte, ptd
-	setsegment3 lsN, pth, ptj
+	setsegpt lsL, pta, ptb
+	setsegpt lsM, pte, ptd
+	setsegpt lsN, pth, ptj
 	// c,a,b ccw test angle; trimmed to g,f
-	setsegment3 lsP, ptc, ptg
-	setsegment3 lsQ, ptf, ptb
+	setsegpt lsP, ptc, ptg
+	setsegpt lsQ, ptf, ptb
 	arcto3 lsN, lsP, +1		// angle clockwise arc
 	showtext "arc"; next
 	arcto3 lsP, lsQ, -1		// angle counterclockwise arc

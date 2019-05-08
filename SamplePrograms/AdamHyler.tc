@@ -12,38 +12,38 @@ int Bat(1),Bac(1),Bzt(1),Bzc(1)		// Boom,  main|mizzen, tack|clew
 int Ma(3), Mz(3), Sa(3), Sz(3), Ba(3), Bz(3)
 
 init[
-	setpoint1(Map,367,130)
-	setpoint1(Mas,415,522)
-	setsegment3(Ma,Map,Mas)
-	setpoint1(Mzp,207,265)
-	setpoint1(Mzs,215,528)
-	setsegment3(Mz,Mzp,Mzs)
-	setpoint1(Sap,230,005)
-	setpoint1(Sab,408,410)
-	setsegment3(Sa,Sap,Sab)
-	setpoint1(Szp,050,150)
-	setpoint1(Szb,215,395)
-	setsegment3(Sz,Szp,Szb)
-	setpoint1(Bat,410,473)
-	setpoint1(Bac,150,462)
-	setsegment3(Ba,Bat,Bac)
-	setpoint1(Bzt,212,463)
-	setpoint1(Bzc,008,440)
-	setsegment3(Bz,Bzt,Bzc)
+	setpoint(Map,367,130)
+	setpoint(Mas,415,522)
+	setsegpt(Ma,Map,Mas)
+	setpoint(Mzp,207,265)
+	setpoint(Mzs,215,528)
+	setsegpt(Mz,Mzp,Mzs)
+	setpoint(Sap,230,005)
+	setpoint(Sab,408,410)
+	setsegpt(Sa,Sap,Sab)
+	setpoint(Szp,050,150)
+	setpoint(Szb,215,395)
+	setsegpt(Sz,Szp,Szb)
+	setpoint(Bat,410,473)
+	setpoint(Bac,150,462)
+	setsegpt(Ba,Bat,Bac)
+	setpoint(Bzt,212,463)
+	setpoint(Bzc,008,440)
+	setsegpt(Bz,Bzt,Bzc)
 ]
 drawPoints[
-	moveto1 Map; dot1 Map;showtext "Map"
-	moveto1 Mas; dot1 Mas;showtext "Mas"
-	moveto1 Mzp; dot1 Mzp;showtext "Mzp"
-	moveto1 Mzs; dot1 Mzs;showtext "Mzs"
-	moveto1 Sap; dot1 Sap;showtext "Sap"
-	moveto1 Sab; dot1 Sab;showtext "Sab"
-	moveto1 Szp; dot1 Szp;showtext "Szp"
-	moveto1 Szb; dot1 Szb;showtext "Szb"
-	moveto1 Bat; dot1 Bat;showtext "Bat"
-	moveto1 Bac; dot1 Bac;showtext "Bac"
-	moveto1 Bzt; dot1 Bzt;showtext "Bzt"
-	moveto1 Bzc; dot1 Bzc;showtext "Bzc"
+	moveto1 Map; dotpt Map;showtext "Map"
+	moveto1 Mas; dotpt Mas;showtext "Mas"
+	moveto1 Mzp; dotpt Mzp;showtext "Mzp"
+	moveto1 Mzs; dotpt Mzs;showtext "Mzs"
+	moveto1 Sap; dotpt Sap;showtext "Sap"
+	moveto1 Sab; dotpt Sab;showtext "Sab"
+	moveto1 Szp; dotpt Szp;showtext "Szp"
+	moveto1 Szb; dotpt Szb;showtext "Szb"
+	moveto1 Bat; dotpt Bat;showtext "Bat"
+	moveto1 Bac; dotpt Bac;showtext "Bac"
+	moveto1 Bzt; dotpt Bzt;showtext "Bzt"
+	moveto1 Bzc; dotpt Bzc;showtext "Bzc"
 ]
 
 

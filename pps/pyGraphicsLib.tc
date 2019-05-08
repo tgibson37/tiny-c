@@ -65,12 +65,12 @@ arcto3 int f(3),t(3), dir [   //from, to, rotation direction
     eight = 2*SIZE_INT
     midpoint ptb, f+eight, t+eight
   ]
-  setsegment3 lsB,pta,ptb
+  setsegpt lsB,pta,ptb
   _corner90 cpt, f(0), f(1), f(2), f(3), dir
   int eight
   eight = 2*SIZE_INT
-  setsegment3 lsX, f+eight, cpt
-  if(xersect center, lsX, lsB)) [
+  setsegpt lsX, f+eight, cpt
+  if(xersectseg center, lsX, lsB)) [
     pl"ERR: lsX and lsB are parallel. See arcto3 code."
     ps" Should be in parallel case."
     exit
