@@ -577,7 +577,7 @@ int _term() {
 			_factor();
 			int b=toptoi();
 			int a=toptoi();
-			if(denom){
+			if(b){
 				int pct = a%b;
 				if(!error)pushk(pct);
 			}
