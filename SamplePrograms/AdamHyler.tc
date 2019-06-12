@@ -163,7 +163,7 @@ main[
 	init1
     init2
 	start "AdamHyler", 600,700
-	raster 600,700,100,1
+//	raster 600,700,100,1
 //	drawPoints1
 	drawSticks1
 	drawSails1

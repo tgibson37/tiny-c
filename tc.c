@@ -54,10 +54,11 @@ int typeToSize( int class, Type type ) {
 /* SITUATION: Parsed an assignment expression. Two stack entries, lvalue, datam.
  *	Effects the assignment. 
  */
-int _eq() {
+void _eq() {
 	int  iDatum;  /* memcpy into these from pr using val.stuff */
 	char cDatum;  /*  and val.size, giving needed cast */
 	void* pDatum;
+	void* where;
 
 	struct stackentry *val = &stack[nxtstack-1]; /* value (on top) */
 	struct stackentry *lval = &stack[nxtstack-2]; /* where to put it */
@@ -67,10 +68,11 @@ int _eq() {
 		fprintf(stderr,"\neq: val");
 		dumpStackEntry(nxtstack-1);
 	}
-	void* where = &((*lval).value.up);
+	popst();popst();  
+	where = &((*lval).value.up);
 	int class = (*lval).class;
 	int type = (*lval).type;
-	int whereSize = typeToSize(class,type);  /* of the lvalue */
+//	int whereSize = typeToSize(class,type);  /* of the lvalue */
 
 	if((*lval).lvalue != 'L') { 
 		eset(LVALERR); 
@@ -138,7 +140,6 @@ int _eq() {
 			pushk(cDatum);
 		}
 	}
-	popst();popst();  
 }
 
 /******* set error unless already set, capture cursor in errat *******/
@@ -231,7 +232,7 @@ char* _findEOS( char* x ) {
 }
 
 /* skip over comments and/or empty lines in any order, new version
-	tolerates 0x0d's, and implements // as well as old /* comments.
+	tolerates 0x0d's, and implements // as well as old slash-star comments.
  */
 void _rem() {
 	for(;;) {
@@ -427,7 +428,7 @@ Type _konst() {
 	} else if(_lit("\"")) {
 		fname=cursor;
 		/* set lname = last char, cursor = lname+2 (past the quote) */
-		if( x = _findEOS(fname) ) {
+		if( (x = _findEOS(fname)) ) {
 			lname = x-1; /*before the quote */
 			cursor = x+1; /*after the quote */
 			*x = 0;
@@ -442,7 +443,7 @@ Type _konst() {
 	} else if(_lit("\'")) {
 		fname=cursor;
 		/* lname = last char, cursor = lname+2 (past the quote) */
-		if( x=_mustFind(fname+1,fname+2,'\'',CURSERR) ) {
+		if( (x=_mustFind(fname+1,fname+2,'\'',CURSERR)) ) {
 			lname = x-1; 
 			cursor = x+1;
 		}
@@ -599,11 +600,11 @@ void _factor() {
 	char* x;
 	if(_lit(xlpar)) {
 		_asgn();
-		if( x=_mustFind( cursor, cursor+5, ')' , RPARERR ) ) {
+		if( (x=_mustFind( cursor, cursor+5, ')' , RPARERR )) ) {
 			cursor = x+1; /*after the paren */
 		}
 	} 
-	else if( type=_konst() ) {
+	else if( (type=_konst()) ) {
 	/* Defines fname,lname. Returns Type. 
 	   void pushst( int class, int lvalue, Type type, void* stuff );
 	*/
@@ -878,7 +879,7 @@ int checkBrackets(char* stop) {
 	while(cursor<stop) {
 		while(*(cursor++) != '[' && cursor<stop) ;
 		if(cursor<stop) {
-			if(err = _skip('[',']'))return err;
+			if( (err=_skip('[',']')) )return err;
 		}
 	}
 	endapp=save;
@@ -895,11 +896,11 @@ char* typeToWord(Type t){
 }
 
 void dumpHex( void* where, int len ) {
-	char* w=where;
+	void* w=where;
 	fflush(stdout);
-	fprintf(stderr,"\n%x: ",w);
+	fprintf(stderr,"\n%p: ",where);
 	int i;
-	for( i=0; i<len; ++i )fprintf(stderr," %x",w[i]);
+	for( i=0; i<len; ++i )fprintf(stderr," %p",w+i);
 }
 
 /* dump from..to inclusive  */
@@ -927,9 +928,9 @@ void dumpState() {
 	fflush(stdout);
 	if(stateCallNumber==0){
 		fprintf(stderr,"\nADDRESSES (hex)");
-		fprintf(stderr,"\npr:     %x",pr);
-		fprintf(stderr,"\nstack:  %x",stack);
-		fprintf(stderr,"\nvartab: %x",vartab);	
+		fprintf(stderr,"\npr:     %p",(void*)pr);
+		fprintf(stderr,"\nstack:  %p",(void*)stack);
+		fprintf(stderr,"\nvartab: %p",(void*)vartab);	
 	}
 
 	fprintf(stderr,"\n----\nSTATE %d\nparsing: ",stateCallNumber++);
@@ -1003,7 +1004,7 @@ void tclink() {
 			union stuff kursor;
 			kursor.up = cursor = lname+1;
 			newvar('E',2,1,&kursor);
-			if(x=_mustFind(cursor, endapp, '[',LBRCERR)) {
+			if( (x=_mustFind(cursor, endapp, '[',LBRCERR)) ) {
 				cursor=x+1;
 				_skip('[',']');
 			}
@@ -1022,7 +1023,7 @@ void tclink() {
 
 /*	allocate four major areas
  */
-int allocStuff() {
+void allocStuff() {
     int prlen=PRLEN, err;
     err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
     if(err){

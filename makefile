@@ -50,9 +50,10 @@ platform.c dialog.c
 HDRS = tc.h
 
 # Add -I to the dir the include files are in
-#CFLAGS = -Wall -g        #<< still a flood
+CFLAGS = -g -Wall -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast \
+-Wno-unused-variable -Wno-unused-but-set-variable
 CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl -lm
-CFLAGS = -w -g
+#CFLAGS = -w -g
 
 .PHONY: all run difft diffd keep dotest install latest
 all: $(TC) $(TEST)
