@@ -3,6 +3,7 @@
 
 int  (*piMC )(int,int,int*) = NULL;
 typedef int (*McList)(int,int*);
+//    type (*fun_ptr)(arg typ list) = &fun; 
 
 /*		MC9 ;scan for nth occurance of CH in a block. Args are
 		  first,last,CH,cnt address. Return pointer to nth
@@ -62,10 +63,10 @@ void pFmt(char *fmt, int *args) {
 		int i=0;
 		while(i<5){
 			pct[i++]=*(fmt++);
-			pct[i]=NULL;
+			pct[i]=0;
 			if(charIn(*fmt,"dscx")){
 				pct[i++]=*(fmt++);
-				pct[i]=NULL;
+				pct[i]=0;
 				break;
 			}
 			else if(!isdigit(*fmt))break;
@@ -94,17 +95,20 @@ printf("\n\n63: MprF: nargs %d args[0..3] %d %d %d %d",
 			nargs,args[0],args[1],args[2],args[3]);
 */
 	pFmt((char*)*args,(args+1));  /* fmt, args */
+	return 0;
 }
 
 /* original MC's */
 int Mpc(int nargs, int *args)
 {
     printf("%c", *args);
+	return *args;
 }
 
 int Mpn(int nargs, int *args)
 {
     printf("%d", *args);
+	return 0;
 }
 
 #if defined(_WIN32)
@@ -130,9 +134,10 @@ char escKey() {
 	if( kbhit()=='[' ){
 		getch_(0);   /* toss the [ */
 		int code = getch_(0);
-		if( 'A'<= code <= 'D' )return -code;
+		if( ('A'<= code) && (code <= 'D') )return -code;
 	}
 	eset(KILL);
+	return 0;   // to avoid compile warning
 }
 
 int Mgch(int nargs, int *args)
@@ -151,6 +156,7 @@ int Mpft(int nargs, int *args) {
 /*printf("\nMC 109: from to %d %d\n", from-pr, to-pr );*/
 	for(;from<=to;++from) printf("%c",*from);
 		/*putchar(*from);*/
+	return 0;   // to avoid compile warning
 }
 
 int naf(int nargs, int *args)
@@ -169,7 +175,7 @@ int MmvBl(int nargs, int *args)
 	char *dest = a+dist;
 	int n = b-a+1;
 	memmove(dest, src, n);
-
+	return 0;   // to avoid compile warning
 }
 
 int Mcountch(int nargs, int *args) // lrb
@@ -190,10 +196,11 @@ int Mchrdy()
 }
 
 /* sleep for N seconds */
-void Msleep(int nargs, int *argsv)
+int Msleep(int nargs, int *argsv)
 {
 	int N = *argsv;
 	sleep(N);
+	return 0;
 }
 
 int Mfilrd(int nargs, int *argsv) {
@@ -270,6 +277,7 @@ int Mfclose(int nargs, int *args) {
 
 int Mexit(int nargs, int *args) {
 	eset(EXIT);
+	return 0;   // to avoid compile warning
 }
 
 int Mexitq (int nargs, int *args) { // lrb
@@ -299,7 +307,7 @@ int Mcdate(int nargs, int *argsv) {
 		info->tm_year-100+2000,info->tm_mon+1, \
 		info->tm_mday,info->tm_hour,info->tm_min, \
 		info->tm_sec);
-	return buff;
+	return (int)buff;
 }
 
 // execute another process, hangs until process ends
@@ -315,7 +323,7 @@ int Mfpn(int nargs, int *argsv) {
 	int unit = argsv[1];
 	char buf[12];
 
-	if(unit<0 + unit>MAX_UNIT)return -8;
+	if( (unit<0)||(unit>MAX_UNIT) )return -8;
 	if(fileUnit[unit]==NULL)return -9;
 // itoa...
 	sprintf(buf, "%d", x);
@@ -400,6 +408,7 @@ int plugInMC(int mcno, int nargs, int *args) {
 //fprintf(stderr,"~355mc %d\n",piMC);
 	if(piMC==NULL) eset(ARGSERR);
 	else return (*piMC)(mcno, nargs, args);
+	return 0;   // to avoid compile warning
 }
 
 void machinecall( int nargs ) {

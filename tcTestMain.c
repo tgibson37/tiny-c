@@ -1,4 +1,5 @@
 #include "tc.h"
+void testing(int argc, char *argv[]);
 
 /* 	tcTestMain.c for test.c, the regression tests of the parts as they were built.
  *	There are two mains. The other, tcMain.c, is the main for the interpreter

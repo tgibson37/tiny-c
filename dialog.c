@@ -82,7 +82,8 @@ void whatHappened() {
 			if(!lineno)lineno = countch(apr,errat,0x0d);
 			printf("\napp ");
 		}
-		printf("line %d (cursor pr[%d])", lineno,errat-pr); _errToWords();
+		printf("line %d (cursor pr[%d])", lineno,(int)(errat-pr));
+		_errToWords();
 		fc=fchar(errat);
 		while((*(fc+firstSignif))==' ' ||(*(fc+firstSignif))=='\t' )
 			 ++firstSignif;

@@ -143,9 +143,8 @@ void _eq() {
 }
 
 /******* set error unless already set, capture cursor in errat *******/
-int eset( int err ){
+void eset( int err ){
 	if(!error){error=err;errat=cursor;}
-	return error;
 }
 
 /* Bump cursor over whitespace. Then return true on match and advance

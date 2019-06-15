@@ -50,7 +50,7 @@ void pushst( int class, int lvalue, Type type, union stuff *value ) {
 
 /* basic popper, entry stays accessible until pushed over */
 struct stackentry* popst() {
-	if( nxtstack-1 < 0 ) { error = POPERR; return; }
+	if( nxtstack-1 < 0 ) { error = POPERR; return NULL; }
 	if(verbose[VS]){
 		fprintf(stderr,"\nstack pop: ");
 		dumpStackEntry(nxtstack-1);

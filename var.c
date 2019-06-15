@@ -51,6 +51,7 @@ int _copyArgValue(struct var *v, int class, Type type, union stuff *passed ) {
 			return TYPEERR;
 		}
 	}
+	return 0;
 }
 
 /* allocates memory for value of v, return 0 on success, else !0
@@ -161,7 +162,7 @@ struct var* addrval() {
 
 /*	prints a value given its description taken from a struct stackEntry */
 void dumpVal(Type t, int class, union stuff *val, char lval){
-	fprintf(stderr,"pr[%d]",(*val).up-(int)pr);
+	fprintf(stderr,"pr[%d]",(int)((*val).up-(void*)pr));
 	if(class==1 && t==Char ){
 		char sval[30];
 		strncpy(sval, (char*)((*val).up), 30);
@@ -184,7 +185,7 @@ void dumpVal(Type t, int class, union stuff *val, char lval){
 
 void dumpFunEntry( int e ) {
 	fprintf(stderr,"\n fun entry at %d:  %d %d %d", e,
-		fun[e].fvar, fun[e].lvar, fun[e].prused-pr );
+		fun[e].fvar, fun[e].lvar, (int)(fun[e].prused-pr) );
 }
 
 void dumpFun() {
@@ -198,7 +199,7 @@ void dumpFun() {
 
 void dumpVar(struct var *v) {
 //fprintf(stderr,"\n~200V");
-	fprintf(stderr,"\n var %d: %s %d %s %d ", v-vartab,
+	fprintf(stderr,"\n var %d: %s %d %s %d ", (int)(v-vartab),
 		(*v).name, (*v).class, typeToWord((*v).type), (*v).len );
 /*	if((*v).value.up) 
 		fprintf(stderr," ref to pr[%d]", (char*)((*v).value.up)-pr);

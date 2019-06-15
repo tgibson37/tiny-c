@@ -42,28 +42,21 @@ Short range sensor
 8 . . . . . . . .
   1 2 3 4 5 6 7 8
 Captain? 
-
-r=Report       s=SR. sensor   l=LR. sensor
-g=Galaxy map   p=Phaser       t=Torpedo
-w=Warp engine  h=Help         q=Quit
-
+Warp engine
+sector distance:
+course (0-360):
+Enterprise in q-37 s-18
 Captain? 
-
-r=Report       s=SR. sensor   l=LR. sensor
-g=Galaxy map   p=Phaser       t=Torpedo
-w=Warp engine  h=Help         q=Quit
-
-Captain? 
-Enterprise in q-28 s-36
+Enterprise in q-37 s-18
 Short range sensor
-1 . . . . . . . .
-2 . . . . . . * .
-3 . . . . * E . .
-4 * . . . . . . .
-5 . . . . . * . .
+1 . . . . . . . E
+2 * . . . . . . .
+3 . . . . * . . .
+4 . . . . . . . .
+5 . * . . . . . .
 6 . . . . . . . .
 7 . . . . . . . .
-8 . . . . . . . .
+8 . . * . . * . .
   1 2 3 4 5 6 7 8
 Captain? 
 

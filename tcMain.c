@@ -45,7 +45,7 @@ void* getFcnPtr(void* lib, const char* fcnName) {
     return fptr;
 }
 
-int loadMC(char* libName) {
+void loadMC(char* libName) {
 	char fileName[1000];
 
 // Open the dynamic library
@@ -119,10 +119,10 @@ int doIncludes(char* fname) {
 		++lineno;
 		if(len>0){
 			if( buff[len-1]=='\n' || buff[len-1]==0x0d ){
-				buff[len-1]=NULL;
+				buff[len-1]=0;
 				if(len>1){
 					if( buff[len-2]=='\n' || buff[len-2]==0x0d )
-						buff[len-2]=NULL;
+						buff[len-2]=0;
 				}
 			}
 		}
@@ -217,5 +217,6 @@ int main(int argc, char *argv[]) {
 	st();   /* <<<== executes statement above, line 10 */
 	prdone();
 	whatHappened();
+    return 0;
 }
 

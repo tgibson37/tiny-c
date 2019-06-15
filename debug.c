@@ -95,7 +95,7 @@ struct brk *find_b(char *sym) {
 
 /* print description and value of variable v */
 void printVar(struct var *v) {
-	printf("\n4~88\n var %d: %s %d %s %d ", v-vartab,
+	printf("\n4~88\n var %d: %s %d %s %d ", (int)(v-vartab),
 		(*v).name, (*v).class, typeToWord((*v).type), (*v).len );
 		print_val(v);
 }
@@ -302,6 +302,7 @@ int db_cmd() {
 		db_usage();
 		return '?';
 	}
+	return -99;   // should never reach this
 }
 
 /********* Command Loop *****************/
@@ -347,7 +348,7 @@ void appstbegin(){
 	if(db_next && (db_next >= db_rundepth) ){
 		int lineno = countch(apr,cursor,'\n');
 		char* lc = lchar(cursor);
-		printf("line %d cursor(pr[%d])->%.10s\n", lineno,cursor-pr,cursor);
+		printf("line %d cursor(pr[%d])->%.10s\n", lineno,(int)(cursor-pr),cursor);
 		db_next=0;
 		_dbCommands();
 	}
@@ -362,11 +363,11 @@ void stbegin() {
 }
 
 /* called from tc.c ~490, symbol lookup if breakpoint set */
-struct var* br_hit(struct var *v) {
+void br_hit(struct var *v) {
 	int lineno;
 	if(cursor>apr){
 		lineno = countch(apr,cursor,'\n');
-		printf("\nbreak at line %d cursor pr[%d]: %s\n",lineno,cursor-pr,(*v).name);
+		printf("\nbreak at line %d cursor pr[%d]: %s\n",lineno,(int)(cursor-pr),(*v).name);
 		showLine(cursor);
 		printf("\n");
 		_dbCommands();
