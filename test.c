@@ -2,6 +2,7 @@
 
 #define testcases 77
 
+void doTest(int testcase);
 char timeStamp[40];
 extern struct stackentry poptop;
 extern char* defaultLibrary;
@@ -159,6 +160,7 @@ void doTest(int testcase) {
 	char cDatum;
 	char buff[80];
 	int ibuff[10];
+	Type _konst();
 
 	error=0;
 	int array1[4];
@@ -231,7 +233,8 @@ void doTest(int testcase) {
 			_symName();
 			cursor = lname+1;
 			pl("");dumpName();
-			printf("\nfname,lname,cursor= %d %d %d",fname-pr,lname-pr,cursor-pr);
+			printf("\nfname,lname,cursor= %d %d %d",
+				(int)(fname-pr),(int)(lname-pr),(int)(cursor-pr) );
 			break;
 /* _symName() defines fname, lname, and advances cursor. 
 	Should get...
@@ -243,7 +246,7 @@ void doTest(int testcase) {
 			strcpy(pr,"char symbol, 34567890123456789012345"); 
 			prused = pr+20;
 			cursor = pr+5;
-        	_varAlloc(Char,0);
+        	_varAlloc(Char,NULL);
         	dumpVarTab();
 			printf("\npr ->%s<-",pr);		/* stops at the NULL */
 			printf("\npr ->%s<-",pr+22);	/* resumes after the NULL */
@@ -263,11 +266,11 @@ void doTest(int testcase) {
 			pl("cursor->");ps(cursor);
 			/* first, match true, cursor -> space after char */
 			int match = _lit("char");  /* lit should match */
-			printf("\nmatch,cursor= %d %d",match,cursor-pr);
+			printf("\nmatch,cursor= %d %d",match,(int)(cursor-pr));
 			/* again, no match this time */
 			pl("cursor->");ps(cursor);
 			match = _lit("char");
-			printf("\nmatch,cursor= %d %d",match,cursor-pr);
+			printf("\nmatch,cursor= %d %d",match,(int)(cursor-pr));
 			/* cursor -> s of symbol */
 			pl("cursor->");ps(cursor);
 			break;
@@ -314,15 +317,15 @@ void doTest(int testcase) {
 			err = iProperty("testFiles/test.prop","kappa",&isInt,99);
 			printf("\nkappa is %d",isInt);fflush(stdout);
 
-			err = sProperty("testFiles/test.prop","delta",&buff,80,"default");
+			err = sProperty("testFiles/test.prop","delta",buff,80,"default");
 			printf("\ndelta is ->%s<-",buff);fflush(stdout);
-			err = sProperty("testFiles/test.prop","epsilon",&buff,80,"default");
-			printf("\nepsilong is ->%s<-",buff);fflush(stdout);
-			err = sProperty("testFiles/test.prop","zeta",&buff,80,"default");
+			err = sProperty("testFiles/test.prop","epsilon",buff,80,"default");
+			printf("\nepsilon is ->%s<-",buff);fflush(stdout);
+			err = sProperty("testFiles/test.prop","zeta",buff,80,"default");
 			printf("\nzeta is ->%s<-",buff);fflush(stdout);
-			err = sProperty("testFiles/test.prop","theta",&buff,80,"default");
+			err = sProperty("testFiles/test.prop","theta",buff,80,"default");
 			printf("\ntheta is ->%s<-",buff);fflush(stdout);
-			err = sProperty("testFiles/test.prop","eta",&buff,80,"default");
+			err = sProperty("testFiles/test.prop","eta",buff,80,"default");
 			printf("\neta is ->%s<-",buff);fflush(stdout);
 			break;
 /*	property file. Should get...
@@ -330,6 +333,12 @@ void doTest(int testcase) {
 				beta is -20
 				gamma is 30
 				epsilon is 99
+				delta is ->hello<-
+				epsilong is ->,<-
+				zeta is ->world<-
+				theta is ->the cat in the hat<-
+				eta is -><-
+				Test 9 done, error=0
  */
 		case 10:
 			pl(" empty case");
@@ -444,7 +453,7 @@ void doTest(int testcase) {
 			endapp = pr + strlen(pr) -1;
 		/*prused = pr+100;*/
 			cursor = pr+1; 
-			printf("\nat start cursor,endapp,error = %d %d %d",cursor-pr,endapp-pr,error);
+			printf("\nat start cursor,endapp,error = %d %d %d",(int)(cursor-pr),(int)(endapp-pr),error);
 			printf("\ncursor->%s",cursor);
 			pl("4 skips: ");
 			/* 4 calls to skip, 
@@ -472,17 +481,17 @@ void doTest(int testcase) {
 			endapp = pr + strlen(pr) -1;
 			cursor = pr;
 			printf("\nBEFORE _rem()");
-			printf("\ncursor %d-->%s", cursor-pr, cursor );
+			printf("\ncursor %d-->%s", (int)(cursor-pr), cursor );
 			_rem();
 			printf("\nAFTER _rem()");
-			printf("\ncursor %d-->%s", cursor-pr, cursor );
+			printf("\ncursor %d-->%s", (int)(cursor-pr), cursor );
 			break;
 /* 
 	_rem(). Should get...
 				BEFORE _rem()
 				cursor 0-->   
 
-				  /* a tiny-c style comment   
+				   a tiny-c style comment   
 				next-line  string-end
 				AFTER _rem()
 				cursor 36-->next-line  string-end
@@ -525,11 +534,13 @@ void doTest(int testcase) {
 			dumpStack();
 			pl("3 popst()'s");
 			popst();  /* char */
-			printf("\n char %c", stack[nxtstack].value );
+			printf("\n char %c", stack[nxtstack].value.uc );
 			popst();
-			printf("\n string %s", stack[nxtstack].value );
+			char* foo7 = (char*)stack[nxtstack].value.up;
+			printf("\n string %s", foo7);
 			popst();
-			printf("\n int %d", stack[nxtstack].value );
+			int foo8 = stack[nxtstack].value.ui;
+			printf("\n int %d", foo8 );
 			break;
 /* 
 	_factor(). Three cases. Should get...
@@ -578,7 +589,7 @@ void doTest(int testcase) {
 
 			pl("look up foo");
 			fname = &pr[0];	lname = &pr[2];
-			struct val* v=addrval();
+			struct var* v=addrval();
 			if(v) dumpVar(v);
 			else pl("addrval returns 0");
 
@@ -710,20 +721,20 @@ void doTest(int testcase) {
 
 			printf("\ndecl char a");
 			_decl();
-			printf("\nprused,obsize %d %d \n",prused-pr,obsize);
+			printf("\nprused,obsize %d %d \n",(int)(prused-pr),obsize);
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 
 			printf("\ndecl int x");
 			_decl();
-			printf("\nprused,obsize %d %d \n",prused-pr,obsize);
+			printf("\nprused,obsize %d %d \n",(int)(prused-pr),obsize);
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 
 			printf("\ndecl char p(7)");
 			_decl();
-			printf("\nprused,obsize %d %d \n",prused-pr,obsize);
+			printf("\nprused,obsize %d %d \n",(int)(prused-pr),obsize);
 			for( i=15; i<len; ++i) printf("%x ",pr[i]);
 
-			printf("\nprused,obsize %d %d ",prused-pr,obsize);
+			printf("\nprused,obsize %d %d ",(int)(prused-pr),obsize);
 			break;
 /* 	_varAlloc(), newvar(), does newvar zero the allocated space properly.
 	And does put|get_int|char use allocated space properly.
@@ -837,7 +848,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 			break;
 /* 	Should get...
 				Test 30 (99):
-				[]/* test 30
+				[]slash-star test 30
 				[
 				MC...  <NOTE: 3 lines of MC's
 				]
@@ -1010,7 +1021,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
  
 				whatHappened, INTENTIONAL ERROR...
 				line 6 SYMERRA, decl needed 
-						  Kcount = 30;   /* <<== tab-tab-space-space K...
+						  Kcount = 30;    <<== tab-tab-space-space K...
  */
 		case 46:
 			testWhole("./testFiles/46");
@@ -1123,7 +1134,7 @@ NOTE: Stack is empty (blank line) because st() pops (discards) one entry.
 /* 	Should get... 
  *				numread 490
  *				First 100 chars...
- *				/* test of lib function readfile, reads and prints itself
+ *				 test of lib function readfile, reads and prints itself
  *				main[
  *					char buff(1000)
  *					char name(0)
