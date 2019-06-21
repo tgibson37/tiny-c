@@ -32,3 +32,40 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
+
+/*	allocate four major areas
+ */
+void allocStuff() {
+    int prlen=PRLEN, err;
+    err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
+    }
+    pr = malloc(prlen);
+    EPR=pr+prlen;
+
+    int funlen=FUNLEN,size;
+    err = iProperty("pps/tc.prop", "FUNLEN", &funlen, FUNLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running fun[%d]",FUNLEN);
+    }
+    size = sizeof(struct funentry);
+    fun = malloc(funlen*size);
+    efun=fun+funlen*size;
+
+    stacklen=STACKLEN;
+    err = iProperty("pps/tc.prop", "STACKLEN", &stacklen, STACKLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running stack[%d]",STACKLEN);
+    }
+    stack = malloc(stacklen*sizeof(struct stackentry));
+
+    vtablen=VTABLEN;
+    err = iProperty("pps/tc.prop", "VTABLEN", &vtablen, VTABLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running var[%d]",VTABLEN);
+    }
+    vartab = malloc(vtablen*sizeof(struct var));
+//fprintf(stderr,"~1035TC: sizes of pr %d fun %d stack %d var %d\n", 
+//    			prlen, funlen, stacklen, vtablen);
+}

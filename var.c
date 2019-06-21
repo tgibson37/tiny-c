@@ -4,6 +4,7 @@
 	Open new var and value frames for the functions locals.
  */
 void newfun() {
+//fprintf(stderr,"\nvar~7: curfun,efun %d %d",curfun-fun,efun-fun);
 	if(++curfun>efun){
 		eset(TMFUERR);
 	} 
