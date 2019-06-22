@@ -145,6 +145,10 @@ int doIncludes(char* fname) {
 int main(int argc, char *argv[]) {
 	int opt,numIncs;
 
+	allocStuff();
+	strcpy(pr,startSeed);
+	lpr = endapp = prused = pr+strlen(startSeed);
+
     while ((opt = getopt(argc, argv, "lqdvr:")) != -1) {
         switch (opt) {
         case 'l':
@@ -181,9 +185,6 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
     }
-	allocStuff();
-	strcpy(pr,startSeed);
-	lpr = endapp = prused = pr+strlen(startSeed);
 
 	cursor = pr;
 	curglbl = fun;
@@ -233,14 +234,14 @@ void allocStuff() {
 
     int funlen=FUNLEN,size;
     err = iProperty("pps/tc.prop", "FUNLEN", &funlen, FUNLEN);
-fprintf(stderr,"tcMain~237 funlen %d\n",funlen);
+//fprintf(stderr,"tcMain~237 funlen %d\n",funlen);
     if(err){
     	fprintf(stderr,"pps/tc.prop err, running fun[%d]",FUNLEN);
     }
     size = sizeof(struct funentry);
     fun = malloc(funlen*size);
     efun=fun+funlen*size;
-fprintf(stderr,"~243 size,fun,efun-fun %d %d %d\n",size,fun,efun-fun);
+//fprintf(stderr,"~243 size,fun,efun-fun %d %d %d\n",size,fun,efun-fun);
     stacklen=STACKLEN;
     err = iProperty("pps/tc.prop", "STACKLEN", &stacklen, STACKLEN);
     if(err){
