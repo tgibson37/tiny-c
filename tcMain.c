@@ -142,6 +142,44 @@ int doIncludes(char* fname) {
 	return libCount;
 }
 
+/*	allocate four major areas
+ */
+int prlen, funlen;
+void allocStuff() {
+	int err, size;
+    prlen=PRLEN;
+    err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
+    }
+    pr = malloc(prlen);
+    EPR=pr+prlen;
+
+    funlen=FUNLEN;
+    err = iProperty("pps/tc.prop", "FUNLEN", &funlen, FUNLEN);
+//fprintf(stderr,"tcMain~237 funlen %d\n",funlen);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running fun[%d]",FUNLEN);
+    }
+    size = sizeof(struct funentry);
+    fun = malloc(funlen*size);
+    efun=fun+funlen*size;
+//fprintf(stderr,"~243 size,fun,efun-fun %d %d %d\n",size,fun,efun-fun);
+    stacklen=STACKLEN;
+    err = iProperty("pps/tc.prop", "STACKLEN", &stacklen, STACKLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running stack[%d]",STACKLEN);
+    }
+    stack = malloc(stacklen*sizeof(struct stackentry));
+
+    vtablen=VTABLEN;
+    err = iProperty("pps/tc.prop", "VTABLEN", &vtablen, VTABLEN);
+    if(err){
+    	fprintf(stderr,"pps/tc.prop err, running var[%d]",VTABLEN);
+    }
+    vartab = malloc(vtablen*sizeof(struct var));
+}
+
 int main(int argc, char *argv[]) {
 	int opt,numIncs;
 
@@ -185,6 +223,10 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
     }
+	if(loadMsg){
+		fprintf(stdout,"Sizes: of pr %d fun %d stack %d var %d\n", 
+    			prlen, funlen, stacklen, vtablen);
+	}
 
 	cursor = pr;
 	curglbl = fun;
@@ -218,45 +260,4 @@ int main(int argc, char *argv[]) {
 	prdone();
 	whatHappened();
     return 0;
-}
-
-
-/*	allocate four major areas
- */
-void allocStuff() {
-    int prlen=PRLEN, err;
-    err = iProperty("pps/tc.prop", "PRLEN", &prlen, PRLEN);
-    if(err){
-    	fprintf(stderr,"pps/tc.prop err, running pr[%d]",PRLEN);
-    }
-    pr = malloc(prlen);
-    EPR=pr+prlen;
-
-    int funlen=FUNLEN,size;
-    err = iProperty("pps/tc.prop", "FUNLEN", &funlen, FUNLEN);
-//fprintf(stderr,"tcMain~237 funlen %d\n",funlen);
-    if(err){
-    	fprintf(stderr,"pps/tc.prop err, running fun[%d]",FUNLEN);
-    }
-    size = sizeof(struct funentry);
-    fun = malloc(funlen*size);
-    efun=fun+funlen*size;
-//fprintf(stderr,"~243 size,fun,efun-fun %d %d %d\n",size,fun,efun-fun);
-    stacklen=STACKLEN;
-    err = iProperty("pps/tc.prop", "STACKLEN", &stacklen, STACKLEN);
-    if(err){
-    	fprintf(stderr,"pps/tc.prop err, running stack[%d]",STACKLEN);
-    }
-    stack = malloc(stacklen*sizeof(struct stackentry));
-
-    vtablen=VTABLEN;
-    err = iProperty("pps/tc.prop", "VTABLEN", &vtablen, VTABLEN);
-    if(err){
-    	fprintf(stderr,"pps/tc.prop err, running var[%d]",VTABLEN);
-    }
-    vartab = malloc(vtablen*sizeof(struct var));
-	if(loadMsg){
-		fprintf(stdout,"Sizes: of pr %d fun %d stack %d var %d\n", 
-    			prlen, funlen, stacklen, vtablen);
-	}
 }
