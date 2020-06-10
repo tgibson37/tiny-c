@@ -7,14 +7,14 @@
 //   One array sized to hold 1+S^2 arrays, 10 arrays for S=3.
 //   Each array needs 2+S^2 cells, 11 for S=3. So:
 
-[	USAGE: declare three items
+[	USAGE: declare three global items
 		int S		// set to size of edge of 4d cube, e.g. 3 for testing
 		int m(110)  // dimension = (2+S^2)*(1+S^2)
 		int SIZEofINT // set to probably 4. Run testArray4d.tc for your tc's value.
 	#include Experiments/array2d.tc
 	#include Experiments/array4d.tc
 	#include pps/library.tc
-	call create_galaxy
+	call create_galaxy, then set/get values
 ]
 
 // creates a 4d int cube with edge of size S in matrix m.
@@ -30,6 +30,16 @@ create_galaxy [
 		]
 		qy = qy+1
 	]
+]
+
+ar4d_set int val,sx,sy,cx,cy [
+	int sector; sector = ar2d_val sx,sy,m
+	ar2d_set val,cx,cy,m+sector
+]
+
+ar4d_val int sx,sy,cx,cy [
+	int sector; sector = ar2d_val sx,sy,m
+	return ar2d_val cx,cy,m+sector
 ]
 
 // index of sector array
@@ -50,7 +60,7 @@ print_sector int sx,sy [
 	ar2d_print m+s
 ]
 
-// prints galaxy and all sector data
+// prints galaxy and sectors in test format
 print_galaxy [
 	int sx,sy
 	while(sy<S)[
@@ -79,6 +89,5 @@ _create_sector int sx,sy [
 	int s(0)
 	s = sector_array(sx,sy)
 	ar2d_setup S,S,m+s
-	fill_sector sx,sy,m+s
 	return s
 ]

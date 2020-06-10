@@ -34,23 +34,69 @@ set_SIZEofINT [
 		m(1)=0
 		return
 	]
-	pl"SIZEofINT not set"
+	pl"WARNING: SIZEofINT not set"
 	exit
 ]
 
 // this is a model for an app setup
-test1 [
-	set_SIZEofINT
+test1 [           // create/print
 	pl"test1";pl""
 	create_galaxy
-pl"created, galaxy portion: "
+	ps"created, galaxy portion: "
 	pl"";ar2d_print m
 	print_galaxy
 ]
 
+test2[            // setters/getters
+	pl"test2";pl""
+	create_galaxy
+
+	int sx,sy,cx,cy,val
+	sx = random 0,2
+	sy = random 0,2
+	cx = random 0,2
+	cy = random 0,2
+	pn sx; pn sy; pn cx; pn cy
+	ar4d_set 99,sx,sy,cx,cy
+	print_galaxy
+	val = ar4d_val sx,sy,cx,cy
+	pl"value retrieved is"; pn val
+]
+
+test3[            //trek galaxy format, but sectab data
+	pl"test3";pl""
+	create_galaxy
+
+	print_sectab
+	int x; x=3
+	int y; y=0
+]
+
+// prints sector table in trek format 
+// (proof of formatting, actual trek data would be in a separate ar2d)
+print_sectab [
+	int sx,sy
+	while(sy<S)[
+		sx=0
+		while(sx<S)[
+			int val
+			val = ar2d_val(sx,sy,m)
+			printf "| %03d " ,val
+			sx=sx+1
+		]
+		sy=sy+1
+		ps"|"
+		pl""
+	]
+]
+
+
+
 testall[
-ps"m";pn m 
-	test1
+	set_SIZEofINT
+	pl"";test1
+	pl"";test2
+	pl"";test3
 ]
 
 //------------  convenience technique

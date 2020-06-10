@@ -59,7 +59,7 @@ Above finished Jun 6 '20
 Getting lots of subscript issues. Need built in help.
 	all fcns should call bad.
 ---------
-Monday
+Monday, Jun 8, 2020
 tc Ex*/ar4d.tc -q
 test all
 m 13620556
@@ -69,7 +69,8 @@ create_sector  0 0 at 13620600
 created, galaxy portion: 
  13620600 3 4 | 5 6 7 | 8 9 10   <<==  good. This is JUST the array
 ---------
-Tuesday  Goal: print sector 0,0
+Tuesday, Jun 9
+Goal: print sector 0,0
 		created, galaxy portion: 
 		 27776364 3 4 | 5 6 7 | 8 9 10
 		sector 0 0:  13 14 15 | 16 17 18 | 19 20 21   <<==  good
@@ -78,6 +79,16 @@ x	remove the dumps
 x	fill each sector with unique id: 10*sx+sy
 x	remove initial hard fill
 x	split ar4d into lib/test files
-	galaxy should use index, not m+index for its data
-		making it address independant
-
+x	galaxy should use index, not m+index for its data making it address independant
+STATUS: creating gallaxy and its sectors.
+TODO: 
+x	4d data setters/getters
+x	test2: setter/getter
+x	test2: print using trek format
+	m must be a param everywhere, like mat in 2d
+	move stuff to Sa*/pps
+	commit/push
+	document
+	email to Lee
+----------
+Wed, Jun 10
