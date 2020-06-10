@@ -13,7 +13,7 @@
 #define RIGHTARROW -67
 #define LEFTARROW -68
 
-#define VLEN 8
+#define VLEN 15
 #define VTABLEN 300
 #define PRLEN 30000
 #define STACKLEN 100

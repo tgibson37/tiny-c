@@ -1,0 +1,116 @@
+#include Experiments/array2d.tc
+#include pps/library.tc
+
+// tests for array2d
+//   Controls at end
+
+int m(14)  // 2+rows*cols
+ar2d_dump[
+	pl"matrix dump:"
+	int i; i=-1
+	while(i<13)pn m(i=i+1)
+	pl""
+]
+ar2d_test0[    // setup
+	ar2d_setup 3,4,m
+	ar2d_dump
+]
+ar2d_test1[    // print
+	ar2d_setup 3,4,m
+	int i
+	while(i<12)[
+		m(i+2)=i
+		i=i+1
+	]
+	ar2d_print m
+]
+ar2d_test2 [    // set value
+	ar2d_setup 3,4,m   // rows, columns, array to hold them
+	int i
+	while(i<12)[m(i+2)=-9;i=i+1]
+	pl"setting cell 2,2 (next to last)"
+	ar2d_set(55,2,2,m)
+	ar2d_print(m)
+	pl"fetching cell 2,2 (next to last)"
+	i = ar2d_val(2,2,m)
+	pl"  value is";pn i
+]
+
+ar2d_test3 [    // abbreviated names. Requires activation of them. See below.
+	ar2d_setup 3,4,m   // rows, columns, array to hold them
+	int i
+	while(i<12)[m(i+2)=-9;i=i+1]
+	pl"setting cell 2,2 (next to last)"
+	ms(55,2,2,m)
+	mp(m)
+	pl"fetching cell 2,2 (next to last)"
+	i = mv(2,2,m)
+	pl"  value is";pn i
+]
+
+ar2d_test4 [    // fill, zap
+	ar2d_setup 3,4,m
+	ar2d_fill 9,m
+	pl"";ar2d_print m
+	ar2d_zap m
+	pl"";ar2d_print m
+]
+
+ar2d_test5[    // set placement
+	ar2d_setup 3,4,m
+	int nrows, ncols, c,r,v
+	nrows=m(0); ncols=m(1)
+	while(r<nrows)[
+		c=0
+		while(c<ncols)[
+			ar2d_set v,r,c,m
+			c=c+1
+			v=v+1
+		]
+		r=r+1
+	]
+	pl"";ar2d_print m
+]
+
+ar2d_testall[
+	ps"test 1"
+	ar2d_test1
+	pl"test 2"
+	ar2d_test2
+	pl"test 3"
+	ar2d_test3
+	pl"test 4"
+	ar2d_test4
+	pl"test 5"
+	ar2d_test5
+]
+[Expected results of testall
+	test all
+	test 1 0 1 2 3 | 4 5 6 7 | 8 9 10 11
+	test 2
+	setting cell 2,2 (next to last) -9 -9 -9 -9 | -9 -9 -9 -9 | -9 -9 55 -9
+	fetching cell 2,2 (next to last)
+	  value is 55
+	test 3
+	setting cell 2,2 (next to last) -9 -9 -9 -9 | -9 -9 -9 -9 | -9 -9 55 -9
+	fetching cell 2,2 (next to last)
+	  value is 55
+	test 4
+	 9 9 9 9 | 9 9 9 9 | 9 9 9 9
+	 0 0 0 0 | 0 0 0 0 | 0 0 0 0
+]
+
+// Convenience technique
+//		simple function names for frequently used
+//		change the names to avoid conflict with app symbols
+ms int x,r,c,m(0) [ar2d_set x,r,c,m]
+mv int r,c,m(0)   [return ar2d_val r,c,m]
+mp int m(0)       [ar2d_print m]
+
+// Change which test(s) here, edit to specific test, or testall
+main[
+	ps "test all"; pl""
+	ar2d_testall
+//	ps "test 5: "
+//	ar2d_test5
+]

@@ -1,0 +1,96 @@
+// from trek.tc...
+/* The galaxy consists of 64 quadrants in an 8 by 8 array.  Each
+/* quadrant consists of 64 sectors in an 8 by 8 array.  nts).
+[
+ The galaxy is really a 4 dimensional array.
+ And from my notes...
+		current sector. Value is object code
+		object codes: 0 .  1 K   2 B   3 *   4 E
+			(nothing,klingon,base,star,Enterprise)
+	u,v,x,y are E's position, quad up over, sect up over
+
+Notation for a cell:   
+	current_quadrant = mat_val(2,7,quads)
+	obj_code = mat_val(3,6,current_quadrant)
+Collapsing the above notation into one line, and using 
+convenience notation...
+	obj_code = mv(2,4,mv(3,6))
+So 65 arrays, each 8x8. And the values in quads are pointers
+to the 64 sector arrays, the cell values in those are the ultimate
+data, each a 3 digit code.
+]
+
+int galaxy(66), current_quadrant
+int quads(64), obj_code
+
+// Stuff to code
+create_galaxy[]
+populate_galaxy[]
+print_galaxy[]
+print_quad int r,c[]
+
+
+
+
+
+
+//---------------------------
+
+mat_setup int rows, cols, mat(0) [
+	mat(0) = rows
+	mat(1) = cols
+]
+
+mat_fill int f,mat(0)[
+	int end; end = 2 + mat(0)*mat(1)
+	int i=1; while((i=i+1)<end)mat(i)=f
+]
+mat_zap int mat(0)[mat_fill(0,mat)]
+
+
+	row
+]
+
+// set value of mat(r,c)
+mat_set int x,r,c,mat(0) [
+	int cell
+	mat(mat_cell(r,c,mat)+2)=x
+	if(mat_bad(r,c,mat))return -999999;
+	return x
+]
+
+// return value of mat(r,c), else huge negative
+mat_val int r,c,mat(0) [
+	if(mat_bad(r,c,mat))return -999999;
+	return mat(2+c+r*mat(1))
+]
+
+mat_print int mat(0)[
+	int rows,cols,r,c
+	rows=mat(0); cols=mat(1)
+	while(r<rows)[
+		if(r)ps " |"
+		while(c<cols)[ 
+			pn mat_val(r,c,mat)
+			c=c+1
+		]
+		r=r+1
+		c=0
+	]
+]
+
+// returns index into array of cell r,c, else -1 if invalid
+mat_cell int r,c,mat(0) [
+	if(mat_bad(r,c,mat))return -1
+	return 2+c+r*mat(0)
+]
+
+// returns true if either c or r are invalid
+mat_bad int r,c,mat(0) [
+	if(c<0) return 1
+	if(c>=mat(1)) return 1
+	if(r<0) return 1
+	if(r>=mat(0)) return 1
+	return 0
+]
+

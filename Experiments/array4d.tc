@@ -1,0 +1,84 @@
+// ar4d.tc -- Using array2d to build higher dimensions.
+// Motivation: trek.tc uses one 4096 array as a 8x8x8x8 4 dimension matrix
+// Notation from my notes on trek.tc:
+//   "u,v,x,y are E's position, quad up over, sect up over"
+
+// strategy: take advantage of regularity to avoid declaring 65 int arrays
+//   One array sized to hold 1+S^2 arrays, 10 arrays for S=3.
+//   Each array needs 2+S^2 cells, 11 for S=3. So:
+
+[	USAGE: declare three items
+		int S		// set to size of edge of 4d cube, e.g. 3 for testing
+		int m(110)  // dimension = (2+S^2)*(1+S^2)
+		int SIZEofINT // set to probably 4. Run testArray4d.tc for your tc's value.
+	#include Experiments/array2d.tc
+	#include Experiments/array4d.tc
+	#include pps/library.tc
+	call create_galaxy
+]
+
+// creates a 4d int cube with edge of size S in matrix m.
+// initial contents are 0.
+create_galaxy [
+	ar2d_setup S,S,m
+	int qx,qy
+	while(qy<S)[
+		qx=0;
+		while(qx<S)[
+			ar2d_set( _create_sector(qx,qy), qx,qy,m) 
+			qx = qx+1
+		]
+		qy = qy+1
+	]
+]
+
+// pointer to sector array
+sector_array int sx,sy [
+	return m+SIZEofINT*(_sector_index(sx,sy))
+]
+
+// fill with value v
+fill_sector int sx,sy,v [
+	ar2d_fill sy+10*sx,v
+]
+
+// prints on one line, not carefully aligned yet.
+print_sector int sx,sy [
+	int s(0)
+	s = sector_array(sx,sy)
+	pl"sector";pn sx;pn sy;ps": "
+	ar2d_print s
+]
+
+// prints galaxy and all sector data
+print_galaxy [
+	int sx,sy
+	while(sy<S)[
+		sx=0
+		while(sx<S)[
+			print_sector(sx,sy)
+			sx=sx+1
+		]
+		sy=sy+1
+	]
+]
+
+//--------  tool layer. Not part of user API.
+
+//returns index into m array whose value points to sector sx,sy.
+//m+sector_endix if created is the array for that sector, else probably NULL.
+//check the returned value before using.
+_sector_index int sx,sy [
+	int size
+	size = 2+S*S
+	return size+(sx*size+sy*size*S)
+]
+
+// return pointer to created array
+_create_sector int sx,sy [
+	int s(0)
+	s = sector_array(sx,sy)
+	ar2d_setup S,S,s
+	fill_sector sx,sy,s
+	return s
+]

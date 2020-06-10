@@ -2,6 +2,20 @@ trek source study
 Tom Gibson, winter 2018
 seeking clues as to the variables a..z
 	Guess: The Lxxx routines were basic subroutines at line xxx
+		L40
+			.
+		L45
+			.
+		L165
+			.
+		L521
+			.
+		L525
+			.
+		L530
+			.
+		L590
+			.
 ---
 ~160	get_course  parameters ???
 	Queries for course, 0..360.

@@ -1,0 +1,68 @@
+#include Experiments/array2d.tc
+#include Experiments/array4d.tc
+#include pps/library.tc
+
+int S
+int m(110)
+int SIZEofINT
+
+// raw dump uses minimal ar4d code
+// dump 0 shows galaxy portion of array, >0 shows quadrant 1 up to S squared
+ar4d_dump int i[
+	int size, begin
+	pl"matrix dump";pn i;
+	if(i>S*S)[ps" no sector";pn i;exit]
+	ps" m is";pn m
+	size=S*S+2
+	begin = sector_index(i-1,0)
+	ps": cells at";pn(begin)
+	pl""
+	i=begin-1
+	while(i<begin+size-1)pn(m(i=i+1))
+]
+
+// cute trick here, but it works
+set_SIZEofINT [
+	m(1)=9
+	char x(0)
+	x=m
+	int i
+	i=-1
+	while(i<10)if(x(i=i+1)==9)[
+		SIZEofINT = i
+		pl"SIZEofINT is";pn i
+		m(1)=0
+		return
+	]
+	pl"SIZEofINT not set"
+	exit
+]
+
+// this is a model for an app setup
+test1 [
+	set_SIZEofINT
+	pl"test1";pl""
+	create_galaxy
+pl"created, galaxy portion: "
+	pl"";ar2d_print m
+	print_galaxy
+]
+
+testall[
+ps"m";pn m 
+	test1
+]
+
+//------------  convenience technique
+//		simple function names for frequently used
+//		change the names to avoid conflict with app symbols
+ms int x,r,c,m(0) [ar2d_set x,r,c,m]
+mv int r,c,m(0)   [return ar2d_val r,c,m]
+mp int m(0)       [ar2d_print m]
+
+// Change which test(s) here, edit to specific test, or testall
+main[
+	S=3   // instead of 8
+	ps "test all"; pl""
+	testall
+]

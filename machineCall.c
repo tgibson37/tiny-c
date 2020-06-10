@@ -411,6 +411,24 @@ int plugInMC(int mcno, int nargs, int *args) {
 	return 0;   // to avoid compile warning
 }
 
+/*	Usage: put MC 0 in your tc code. Then either:
+ *	bkpnt Mzero for debugging, or string arg to dumpVar, or both.
+ */
+void Mzero(){}
+void _mzero(int nargs, int *args){
+	if(nargs){
+		char* sym = (char*)args[0];
+		char *label;
+		if(nargs>1)label = (char*)args[1];
+		else label = sym;
+		fprintf(stderr,"\n%s:  ",label);
+		struct var* v = addrval_all(sym);
+		if(v)dumpVar(v);
+		else fprintf(stderr,"%s, no such symbol\n",sym);
+	}
+	Mzero();
+}
+
 void machinecall( int nargs ) {
 //	int i, args[nargs-1];
 	int i, args[10]; // lrb tcc complains ... wants a constant expression
@@ -419,6 +437,11 @@ void machinecall( int nargs ) {
 	for(i=0; i<nargs; ++i){
 		int x=toptoi();
 		args[nargs-1-i]=x;
+	}
+	if(mcno==0){  // MC 0 for debugging
+		pushk(0);
+		_mzero(nargs, args);
+		return;
 	}
 	if(mcno<100)origMC(mcno, nargs, args);
 	else if(mcno<200) newMC(mcno-100, nargs, args);
