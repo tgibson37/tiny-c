@@ -32,9 +32,9 @@ create_galaxy [
 	]
 ]
 
-// pointer to sector array
+// index of sector array
 sector_array int sx,sy [
-	return m+SIZEofINT*(_sector_index(sx,sy))
+	return SIZEofINT*(_sector_index(sx,sy))
 ]
 
 // fill with value v
@@ -47,7 +47,7 @@ print_sector int sx,sy [
 	int s(0)
 	s = sector_array(sx,sy)
 	pl"sector";pn sx;pn sy;ps": "
-	ar2d_print s
+	ar2d_print m+s
 ]
 
 // prints galaxy and all sector data
@@ -78,7 +78,7 @@ _sector_index int sx,sy [
 _create_sector int sx,sy [
 	int s(0)
 	s = sector_array(sx,sy)
-	ar2d_setup S,S,s
-	fill_sector sx,sy,s
+	ar2d_setup S,S,m+s
+	fill_sector sx,sy,m+s
 	return s
 ]
