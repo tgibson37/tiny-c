@@ -1,4 +1,9 @@
-// The arg mat must have size at least 2+rows+cols.
+[	Usage: Declare an int array, size is 2+nrows*ncols.
+	Call ar2d_setup(nrows,ncols).
+	Use ar2d methods defined below to set/retrieve/print data.
+]
+
+// initialize ar2d array
 ar2d_setup int rows, cols, mat(0) [
 	mat(0) = rows
 	mat(1) = cols

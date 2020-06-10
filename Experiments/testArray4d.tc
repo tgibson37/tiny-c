@@ -41,15 +41,15 @@ set_SIZEofINT [
 // this is a model for an app setup
 test1 [           // create/print
 	pl"test1";pl""
-	create_galaxy
+	create_galaxy m
 	ps"created, galaxy portion: "
 	pl"";ar2d_print m
-	print_galaxy
+	print_galaxy m
 ]
 
 test2[            // setters/getters
 	pl"test2";pl""
-	create_galaxy
+	create_galaxy m
 
 	int sx,sy,cx,cy,val
 	sx = random 0,2
@@ -57,30 +57,37 @@ test2[            // setters/getters
 	cx = random 0,2
 	cy = random 0,2
 	pn sx; pn sy; pn cx; pn cy
-	ar4d_set 99,sx,sy,cx,cy
-	print_galaxy
-	val = ar4d_val sx,sy,cx,cy
+	ar4d_set 99,sx,sy,cx,cy,m
+	print_galaxy m
+	val = ar4d_val sx,sy,cx,cy,m
 	pl"value retrieved is"; pn val
 ]
 
 test3[            //trek galaxy format, but sectab data
 	pl"test3";pl""
-	create_galaxy
+	create_galaxy m
 
-	print_sectab
+	print_sectab m
 	int x; x=3
 	int y; y=0
 ]
 
+test4[
+	pl"test4";pl""
+	create_galaxy m
+
+	
+]
+
 // prints sector table in trek format 
 // (proof of formatting, actual trek data would be in a separate ar2d)
-print_sectab [
+print_sectab int mat(0)[
 	int sx,sy
 	while(sy<S)[
 		sx=0
 		while(sx<S)[
 			int val
-			val = ar2d_val(sx,sy,m)
+			val = ar2d_val(sx,sy,mat)
 			printf "| %03d " ,val
 			sx=sx+1
 		]

@@ -1,12 +1,3 @@
-// ar4d.tc -- Using array2d to build higher dimensions.
-// Motivation: trek.tc uses one 4096 array as a 8x8x8x8 4 dimension matrix
-// Notation from my notes on trek.tc:
-//   "u,v,x,y are E's position, quad up over, sect up over"
-
-// strategy: take advantage of regularity to avoid declaring 65 int arrays
-//   One array sized to hold 1+S^2 arrays, 10 arrays for S=3.
-//   Each array needs 2+S^2 cells, 11 for S=3. So:
-
 [	USAGE: declare three global items
 		int S		// set to size of edge of 4d cube, e.g. 3 for testing
 		int m(110)  // dimension = (2+S^2)*(1+S^2)
@@ -17,56 +8,65 @@
 	call create_galaxy, then set/get values
 ]
 
+// ar4d.tc -- Using array2d to build higher dimensions.
+// Motivation: trek.tc uses one 4096 array as a 8x8x8x8 4 dimension matrix
+// Notation from my notes on trek.tc:
+//   "u,v,x,y are E's position, quad up over, sect up over"
+
+// strategy: take advantage of regularity to avoid declaring 65 int arrays
+//   One array sized to hold 1+S^2 arrays, 10 arrays for S=3.
+//   Each array needs 2+S^2 cells, 11 for S=3. So:
+
 // creates a 4d int cube with edge of size S in matrix m.
 // initial contents are 0.
-create_galaxy [
-	ar2d_setup S,S,m
+create_galaxy int mat(0)[
+	ar2d_setup S,S,mat
 	int qx,qy
 	while(qy<S)[
 		qx=0;
 		while(qx<S)[
-			ar2d_set( _create_sector(qx,qy), qx,qy,m) 
+			ar2d_set( _create_sector(qx,qy,mat), qx,qy,mat) 
 			qx = qx+1
 		]
 		qy = qy+1
 	]
 ]
 
-ar4d_set int val,sx,sy,cx,cy [
-	int sector; sector = ar2d_val sx,sy,m
-	ar2d_set val,cx,cy,m+sector
+ar4d_set int val,sx,sy,cx,cy,mat(0) [
+	int sector; sector = ar2d_val sx,sy,mat
+	ar2d_set val,cx,cy,mat+sector
 ]
 
-ar4d_val int sx,sy,cx,cy [
-	int sector; sector = ar2d_val sx,sy,m
-	return ar2d_val cx,cy,m+sector
+ar4d_val int sx,sy,cx,cy,mat(0) [
+	int sector; sector = ar2d_val sx,sy,mat
+	return ar2d_val cx,cy,mat+sector
 ]
 
 // index of sector array
-sector_array int sx,sy [
+sector_array int sx,sy,mat(0) [
 	return SIZEofINT*(_sector_index(sx,sy))
 ]
 
 // fill with value v
-fill_sector int sx,sy,v [
-	ar2d_fill sy+10*sx,v
+fill_sector int sx,sy,v,mat(0) [
+	ar2d_fill sy+10*sx,v,mat
 ]
 
 // prints on one line, not carefully aligned yet.
-print_sector int sx,sy [
+print_sector int sx,sy,mat(0) [
 	int s(0)
-	s = sector_array(sx,sy)
+	s = sector_array(sx,sy,mat)
 	pl"sector";pn sx;pn sy;ps": "
-	ar2d_print m+s
+	ar2d_print mat+s
 ]
 
 // prints galaxy and sectors in test format
-print_galaxy [
+print_galaxy int mat(0) [
 	int sx,sy
 	while(sy<S)[
 		sx=0
 		while(sx<S)[
-			print_sector(sx,sy)
+			print_sector(sx,sy,mat)
 			sx=sx+1
 		]
 		sy=sy+1
@@ -85,9 +85,9 @@ _sector_index int sx,sy [
 ]
 
 // return pointer to created array
-_create_sector int sx,sy [
+_create_sector int sx,sy,mat(0) [
 	int s(0)
-	s = sector_array(sx,sy)
-	ar2d_setup S,S,m+s
+	s = sector_array(sx,sy,mat)
+	ar2d_setup S,S,mat+s
 	return s
 ]
