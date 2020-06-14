@@ -1,0 +1,14 @@
+arr2d.tc
+
+Goal: View an array as a matrix. 
+The first two cells capture the dimensions, thus making the array self
+defining. The array size must therefore be at least 2+rows*cols.
+Usage: 
+  Declare an array, and call mat_setup to initialize it as an array.
+Then typically only mat_set and mat_val need be used in an application.
+The other functions may be useful, so look them over. 
+  A set of convenient functions are in the block comment at the end. 
+Uncover these (and maybe edit the names) to simplify usage.
+
+[Note: later changed from mat to arr2d]
+

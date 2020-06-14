@@ -1,0 +1,101 @@
+Higher dimensions
+---
+// from trek.tc...
+/* The galaxy consists of 64 quadrants in an 8 by 8 array.  Each
+/* quadrant consists of 64 sectors in an 8 by 8 array.  nts).
+
+ The galaxy is really a 4 dimensional array.
+ And from my notes (SamplePrograms/trek_comments.txt)...
+		current sector. Value is object code
+		object codes: 0 .  1 K   2 B   3 *   4 E
+			(nothing,klingon,base,star,Enterprise)
+	u,v,x,y are E's position, quad up over, sect up over
+
+To avoid confusion I will use the term "cell_code" instead of "object codes".
+
+Galaxy is an 8x8 array of sector references, with a 3 digit code showing
+a count of objects in that sector: Klingons, Bases, Stars. A long range scan
+from the Enterprise shows the Enterprise sector and adjacent sectors with 
+this code. You do not see their exact placement yet. 
+
+Each sector is an 8x8 array of "cells", most empty (.) but some with
+an object displayed as  K, B, or *.
+
+Using my array2d package, notation for a cell:   
+	current_quadrant = ar2d_val(2,7,sector_ref)
+	cell_code = ar2d_val(3,6,current_quadrant)
+Collapsing the above notation into one line, and using 
+convenience notation...
+	 cell_code = mv(3,6,mv(2,7,q))
+So 65 arrays, each 8x8. And the values in quads are pointers
+to the 64 sector arrays, the cell values in those are the ultimate
+data, each a cell code.
+
+written about June 5,  my getting started thoughts.
+--------------
+
+TODO list (x means done)
+
+Next:
+	Pull all files into Experiments folder
+x		matrix.tc
+x		mat_trek.tc
+x	Rename array2d, etc.
+x		files
+x		code			mat_  -->  ar2d_
+x	Divide matrix.tc into its two parts
+x		array2d.tc
+x		testArray2d.tc
+x	Decide how to handle the convenience code.
+x		Leave in the test file as ms,mv,mp. Its a convenience technique, not
+x		library code.
+x	Study two notes files and decide which to save and where
+x		This file: kind of a log, but brief.
+x		ar4d: thoughts leading to 4d notation, plus suggested coding for 4d test
+x		KEEP both in Ex* for now.
+Above finished Jun 6 '20
+----------
+Sun Jun 7
+TODO:
+	put 2d stuff in 
+		pps 
+		Sa*
+x	COMMIT
+x	Code,run,commit a small size 2d and 4d tests.
+x		testArray3d.tc
+x		testArray4d.tc
+---------
+Monday, Jun 8, 2020
+tc Ex*/ar4d.tc -q
+test all
+m 13620556
+SIZEofINT is 4
+test1
+create_sector  0 0 at 13620600
+created, galaxy portion: 
+ 13620600 3 4 | 5 6 7 | 8 9 10   <<==  good. This is JUST the array
+---------
+Tuesday, Jun 9
+Goal: print sector 0,0
+		created, galaxy portion: 
+		 27776364 3 4 | 5 6 7 | 8 9 10
+		sector 0 0:  13 14 15 | 16 17 18 | 19 20 21   <<==  good
+x	more sectors
+x	remove the dumps
+x	fill each sector with unique id: 10*sx+sy
+x	remove initial hard fill
+x	split ar4d into lib/test files
+x	galaxy should use index, not m+index for its data making it address independant
+STATUS: creating gallaxy and its sectors.
+TODO: 
+x	4d data setters/getters
+x	test2: setter/getter
+x	test2: print using trek format
+x	m must be a param everywhere, like mat in 2d
+c	move stuff to Sa*/pps
+	commit/push
+	document
+	email to Lee
+----------
+Wed, Jun 10
+create galaxy should create a separate 2d just for galaxy data

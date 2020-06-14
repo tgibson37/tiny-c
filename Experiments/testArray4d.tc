@@ -1,5 +1,5 @@
-#include Experiments/array2d.tc
-#include Experiments/array4d.tc
+#include TryIt/Experiments/array2d.tc
+#include TryIt/Experiments/array4d.tc
 #include pps/library.tc
 
 int S
