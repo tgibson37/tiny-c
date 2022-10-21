@@ -58,10 +58,12 @@ int quiet;
 #define EXIT         98
 #define KILL         99
 
+#define INT long    // sizeof(INT) must equal sizeof(char*)
+
 /*	All tc data are ints or chars. Pointers are an int index into pr. 
  *	stuff is the typless holder of any value.
  */
-union stuff { char uc; int ui; void* up; };
+union stuff { char uc; INT ui; void* up; };
 
 typedef enum type {Err,Char,Int,CharStar} Type;
 
@@ -212,5 +214,5 @@ int _lit(char*);
 void _varAlloc(Type type, union stuff *vpassed);
 int _symName();
 int charIn(char c, char *choices );
-void pFmt(char *fmt, int *args);
+void pFmt(char *fmt, INT *args);
 int _skip(char l, char r);

@@ -53,7 +53,7 @@ void pft(char *from, char *to ) {
  *	either a %<char> or a block of chars excluding %. Recursive
  *	until whole fmt string consumed.
  */
-void pFmt(char *fmt, int *args) {
+void pFmt(char *fmt, INT *args) {
 	char pct[9], *nxtpct;
 	int datum, fmtchar;
 	if(!(*fmt))return;
@@ -88,7 +88,7 @@ void pFmt(char *fmt, int *args) {
 }
 
 /* new MC's with this implementation. A bit of modernization. */
-int MprF(int nargs, int *args)
+int MprF(int nargs, INT *args)
 {
 /*
 printf("\n\n63: MprF: nargs %d args[0..3] %d %d %d %d",

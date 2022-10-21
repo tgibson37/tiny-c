@@ -52,8 +52,9 @@ HDRS = tc.h
 # Add -I to the dir the include files are in
 #CFLAGS = -g -Wall -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast \
 -Wno-unused-variable -Wno-unused-but-set-variable
-CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl -lm
-CFLAGS = -w -g
+#CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl -lm
+CLIBS =  -ldl -lm
+CFLAGS = -w -g -m32
 #CFLAGS = 
 .PHONY: all run difft diffd keep dotest install latest
 all: $(TC) $(TEST)
