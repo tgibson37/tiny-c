@@ -13,7 +13,7 @@ extern int  (*piMC )(int,int,int*);
 int naf(int nargs, int *args);
 
 char* startSeed="[main();]";
-char* ppsPath="./pps";
+//char* ppsPath="./pps";
 
 void tcUsage() {
 	printf("Usage: tc [-q] [-d] [-r seed-code] appfile");
