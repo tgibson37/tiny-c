@@ -1,3 +1,6 @@
+#ifndef TC_H_INCLUDED
+#define TC_H_INCLUDED
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -26,9 +29,9 @@
 #define VS 2
 #define VP 3
 #define VV 4
-char verbose[8];
-int debug;
-int quiet;
+extern char verbose[8];
+extern int debug;
+extern int quiet;
 
 /* error tags */
 #define STATERR      1
@@ -73,8 +76,8 @@ struct stackentry {
 	union stuff value; 
 };
 /* the stack */
-struct stackentry *stack;
-int nxtstack, stacklen;
+extern struct stackentry *stack;
+extern int nxtstack, stacklen;
 
 /* a fun entry */
 struct funentry { 
@@ -82,24 +85,24 @@ struct funentry {
 	char* prused;
 };
 /* fun table */
-struct funentry *fun;
-struct funentry *curglbl, *curfun, *efun;
+extern struct funentry *fun;
+extern struct funentry *curglbl, *curfun, *efun;
 
 struct var { 
 	char name[VLEN+1]; int class; Type type; int len; int brkpt;
 	union stuff value; 
 };
 /* variable table */
-struct var *vartab;
-int nxtvar, vtablen;
+extern struct var *vartab;
+extern int nxtvar, vtablen;
 
 /* most recent function entered */
-char fcnName[VLEN+1];
+extern char fcnName[VLEN+1];
 void saveName();
 
 /* program space */
-char* pr;
-char *lpr, *apr, *endapp, *prused, *EPR;
+extern char* pr;
+extern char *lpr, *apr, *endapp, *prused, *EPR;
 
 /* EPR is end of program SPACE. 
  *	pr starts with startSeed, then libs, then app, then values
@@ -112,17 +115,17 @@ char *lpr, *apr, *endapp, *prused, *EPR;
  */
 
 /************ Globals **************/
-int error, leave, brake;
-char* fname;
-char* lname;
-char* cursor;
-char* stcurs;
-char* errat;
-int obsize, vclass, alen;
-int traceMode;
+extern int error, leave, brake;
+extern char* fname;
+extern char* lname;
+extern char* cursor;
+extern char* stcurs;
+extern char* errat;
+extern int obsize, vclass, alen;
+extern int traceMode;
 extern char* ppsPath;
 
-FILE* fileUnit[MAX_UNIT];
+extern FILE* fileUnit[MAX_UNIT];
 int tcFopen(char* name, char* mode);
 int tcFputs(char* str, int unit);
 int tcFputc(char c, int unit);
@@ -216,3 +219,4 @@ int _symName();
 int charIn(char c, char *choices );
 void pFmt(char *fmt, INT *args);
 int _skip(char l, char r);
+#endif

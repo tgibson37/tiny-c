@@ -34,7 +34,7 @@ INSTALLTC = /usr/local/bin/tinyc
 INSTALLLIB = /usr/local/share/tinyC/library.tc
 LATEST = ls -lt $(TC) $(INSTALLTC) $(LIB) $(INSTALLLIB)
 
-OBJMOST = tc.o FileRead.o debug.o machineCall.o platform.o var.o stack.o dialog.o
+OBJMOST = tc_externs.o tc.o FileRead.o debug.o machineCall.o platform.o var.o stack.o dialog.o
 
 OBJALL = $(OBJMOST) tcTestMain.o tcMain.o test.o
 
@@ -45,7 +45,7 @@ OBJTC = $(OBJMOST) tcMain.o
 OBJTEST = $(OBJMOST) test.o tcTestMain.o
 
 # All the header and c files
-SRCS = test.c tc.c machineCall.c var.c stack.c tcTestMain.c tcMain.c \
+SRCS = tc_externs.c test.c tc.c machineCall.c var.c stack.c tcTestMain.c tcMain.c \
 platform.c dialog.c
 HDRS = tc.h
 
@@ -54,7 +54,8 @@ HDRS = tc.h
 -Wno-unused-variable -Wno-unused-but-set-variable
 #CLIBS = -L/usr/lib/x86_64-linux-gnu -ldl -lm
 CLIBS =  -ldl -lm
-CFLAGS = -w -g -m32
+CFLAGS = -w -g -m32 
+#-fcommon
 #CFLAGS = 
 .PHONY: all run difft diffd keep dotest install latest
 all: $(TC) $(TEST)
